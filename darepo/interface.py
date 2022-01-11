@@ -9,6 +9,7 @@ import h5py
 from .config import _config
 
 from .helpers_hdf5 import create_virtualfile, walk_hdf5file
+from .helpers_misc import hash_path, RecursiveNamespace
 
 
 class BaseSnapshot(object):
