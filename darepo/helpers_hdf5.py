@@ -111,7 +111,8 @@ def create_virtualfile(fn, files, max_workers=4):
                 vals = [result[i]["attrs"][group][k] for i in range(len(files))]
                 if isinstance(vals[0], np.ndarray):
                     if not (np.all([np.array_equal(vals[0], v) for v in vals])):
-                        print(group, k, "has different values.")
+                        if k not in ["NumPart_ThisFile"]: # expected
+                            print(group, k, "has different values.")
                         attrsdiffer[group][k] = np.stack(vals)
                         continue
                 else:
