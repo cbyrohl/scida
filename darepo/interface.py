@@ -74,8 +74,8 @@ class BaseSnapshot(object):
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
-        for k in self.datadict:
-            self.datadict[k] = FieldContainer(**self.datadict[k])
+        for k in self.data:
+            self.data[k] = FieldContainer(**self.data[k])
 
         ## attrs
         if "/Config" in tree["attrs"]:
