@@ -18,7 +18,7 @@ def walk_hdf5group(grp, tree, get_attrs=False):
 
 
 def walk_hdf5file(fn, tree, get_attrs=True):
-    with h5py.File(fn) as hf:
+    with h5py.File(fn, "r") as hf:
         walk_hdf5group(hf, tree, get_attrs=get_attrs)
     return tree
 
