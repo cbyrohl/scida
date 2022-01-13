@@ -18,14 +18,15 @@ def walk_hdf5group(grp, tree, get_attrs=False):
 
 
 def walk_hdf5file(fn, tree, get_attrs=True):
-    with h5py.File(fn) as hf:
+    with h5py.File(fn, "r") as hf:
         walk_hdf5group(hf, tree, get_attrs=get_attrs)
     return tree
 
 
-def create_virtualfile(fn, files, max_workers=4):
+def create_virtualfile(fn, files, max_workers=16):
     # first obtain all datasets and groups
     trees = [{} for i in range(len(files))]
+
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         result = executor.map(walk_hdf5file, files, trees)
     result = list(result)
@@ -111,7 +112,8 @@ def create_virtualfile(fn, files, max_workers=4):
                 vals = [result[i]["attrs"][group][k] for i in range(len(files))]
                 if isinstance(vals[0], np.ndarray):
                     if not (np.all([np.array_equal(vals[0], v) for v in vals])):
-                        print(group, k, "has different values.")
+                        if k not in ["NumPart_ThisFile"]: # expected
+                            print(group, k, "has different values.")
                         attrsdiffer[group][k] = np.stack(vals)
                         continue
                 else:

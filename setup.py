@@ -12,7 +12,8 @@ setuptools.setup(
         'numba',
         'pandas',
         'astropy',
-        'dask'
+        'dask',
+        'distributed'
     ],
     tests_require=[
         'pytest',

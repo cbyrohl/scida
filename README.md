@@ -9,3 +9,7 @@ pip install -e .
 ```
 
 in the cloned repository.
+
+# First Steps
+Start up a Jupyter notebook server and begin with the [Getting Started tutorial](examples/GettingStarted.ipynb).
+

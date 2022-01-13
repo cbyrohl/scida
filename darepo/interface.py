@@ -19,12 +19,15 @@ class BaseSnapshot(object):
         self.path = path
         self.file = None # File reference
         self.fn = "" # Filename
-        self.datadict = {}
+        self.data = {}
 
         self.load_data()
-        self.data = RecursiveNamespace(**self.datadict)
+        self.d = RecursiveNamespace(**self.data)
 
     def load_data(self):
+        if not os.path.exists(self.path):
+            raise Exception("Specified path does not exist.")
+
         if os.path.isdir(self.path):
             # we are given a directory with multiple files. Create a virtual file first.
             files = np.array([os.path.join(self.path, f) for f in os.listdir(self.path)])
@@ -61,14 +64,14 @@ class BaseSnapshot(object):
         for group in tree["groups"]:
             # TODO: Do not hardcode dataset/field groups
             if group.startswith("/PartType") or group.startswith("/Group") or group.startswith("/Subhalo"):
-                self.datadict[group.split("/")[1]] = {}
+                self.data[group.split("/")[1]] = {}
         ## datasets
         for dataset in tree["datasets"]:
             if dataset[0].startswith("/PartType") or dataset[0].startswith("/Group") or dataset[0].startswith("/Subhalo"):
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
                 ds = da.from_array(self.h5file[dataset[0]])
                 #ds = load_hdf5dataset_as_daskarr((self.file, dataset[0],), shape=dataset[1], dtype=dataset[2])
-                self.datadict[group][dataset[0].split("/")[-1]] = ds
+                self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
         for k in self.datadict:
