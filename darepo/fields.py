@@ -17,7 +17,6 @@ class FieldContainer(dict):
         def decorator(func,name=name):
             if name is None:
                 name = func.__name__
-            print(name,func)
             self.derivedfields[name] = DerivedField(name, func)
             return func
 
