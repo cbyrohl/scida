@@ -10,6 +10,7 @@ from .config import _config
 
 from .helpers_hdf5 import create_virtualfile, walk_hdf5file
 from .helpers_misc import hash_path, RecursiveNamespace
+from .fields import FieldContainer
 
 
 class BaseSnapshot(object):
@@ -68,6 +69,10 @@ class BaseSnapshot(object):
                 ds = da.from_array(self.h5file[dataset[0]])
                 #ds = load_hdf5dataset_as_daskarr((self.file, dataset[0],), shape=dataset[1], dtype=dataset[2])
                 self.datadict[group][dataset[0].split("/")[-1]] = ds
+
+        ## Make each datadict entry a FieldContainer
+        for k in self.datadict:
+            self.datadict[k] = FieldContainer(**self.datadict[k])
 
         ## attrs
         if "/Config" in tree["attrs"]:
