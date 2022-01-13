@@ -23,9 +23,10 @@ def walk_hdf5file(fn, tree, get_attrs=True):
     return tree
 
 
-def create_virtualfile(fn, files, max_workers=4):
+def create_virtualfile(fn, files, max_workers=16):
     # first obtain all datasets and groups
     trees = [{} for i in range(len(files))]
+
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         result = executor.map(walk_hdf5file, files, trees)
     result = list(result)
