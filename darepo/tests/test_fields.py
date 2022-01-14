@@ -20,6 +20,10 @@ def test_fields():
     def testfield_explicitname(data, **kwargs):
         return data["testfield"]+2
 
+    @snp.register_field("gas", name="testfield3")
+    def testfield_explicitname(data, **kwargs):
+        return data["testfield"]+2
+
     # first-order field
     val0 = snp.data["PartType0"]["testfield"].compute()
     assert val0 == 0

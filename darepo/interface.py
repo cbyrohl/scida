@@ -12,6 +12,7 @@ from .config import _config
 from .helpers_hdf5 import create_virtualfile, walk_hdf5file
 from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainer
+from .helpers_misc import partTypeNum
 
 
 class Dataset(object):
@@ -88,6 +89,29 @@ class Dataset(object):
         ## attrs
         self.metadata = tree["attrs"]
 
+    def save(self, fname, overwrite=True):
+        """Saving into zarr format."""
+        # We use zarr, as this way we have support to directly write into the file by the workers
+        # (rather than passing back the data chunk over the scheduler to the interface)
+        # Also, this way we can leverage new features, such as a large variety of compression methods.
+        store = zarr.DirectoryStore(fname)
+        root = zarr.group(store, overwrite=overwrite)
+
+        # Metadata
+        attrsdict = dict(Config=self.config, Header=self.header, Parameters=self.parameters)
+        for dctname, dct in attrsdict.items():
+            if isinstance(dct, dict):
+                grp = root.create_group(dctname)
+                for k, v in dct.items():
+                    v = make_serializable(v)
+                    grp.attrs[k] = v
+        # Data
+        datagrp = root.create_group("data")
+        for p in self.data:
+            datagrp.create_group(p)
+            for k in self.data[p]:
+                da.to_zarr(self.data[p][k], os.path.join(fname, "data", p, k), overwrite=True)
+
 
 class BaseSnapshot(Dataset):
     def __init__(self, path):
@@ -103,29 +127,10 @@ class BaseSnapshot(Dataset):
 
         self.boxsize = np.full(3,np.nan)
 
-            
-    def save(self, fname, overwrite=True):
-        """Saving into zarr format."""
-        # We use zarr, as this way we have support to directly write into the file by the workers
-        # (rather than passing back the data chunk over the scheduler to the interface)
-        # Also, this way we can leverage new features, such as a large variety of compression methods.
-        store = zarr.DirectoryStore(fname)
-        root = zarr.group(store, overwrite=overwrite)
+    def register_field(self, parttype, name=None, construct=True):
+        num = partTypeNum(parttype)
+        return self.data["PartType"+str(num)].register_field(name=name)
 
-        # Metadata
-        attrsdict = dict(Config=self.config,Header=self.header,Parameters=self.parameters)
-        for dctname, dct in attrsdict.items():
-            if isinstance(dct, dict):
-                grp = root.create_group(dctname)
-                for k,v in dct.items():
-                    v = make_serializable(v)
-                    grp.attrs[k] = v
-        # Data
-        datagrp = root.create_group("data")
-        for p in self.data:
-            grp = datagrp.create_group(p)
-            for k in self.data[p]:
-                da.to_zarr(self.data[p][k],os.path.join(fname,"data",p,k),overwrite=True)
 
 
 class ArepoSnapshot(BaseSnapshot):
