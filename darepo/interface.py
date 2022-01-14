@@ -14,55 +14,60 @@ from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainer
 
 
-class BaseSnapshot(object):
+class Dataset(object):
     def __init__(self, path):
-        self.data = None
+        super().__init__()
         self.path = path
-        self.file = None # File reference
-        self.fn = "" # Filename
+        self.file = None
+        self.tempfile = None # need this reference to keep garbage collection away for the tempfile
+        self.location = None
+
+        # Let's find the data and metadata for the object at 'path'
+        self.metadata = {}
         self.data = {}
 
-        self.load_data()
-        self.d = RecursiveNamespace(**self.data)
-
-        self.boxsize = np.full(3,np.nan)
-
-    def load_data(self):
         if not os.path.exists(self.path):
             raise Exception("Specified path does not exist.")
 
-        if os.path.isdir(self.path):
-            # we are given a directory with multiple files. Create a virtual file first.
-            files = np.array([os.path.join(self.path, f) for f in os.listdir(self.path)])
-            nmbrs = [int(f.split(".")[-2]) for f in files]
-            sortidx = np.argsort(nmbrs)
-            files = files[sortidx]
-
-            if "cachedir" in _config:
-                # we create a virtual file in the cache directory
-                fn = hash_path(self.path) + ".hdf5"
-                file = os.path.join(_config["cachedir"], fn)
-                if not os.path.isfile(file):
-                    create_virtualfile(file, files)
-                else:
-                    # TODO
-                    logging.warning("Virtual file already existing? TODO.")
-                    raise NotImplementedError
+        if os.path.isdir(path):
+            if os.path.isfile(os.path.join(path,".zgroup")):
+                # object is a zarr object
+                raise NotImplementedError # TODO
             else:
-                # otherwise, we create a temporary file
-                self.file = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
-                self.fn = self.file.name
-                create_virtualfile(self.file.name, files)
-                logging.warning("No caching directory specified. Initial file read will remain slow.")
+                # otherwise expect this is a chunked HDF5 file
+                self.load_chunkedhdf5()
         else:
             # we are directly given a target file
-            # TODO
-            raise NotImplementedError
-        self.h5file = h5py.File(self.fn,"r")
+            raise NotImplementedError # TODO
 
+
+    def load_chunkedhdf5(self):
+        files = np.array([os.path.join(self.path, f) for f in os.listdir(self.path)])
+        nmbrs = [int(f.split(".")[-2]) for f in files]
+        sortidx = np.argsort(nmbrs)
+        files = files[sortidx]
+
+        if "cachedir" in _config:
+            # we create a virtual file in the cache directory
+            fn = hash_path(self.path) + ".hdf5"
+            file = os.path.join(_config["cachedir"], fn)
+            if not os.path.isfile(file):
+                create_virtualfile(file, files)
+            else:
+                # TODO
+                logging.warning("Virtual file already existing? TODO.")
+                raise NotImplementedError
+        else:
+            # otherwise, we create a temporary file
+            self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
+            self.location = self.tempfile.name
+            create_virtualfile(self.location, files)
+            logging.warning("No caching directory specified. Initial file read will remain slow.")
+
+        self.file = h5py.File(self.location,"r")
         # Populate instance with hdf5 data
         tree = {}
-        walk_hdf5file(self.fn, tree)
+        walk_hdf5file(self.location, tree)
         ## groups
         for group in tree["groups"]:
             # TODO: Do not hardcode dataset/field groups
@@ -72,7 +77,7 @@ class BaseSnapshot(object):
         for dataset in tree["datasets"]:
             if dataset[0].startswith("/PartType") or dataset[0].startswith("/Group") or dataset[0].startswith("/Subhalo"):
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
-                ds = da.from_array(self.h5file[dataset[0]])
+                ds = da.from_array(self.file[dataset[0]])
                 #ds = load_hdf5dataset_as_daskarr((self.file, dataset[0],), shape=dataset[1], dtype=dataset[2])
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
@@ -81,13 +86,23 @@ class BaseSnapshot(object):
             self.data[k] = FieldContainer(**self.data[k])
 
         ## attrs
-        if "/Config" in tree["attrs"]:
-            self.config = tree["attrs"]["/Config"]
-        if "/Header" in tree["attrs"]:
-            self.header = tree["attrs"]["/Header"]
-        if "/Parameters" in tree["attrs"]:
-            self.parameters = tree["attrs"]["/Parameters"]
-            
+        self.metadata = tree["attrs"]
+
+
+class BaseSnapshot(Dataset):
+    def __init__(self, path):
+        super().__init__(path)
+
+        defaultattributes =  ["config","header","parameters"]
+        for k in self.metadata:
+            name = k.strip("/").lower()
+            if name in defaultattributes:
+                self.__dict__[name] = self.metadata[k]
+
+        self.d = RecursiveNamespace(**self.data)
+
+        self.boxsize = np.full(3,np.nan)
+
             
     def save(self, fname, overwrite=True):
         """Saving into zarr format."""
