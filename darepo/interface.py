@@ -112,16 +112,6 @@ class BaseSnapshot(object):
             for k in self.data[p]:
                 da.to_zarr(self.data[p][k],os.path.join(fname,"data",p,k),overwrite=True)
 
-    def save_header(self,fname):
-        with h5py.File(fname, 'r+') as hf:
-            grp = hf.create_group("Header")
-            for h in self.header:
-                grp.attrs[h] = self.header[h]
-            # overwrite relevant header attributes.
-            grp.attrs["NumFilesPerSnapshot"] = 1
-            h = (self.cosmology.H0/100).value
-            grp.attrs["BoxSize"] = (self.boxsize/h*u.kpc).to(u.cm).value/(1+grp.attrs["Redshift"])
-
 
 class ArepoSnapshot(BaseSnapshot):
     def __init__(self, path):
