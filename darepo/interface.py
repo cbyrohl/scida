@@ -110,7 +110,7 @@ class BaseSnapshot(object):
         for p in self.data:
             grp = datagrp.create_group(p)
             for k in self.data[p]:
-                da.to_zarr(self.data[p][k],os.path.join(fname,"data",p),overwrite=True)
+                da.to_zarr(self.data[p][k],os.path.join(fname,"data",p,k),overwrite=True)
 
     def save_header(self,fname):
         with h5py.File(fname, 'r+') as hf:
