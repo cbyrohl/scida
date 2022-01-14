@@ -1,5 +1,6 @@
 import types
 import hashlib
+import numpy as np
 
 def hash_path(path):
     sha = hashlib.sha256()
@@ -22,3 +23,13 @@ class RecursiveNamespace(types.SimpleNamespace):
             return [self.__elt(i) for i in elt]
         return elt
 
+
+def make_serializable(v):
+    # Attributes need to be JSON serializable. No numpy types allowed.
+    if isinstance(v, np.ndarray):
+        v = v.tolist()
+    if isinstance(v, np.generic):
+        v = v.item()
+    if isinstance(v, bytes):
+        v = v.decode("utf-8")
+    return v

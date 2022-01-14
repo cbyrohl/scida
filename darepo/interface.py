@@ -10,7 +10,7 @@ import zarr
 from .config import _config
 
 from .helpers_hdf5 import create_virtualfile, walk_hdf5file
-from .helpers_misc import hash_path, RecursiveNamespace
+from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainer
 
 
@@ -132,14 +132,4 @@ class ArepoSnapshot(BaseSnapshot):
         else:
             # Have not thought about non-cubic cases yet.
             raise NotImplementedError
-
-def make_serializable(v):
-    # Attributes need to be JSON serializable. No numpy types allowed.
-    if isinstance(v, np.ndarray):
-        v = v.tolist()
-    if isinstance(v, np.generic):
-        v = v.item()
-    if isinstance(v, bytes):
-        v = v.decode("utf-8")
-    return v
 
