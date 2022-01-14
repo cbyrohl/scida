@@ -5,6 +5,7 @@ import tempfile
 import dask.array as da
 import numpy as np
 import h5py
+import zarr
 
 from .config import _config
 
@@ -23,6 +24,8 @@ class BaseSnapshot(object):
 
         self.load_data()
         self.d = RecursiveNamespace(**self.data)
+
+        self.boxsize = np.full(3,np.nan)
 
     def load_data(self):
         if not os.path.exists(self.path):
@@ -84,8 +87,59 @@ class BaseSnapshot(object):
             self.header = tree["attrs"]["/Header"]
         if "/Parameters" in tree["attrs"]:
             self.parameters = tree["attrs"]["/Parameters"]
+            
+            
+    def save(self, fname, overwrite=True):
+        """Saving into zarr format."""
+        # We use zarr, as this way we have support to directly write into the file by the workers
+        # (rather than passing back the data chunk over the scheduler to the interface)
+        # Also, this way we can leverage new features, such as a large variety of compression methods.
+        store = zarr.DirectoryStore(fname)
+        root = zarr.group(store, overwrite=overwrite)
+
+        # Metadata
+        attrsdict = dict(Config=self.config,Header=self.header,Parameters=self.parameters)
+        for dctname, dct in attrsdict.items():
+            if isinstance(dct, dict):
+                grp = root.create_group(dctname)
+                for k,v in dct.items():
+                    v = make_serializable(v)
+                    grp.attrs[k] = v
+        # Data
+        datagrp = root.create_group("data")
+        for p in self.data:
+            grp = datagrp.create_group(p)
+            for k in self.data[p]:
+                da.to_zarr(self.data[p][k],os.path.join(fname,"data",p),overwrite=True)
+
+    def save_header(self,fname):
+        with h5py.File(fname, 'r+') as hf:
+            grp = hf.create_group("Header")
+            for h in self.header:
+                grp.attrs[h] = self.header[h]
+            # overwrite relevant header attributes.
+            grp.attrs["NumFilesPerSnapshot"] = 1
+            h = (self.cosmology.H0/100).value
+            grp.attrs["BoxSize"] = (self.boxsize/h*u.kpc).to(u.cm).value/(1+grp.attrs["Redshift"])
 
 
 class ArepoSnapshot(BaseSnapshot):
     def __init__(self, path):
         super().__init__(path)
+
+        if isinstance(self.header["BoxSize"],float):
+            self.boxsize[:] = self.header["BoxSize"]
+        else:
+            # Have not thought about non-cubic cases yet.
+            raise NotImplementedError
+
+def make_serializable(v):
+    # Attributes need to be JSON serializable. No numpy types allowed.
+    if isinstance(v, np.ndarray):
+        v = v.tolist()
+    if isinstance(v, np.generic):
+        v = v.item()
+    if isinstance(v, bytes):
+        v = v.decode("utf-8")
+    return v
+
