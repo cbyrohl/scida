@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import numpy as np
 import h5py
+import logging
 
 from concurrent.futures import ProcessPoolExecutor
 
@@ -112,8 +113,7 @@ def create_virtualfile(fn, files, max_workers=16):
                 vals = [result[i]["attrs"][group][k] for i in range(len(files))]
                 if isinstance(vals[0], np.ndarray):
                     if not (np.all([np.array_equal(vals[0], v) for v in vals])):
-                        if k not in ["NumPart_ThisFile"]: # expected
-                            print(group, k, "has different values.")
+                        logging.info(group, k, "has different values.")
                         attrsdiffer[group][k] = np.stack(vals)
                         continue
                 else:
