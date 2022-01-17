@@ -85,6 +85,16 @@ class Dataset(object):
         for k in self.data:
             self.data[k] = FieldContainer(**self.data[k])
 
+        # Add a unique identifier for each element for each data type
+        for p in self.data:
+            k = next(iter(self.data[p]))
+            arr = self.data[p][k]
+            nparts = arr.shape[0]
+            chunks = arr.chunks
+            if len(chunks) == 2:
+                chunks = (chunks[0],)
+            self.data[p]["uid"] = da.arange(nparts, chunks=chunks)
+
         ## attrs
         self.metadata = tree["attrs"]
 
