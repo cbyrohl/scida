@@ -2,6 +2,9 @@ import re
 import astropy.units as u
 import numbers
 import logging
+import numpy as np
+import dask.array as da
+from numba import njit
 from ..interface import BaseSnapshot
 
 from .arepo_units import unitstr_arepo,get_unittuples_from_TNGdocs_groups, \
@@ -22,6 +25,11 @@ class ArepoSnapshot(BaseSnapshot):
                 if k not in self.data:
                     self.data[k] = self.catalog.data[k]
 
+        # Add halo/subhalo IDs to particles (if catalogs available)
+        if self.catalog is not None:
+            self.add_catalogIDs()
+
+        # Add certain metadata to class __dict__
         if isinstance(self.header["BoxSize"], float):
             self.boxsize[:] = self.header["BoxSize"]
         else:
@@ -38,6 +46,34 @@ class ArepoSnapshot(BaseSnapshot):
         else:
             key = parttype
         return super().register_field(key, name=name, construct=construct)
+
+    def add_catalogIDs(self):
+        # Get Offsets for particles in snapshot
+        self.data["Group"]["GroupOffsetsType"] = da.concatenate([np.zeros((1,6),dtype=np.int64),da.cumsum(self.data["Group"]["GroupLenType"],axis=0)[:-1]])
+
+
+        # TODO: make these delayed objects and properly pass into (delayed?) numba functions:
+        # https://docs.dask.org/en/stable/delayed-best-practices.html#avoid-repeatedly-putting-large-inputs-into-delayed-calls
+        halocelloffsets = self.data["Group"]["GroupOffsetsType"].compute()
+        halocellcounts = self.data["Group"]["GroupLenType"].compute()
+        subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"].compute()
+
+
+        for key in self.data:
+            if not(key.startswith("PartType")):
+                continue
+            num = int(key[-1])
+
+            # Group ID
+            gidx = self.data[key]["uid"]
+            hidx = compute_haloindex(gidx, halocelloffsets[:, num])
+            self.data[key]["GroupID"] = hidx
+            # Subhalo ID
+            gidx = self.data[key]["uid"]
+            shcounts, shnumber = get_shcounts_shcells(subhalogrnr, halocelloffsets[:, num].shape[0])
+            sidx = compute_subhaloindex(gidx, halocelloffsets[:, num], shnumber, shcounts, halocellcounts[:, num])
+            self.data[key]["SubhaloID"] = sidx
+
 
 
 class ArepoSnapshotWithUnits(ArepoSnapshot):
@@ -60,6 +96,137 @@ class ArepoSnapshotWithUnits(ArepoSnapshot):
                 else:
                     logging.info("No units for '%s'"%name)
 
+
+@njit
+def get_hidx(gidx_start, gidx_count, celloffsets):
+    """Get halo index of a given cell
+
+    Parameters
+    ----------
+    gidx_start: integer
+        The first unique integer ID for the first particle
+    gidx_count: integer
+        The amount of halo indices we are querying after "gidx_start"
+    celloffsets : array
+        An array holding the starting cell offset for each halo
+    """
+    res = -1 * np.ones(gidx_count, dtype=np.int32)
+    # find initial celloffset
+    hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
+    startid = 0
+    endid = celloffsets[hidx_start_idx + 1] - gidx_start
+    # Now iterate through list.
+    while True:
+        if (startid >= gidx_count):
+            break
+        res[startid:endid] = hidx_start_idx
+        hidx_start_idx += 1
+        startid = endid
+        if (hidx_start_idx >= celloffsets.shape[0] - 1):
+            startid = gidx_count
+        else:
+            count = celloffsets[hidx_start_idx + 1] - celloffsets[hidx_start_idx]
+            endid = startid + count
+    return res
+
+
+def get_hidx_daskwrap(gidx, halocelloffsets):
+    gidx_start = gidx[0]
+    gidx_count = gidx.shape[0]
+    return get_hidx(gidx_start, gidx_count, halocelloffsets)
+
+
+def compute_haloindex(gidx, halocelloffsets, *args):
+    return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, meta=np.array((), dtype=np.int64))
+
+
+@njit
+def get_shidx(gidx_start, gidx_count, celloffsets, shnumber, shcounts, shcellcounts):
+    res = -1 * np.ones(gidx_count, dtype=np.int32)  # fuzz has negative index.
+    # find initial Group we are in
+    hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
+    startid = 0
+    if (hidx_start_idx + 1 >= celloffsets.shape[0]):
+        # Cells not in halos anymore. Thus already return.
+        # TODO Possible bug for last halo of catalog (if it would contain cells in subhalo) (?)
+        return res
+    endid = celloffsets[hidx_start_idx + 1] - gidx_start
+
+    hidx = hidx_start_idx
+    shcumsum = np.zeros(shcounts[hidx] + 1, dtype=np.int64)
+    shcumsum[1:] = np.cumsum(shcellcounts[shnumber[hidx]:shnumber[hidx] + shcounts[hidx]])
+    shcumsum += celloffsets[hidx_start_idx]
+    sidx_start_idx = np.searchsorted(shcumsum, gidx_start, side="right") - 1
+    if sidx_start_idx < shcounts[hidx]:
+        endid = shcumsum[sidx_start_idx + 1] - gidx_start
+    # Now iterate through list.
+    cont = True
+    while cont:
+        if (startid >= gidx_count):
+            break
+        res[startid:endid] = sidx_start_idx
+        sidx_start_idx += 1
+        if sidx_start_idx < shcounts[hidx_start_idx]:
+            count = shcumsum[sidx_start_idx + 1] - shcumsum[sidx_start_idx]
+            startid = endid
+        else:
+            dbgcount = 0
+            while dbgcount < 100:  # find next halo with >0 subhalos
+                hidx_start_idx += 1
+                if hidx_start_idx >= shcounts.shape[0]:
+                    cont = False
+                    break
+                if shcounts[hidx_start_idx] > 0:
+                    break
+                dbgcount += 1
+            hidx = hidx_start_idx
+            if (hidx_start_idx >= celloffsets.shape[0] - 1):
+                startid = gidx_count
+            else:
+                count = celloffsets[hidx_start_idx + 1] - celloffsets[hidx_start_idx]
+                if hidx < shcounts.shape[0]:
+                    shcumsum = np.zeros(shcounts[hidx] + 1, dtype=np.int64)
+                    shcumsum[1:] = np.cumsum(shcellcounts[shnumber[hidx]:shnumber[hidx] + shcounts[hidx]])
+                    shcumsum += celloffsets[hidx_start_idx]
+                    sidx_start_idx = 0
+                    if sidx_start_idx < shcounts[hidx]:
+                        count = shcumsum[sidx_start_idx + 1] - shcumsum[sidx_start_idx]
+                    startid = celloffsets[hidx_start_idx] - gidx_start
+        endid = startid + count
+    return res
+
+
+def get_shidx_daskwrap(gidx, halocelloffsets, shnumber, shcounts, shcellcounts):
+    gidx_start = gidx[0]
+    gidx_count = gidx.shape[0]
+    return get_shidx(gidx_start, gidx_count, halocelloffsets, shnumber, shcounts, shcellcounts)
+
+
+def compute_subhaloindex(gidx, halocelloffsets, shnumber, shcounts, shcellcounts):
+    return da.map_blocks(get_shidx_daskwrap, gidx, halocelloffsets, shnumber, shcounts, shcellcounts,
+                         meta=np.array((), dtype=np.int64))
+
+
+@njit
+def get_shcounts_shcells(SubhaloGrNr, hlength):
+    """Returns the number offset and count of subhalos per halo."""
+    shcounts = np.zeros(hlength, dtype=np.int32)
+    shnumber = np.zeros(hlength, dtype=np.int32)
+    i = 0
+    hid = 0
+    hid_old = 0
+    while True:
+        if i == SubhaloGrNr.shape[0]:
+            break
+        hid = SubhaloGrNr[i]
+        if (hid == hid_old):
+            shcounts[hid] += 1
+        else:
+            shnumber[hid] = i
+            shcounts[hid] += 1
+            hid_old = hid
+        i += 1
+    return shcounts, shnumber
 
 def get_units_from_AREPOdocs(unitstr, codeunitdict):
     # first, extract list of unit tuples (consisting of unit as string and exponent)
