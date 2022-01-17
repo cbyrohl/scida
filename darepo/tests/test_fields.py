@@ -16,11 +16,7 @@ def test_fields():
     def testfield2(data, **kwargs):
         return data["testfield"]+1
 
-    @snp.data["PartType0"].register_field(name="testfield3")
-    def testfield_explicitname(data, **kwargs):
-        return data["testfield"]+2
-
-    @snp.register_field("gas", name="testfield3")
+    @snp.register_field("PartType0", name="testfield3")
     def testfield_explicitname(data, **kwargs):
         return data["testfield"]+2
 
