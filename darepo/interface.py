@@ -98,10 +98,11 @@ class Dataset(object):
         root = zarr.group(store, overwrite=overwrite)
 
         # Metadata
-        attrsdict = dict(Config=self.config, Header=self.header, Parameters=self.parameters)
-        for dctname, dct in attrsdict.items():
-            if isinstance(dct, dict):
+        defaultattributes = ["config","header","parameters"]
+        for dctname in defaultattributes:
+            if dctname in self.__dict__:
                 grp = root.create_group(dctname)
+                dct = self.__dict__[dctname]
                 for k, v in dct.items():
                     v = make_serializable(v)
                     grp.attrs[k] = v
@@ -117,7 +118,7 @@ class BaseSnapshot(Dataset):
     def __init__(self, path):
         super().__init__(path)
 
-        defaultattributes =  ["config","header","parameters"]
+        defaultattributes = ["config","header","parameters"]
         for k in self.metadata:
             name = k.strip("/").lower()
             if name in defaultattributes:
@@ -135,6 +136,9 @@ class BaseSnapshot(Dataset):
 
 class ArepoSnapshot(BaseSnapshot):
     def __init__(self, path):
+        self.header = {}
+        self.config = {}
+        self.parameters = {}
         super().__init__(path)
 
         if isinstance(self.header["BoxSize"],float):
