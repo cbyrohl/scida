@@ -119,7 +119,7 @@ def create_virtualfile(fn, files, max_workers=16):
                 else:
                     #assert len(set(vals)) == 1, k + " has different values."  # TODO
                     if not len(set(vals)) == 1:
-                        print(group, k, "has different values.")
+                        logging.info(group, k, "has different values.")
                         attrsdiffer[group][k] = np.array(vals)
                         continue
                 attrssame[group][k] = vals[0]
