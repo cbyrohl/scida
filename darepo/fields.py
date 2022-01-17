@@ -3,9 +3,10 @@ import functools
 
 
 class DerivedField(object):
-    def __init__(self, name, func):
+    def __init__(self, name, func, description=""):
         self.name = name
         self.func = func
+        self.description = description
 
 
 class FieldContainer(dict):
@@ -13,13 +14,13 @@ class FieldContainer(dict):
         super().__init__(self, **kwargs)
         self.derivedfields = {}
 
-    def register_field(self, name=None):
-        def decorator(func,name=name):
+    def register_field(self, name=None, description=""):
+        # we only construct field upon first call to it (default)
+        def decorator(func, name=name, description=description):
             if name is None:
                 name = func.__name__
-            self.derivedfields[name] = DerivedField(name, func)
+            self.derivedfields[name] = DerivedField(name, func, description=description)
             return func
-
         return decorator
 
     def __getitem__(self, key):
