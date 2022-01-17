@@ -12,7 +12,6 @@ from .config import _config
 from .helpers_hdf5 import create_virtualfile, walk_hdf5file
 from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainer
-from .helpers_misc import partTypeNum
 
 
 class Dataset(object):
@@ -129,21 +128,7 @@ class BaseSnapshot(Dataset):
         self.boxsize = np.full(3,np.nan)
 
     def register_field(self, parttype, name=None, construct=True):
-        num = partTypeNum(parttype)
-        return self.data["PartType"+str(num)].register_field(name=name)
+        return self.data[parttype].register_field(name=name)
 
 
-
-class ArepoSnapshot(BaseSnapshot):
-    def __init__(self, path):
-        self.header = {}
-        self.config = {}
-        self.parameters = {}
-        super().__init__(path)
-
-        if isinstance(self.header["BoxSize"],float):
-            self.boxsize[:] = self.header["BoxSize"]
-        else:
-            # Have not thought about non-cubic cases yet.
-            raise NotImplementedError
 
