@@ -5,10 +5,37 @@ import logging
 import numpy as np
 import dask.array as da
 from numba import njit
-from ..interface import BaseSnapshot
+from ..interface import BaseSnapshot,Selector
 
 from .arepo_units import unitstr_arepo,get_unittuples_from_TNGdocs_groups, \
     get_unittuples_from_TNGdocs_particles, get_unittuples_from_TNGdocs_subhalos
+
+
+class ArepoSelector(Selector):
+    def __init__(self):
+        super().__init__()
+        self.keys = ["haloID"]
+    def prepare(self,*args,**kwargs):
+        snap = args[0]
+        if snap.catalog is None:
+            raise ValueError("Cannot select for haloID without catalog loaded.")
+        haloID = kwargs.get("haloID",None)
+        if haloID is None:
+            return
+        offsets = self.data_backup["Group"]["GroupLenType"][haloID,:].compute()
+        lengths = self.data_backup["Group"]["GroupOffsetsType"][haloID,:].compute()
+        for p in self.data_backup:
+            splt = p.split("PartType")
+            if len(splt)==1:
+                for k,v in self.data_backup[p].items():
+                    self.data[p][k] = v
+            else:
+                pnum = int(splt[1])
+                offset = offsets[pnum]
+                length = lengths[pnum]
+                for k,v in self.data_backup[p].items():
+                    self.data[p][k] = v[offset:offset+length]
+        snap.data = self.data
 
 
 class ArepoSnapshot(BaseSnapshot):
@@ -35,6 +62,10 @@ class ArepoSnapshot(BaseSnapshot):
         else:
             # Have not thought about non-cubic cases yet.
             raise NotImplementedError
+
+    @ArepoSelector()
+    def return_data(self):
+        return super().return_data()
 
     def register_field(self, parttype, name=None, construct=True):
         num = partTypeNum(parttype)
@@ -73,6 +104,7 @@ class ArepoSnapshot(BaseSnapshot):
             shcounts, shnumber = get_shcounts_shcells(subhalogrnr, halocelloffsets[:, num].shape[0])
             sidx = compute_subhaloindex(gidx, halocelloffsets[:, num], shnumber, shcounts, halocellcounts[:, num])
             self.data[key]["SubhaloID"] = sidx
+
 
 
 
@@ -307,6 +339,9 @@ def get_units_from_TNGdocs(codeunitdict):
     unittuples = get_unittuples_from_TNGdocs_subhalos()
     units["subhalos"] = {k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()}
     return units
+
+
+
 
 
 

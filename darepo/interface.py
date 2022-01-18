@@ -146,3 +146,44 @@ class BaseSnapshot(Dataset):
 
 
 
+def deepdictkeycopy(olddict,newdict):
+    """Recursively walk nested dictionary, only creating empty dictionaries
+    for entries that are dictionaries themselves"""
+    for k,v in olddict.items():
+        if isinstance(v,dict):
+            newdict[k] = {}
+            deepdictkeycopy(v,newdict[k])
+
+class Selector(object):
+    """ Base Class for data selection decorator factory"""
+    def __init__(self):
+        self.keys = None
+        self.data_backup = {}
+        self.data = {}
+
+    def __call__(self, fn, *args, **kwargs):
+        def newfn(*args, **kwargs):
+            # TODO: Add graceful exit/restore after exception in self.prepare
+            self.data_backup = args[0].data
+            self.data = {}
+            deepdictkeycopy(self.data_backup,self.data)
+
+            self.prepare(*args,**kwargs)
+            if self.keys is None:
+                raise NotImplementedError("Subclass implementation needed for self.keys!")
+            if(kwargs.pop("dropkeys",True)):
+                for k in self.keys:
+                    kwargs.pop(k, None)
+            try:
+                result = fn(*args, **kwargs)
+                return result
+            finally:
+                self.finalize(*args,**kwargs)
+        return newfn
+
+    def prepare(self):
+        raise NotImplementedError("Subclass implementation needed!")
+
+    def finalize(self,*args,**kwargs):
+        args[0].data = self.data_backup
+
