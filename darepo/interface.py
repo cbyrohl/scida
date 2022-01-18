@@ -98,6 +98,10 @@ class Dataset(object):
         ## attrs
         self.metadata = tree["attrs"]
 
+
+    def return_data(self):
+        return self.data
+
     def save(self, fname, overwrite=True):
         """Saving into zarr format."""
         # We use zarr, as this way we have support to directly write into the file by the workers
