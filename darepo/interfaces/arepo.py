@@ -22,8 +22,8 @@ class ArepoSelector(Selector):
         haloID = kwargs.get("haloID",None)
         if haloID is None:
             return
-        offsets = self.data_backup["Group"]["GroupLenType"][haloID,:].compute()
-        lengths = self.data_backup["Group"]["GroupOffsetsType"][haloID,:].compute()
+        lengths = self.data_backup["Group"]["GroupLenType"][haloID,:].compute()
+        offsets = self.data_backup["Group"]["GroupOffsetsType"][haloID,:].compute()
         for p in self.data_backup:
             splt = p.split("PartType")
             if len(splt)==1:
