@@ -41,7 +41,7 @@ class Dataset(object):
             raise NotImplementedError # TODO
 
 
-    def load_chunkedhdf5(self):
+    def load_chunkedhdf5(self,overwrite=False):
         files = np.array([os.path.join(self.path, f) for f in os.listdir(self.path)])
         nmbrs = [int(f.split(".")[-2]) for f in files]
         sortidx = np.argsort(nmbrs)
@@ -50,13 +50,10 @@ class Dataset(object):
         if "cachedir" in _config:
             # we create a virtual file in the cache directory
             fn = hash_path(self.path) + ".hdf5"
-            file = os.path.join(_config["cachedir"], fn)
-            if not os.path.isfile(file):
-                create_virtualfile(file, files)
-            else:
-                # TODO
-                logging.warning("Virtual file already existing? TODO.")
-                raise NotImplementedError
+            fp = os.path.join(_config["cachedir"], fn)
+            if not os.path.isfile(fp) or overwrite:
+                create_virtualfile(fp, files)
+            self.location = fp
         else:
             # otherwise, we create a temporary file
             self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
