@@ -97,7 +97,7 @@ class ArepoSnapshot(BaseSnapshot):
 
             # Group ID
             gidx = self.data[key]["uid"]
-            hidx = compute_haloindex(gidx, halocelloffsets[:, num])
+            hidx = compute_haloindex(gidx, halocelloffsets[:, num], halocellcounts[:,num])
             self.data[key]["GroupID"] = hidx
             # Subhalo ID
             gidx = self.data[key]["uid"]
@@ -130,7 +130,7 @@ class ArepoSnapshotWithUnits(ArepoSnapshot):
 
 
 @njit
-def get_hidx(gidx_start, gidx_count, celloffsets):
+def get_hidx(gidx_start, gidx_count, celloffsets, cellcounts):
     """Get halo index of a given cell
 
     Parameters
@@ -141,6 +141,8 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
         The amount of halo indices we are querying after "gidx_start"
     celloffsets : array
         An array holding the starting cell offset for each halo
+    cellcounts : array
+        The count of cells for each halo
     """
     res = -1 * np.ones(gidx_count, dtype=np.int32)
     # find initial celloffset
@@ -148,28 +150,25 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
     startid = 0
     endid = celloffsets[hidx_start_idx + 1] - gidx_start
     # Now iterate through list.
-    while True:
-        if (startid >= gidx_count):
-            break
+    while startid < gidx_count:
         res[startid:endid] = hidx_start_idx
         hidx_start_idx += 1
         startid = endid
-        if (hidx_start_idx >= celloffsets.shape[0] - 1):
-            startid = gidx_count
-        else:
-            count = celloffsets[hidx_start_idx + 1] - celloffsets[hidx_start_idx]
-            endid = startid + count
+        if (hidx_start_idx >= celloffsets.shape[0]):
+            break
+        count = cellcounts[hidx_start_idx]
+        endid = startid + count
     return res
 
 
-def get_hidx_daskwrap(gidx, halocelloffsets):
+def get_hidx_daskwrap(gidx, halocelloffsets, halocellcounts):
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
-    return get_hidx(gidx_start, gidx_count, halocelloffsets)
+    return get_hidx(gidx_start, gidx_count, halocelloffsets, halocellcounts)
 
 
-def compute_haloindex(gidx, halocelloffsets, *args):
-    return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, meta=np.array((), dtype=np.int64))
+def compute_haloindex(gidx, halocelloffsets, halocellcounts, *args):
+    return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, halocellcounts, meta=np.array((), dtype=np.int64))
 
 
 @njit
