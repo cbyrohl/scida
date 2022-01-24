@@ -1,3 +1,4 @@
+import inspect
 import re
 import astropy.units as u
 import numbers
@@ -8,7 +9,7 @@ import dask.array as da
 from numba import njit
 
 from ..interface import BaseSnapshot,Selector
-from ..helpers_misc import computedecorator, get_default_args
+from ..helpers_misc import computedecorator, get_args, get_kwargs
 from .arepo_units import unitstr_arepo,get_unittuples_from_TNGdocs_groups, \
     get_unittuples_from_TNGdocs_particles, get_unittuples_from_TNGdocs_subhalos
 
@@ -110,10 +111,13 @@ class ArepoSnapshot(BaseSnapshot):
     @computedecorator
     def map_halo_operation(self, func, chunksize=int(3e7)):
         # TODO: auto chunksize
-        dfltargs = get_default_args(func)
-        fieldnames = dfltargs["fieldnames"]
-        parttype = dfltargs["parttype"]
+        dfltkwargs = get_kwargs(func)
+        fieldnames = dfltkwargs.get("fieldnames",None)
+        parttype = dfltkwargs.get("parttype","PartType0")
         partnum = int(parttype[-1])
+
+        if fieldnames is None:
+            fieldnames = get_args(func)
 
         lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
         offsets = self.data["Group"]["GroupOffsetsType"][:, partnum].compute()

@@ -35,13 +35,19 @@ def make_serializable(v):
         v = v.decode("utf-8")
     return v
 
-def get_default_args(func):
+def get_kwargs(func):
     signature = inspect.signature(func)
     return {
         k: v.default
         for k, v in signature.parameters.items()
         if v.default is not inspect.Parameter.empty
     }
+
+def get_args(func):
+    signature = inspect.signature(func)
+    return [k for k,v in signature.parameters.items()
+        if v.default is inspect.Parameter.empty]
+
 
 
 def computedecorator(func):
