@@ -1,6 +1,7 @@
 import types
 import hashlib
 import numpy as np
+import inspect
 
 def hash_path(path):
     sha = hashlib.sha256()
@@ -33,3 +34,22 @@ def make_serializable(v):
     if isinstance(v, bytes):
         v = v.decode("utf-8")
     return v
+
+def get_default_args(func):
+    signature = inspect.signature(func)
+    return {
+        k: v.default
+        for k, v in signature.parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }
+
+
+def computedecorator(func):
+    def wrapper(*args, compute=False, **kwargs):
+        res = func(*args, **kwargs)
+        if compute:
+            return res.compute()
+        else:
+            return res
+
+    return wrapper

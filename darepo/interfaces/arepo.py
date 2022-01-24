@@ -3,10 +3,12 @@ import astropy.units as u
 import numbers
 import logging
 import numpy as np
+from dask import delayed
 import dask.array as da
 from numba import njit
-from ..interface import BaseSnapshot,Selector
 
+from ..interface import BaseSnapshot,Selector
+from ..helpers_misc import computedecorator, get_default_args
 from .arepo_units import unitstr_arepo,get_unittuples_from_TNGdocs_groups, \
     get_unittuples_from_TNGdocs_particles, get_unittuples_from_TNGdocs_subhalos
 
@@ -104,6 +106,63 @@ class ArepoSnapshot(BaseSnapshot):
             shcounts, shnumber = get_shcounts_shcells(subhalogrnr, halocelloffsets[:, num].shape[0])
             sidx = compute_subhaloindex(gidx, halocelloffsets[:, num], shnumber, shcounts, halocellcounts[:, num])
             self.data[key]["SubhaloID"] = sidx
+
+    @computedecorator
+    def map_halo_operation(self, func, chunksize=int(3e7)):
+        # TODO: auto chunksize
+        dfltargs = get_default_args(func)
+        fieldnames = dfltargs["fieldnames"]
+        parttype = dfltargs["parttype"]
+        partnum = int(parttype[-1])
+
+        lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
+        offsets = self.data["Group"]["GroupOffsetsType"][:, partnum].compute()
+
+        totlength = offsets[-1] - 1  # why this? instead of "offsets[-1]+lengths[-1]"?
+        chunksize = max(chunksize,np.max(lengths))
+        nbins = int(np.ceil(totlength / chunksize))
+        bins = np.linspace(0, totlength, nbins + 1, dtype=int)
+        oindex = np.searchsorted(offsets, bins, side="right") - 1
+        assert np.all(np.diff(oindex) != 0)  # chunk smaller than largest halo. Increase chunk size
+
+        chunks = np.diff(oindex)
+        chunks[-1] += 1  # TODO: Why is this manually needed?
+        chunks = [tuple(chunks.tolist())]
+
+        slcoffsets = offsets[oindex]
+        slcoffsets[-1] = totlength
+        slclengths = np.diff(slcoffsets)
+
+        slcs = [slice(oindex[i], oindex[i + 1]) for i in range(len(oindex) - 1)]
+        slcs[-1] = slice(oindex[-2], oindex[-1] + 1)  # hacky! why needed?
+
+        halolengths_in_chunks = [lengths[slc] for slc in slcs]
+
+        d_hic = delayed(halolengths_in_chunks)
+
+        arrs = [self.data[parttype][f][:totlength] for f in fieldnames]
+        for i, arr in enumerate(arrs):
+            arrs[i] = arr.rechunk(chunks=[tuple(slclengths.tolist())])
+
+        calc = da.map_blocks(wrap_func_scalar, func, d_hic, *arrs, dtype=arr.dtype, chunks=chunks)
+
+        return calc
+
+
+
+
+
+def wrap_func_scalar(func, halolengths_in_chunks, *arrs, block_id=None):
+    lengths = halolengths_in_chunks[block_id[0]]
+    n = len(lengths)
+
+    offsets = np.cumsum([0] + list(lengths))
+    res = []
+    for i, o in enumerate(offsets[:-1]):
+        arrchunks = [arr[o:offsets[i + 1]] for arr in arrs]
+        # assert len(np.unique(arrchunk))==1
+        res.append(func(*arrchunks))
+    return np.array(res)
 
 
 
