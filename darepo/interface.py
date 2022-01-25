@@ -3,6 +3,7 @@ import logging
 import tempfile
 
 import dask.array as da
+import dask
 import numpy as np
 import h5py
 import zarr
@@ -137,10 +138,13 @@ class Dataset(object):
                     v = make_serializable(v)
                     grp.attrs[k] = v
         # Data
+        tasks = []
         for p in self.data:
             root.create_group(p)
             for k in self.data[p]:
-                da.to_zarr(self.data[p][k], os.path.join(fname, p, k), overwrite=True)
+                task = da.to_zarr(self.data[p][k], os.path.join(fname, p, k), overwrite=True,compute=False)
+                tasks.append(task)
+        dask.compute(tasks)
 
 
 class BaseSnapshot(Dataset):
