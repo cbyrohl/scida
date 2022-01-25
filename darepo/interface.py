@@ -120,12 +120,13 @@ class Dataset(object):
     def return_data(self):
         return self.data
 
-    def save(self, fname, overwrite=True):
+    def save(self, fname, overwrite=True, zarr_kwargs={}, cast_uints=False):
         """Saving into zarr format."""
         # We use zarr, as this way we have support to directly write into the file by the workers
         # (rather than passing back the data chunk over the scheduler to the interface)
         # Also, this way we can leverage new features, such as a large variety of compression methods.
-        store = zarr.DirectoryStore(fname)
+        # cast_uints: if true, we cast uints to ints; needed for some compressions (particularly zfp)
+        store = zarr.DirectoryStore(fname,**zarr_kwargs)
         root = zarr.group(store, overwrite=overwrite)
 
         # Metadata
@@ -142,7 +143,14 @@ class Dataset(object):
         for p in self.data:
             root.create_group(p)
             for k in self.data[p]:
-                task = da.to_zarr(self.data[p][k], os.path.join(fname, p, k), overwrite=True,compute=False)
+                arr = self.data[p][k]
+                if cast_uints:
+                    if arr.dtype==np.uint64:
+                        arr = arr.astype(np.int64)
+                    elif arr.dtype==np.uint32:
+                        arr = arr.astype(np.int32)
+
+                task = da.to_zarr(arr, os.path.join(fname, p, k), overwrite=True,compute=False)
                 tasks.append(task)
         dask.compute(tasks)
 
