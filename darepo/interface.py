@@ -38,7 +38,14 @@ class Dataset(object):
                 self.load_chunkedhdf5()
         else:
             # we are directly given a target file
-            raise NotImplementedError # TODO
+            self.load_hdf5()
+
+    def load_hdf5(self):
+        self.location = self.path
+        tree = {}
+        walk_hdf5file(self.location,tree=tree)
+        self.file = h5py.File(self.location,"r")
+        self.load_from_tree(tree)
 
     def load_zarr(self):
         self.location = self.path
