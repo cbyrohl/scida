@@ -82,20 +82,29 @@ class Dataset(object):
         self.load_from_tree(tree)
 
 
-    def load_from_tree(self,tree,groups_load=("/PartType","/Group","/Subhalo")):
+    def load_from_tree(self,tree,groups_load=None):
+        """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
+        if groups_load is None:
+            toload = True
+            groups_with_datasets = set([d[0].split("/")[1] for d in tree["datasets"]])
         ## groups
         for group in tree["groups"]:
             # TODO: Do not hardcode dataset/field groups
-            toload = any([group.startswith(gname) for gname in groups_load])
+            if groups_load is not None:
+                toload = any([group.startswith(gname) for gname in groups_load])
+            else:
+                toload = any([group=="/"+g for g in groups_with_datasets])
             if toload:
                 self.data[group.split("/")[1]] = {}
         ## datasets
         for dataset in tree["datasets"]:
-            toload = any([dataset[0].startswith(gname) for gname in groups_load])
+            if groups_load is not None:
+                toload = any([dataset[0].startswith(gname) for gname in groups_load])
+            else:
+                toload = any([dataset[0].startswith("/"+g+"/") for g in groups_with_datasets])
             if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
                 ds = da.from_array(self.file[dataset[0]])
-                #ds = load_hdf5dataset_as_daskarr((self.file, dataset[0],), shape=dataset[1], dtype=dataset[2])
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
