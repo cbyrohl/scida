@@ -2,25 +2,34 @@ from collections import OrderedDict
 import numpy as np
 import h5py
 import logging
+import zarr
 
 from concurrent.futures import ProcessPoolExecutor
 
-def walk_hdf5group(grp, tree, get_attrs=False):
+def walk_group(grp, tree, get_attrs=False):
     if len(tree) == 0:
         tree.update(**dict(attrs={}, groups=[], datasets=[]))
     if len(grp.attrs) > 0:
         tree["attrs"][grp.name] = dict(grp.attrs)
-    for k in grp.keys():
-        if isinstance(grp[k], h5py._hl.group.Group):
-            tree["groups"].append(grp[k].name)
-            walk_hdf5group(grp[k], tree, get_attrs=get_attrs)
-        else:  # it's a dataset (?)
-            tree["datasets"].append([grp[k].name, grp[k].shape, grp[k].dtype])
+    for k,o in grp.items():
+        if isinstance(o, h5py._hl.group.Group) or isinstance(o, zarr.hierarchy.Group):
+            tree["groups"].append(o.name)
+            walk_group(o, tree, get_attrs=get_attrs)
+        elif isinstance(o,h5py._hl.dataset.Dataset) or isinstance(o,zarr.core.Array):  # it's a dataset (?)
+            tree["datasets"].append([o.name, o.shape, o.dtype])
+        else:
+            raise TypeError("Unknown type '%s'"%type(o))
+
+
+def walk_zarrfile(fn, tree, get_attrs=True):
+    with zarr.open(fn) as z:
+        walk_group(z, tree, get_attrs=get_attrs)
+    return tree
 
 
 def walk_hdf5file(fn, tree, get_attrs=True):
     with h5py.File(fn, "r") as hf:
-        walk_hdf5group(hf, tree, get_attrs=get_attrs)
+        walk_group(hf, tree, get_attrs=get_attrs)
     return tree
 
 

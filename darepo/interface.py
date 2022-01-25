@@ -9,7 +9,7 @@ import zarr
 
 from .config import _config
 
-from .helpers_hdf5 import create_virtualfile, walk_hdf5file
+from .helpers_hdf5 import create_virtualfile, walk_hdf5file, walk_zarrfile
 from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainer
 
@@ -32,7 +32,7 @@ class Dataset(object):
         if os.path.isdir(path):
             if os.path.isfile(os.path.join(path,".zgroup")):
                 # object is a zarr object
-                raise NotImplementedError # TODO
+                self.load_zarr()
             else:
                 # otherwise expect this is a chunked HDF5 file
                 self.load_chunkedhdf5()
@@ -40,6 +40,12 @@ class Dataset(object):
             # we are directly given a target file
             raise NotImplementedError # TODO
 
+    def load_zarr(self):
+        self.location = self.path
+        tree = {}
+        walk_zarrfile(self.location,tree=tree)
+        self.file = zarr.open(self.location)
+        self.load_from_tree(tree)
 
     def load_chunkedhdf5(self,overwrite=False):
         files = np.array([os.path.join(self.path, f) for f in os.listdir(self.path)])
@@ -62,17 +68,23 @@ class Dataset(object):
             logging.warning("No caching directory specified. Initial file read will remain slow.")
 
         self.file = h5py.File(self.location,"r")
-        # Populate instance with hdf5 data
+
         tree = {}
         walk_hdf5file(self.location, tree)
+        self.load_from_tree(tree)
+
+
+    def load_from_tree(self,tree,groups_load=("/PartType","/Group","/Subhalo")):
         ## groups
         for group in tree["groups"]:
             # TODO: Do not hardcode dataset/field groups
-            if group.startswith("/PartType") or group.startswith("/Group") or group.startswith("/Subhalo"):
+            toload = any([group.startswith(gname) for gname in groups_load])
+            if toload:
                 self.data[group.split("/")[1]] = {}
         ## datasets
         for dataset in tree["datasets"]:
-            if dataset[0].startswith("/PartType") or dataset[0].startswith("/Group") or dataset[0].startswith("/Subhalo"):
+            toload = any([dataset[0].startswith(gname) for gname in groups_load])
+            if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
                 ds = da.from_array(self.file[dataset[0]])
                 #ds = load_hdf5dataset_as_daskarr((self.file, dataset[0],), shape=dataset[1], dtype=dataset[2])
@@ -96,6 +108,7 @@ class Dataset(object):
         self.metadata = tree["attrs"]
 
 
+
     def return_data(self):
         return self.data
 
@@ -117,11 +130,10 @@ class Dataset(object):
                     v = make_serializable(v)
                     grp.attrs[k] = v
         # Data
-        datagrp = root.create_group("data")
         for p in self.data:
-            datagrp.create_group(p)
+            root.create_group(p)
             for k in self.data[p]:
-                da.to_zarr(self.data[p][k], os.path.join(fname, "data", p, k), overwrite=True)
+                da.to_zarr(self.data[p][k], os.path.join(fname, p, k), overwrite=True)
 
 
 class BaseSnapshot(Dataset):

@@ -1,13 +1,12 @@
 import numpy as np
+import pytest
 
 
 from ..interface import BaseSnapshot
 from ..interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
+from . import path,gpath
 
 
-# We test on a snapshot from TNG50-4
-path = "/data/cbyrohl/TNGdata/TNG50-4/output/snapdir_042"
-gpath = "/data/cbyrohl/TNGdata/TNG50-4/output/groups_042"
 
 
 def test_snapshot_load():
@@ -18,9 +17,20 @@ def test_groups_load():
     snp = BaseSnapshot(gpath)
 
 
+#@pytest.mark.dependency()
 def test_snapshot_save():
     snp = BaseSnapshot(path)
     snp.save("test.zarr")
+
+
+#@pytest.mark.dependency(depends=["test_snapshot_save"])
+def test_snapshot_load_zarr():
+    snp = BaseSnapshot(path)
+    snp.save("test.zarr")
+    snp_zarr = BaseSnapshot("test.zarr")
+    for k,o in snp.data.items():
+        for l,u in o.items():
+            assert u.shape==snp_zarr.data[k][l].shape
 
 
 def test_areposnapshot_load():
