@@ -16,12 +16,13 @@ from .fields import FieldContainer
 
 
 class Dataset(object):
-    def __init__(self, path):
+    def __init__(self, path, chunksize="auto"):
         super().__init__()
         self.path = path
         self.file = None
-        self.tempfile = None # need this reference to keep garbage collection away for the tempfile
+        self.tempfile = None  # need this reference to keep garbage collection away for the tempfile
         self.location = None
+        self.chunksize = chunksize
 
         # Let's find the data and metadata for the object at 'path'
         self.metadata = {}
@@ -104,7 +105,7 @@ class Dataset(object):
                 toload = any([dataset[0].startswith("/"+g+"/") for g in groups_with_datasets])
             if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
-                ds = da.from_array(self.file[dataset[0]])
+                ds = da.from_array(self.file[dataset[0]], chunks=self.chunksize)
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
@@ -165,8 +166,8 @@ class Dataset(object):
 
 
 class BaseSnapshot(Dataset):
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, chunksize="auto"):
+        super().__init__(path, chunksize=chunksize)
 
         defaultattributes = ["config","header","parameters"]
         for k in self.metadata:

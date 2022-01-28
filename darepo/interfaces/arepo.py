@@ -42,11 +42,11 @@ class ArepoSelector(Selector):
 
 
 class ArepoSnapshot(BaseSnapshot):
-    def __init__(self, path, catalog=None):
+    def __init__(self, path, chunksize="auto", catalog=None):
         self.header = {}
         self.config = {}
         self.parameters = {}
-        super().__init__(path)
+        super().__init__(path, chunksize=chunksize)
 
         self.catalog = catalog
         if catalog is not None:
