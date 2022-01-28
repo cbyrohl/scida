@@ -50,7 +50,7 @@ class ArepoSnapshot(BaseSnapshot):
 
         self.catalog = catalog
         if catalog is not None:
-            self.catalog = BaseSnapshot(catalog)
+            self.catalog = BaseSnapshot(catalog, virtualcache=False) # copy catalog for better performance
             for k in self.catalog.data:
                 if k not in self.data:
                     self.data[k] = self.catalog.data[k]
