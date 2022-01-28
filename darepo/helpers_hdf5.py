@@ -91,7 +91,6 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
                     # create virtual sources
                     vsources = []
                     for k in shapes[field]:
-                        print(k)
                         vsources.append(
                             h5py.VirtualSource(files[k], name=field, shape=shapes[field][k], dtype=dtypes[field]))
                     layout = h5py.VirtualLayout(shape=tuple(newshape), dtype=dtypes[field])
@@ -108,7 +107,7 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
                 for field in groupfields:
                     totentries = np.array([k[1] for k in chunks[field]]).sum()
                     newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
-                    dset = hf.create_dataset(field, shape=newshape)
+                    dset = hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
                 counters = {field: 0 for field in groupfields}
                 for i in range(len(files)):
                     with h5py.File(files[i]) as hf_load:
