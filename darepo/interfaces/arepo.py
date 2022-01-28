@@ -88,6 +88,7 @@ class ArepoSnapshot(BaseSnapshot):
         halocelloffsets = self.data["Group"]["GroupOffsetsType"].compute()
         halocellcounts = self.data["Group"]["GroupLenType"].compute()
         subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"].compute()
+        subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"].compute()
 
 
         for key in self.data:
@@ -102,7 +103,7 @@ class ArepoSnapshot(BaseSnapshot):
             # Subhalo ID
             gidx = self.data[key]["uid"]
             shcounts, shnumber = get_shcounts_shcells(subhalogrnr, halocelloffsets[:, num].shape[0])
-            sidx = compute_subhaloindex(gidx, halocelloffsets[:, num], shnumber, shcounts, halocellcounts[:, num])
+            sidx = compute_subhaloindex(gidx, halocelloffsets[:, num], shnumber, shcounts, subhalocellcounts[:, num])
             self.data[key]["SubhaloID"] = sidx
 
 
