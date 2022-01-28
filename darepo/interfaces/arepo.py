@@ -211,8 +211,14 @@ def get_hidx(gidx_start, gidx_count, celloffsets, cellcounts):
     res = -1 * np.ones(gidx_count, dtype=np.int32)
     # find initial celloffset
     hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
+    if hidx_start_idx+1<celloffsets.shape[0]:
+        celloffset = celloffsets[hidx_start_idx + 1]
+    else:
+        celloffset = celloffsets[-1] + cellcounts[-1]
+    endid = celloffset - gidx_start
+    if endid<0: # we are done. Already out of scope of lookup => all unbound gas.
+        return res
     startid = 0
-    endid = celloffsets[hidx_start_idx + 1] - gidx_start
     # Now iterate through list.
     while startid < gidx_count:
         res[startid:endid] = hidx_start_idx
