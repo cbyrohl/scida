@@ -81,6 +81,8 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
             hf.create_group(group)
             groupfields = [field for field in shapes.keys() if
                            field.startswith(group) and field.count("/") - 1 == group.count("/")]
+            if len(groupfields)==0:
+                continue
 
             # fill fields
             if virtual: # for virtual datasets, iterate over all fields and concat each file to virtual dataset
@@ -109,12 +111,15 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
                     newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
                     dset = hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
                 counters = {field: 0 for field in groupfields}
-                for i in range(len(files)):
-                    with h5py.File(files[i]) as hf_load:
+                for k in range(len(files)):
+                    with h5py.File(files[k]) as hf_load:
                         for field in groupfields:
-                            n = chunks[field][i][1]
-                            hf[field][counters[field]:counters[field]+n] = hf_load[field]
-                            counters[field] = counters[field] + n
+                            n = shapes[field].get(k,[0,0])[0]
+                            if n==0:
+                                continue
+                            offset = counters[field]
+                            hf[field][offset:offset+n] = hf_load[field]
+                            counters[field] = offset + n
 
         # save information regarding chunks
         grp = hf.create_group("_chunks")
