@@ -1,5 +1,5 @@
 # We test on a snapshot from TNG50-4
-path = "/data/cbyrohl/TNGdata/TNG50-4/output/snapdir_042"
+from . import path,gpath
 
 from ..interface import BaseSnapshot
 import dask.array as da

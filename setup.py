@@ -13,7 +13,8 @@ setuptools.setup(
         'pandas',
         'astropy',
         'dask',
-        'distributed'
+        'distributed',
+        'zarr'
     ],
     tests_require=[
         'pytest',

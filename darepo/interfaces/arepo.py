@@ -1,12 +1,15 @@
+import inspect
 import re
 import astropy.units as u
 import numbers
 import logging
 import numpy as np
+from dask import delayed
 import dask.array as da
 from numba import njit
-from ..interface import BaseSnapshot,Selector
 
+from ..interface import BaseSnapshot,Selector
+from ..helpers_misc import computedecorator, get_args, get_kwargs
 from .arepo_units import unitstr_arepo,get_unittuples_from_TNGdocs_groups, \
     get_unittuples_from_TNGdocs_particles, get_unittuples_from_TNGdocs_subhalos
 
@@ -98,13 +101,73 @@ class ArepoSnapshot(BaseSnapshot):
 
             # Group ID
             gidx = self.data[key]["uid"]
-            hidx = compute_haloindex(gidx, halocelloffsets[:, num])
+            hidx = compute_haloindex(gidx, halocelloffsets[:, num], halocellcounts[:,num])
             self.data[key]["GroupID"] = hidx
             # Subhalo ID
             gidx = self.data[key]["uid"]
             shcounts, shnumber = get_shcounts_shcells(subhalogrnr, halocelloffsets[:, num].shape[0])
             sidx = compute_subhaloindex(gidx, halocelloffsets[:, num], shnumber, shcounts, subhalocellcounts[:, num])
             self.data[key]["SubhaloID"] = sidx
+
+    @computedecorator
+    def map_halo_operation(self, func, chunksize=int(3e7)):
+        # TODO: auto chunksize
+        dfltkwargs = get_kwargs(func)
+        fieldnames = dfltkwargs.get("fieldnames",None)
+        parttype = dfltkwargs.get("parttype","PartType0")
+        partnum = int(parttype[-1])
+
+        if fieldnames is None:
+            fieldnames = get_args(func)
+
+        lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
+        offsets = self.data["Group"]["GroupOffsetsType"][:, partnum].compute()
+
+        totlength = offsets[-1] - 1  # why this? instead of "offsets[-1]+lengths[-1]"?
+        chunksize = max(chunksize,np.max(lengths))
+        nbins = int(np.ceil(totlength / chunksize))
+        bins = np.linspace(0, totlength, nbins + 1, dtype=int)
+        oindex = np.searchsorted(offsets, bins, side="right") - 1
+        assert np.all(np.diff(oindex) != 0)  # chunk smaller than largest halo. Increase chunk size
+
+        chunks = np.diff(oindex)
+        chunks[-1] += 1  # TODO: Why is this manually needed?
+        chunks = [tuple(chunks.tolist())]
+
+        slcoffsets = offsets[oindex]
+        slcoffsets[-1] = totlength
+        slclengths = np.diff(slcoffsets)
+
+        slcs = [slice(oindex[i], oindex[i + 1]) for i in range(len(oindex) - 1)]
+        slcs[-1] = slice(oindex[-2], oindex[-1] + 1)  # hacky! why needed?
+
+        halolengths_in_chunks = [lengths[slc] for slc in slcs]
+
+        d_hic = delayed(halolengths_in_chunks)
+
+        arrs = [self.data[parttype][f][:totlength] for f in fieldnames]
+        for i, arr in enumerate(arrs):
+            arrs[i] = arr.rechunk(chunks=[tuple(slclengths.tolist())])
+
+        calc = da.map_blocks(wrap_func_scalar, func, d_hic, *arrs, dtype=arr.dtype, chunks=chunks)
+
+        return calc
+
+
+
+
+
+def wrap_func_scalar(func, halolengths_in_chunks, *arrs, block_id=None):
+    lengths = halolengths_in_chunks[block_id[0]]
+    n = len(lengths)
+
+    offsets = np.cumsum([0] + list(lengths))
+    res = []
+    for i, o in enumerate(offsets[:-1]):
+        arrchunks = [arr[o:offsets[i + 1]] for arr in arrs]
+        # assert len(np.unique(arrchunk))==1
+        res.append(func(*arrchunks))
+    return np.array(res)
 
 
 
@@ -131,7 +194,7 @@ class ArepoSnapshotWithUnits(ArepoSnapshot):
 
 
 @njit
-def get_hidx(gidx_start, gidx_count, celloffsets):
+def get_hidx(gidx_start, gidx_count, celloffsets, cellcounts):
     """Get halo index of a given cell
 
     Parameters
@@ -142,6 +205,8 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
         The amount of halo indices we are querying after "gidx_start"
     celloffsets : array
         An array holding the starting cell offset for each halo
+    cellcounts : array
+        The count of cells for each halo
     """
     res = -1 * np.ones(gidx_count, dtype=np.int32)
     # find initial celloffset
@@ -149,28 +214,25 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
     startid = 0
     endid = celloffsets[hidx_start_idx + 1] - gidx_start
     # Now iterate through list.
-    while True:
-        if (startid >= gidx_count):
-            break
+    while startid < gidx_count:
         res[startid:endid] = hidx_start_idx
         hidx_start_idx += 1
         startid = endid
-        if (hidx_start_idx >= celloffsets.shape[0] - 1):
-            startid = gidx_count
-        else:
-            count = celloffsets[hidx_start_idx + 1] - celloffsets[hidx_start_idx]
-            endid = startid + count
+        if (hidx_start_idx >= celloffsets.shape[0]):
+            break
+        count = cellcounts[hidx_start_idx]
+        endid = startid + count
     return res
 
 
-def get_hidx_daskwrap(gidx, halocelloffsets):
+def get_hidx_daskwrap(gidx, halocelloffsets, halocellcounts):
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
-    return get_hidx(gidx_start, gidx_count, halocelloffsets)
+    return get_hidx(gidx_start, gidx_count, halocelloffsets, halocellcounts)
 
 
-def compute_haloindex(gidx, halocelloffsets, *args):
-    return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, meta=np.array((), dtype=np.int64))
+def compute_haloindex(gidx, halocelloffsets, halocellcounts, *args):
+    return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, halocellcounts, meta=np.array((), dtype=np.int64))
 
 
 @njit

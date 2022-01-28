@@ -3,13 +3,14 @@ import logging
 import tempfile
 
 import dask.array as da
+import dask
 import numpy as np
 import h5py
 import zarr
 
 from .config import _config
 
-from .helpers_hdf5 import create_virtualfile, walk_hdf5file
+from .helpers_hdf5 import create_virtualfile, walk_hdf5file, walk_zarrfile
 from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainer
 
@@ -32,16 +33,29 @@ class Dataset(object):
         if os.path.isdir(path):
             if os.path.isfile(os.path.join(path,".zgroup")):
                 # object is a zarr object
-                raise NotImplementedError # TODO
+                self.load_zarr()
             else:
                 # otherwise expect this is a chunked HDF5 file
                 self.load_chunkedhdf5()
         else:
             # we are directly given a target file
-            raise NotImplementedError # TODO
+            self.load_hdf5()
 
+    def load_hdf5(self):
+        self.location = self.path
+        tree = {}
+        walk_hdf5file(self.location,tree=tree)
+        self.file = h5py.File(self.location,"r")
+        self.load_from_tree(tree)
 
-    def load_chunkedhdf5(self):
+    def load_zarr(self):
+        self.location = self.path
+        tree = {}
+        walk_zarrfile(self.location,tree=tree)
+        self.file = zarr.open(self.location)
+        self.load_from_tree(tree)
+
+    def load_chunkedhdf5(self,overwrite=False):
         files = np.array([os.path.join(self.path, f) for f in os.listdir(self.path)])
         nmbrs = [int(f.split(".")[-2]) for f in files]
         sortidx = np.argsort(nmbrs)
@@ -50,13 +64,10 @@ class Dataset(object):
         if "cachedir" in _config:
             # we create a virtual file in the cache directory
             fn = hash_path(self.path) + ".hdf5"
-            file = os.path.join(_config["cachedir"], fn)
-            if not os.path.isfile(file):
-                create_virtualfile(file, files)
-            else:
-                # TODO
-                logging.warning("Virtual file already existing? TODO.")
-                raise NotImplementedError
+            fp = os.path.join(_config["cachedir"], fn)
+            if not os.path.isfile(fp) or overwrite:
+                create_virtualfile(fp, files)
+            self.location = fp
         else:
             # otherwise, we create a temporary file
             self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
@@ -65,20 +76,35 @@ class Dataset(object):
             logging.warning("No caching directory specified. Initial file read will remain slow.")
 
         self.file = h5py.File(self.location,"r")
-        # Populate instance with hdf5 data
+
         tree = {}
         walk_hdf5file(self.location, tree)
+        self.load_from_tree(tree)
+
+
+    def load_from_tree(self,tree,groups_load=None):
+        """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
+        if groups_load is None:
+            toload = True
+            groups_with_datasets = set([d[0].split("/")[1] for d in tree["datasets"]])
         ## groups
         for group in tree["groups"]:
             # TODO: Do not hardcode dataset/field groups
-            if group.startswith("/PartType") or group.startswith("/Group") or group.startswith("/Subhalo"):
+            if groups_load is not None:
+                toload = any([group.startswith(gname) for gname in groups_load])
+            else:
+                toload = any([group=="/"+g for g in groups_with_datasets])
+            if toload:
                 self.data[group.split("/")[1]] = {}
         ## datasets
         for dataset in tree["datasets"]:
-            if dataset[0].startswith("/PartType") or dataset[0].startswith("/Group") or dataset[0].startswith("/Subhalo"):
+            if groups_load is not None:
+                toload = any([dataset[0].startswith(gname) for gname in groups_load])
+            else:
+                toload = any([dataset[0].startswith("/"+g+"/") for g in groups_with_datasets])
+            if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
                 ds = da.from_array(self.file[dataset[0]])
-                #ds = load_hdf5dataset_as_daskarr((self.file, dataset[0],), shape=dataset[1], dtype=dataset[2])
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
@@ -99,15 +125,17 @@ class Dataset(object):
         self.metadata = tree["attrs"]
 
 
+
     def return_data(self):
         return self.data
 
-    def save(self, fname, overwrite=True):
+    def save(self, fname, overwrite=True, zarr_kwargs={}, cast_uints=False):
         """Saving into zarr format."""
         # We use zarr, as this way we have support to directly write into the file by the workers
         # (rather than passing back the data chunk over the scheduler to the interface)
         # Also, this way we can leverage new features, such as a large variety of compression methods.
-        store = zarr.DirectoryStore(fname)
+        # cast_uints: if true, we cast uints to ints; needed for some compressions (particularly zfp)
+        store = zarr.DirectoryStore(fname,**zarr_kwargs)
         root = zarr.group(store, overwrite=overwrite)
 
         # Metadata
@@ -120,11 +148,20 @@ class Dataset(object):
                     v = make_serializable(v)
                     grp.attrs[k] = v
         # Data
-        datagrp = root.create_group("data")
+        tasks = []
         for p in self.data:
-            datagrp.create_group(p)
+            root.create_group(p)
             for k in self.data[p]:
-                da.to_zarr(self.data[p][k], os.path.join(fname, "data", p, k), overwrite=True)
+                arr = self.data[p][k]
+                if cast_uints:
+                    if arr.dtype==np.uint64:
+                        arr = arr.astype(np.int64)
+                    elif arr.dtype==np.uint32:
+                        arr = arr.astype(np.int32)
+
+                task = da.to_zarr(arr, os.path.join(fname, p, k), overwrite=True,compute=False)
+                tasks.append(task)
+        dask.compute(tasks)
 
 
 class BaseSnapshot(Dataset):
