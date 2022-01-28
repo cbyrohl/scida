@@ -33,7 +33,8 @@ def walk_hdf5file(fn, tree, get_attrs=True):
     return tree
 
 
-def create_virtualfile(fn, files, max_workers=16):
+def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
+    """Creates a virtual hdf5 file from list of given files. Virtual by default."""
     # first obtain all datasets and groups
     trees = [{} for i in range(len(files))]
 
@@ -73,33 +74,48 @@ def create_virtualfile(fn, files, max_workers=16):
         # then save the chunking information for this group
         groupchunks[field] = arr0
 
-    # next fill virtual file
+    # next fill merger file
     with h5py.File(fn, "w") as hf:
         # create groups
         for group in groups:
             hf.create_group(group)
             groupfields = [field for field in shapes.keys() if
                            field.startswith(group) and field.count("/") - 1 == group.count("/")]
+
             # fill fields
-            for field in groupfields:
-                totentries = np.array([k[1] for k in chunks[field]]).sum()
-                virtshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
+            if virtual: # for virtual datasets, iterate over all fields and concat each file to virtual dataset
+                for field in groupfields:
+                    totentries = np.array([k[1] for k in chunks[field]]).sum()
+                    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
 
-                # create virtual sources
-                vsources = []
-                for k in shapes[field]:
-                    vsources.append(
-                        h5py.VirtualSource(files[k], name=field, shape=shapes[field][k], dtype=dtypes[field]))
-                layout = h5py.VirtualLayout(shape=tuple(virtshape), dtype=dtypes[field])
+                    # create virtual sources
+                    vsources = []
+                    for k in shapes[field]:
+                        print(k)
+                        vsources.append(
+                            h5py.VirtualSource(files[k], name=field, shape=shapes[field][k], dtype=dtypes[field]))
+                    layout = h5py.VirtualLayout(shape=tuple(newshape), dtype=dtypes[field])
 
-                # fill virtual dataset
-                offset = 0
-                for vsource in vsources:
-                    length = vsource.shape[0]
-                    layout[offset: offset + length] = vsource
-                    offset += length
-                assert virtshape[0] == offset  # make sure we filled the array up fully.
-                hf.create_virtual_dataset(field, layout)
+                    # fill virtual dataset
+                    offset = 0
+                    for vsource in vsources:
+                        length = vsource.shape[0]
+                        layout[offset: offset + length] = vsource
+                        offset += length
+                    assert newshape[0] == offset  # make sure we filled the array up fully.
+                    hf.create_virtual_dataset(field, layout)
+            else: # copied dataset. For performance, we iterate differently: Loop over each file's fields
+                for field in groupfields:
+                    totentries = np.array([k[1] for k in chunks[field]]).sum()
+                    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
+                    dset = hf.create_dataset(field, shape=newshape)
+                counters = {field: 0 for field in groupfields}
+                for i in range(len(files)):
+                    with h5py.File(files[i]) as hf_load:
+                        for field in groupfields:
+                            n = chunks[field][i][1]
+                            hf[field][counters[field]:counters[field]+n] = hf_load[field]
+                            counters[field] = counters[field] + n
 
         # save information regarding chunks
         grp = hf.create_group("_chunks")

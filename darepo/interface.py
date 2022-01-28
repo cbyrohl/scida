@@ -10,19 +10,20 @@ import zarr
 
 from .config import _config
 
-from .helpers_hdf5 import create_virtualfile, walk_hdf5file, walk_zarrfile
+from .helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainer
 
 
 class Dataset(object):
-    def __init__(self, path, chunksize="auto"):
+    def __init__(self, path, chunksize="auto", virtualcache=True):
         super().__init__()
         self.path = path
         self.file = None
         self.tempfile = None  # need this reference to keep garbage collection away for the tempfile
         self.location = None
         self.chunksize = chunksize
+        self.virtualcache = virtualcache
 
         # Let's find the data and metadata for the object at 'path'
         self.metadata = {}
@@ -67,13 +68,13 @@ class Dataset(object):
             fn = hash_path(self.path) + ".hdf5"
             fp = os.path.join(_config["cachedir"], fn)
             if not os.path.isfile(fp) or overwrite:
-                create_virtualfile(fp, files)
+                create_mergedhdf5file(fp, files, virtual=self.virtualcache)
             self.location = fp
         else:
             # otherwise, we create a temporary file
             self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
             self.location = self.tempfile.name
-            create_virtualfile(self.location, files)
+            create_mergedhdf5file(self.location, files, virtual=self.virtualcache)
             logging.warning("No caching directory specified. Initial file read will remain slow.")
 
         self.file = h5py.File(self.location,"r")
@@ -166,8 +167,8 @@ class Dataset(object):
 
 
 class BaseSnapshot(Dataset):
-    def __init__(self, path, chunksize="auto"):
-        super().__init__(path, chunksize=chunksize)
+    def __init__(self, path, chunksize="auto", virtualcache=True):
+        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache)
 
         defaultattributes = ["config","header","parameters"]
         for k in self.metadata:
