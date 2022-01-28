@@ -82,17 +82,17 @@ class ArepoSnapshot(BaseSnapshot):
         return super().register_field(key, name=name, construct=construct)
 
     def add_catalogIDs(self):
-        # Get Offsets for particles in snapshot
-        self.data["Group"]["GroupOffsetsType"] = da.concatenate([np.zeros((1,6),dtype=np.int64),da.cumsum(self.data["Group"]["GroupLenType"],axis=0)[:-1]])
-
-
         # TODO: make these delayed objects and properly pass into (delayed?) numba functions:
         # https://docs.dask.org/en/stable/delayed-best-practices.html#avoid-repeatedly-putting-large-inputs-into-delayed-calls
-        halocelloffsets = self.data["Group"]["GroupOffsetsType"].compute()
-        halocellcounts = self.data["Group"]["GroupLenType"].compute()
+
+        # Get Offsets for particles in snapshot
+        glen = self.data["Group"]["GroupLenType"]
+        da_halocelloffsets = da.concatenate([np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0)])
+        self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1]  # remove last entry to match shape
+        halocelloffsets = da_halocelloffsets.compute()
+
         subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"].compute()
         subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"].compute()
-
 
         for key in self.data:
             if not(key.startswith("PartType")):
@@ -101,7 +101,7 @@ class ArepoSnapshot(BaseSnapshot):
 
             # Group ID
             gidx = self.data[key]["uid"]
-            hidx = compute_haloindex(gidx, halocelloffsets[:, num], halocellcounts[:,num])
+            hidx = compute_haloindex(gidx, halocelloffsets[:, num])
             self.data[key]["GroupID"] = hidx
             # Subhalo ID
             gidx = self.data[key]["uid"]
@@ -194,7 +194,7 @@ class ArepoSnapshotWithUnits(ArepoSnapshot):
 
 
 @njit
-def get_hidx(gidx_start, gidx_count, celloffsets, cellcounts):
+def get_hidx(gidx_start, gidx_count, celloffsets):
     """Get halo index of a given cell
 
     Parameters
@@ -204,73 +204,73 @@ def get_hidx(gidx_start, gidx_count, celloffsets, cellcounts):
     gidx_count: integer
         The amount of halo indices we are querying after "gidx_start"
     celloffsets : array
-        An array holding the starting cell offset for each halo
-    cellcounts : array
-        The count of cells for each halo
+        An array holding the starting cell offset for each halo. Needs to include the
+        offset after the last halo. The required shape is thus (Nhalo+1,).
     """
     res = -1 * np.ones(gidx_count, dtype=np.int32)
     # find initial celloffset
     hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
-    if hidx_start_idx+1<celloffsets.shape[0]:
-        celloffset = celloffsets[hidx_start_idx + 1]
-    else:
-        celloffset = celloffsets[-1] + cellcounts[-1]
-    endid = celloffset - gidx_start
-    if endid<0: # we are done. Already out of scope of lookup => all unbound gas.
+    if hidx_start_idx+1>=celloffsets.shape[0]:
+        # we are done. Already out of scope of lookup => all unbound gas.
         return res
+    celloffset = celloffsets[hidx_start_idx + 1]
+    endid = celloffset - gidx_start
     startid = 0
     # Now iterate through list.
     while startid < gidx_count:
         res[startid:endid] = hidx_start_idx
         hidx_start_idx += 1
         startid = endid
-        if (hidx_start_idx >= celloffsets.shape[0]):
+        if (hidx_start_idx >= celloffsets.shape[0]-1):
             break
-        count = cellcounts[hidx_start_idx]
+        count = celloffsets[hidx_start_idx+1] - celloffsets[hidx_start_idx]
         endid = startid + count
     return res
 
 
-def get_hidx_daskwrap(gidx, halocelloffsets, halocellcounts):
+def get_hidx_daskwrap(gidx, halocelloffsets):
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
-    return get_hidx(gidx_start, gidx_count, halocelloffsets, halocellcounts)
+    return get_hidx(gidx_start, gidx_count, halocelloffsets)
 
 
-def compute_haloindex(gidx, halocelloffsets, halocellcounts, *args):
-    return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, halocellcounts, meta=np.array((), dtype=np.int64))
+def compute_haloindex(gidx, halocelloffsets, *args):
+    return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, meta=np.array((), dtype=np.int64))
 
 
 @njit
 def get_shidx(gidx_start, gidx_count, celloffsets, shnumber, shcounts, shcellcounts):
     res = -1 * np.ones(gidx_count, dtype=np.int32)  # fuzz has negative index.
+
     # find initial Group we are in
     hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
-    startid = 0
-    if (hidx_start_idx + 1 >= celloffsets.shape[0]):
-        # Cells not in halos anymore. Thus already return.
-        # TODO Possible bug for last halo of catalog (if it would contain cells in subhalo) (?)
+    if hidx_start_idx+1>=celloffsets.shape[0]:
+        # we are done. Already out of scope of lookup => all unbound gas.
         return res
-    endid = celloffsets[hidx_start_idx + 1] - gidx_start
+    celloffset = celloffsets[hidx_start_idx + 1]
+    endid = celloffset - gidx_start
+    startid = 0
 
+    # find initial subhalo we are in
     hidx = hidx_start_idx
     shcumsum = np.zeros(shcounts[hidx] + 1, dtype=np.int64)
-    shcumsum[1:] = np.cumsum(shcellcounts[shnumber[hidx]:shnumber[hidx] + shcounts[hidx]])
+    shcumsum[1:] = np.cumsum(shcellcounts[shnumber[hidx]:shnumber[hidx] + shcounts[hidx]]) # collect halo's subhalo offsets
     shcumsum += celloffsets[hidx_start_idx]
     sidx_start_idx = np.searchsorted(shcumsum, gidx_start, side="right") - 1
     if sidx_start_idx < shcounts[hidx]:
         endid = shcumsum[sidx_start_idx + 1] - gidx_start
+
     # Now iterate through list.
     cont = True
-    while cont:
-        if (startid >= gidx_count):
-            break
-        res[startid:endid] = sidx_start_idx
+    while cont and (startid < gidx_count):
+        res[startid:endid] = sidx_start_idx if sidx_start_idx+1<shcumsum.shape[0] else -1
         sidx_start_idx += 1
         if sidx_start_idx < shcounts[hidx_start_idx]:
+            # we prepare to fill the next available subhalo for current halo
             count = shcumsum[sidx_start_idx + 1] - shcumsum[sidx_start_idx]
             startid = endid
         else:
+            # we need to find the next halo to start filling its subhalos
             dbgcount = 0
             while dbgcount < 100:  # find next halo with >0 subhalos
                 hidx_start_idx += 1
@@ -303,7 +303,7 @@ def get_shidx_daskwrap(gidx, halocelloffsets, shnumber, shcounts, shcellcounts):
     return get_shidx(gidx_start, gidx_count, halocelloffsets, shnumber, shcounts, shcellcounts)
 
 
-def compute_subhaloindex(gidx, halocelloffsets, shnumber, shcounts, shcellcounts):
+def compute_subhaloindex(gidx, halocelloffsets,shnumber, shcounts, shcellcounts):
     return da.map_blocks(get_shidx_daskwrap, gidx, halocelloffsets, shnumber, shcounts, shcellcounts,
                          meta=np.array((), dtype=np.int64))
 
