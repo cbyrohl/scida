@@ -110,7 +110,7 @@ class ArepoSnapshot(BaseSnapshot):
             self.data[key]["SubhaloID"] = sidx
 
     @computedecorator
-    def map_halo_operation(self, func, chunksize=int(3e7)):
+    def map_halo_operation(self, func, chunksize=int(3e7), shape=(1,)):
         # TODO: auto chunksize
         dfltkwargs = get_kwargs(func)
         fieldnames = dfltkwargs.get("fieldnames",None)
@@ -130,9 +130,13 @@ class ArepoSnapshot(BaseSnapshot):
         oindex = np.searchsorted(offsets, bins, side="right") - 1
         assert np.all(np.diff(oindex) != 0)  # chunk smaller than largest halo. Increase chunk size
 
+        new_axis = None
         chunks = np.diff(oindex)
         chunks[-1] += 1  # TODO: Why is this manually needed?
         chunks = [tuple(chunks.tolist())]
+        if shape!=(1,):
+            chunks.append(shape)
+            new_axis = np.arange(1,len(shape)+1).tolist()
 
         slcoffsets = offsets[oindex]
         slcoffsets[-1] = totlength
@@ -149,7 +153,7 @@ class ArepoSnapshot(BaseSnapshot):
         for i, arr in enumerate(arrs):
             arrs[i] = arr.rechunk(chunks=[tuple(slclengths.tolist())])
 
-        calc = da.map_blocks(wrap_func_scalar, func, d_hic, *arrs, dtype=arr.dtype, chunks=chunks)
+        calc = da.map_blocks(wrap_func_scalar, func, d_hic, *arrs, dtype=arr.dtype, chunks=chunks,new_axis=new_axis)
 
         return calc
 
