@@ -110,11 +110,14 @@ class ArepoSnapshot(BaseSnapshot):
             self.data[key]["SubhaloID"] = sidx
 
     @computedecorator
-    def map_halo_operation(self, func, chunksize=int(3e7), shape=(1,)):
+    def map_halo_operation(self, func, chunksize=int(3e7)):
         # TODO: auto chunksize
         dfltkwargs = get_kwargs(func)
         fieldnames = dfltkwargs.get("fieldnames",None)
         parttype = dfltkwargs.get("parttype","PartType0")
+        shape = dfltkwargs.get("shape", (1,))
+        dtype = dfltkwargs.get("dtype", "float64")
+        default = dfltkwargs.get("default", 0)
         partnum = int(parttype[-1])
 
         if fieldnames is None:
@@ -132,7 +135,7 @@ class ArepoSnapshot(BaseSnapshot):
 
         new_axis = None
         chunks = np.diff(oindex)
-        chunks[-1] += 2  # TODO: Why is this manually needed? and why 2??
+        chunks[-1] += lengths.shape[0]
         chunks = [tuple(chunks.tolist())]
         if shape!=(1,):
             chunks.append(shape)
@@ -153,7 +156,10 @@ class ArepoSnapshot(BaseSnapshot):
         for i, arr in enumerate(arrs):
             arrs[i] = arr.rechunk(chunks=[tuple(slclengths.tolist())])
 
-        calc = da.map_blocks(wrap_func_scalar, func, d_hic, *arrs, dtype=arr.dtype, chunks=chunks,new_axis=new_axis)
+
+
+        calc = da.map_blocks(wrap_func_scalar, func, d_hic, *arrs, dtype=dtype, chunks=chunks,new_axis=new_axis,
+                             func_output_shape=shape, func_output_dtype=dtype, func_output_default=default)
 
         return calc
 
@@ -161,15 +167,19 @@ class ArepoSnapshot(BaseSnapshot):
 
 
 
-def wrap_func_scalar(func, halolengths_in_chunks, *arrs, block_id=None):
+def wrap_func_scalar(func, halolengths_in_chunks, *arrs, block_info=None, block_id=None,
+                     func_output_shape=(1,), func_output_dtype="float64",
+                     func_output_default=0):
     lengths = halolengths_in_chunks[block_id[0]]
     n = len(lengths)
 
     offsets = np.cumsum([0] + list(lengths))
     res = []
     for i, o in enumerate(offsets[:-1]):
+        if o==offsets[i+1]:
+            res.append(func_output_default*np.ones(func_output_shape, dtype=func_output_dtype))
+            continue
         arrchunks = [arr[o:offsets[i + 1]] for arr in arrs]
-        # assert len(np.unique(arrchunk))==1
         res.append(func(*arrchunks))
     return np.array(res)
 
