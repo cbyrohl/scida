@@ -123,7 +123,7 @@ class ArepoSnapshot(BaseSnapshot):
         lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
         offsets = self.data["Group"]["GroupOffsetsType"][:, partnum].compute()
 
-        totlength = offsets[-1] - 1  # why this? instead of "offsets[-1]+lengths[-1]"?
+        totlength = offsets[-1] + lengths[-1]
         chunksize = max(chunksize,np.max(lengths))
         nbins = int(np.ceil(totlength / chunksize))
         bins = np.linspace(0, totlength, nbins + 1, dtype=int)
@@ -132,7 +132,7 @@ class ArepoSnapshot(BaseSnapshot):
 
         new_axis = None
         chunks = np.diff(oindex)
-        chunks[-1] += 1  # TODO: Why is this manually needed?
+        chunks[-1] += 2  # TODO: Why is this manually needed? and why 2??
         chunks = [tuple(chunks.tolist())]
         if shape!=(1,):
             chunks.append(shape)
@@ -143,7 +143,7 @@ class ArepoSnapshot(BaseSnapshot):
         slclengths = np.diff(slcoffsets)
 
         slcs = [slice(oindex[i], oindex[i + 1]) for i in range(len(oindex) - 1)]
-        slcs[-1] = slice(oindex[-2], oindex[-1] + 1)  # hacky! why needed?
+        slcs[-1] = slice(oindex[-2], oindex[-1] + 2)  # hacky! why needed? see TODO above.
 
         halolengths_in_chunks = [lengths[slc] for slc in slcs]
 
