@@ -47,6 +47,13 @@ class ArepoSnapshot(BaseSnapshot):
         self.config = {}
         self.parameters = {}
         super().__init__(path, chunksize=chunksize)
+        self.cosmology = None
+        if "HubbleParam" in self.header and "Omega0" in self.header:
+            import astropy.units as u
+            from astropy.cosmology import FlatLambdaCDM
+            h = self.header["HubbleParam"]
+            omega0 = self.header["Omega0"]
+            self.cosmology = FlatLambdaCDM(H0=100 * h * u.km / u.s / u.Mpc, Om0=omega0)
 
         self.catalog = catalog
         if catalog is not None:
