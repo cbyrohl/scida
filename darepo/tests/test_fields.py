@@ -29,3 +29,16 @@ def test_fields():
     # second-order field with custom name
     val2 = snp.data["PartType0"]["testfield3"].compute()
     assert val2 == 2
+
+    # test that we are passed the snapshot instance
+    @snp.register_field("PartType0")
+    def access_snapshot(data, **kwargs):
+        return kwargs["snap"]
+    val = snp.data["PartType0"]["access_snapshot"]
+    assert val is not None
+
+    @snp.register_field("PartType0")
+    def access_snapshot2(data, snap=None):
+        return snap
+    val = snp.data["PartType0"]["access_snapshot2"]
+    assert val is not None
