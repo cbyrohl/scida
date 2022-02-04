@@ -12,11 +12,11 @@ from .config import _config
 
 from .helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
-from .fields import FieldContainer
+from .fields import FieldContainerCollection
 
 
 class Dataset(object):
-    def __init__(self, path, chunksize="auto", virtualcache=True):
+    def __init__(self, path, chunksize="auto", virtualcache=True, overwritecache = False):
         super().__init__()
         self.path = path
         self.file = None
@@ -24,10 +24,11 @@ class Dataset(object):
         self.location = None
         self.chunksize = chunksize
         self.virtualcache = virtualcache
+        self.overwritecache = overwritecache
 
         # Let's find the data and metadata for the object at 'path'
         self.metadata = {}
-        self.data = {}
+        self.data = FieldContainerCollection()
 
         if not os.path.exists(self.path):
             raise Exception("Specified path does not exist.")
@@ -38,7 +39,7 @@ class Dataset(object):
                 self.load_zarr()
             else:
                 # otherwise expect this is a chunked HDF5 file
-                self.load_chunkedhdf5()
+                self.load_chunkedhdf5(overwrite=self.overwritecache)
         else:
             # we are directly given a target file
             self.load_hdf5()
@@ -110,8 +111,10 @@ class Dataset(object):
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
+        data = FieldContainerCollection(self.data.keys(), derivedfields_kwargs=dict(snap=self))
         for k in self.data:
-            self.data[k] = FieldContainer(**self.data[k])
+            data.new_container(k, **self.data[k])
+        self.data = data
 
         # Add a unique identifier for each element for each data type
         for p in self.data:
@@ -180,9 +183,9 @@ class BaseSnapshot(Dataset):
 
         self.boxsize = np.full(3,np.nan)
 
-    def register_field(self, parttype, name=None, construct=True):
-        return self.data[parttype].register_field(name=name)
 
+    def register_field(self, parttype, name=None, description=""):
+        return self.data.register_field(parttype, name=name, description=description)
 
 
 def deepdictkeycopy(olddict,newdict):
