@@ -43,7 +43,7 @@ class FieldContainerCollection(MutableMapping):
             if k not in self.store:
                 self.store[k] = FieldContainer(derivedfields_kwargs=self.derivedfields_kwargs)
             else:
-                self.store[k].update(**collection.store[k])
+                self.store[k].derivedfields.update(**collection.store[k].derivedfields)
 
     def register_field(self, parttype, name=None, description=""):
         if parttype=="all":
