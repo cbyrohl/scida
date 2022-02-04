@@ -13,7 +13,9 @@ class DerivedField(object):
 
 class FieldContainerCollection(MutableMapping):
     """A mutable collection of FieldContainers."""
-    def __init__(self, types=[], derivedfields_kwargs=None):
+    def __init__(self, types=None, derivedfields_kwargs=None):
+        if types is None:
+            types = []
         self.store = {k: FieldContainer(derivedfields_kwargs=derivedfields_kwargs) for k in types}
         self.derivedfields_kwargs = derivedfields_kwargs
 
@@ -34,6 +36,14 @@ class FieldContainerCollection(MutableMapping):
 
     def new_container(self, key, **kwargs):
         self[key] = FieldContainer(**kwargs, derivedfields_kwargs=self.derivedfields_kwargs)
+
+    def merge_derivedfields(self, collection):
+        assert isinstance(collection, FieldContainerCollection)
+        for k in collection.store:
+            if k not in self.store:
+                self.store[k] = FieldContainer(derivedfields_kwargs=self.derivedfields_kwargs)
+            else:
+                self.store[k].update(**collection.store[k])
 
     def register_field(self, parttype, name=None, description=""):
         if parttype=="all":
