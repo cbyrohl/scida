@@ -50,3 +50,10 @@ def test_fields():
     with pytest.raises(KeyError):
         part0.get("testfield", allow_derived=False)
 
+    # test "all"
+    @snp.register_field("all")
+    def testfield_all(data, **kwargs):
+        return True
+    assert all([snp.data[k]["testfield_all"] for k in snp.data.keys()])
+
+
