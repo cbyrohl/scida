@@ -4,12 +4,14 @@ import astropy.units as u
 import numbers
 import logging
 import numpy as np
+import dask
 from dask import delayed
 import dask.array as da
 from numba import njit
+import warnings
 
 from ..interface import BaseSnapshot,Selector
-from ..helpers_misc import computedecorator, get_args, get_kwargs
+from ..helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
 from .arepo_units import unitstr_arepo,get_unittuples_from_TNGdocs_groups, \
     get_unittuples_from_TNGdocs_particles, get_unittuples_from_TNGdocs_subhalos
 
@@ -18,6 +20,7 @@ class ArepoSelector(Selector):
     def __init__(self):
         super().__init__()
         self.keys = ["haloID"]
+
     def prepare(self,*args,**kwargs):
         snap = args[0]
         if snap.catalog is None:
@@ -117,8 +120,10 @@ class ArepoSnapshot(BaseSnapshot):
             self.data[key]["SubhaloID"] = sidx
 
     @computedecorator
-    def map_halo_operation(self, func, chunksize=int(3e7)):
-        # TODO: auto chunksize
+    def map_halo_operation(self, func, chunksize=int(3e7), cpucost_halo=1e4, Nmin=None):
+        if chunksize is not None:
+            warnings.warn('"chunksize" parameter is depreciated and has no effect. Specify Nmin for control.',
+                          DeprecationWarning)
         dfltkwargs = get_kwargs(func)
         fieldnames = dfltkwargs.get("fieldnames",None)
         parttype = dfltkwargs.get("parttype","PartType0")
@@ -131,14 +136,20 @@ class ArepoSnapshot(BaseSnapshot):
             fieldnames = get_args(func)
 
         lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
-        offsets = self.data["Group"]["GroupOffsetsType"][:, partnum].compute()
+        offsets = np.concatenate([[0], np.cumsum(lengths)])
 
-        totlength = offsets[-1] + lengths[-1]
-        chunksize = max(chunksize,np.max(lengths))
-        nbins = int(np.ceil(totlength / chunksize))
-        bins = np.linspace(0, totlength, nbins + 1, dtype=int)
-        oindex = np.searchsorted(offsets, bins, side="right") - 1
-        assert np.all(np.diff(oindex) != 0)  # chunk smaller than largest halo. Increase chunk size
+        # Determine chunkedges automatically
+        # TODO: very messy and inefficient routine. improve some time.
+        # TODO: Set entry_bytes_out
+        entry_nbytes_in = np.sum([self.data[parttype][f][0].nbytes for f in fieldnames]) # nbytes
+        nbytes_dtype_out = 4 # TODO: hardcode 4 byte output dtype as estimate for now
+        entry_nbytes_out = nbytes_dtype_out * np.product(shape)
+        list_chunkedges = map_halo_operation_get_chunkedges(lengths, entry_nbytes_in, entry_nbytes_out,
+                                                            cpucost_halo=cpucost_halo, Nmin=Nmin)
+
+        # TODO: Get rid of oindex; only here because have not adjusted code to map_halo_operation_get_chunkedges
+        totlength = offsets[-1]
+        oindex = np.array(list(list_chunkedges[:,0])+[list_chunkedges[-1,-1]])
 
         new_axis = None
         chunks = np.diff(oindex)
@@ -149,7 +160,6 @@ class ArepoSnapshot(BaseSnapshot):
             new_axis = np.arange(1,len(shape)+1).tolist()
 
         slcoffsets = offsets[oindex]
-        slcoffsets[-1] = totlength
         slclengths = np.diff(slcoffsets)
 
         slcs = [slice(oindex[i], oindex[i + 1]) for i in range(len(oindex) - 1)]
@@ -457,3 +467,56 @@ def partTypeNum(partType):
         return 5
     if str(partType).lower() in ["all"]:
         return -1
+
+def memorycost_limiter(cost_memory, cost_cpu, list_chunkedges, cost_memory_max):
+    """If a chunk too memory expensive, split into equal cpu expense operations."""
+    list_chunkedges_new = []
+    for chunkedges in list_chunkedges:
+        slc = slice(*chunkedges)
+        totcost_mem = np.sum(cost_memory[slc])
+        list_chunkedges_new.append(chunkedges)
+        if totcost_mem>cost_memory_max:
+            sumcost = cost_cpu[slc].cumsum()
+            idx = np.argmin(np.abs(sumcost-0.5*sumcost[-1]))
+            chunkedges1 = [chunkedges[0], idx]
+            chunkedges2 = [idx, chunkedges[1]]
+            list_chunkedges_new.pop()
+            list_chunkedges_new += memorycost_limiter(cost_memory, cost_cpu, [chunkedges1], cost_memory_max)
+            list_chunkedges_new += memorycost_limiter(cost_memory, cost_cpu, [chunkedges2], cost_memory_max)
+    return list_chunkedges_new
+
+def map_halo_operation_get_chunkedges(lengths, entry_nbytes_in, entry_nbytes_out,
+                                      cpucost_halo=1.0, Nmin=None):
+    cpucost_particle = 1.0 # we only care about ratio, so keep particle cost fixed.
+    cost = cpucost_particle * lengths + cpucost_halo
+    sumcost = cost.cumsum()
+
+    #let's allow a maximal chunksize of 4 times the dask default setting for an individual array [here: multiple]
+    chunksize_bytes = 4*parse_humansize(dask.config.get('array.chunk-size'))
+    cost_memory = entry_nbytes_in*lengths + entry_nbytes_out
+
+    if not np.max(cost_memory)<chunksize_bytes:
+        raise ValueError("Some halo requires more memory than allowed. Consider overriding chunksize_bytes>%i."%np.max(lengths))
+
+    N = int(np.ceil(np.sum(cost_memory)/chunksize_bytes))
+    N = int(np.ceil(1.3*N)) #  fudge factor
+    if Nmin is not None:
+        N = max(Nmin,N)
+    targetcost = sumcost[-1]/N
+    arr = np.diff(sumcost%targetcost)
+    idx = [0]+list(np.where(arr<0)[0]+1)
+    if len(idx)==N+1:
+        idx[-1] = sumcost.shape[0]
+    elif len(idx)==N:
+        idx.append(sumcost.shape[0])
+    else:
+        raise ValueError("Unexpected chunk indices.")
+    list_chunkedges = []
+    for i in range(len(idx)-1):
+        list_chunkedges.append([idx[i], idx[i+1]])
+
+    list_chunkedges = np.asarray(memorycost_limiter(cost_memory, cost, list_chunkedges, chunksize_bytes))
+
+    # make sure we did not lose any halos.
+    assert np.all(~(list_chunkedges.flatten()[2:-1:2]-list_chunkedges.flatten()[1:-1:2]).astype(bool))
+    return list_chunkedges
