@@ -1,4 +1,5 @@
 # We test on a snapshot from TNG50-4
+import pytest
 from . import path,gpath
 
 from ..interface import BaseSnapshot
@@ -42,3 +43,10 @@ def test_fields():
         return snap
     val = snp.data["PartType0"]["access_snapshot2"]
     assert val is not None
+
+    # test FieldContainer get()
+    part0 = snp.data["PartType0"]
+    assert part0.get("testfield", allow_derived=True).compute()==0
+    with pytest.raises(KeyError):
+        part0.get("testfield", allow_derived=False)
+

@@ -1,6 +1,7 @@
 import dask.array as da
 import functools
 import inspect
+from collections.abc import MutableMapping
 from .helpers_misc import get_kwargs
 
 
@@ -11,11 +12,12 @@ class DerivedField(object):
         self.description = description
 
 
-class FieldContainer(dict):
-    def __init__(self, derivedfields_kwargs={}, **kwargs):
-        super().__init__(self, **kwargs)
+class FieldContainer(MutableMapping):
+    def __init__(self, *args, derivedfields_kwargs=None, **kwargs):
+        self.fields = {}
+        self.fields.update(*args, **kwargs)
         self.derivedfields = {}
-        self.derivedfields_kwargs = derivedfields_kwargs
+        self.derivedfields_kwargs = derivedfields_kwargs if derivedfields_kwargs is not None else {}
 
     def register_field(self, name=None, description=""):
         # we only construct field upon first call to it (default)
@@ -26,9 +28,12 @@ class FieldContainer(dict):
             return func
         return decorator
 
+    def __setitem__(self, key, value):
+        self.fields[key] = value
+
     def __getitem__(self, key):
-        if key in self:
-            return super().__getitem__(key)
+        if key in self.fields:
+            return self.fields[key]
         else:
             if key in self.derivedfields:
                 func = self.derivedfields[key].func
@@ -40,8 +45,29 @@ class FieldContainer(dict):
                 # next, we add all optional arguments if func is accepting **kwargs and varname not yet in signature
                 if accept_kwargs:
                     kwargs.update(**{k: v for k, v in dkwargs.items() if k not in inspect.getfullargspec(func).args})
-                self[key] = func(self,**kwargs)
-                return super().__getitem__(key)
+                self.fields[key] = func(self,**kwargs)
+                return self.fields[key]
             else:
                 raise KeyError("Unknown field '%s'" % key)
+
+    def __delitem__(self, key):
+        if key in self.derivedfields:
+            del self.derivedfields[key]
+        del self.fields[key]
+
+    def __iter__(self):
+        return iter(self.fields)
+
+    def __len__(self):
+        return len(self.fields)
+
+    def get(self, key, value=None, allow_derived=True):
+        if key in self.derivedfields and not allow_derived:
+            raise KeyError("Field '%s' is derived (allow_derived=False)" % key)
+        else:
+            try:
+                return self.__getitem__(key)
+            except KeyError:
+                return value
+
 
