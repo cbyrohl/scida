@@ -59,7 +59,8 @@ class Dataset(object):
         self.load_from_tree(tree)
 
     def load_chunkedhdf5(self,overwrite=False):
-        files = np.array([os.path.join(self.path, f) for f in os.listdir(self.path)])
+        files = [os.path.join(self.path, f) for f in os.listdir(self.path)]
+        files = np.array([f for f in files if os.path.isfile(f)]) # ignore subdirectories
         nmbrs = [int(f.split(".")[-2]) for f in files]
         sortidx = np.argsort(nmbrs)
         files = files[sortidx]
