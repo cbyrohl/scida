@@ -1,12 +1,10 @@
 # We test on a snapshot from TNG50-4
 import pytest
-from . import path,gpath
 
 from ..interface import BaseSnapshot
 import dask.array as da
 
-def test_fields():
-    snp = BaseSnapshot(path)
+def test_fields(snp):
     gas_field_register = snp.data["PartType0"].register_field()
 
     @gas_field_register

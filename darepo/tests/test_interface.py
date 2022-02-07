@@ -4,7 +4,6 @@ import pytest
 
 from ..interface import BaseSnapshot
 from ..interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
-from . import path,gpath
 
 from .conftest import flag_test_long  # Set to true to run time-taking tests.
 
@@ -15,8 +14,8 @@ def test_snapshot_load(snp):
 def test_groups_load(grp):
     assert grp.file is not None
 
-def test_groups_load_nonvirtual():
-    snp = BaseSnapshot(gpath, virtualcache=False)
+def test_groups_load_nonvirtual(tng50_grouppath):
+    snp = BaseSnapshot(tng50_grouppath, virtualcache=False)
 
 
 @pytest.mark.skipif(not(flag_test_long), reason="Not requesting time-taking tasks")
@@ -78,6 +77,6 @@ def test_areposnapshot_load_withcatalog(areposnpfull):
     assert len(snp.data.keys()) == 7
 
 
-def test_areposnapshot_load_withcatalogandunits():
-    snp = ArepoSnapshotWithUnits(path, catalog=gpath)
+def test_areposnapshot_load_withcatalogandunits(tng50_snappath, tng50_grouppath):
+    snp = ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
     assert snp.file is not None
