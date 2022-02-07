@@ -6,29 +6,26 @@ from ..interface import BaseSnapshot
 from ..interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
 from . import path,gpath
 
-flag_test_long = False # Set to true to run time-taking tests.
+from .conftest import flag_test_long  # Set to true to run time-taking tests.
 
 
-def test_snapshot_load():
-    snp = BaseSnapshot(path)
+def test_snapshot_load(snp):
+    assert snp.file is not None
 
-
-def test_groups_load():
-    snp = BaseSnapshot(gpath)
+def test_groups_load(grp):
+    assert grp.file is not None
 
 def test_groups_load_nonvirtual():
     snp = BaseSnapshot(gpath, virtualcache=False)
 
 
 @pytest.mark.skipif(not(flag_test_long), reason="Not requesting time-taking tasks")
-def test_snapshot_save():
-    snp = BaseSnapshot(path)
+def test_snapshot_save(snp):
     snp.save("test.zarr")
 
 
 @pytest.mark.skipif(not(flag_test_long), reason="Not requesting time-taking tasks")
-def test_snapshot_load_zarr():
-    snp = BaseSnapshot(path)
+def test_snapshot_load_zarr(snp):
     snp.save("test.zarr")
     snp_zarr = BaseSnapshot("test.zarr")
     for k,o in snp.data.items():
@@ -36,12 +33,12 @@ def test_snapshot_load_zarr():
             assert u.shape==snp_zarr.data[k][l].shape
 
 
-def test_areposnapshot_load():
-    snp = ArepoSnapshot(path)
+def test_areposnapshot_load(areposnp):
+    snp = areposnp
     assert len(snp.data.keys()) == 5
 
-def test_areposnapshot_halooperation():
-    snap = ArepoSnapshot(path, catalog=path.replace("snapdir", "groups"))
+def test_areposnapshot_halooperation(areposnpfull):
+    snap = areposnpfull
 
     def calculate_count(GroupID, parttype="PartType0"):
         """Halo Count per halo. Has to be 1 exactly."""
@@ -55,13 +52,12 @@ def test_areposnapshot_halooperation():
         """returns Halo ID"""
         return GroupID[-1]
 
-    counttask = snap.map_halo_operation(calculate_count, compute=False, chunksize=int(3e6))
+    counttask = snap.map_halo_operation(calculate_count, compute=False, Nmin=20)
     partcounttask = snap.map_halo_operation(calculate_partcount, compute=False, chunksize=int(3e6))
     hidtask = snap.map_halo_operation(calculate_haloid, compute=False, chunksize=int(3e6))
     count = counttask.compute()
     partcount = partcounttask.compute()
     hid = hidtask.compute()
-    print(hid)
 
     count0 = np.where(partcount == 0)[0]
     diff0 = np.sort(np.concatenate((count0, count0 - 1)))
@@ -77,10 +73,11 @@ def test_areposnapshot_halooperation():
     assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
 
 
-def test_areposnapshot_load_withcatalog():
-    snp = ArepoSnapshot(path, catalog=gpath)
+def test_areposnapshot_load_withcatalog(areposnpfull):
+    snp = areposnpfull
     assert len(snp.data.keys()) == 7
 
 
 def test_areposnapshot_load_withcatalogandunits():
     snp = ArepoSnapshotWithUnits(path, catalog=gpath)
+    assert snp.file is not None
