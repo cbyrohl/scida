@@ -1,0 +1,11 @@
+name: darepo
+
+dependencies:
+  - h5py
+  - numpy
+  - pandas
+  - numba
+  - astropy
+  - dask
+  - distributed
+  - zarr
