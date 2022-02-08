@@ -52,6 +52,10 @@ class Dataset(object):
         hash_value = int(hashlib.sha256(self.location.encode('utf-8')).hexdigest(), 16) % 10**10
         return hash_value
 
+        
+    def __dask_tokenize__(self):
+        return self.__hash__()
+
 
     def load_hdf5(self):
         self.location = self.path
