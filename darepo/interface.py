@@ -121,7 +121,8 @@ class Dataset(object):
                 toload = any([dataset[0].startswith("/"+g+"/") for g in groups_with_datasets])
             if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
-                ds = da.from_array(self.file[dataset[0]], chunks=self.chunksize)
+                name = "Dataset"+str(self.__hash__())+dataset[0].replace("/","_")
+                ds = da.from_array(self.file[dataset[0]], chunks=self.chunksize, name=name)
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
