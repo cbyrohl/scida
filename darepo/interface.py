@@ -1,6 +1,7 @@
 import os
 import logging
 import tempfile
+import hashlib
 
 import dask.array as da
 import dask
@@ -43,6 +44,14 @@ class Dataset(object):
         else:
             # we are directly given a target file
             self.load_hdf5()
+
+
+    def __hash__(self):
+        """Hash for Dataset instance to be derived from the file location."""
+        # determinstic hash; note that hash() on a string is no longer deterministic in python3.
+        hash_value = int(hashlib.sha256(self.location.encode('utf-8')).hexdigest(), 16) % 10**10
+        return hash_value
+
 
     def load_hdf5(self):
         self.location = self.path
