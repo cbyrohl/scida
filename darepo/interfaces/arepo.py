@@ -80,7 +80,7 @@ class ArepoSnapshot(BaseSnapshot):
     def return_data(self):
         return super().return_data()
 
-    def register_field(self, parttype, name=None, construct=True):
+    def register_field(self, parttype, name=None, construct=True): # TODO: introduce (immediate) construct option later 
         num = partTypeNum(parttype)
         if num == -1: # TODO: all particle species
             key = "all"
@@ -89,7 +89,7 @@ class ArepoSnapshot(BaseSnapshot):
             key = "PartType"+str(num)
         else:
             key = parttype
-        return super().register_field(key, name=name, construct=construct)
+        return super().register_field(key, name=name)
 
     def add_catalogIDs(self):
         # TODO: make these delayed objects and properly pass into (delayed?) numba functions:
