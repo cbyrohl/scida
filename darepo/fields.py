@@ -37,7 +37,22 @@ class FieldContainerCollection(MutableMapping):
     def new_container(self, key, **kwargs):
         self[key] = FieldContainer(**kwargs, derivedfields_kwargs=self.derivedfields_kwargs)
 
+    def merge(self, collection, overwrite=True):
+        assert isinstance(collection, FieldContainerCollection)
+        for k in collection.store:
+            if k not in self.store:
+                self.store[k] = FieldContainer(derivedfields_kwargs=self.derivedfields_kwargs)
+            if overwrite:
+                c1 = self.store[k]
+                c2 = collection.store[k]
+            else:
+                c1 = collection.store[k]
+                c2 = self.store[k]
+            c1.fields.update(**c2.fields)
+            c1.derivedfields.update(**c2.derivedfields)
+
     def merge_derivedfields(self, collection):
+        # to be depreciated. Use self.merge.
         assert isinstance(collection, FieldContainerCollection)
         for k in collection.store:
             if k not in self.store:
