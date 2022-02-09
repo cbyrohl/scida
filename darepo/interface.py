@@ -84,8 +84,10 @@ class Dataset(object):
 
         if "cachedir" in _config:
             # we create a virtual file in the cache directory
-            fn = hash_path(self.path) + ".hdf5"
-            fp = os.path.join(_config["cachedir"], fn)
+            dataset_cachedir = os.path.join(_config["cachedir"], hash_path(self.path))
+            fp = os.path.join(dataset_cachedir,"data.hdf5")
+            if not os.path.exists(dataset_cachedir):
+                os.mkdir(dataset_cachedir)
             if not os.path.isfile(fp) or overwrite:
                 create_mergedhdf5file(fp, files, virtual=self.virtualcache)
             self.location = fp
@@ -136,6 +138,8 @@ class Dataset(object):
             if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
                 name = "Dataset"+str(self.__hash__())+dataset[0].replace("/","_")
+                if "__dask_tokenize__" in self.file: # check if the file contains the dask name.
+                    name = self.file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
                 ds = da.from_array(self.file[dataset[0]], chunks=self.chunksize, name=name, inline_array=inline_array)
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
