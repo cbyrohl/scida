@@ -61,7 +61,11 @@ class Dataset(object):
         self.location = self.path
         tree = {}
         walk_hdf5file(self.location,tree=tree)
-        self.file = h5py.File(self.location,"r")
+        try:
+            import h5pickle
+            self.file = h5pickle.File(self.location,"r")
+        except ImportError:
+            self.file = h5py.File(self.location,"r")
         self.load_from_tree(tree)
 
     def load_zarr(self):
@@ -92,7 +96,12 @@ class Dataset(object):
             create_mergedhdf5file(self.location, files, virtual=self.virtualcache)
             logging.warning("No caching directory specified. Initial file read will remain slow.")
 
-        self.file = h5py.File(self.location,"r")
+
+        try:
+            import h5pickle
+            self.file = h5pickle.File(self.location,"r")
+        except ImportError:
+            self.file = h5py.File(self.location,"r")
 
         tree = {}
         walk_hdf5file(self.location, tree)
@@ -101,6 +110,11 @@ class Dataset(object):
 
     def load_from_tree(self,tree,groups_load=None):
         """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
+        inline_array = True  # inline arrays in dask; heavily reduces memory usage. However, doesnt work with h5py (need h5pickle wrapper or zarr).
+        if type(self.file) == h5py._hl.files.File:
+            logging.warning("Install h5pickle ('pip install h5pickle') to allow inlining arrays. This will increase performance significantly.")
+            inline_array = False
+
         if groups_load is None:
             toload = True
             groups_with_datasets = set([d[0].split("/")[1] for d in tree["datasets"]])
@@ -122,7 +136,7 @@ class Dataset(object):
             if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
                 name = "Dataset"+str(self.__hash__())+dataset[0].replace("/","_")
-                ds = da.from_array(self.file[dataset[0]], chunks=self.chunksize, name=name)
+                ds = da.from_array(self.file[dataset[0]], chunks=self.chunksize, name=name, inline_array=inline_array)
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
         ## Make each datadict entry a FieldContainer
