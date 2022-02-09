@@ -133,12 +133,16 @@ class Dataset(object):
 
         # Add a unique identifier for each element for each data type
         for p in self.data:
-            k = next(iter(self.data[p]))
-            arr = self.data[p][k]
-            nparts = arr.shape[0]
-            chunks = arr.chunks
-            if len(chunks) == 2:
-                chunks = (chunks[0],)
+            for k, v in self.data[p].items():
+                nparts = v.shape[0]
+                if len(v.chunks)==1:
+                    # make same shape as other 1D arrays.
+                    chunks = v.chunks
+                    break
+                else:
+                    # alternatively, attempt to use chunks from multi-dim array until found something better.
+                    chunks = (v.chunks[0],)
+
             self.data[p]["uid"] = da.arange(nparts, chunks=chunks)
 
         ## attrs
