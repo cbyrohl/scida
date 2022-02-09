@@ -110,7 +110,7 @@ class Dataset(object):
 
     def load_from_tree(self,tree,groups_load=None):
         """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
-        inline_array = True  # inline arrays in dask; heavily reduces memory usage. However, doesnt work with h5py (need h5pickle wrapper or zarr).
+        inline_array = False  # inline arrays in dask; heavily reduces memory usage. However, doesnt work with h5py (need h5pickle wrapper or zarr).
         if type(self.file) == h5py._hl.files.File:
             logging.warning("Install h5pickle ('pip install h5pickle') to allow inlining arrays. This will increase performance significantly.")
             inline_array = False
