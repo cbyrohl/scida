@@ -80,3 +80,10 @@ def test_areposnapshot_load_withcatalog(areposnpfull):
 def test_areposnapshot_load_withcatalogandunits(tng50_snappath, tng50_grouppath):
     snp = ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
     assert snp.file is not None
+
+
+def test_areposnapshot_map_hquantity(areposnpfull):
+    areposnpfull.add_groupquantity_to_particles("GroupSFR")
+    partarr = areposnpfull.data["PartType0"]["GroupSFR"]
+    haloarr = areposnpfull.data["Group"]["GroupSFR"]
+    assert partarr[0].compute()==haloarr[0].compute()

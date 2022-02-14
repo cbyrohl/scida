@@ -181,8 +181,17 @@ class ArepoSnapshot(BaseSnapshot):
 
         return calc
 
+    def add_groupquantity_to_particles(self, name, parttype="PartType0"):
+        assert name not in self.data[parttype]  # we simply map the name from Group to Particle for now. Should work (?)
+        glen = self.data["Group"]["GroupLenType"]
+        da_halocelloffsets = da.concatenate([np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0)])
+        self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1]  # remove last entry to match shape
+        halocelloffsets = da_halocelloffsets.compute()
 
-
+        gidx = self.data[parttype]["uid"]
+        num = int(parttype[-1])
+        hquantity = compute_haloquantity(gidx, halocelloffsets[:, num], self.data["Group"][name])
+        self.data[parttype][name] = hquantity
 
 
 def wrap_func_scalar(func, halolengths_in_chunks, *arrs, block_info=None, block_id=None,
@@ -241,21 +250,22 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
     """
     res = -1 * np.ones(gidx_count, dtype=np.int32)
     # find initial celloffset
-    hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
-    if hidx_start_idx+1>=celloffsets.shape[0]:
+    hidx_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
+    if hidx_idx+1>=celloffsets.shape[0]:
         # we are done. Already out of scope of lookup => all unbound gas.
         return res
-    celloffset = celloffsets[hidx_start_idx + 1]
+    celloffset = celloffsets[hidx_idx + 1]
     endid = celloffset - gidx_start
     startid = 0
+
     # Now iterate through list.
     while startid < gidx_count:
-        res[startid:endid] = hidx_start_idx
-        hidx_start_idx += 1
+        res[startid:endid] = hidx_idx
+        hidx_idx += 1
         startid = endid
-        if (hidx_start_idx >= celloffsets.shape[0]-1):
+        if (hidx_idx >= celloffsets.shape[0]-1):
             break
-        count = celloffsets[hidx_start_idx+1] - celloffsets[hidx_start_idx]
+        count = celloffsets[hidx_idx+1] - celloffsets[hidx_idx]
         endid = startid + count
     return res
 
@@ -266,8 +276,20 @@ def get_hidx_daskwrap(gidx, halocelloffsets):
     return get_hidx(gidx_start, gidx_count, halocelloffsets)
 
 
+def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
+    hidx = get_hidx_daskwrap(gidx, halocelloffsets)
+    result = np.where(hidx>-1, valarr[hidx], -1)
+    return result
+
+
 def compute_haloindex(gidx, halocelloffsets, *args):
+    """Computes the halo index for each particle with dask."""
     return da.map_blocks(get_hidx_daskwrap, gidx, halocelloffsets, meta=np.array((), dtype=np.int64))
+
+
+def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
+    """Computes a halo quantity for each particle with dask."""
+    return da.map_blocks(get_haloquantity_daskwrap, gidx, halocelloffsets, hvals, meta=np.array((), dtype=hvals.dtype))
 
 
 @njit
