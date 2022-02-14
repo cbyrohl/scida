@@ -205,6 +205,8 @@ def wrap_func_scalar(func, halolengths_in_chunks, *arrs, block_info=None, block_
     for i, o in enumerate(offsets[:-1]):
         if o==offsets[i+1]:
             res.append(func_output_default*np.ones(func_output_shape, dtype=func_output_dtype))
+            if func_output_shape==(1,):
+                res[-1] = res[-1].item()
             continue
         arrchunks = [arr[o:offsets[i + 1]] for arr in arrs]
         res.append(func(*arrchunks))
