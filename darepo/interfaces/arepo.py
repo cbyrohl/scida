@@ -156,8 +156,8 @@ class ArepoSnapshot(BaseSnapshot):
         chunks = np.diff(oindex)
         chunks[-1] += lengths.shape[0]
         chunks = [tuple(chunks.tolist())]
-        if shape!=(1,):
-            chunks.append(shape)
+        if isinstance(shape,tuple) and shape != (1,):
+            chunks += [(s,) for s in shape]
             new_axis = np.arange(1,len(shape)+1).tolist()
 
         slcoffsets = offsets[oindex]
@@ -172,11 +172,19 @@ class ArepoSnapshot(BaseSnapshot):
 
         arrs = [self.data[parttype][f][:totlength] for f in fieldnames]
         for i, arr in enumerate(arrs):
-            arrs[i] = arr.rechunk(chunks=[tuple(slclengths.tolist())])
+            arrchunks = (tuple(slclengths.tolist()),)
+            if len(arr.shape)>1:
+                arrchunks = arrchunks+(arr.shape[1:],)
+            arrs[i] = arr.rechunk(chunks=arrchunks)
+        arrdims = np.array([len(arr.shape) for arr in arrs])
+        assert np.all(arrdims==arrdims[0]) # Cannot handle different input dims for now
 
-
+        drop_axis = None
+        if arrdims[0]>1:
+            drop_axis = np.arange(1,arrdims[0])
 
         calc = da.map_blocks(wrap_func_scalar, func, d_hic, *arrs, dtype=dtype, chunks=chunks,new_axis=new_axis,
+                             drop_axis=drop_axis,
                              func_output_shape=shape, func_output_dtype=dtype, func_output_default=default)
 
         return calc
