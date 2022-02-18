@@ -179,7 +179,7 @@ class ArepoSnapshot(BaseSnapshot):
         arrdims = np.array([len(arr.shape) for arr in arrs])
         assert np.all(arrdims==arrdims[0]) # Cannot handle different input dims for now
 
-        drop_axis = None
+        drop_axis = [] 
         if arrdims[0]>1:
             drop_axis = np.arange(1,arrdims[0])
 
