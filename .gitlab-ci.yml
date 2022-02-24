@@ -9,9 +9,8 @@ pages:
   - pip install -U sphinx_rtd_theme
   - pip install -U breathe
   - cd docs
-  - mkdir build
-  - sphinx-build -b html . public
-  - cp -r public ..
+  - make html
+  - cp -r build/html ../public
   allow_failure: true
   artifacts:
     paths:
