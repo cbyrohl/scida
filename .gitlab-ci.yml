@@ -1,0 +1,20 @@
+stages:
+  - deploy
+
+pages:
+  stage: deploy
+  image: python:3.7-bullseye
+  script:
+  - pip install -U sphinx
+  - pip install -U sphinx_rtd_theme
+  - pip install -U breathe
+  - cd docs
+  - mkdir build
+  - sphinx-build -b html . public
+  - cp -r public ..
+  allow_failure: true
+  artifacts:
+    paths:
+    - public
+  only:
+  - main
