@@ -8,7 +8,7 @@ pages:
   - apt update && apt install -y pandoc
   - pip install -U sphinx
   - pip install -U sphinx_rtd_theme
-  - pip install -U breathe
+  - pip install -U nbsphinx
   - pip install -U IPython
   - pip install -U ipykernel
   - cd docs
