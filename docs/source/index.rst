@@ -11,6 +11,7 @@ Welcome to darepo's documentation!
    :caption: Contents:
 
    gettingstarted
+   examples
 
 
 
