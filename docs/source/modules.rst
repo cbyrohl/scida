@@ -1,7 +1,7 @@
-darepo
+astrodask
 ======
 
 .. toctree::
    :maxdepth: 4
 
-   darepo
+   astrodask

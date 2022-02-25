@@ -1,4 +1,4 @@
-name: darepo
+name: astrodask
 
 dependencies:
   - h5py

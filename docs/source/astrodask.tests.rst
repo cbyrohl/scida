@@ -1,29 +1,29 @@
-darepo.tests package
+astrodask.tests package
 ====================
 
 Submodules
 ----------
 
-darepo.tests.conftest module
+astrodask.tests.conftest module
 ----------------------------
 
-.. automodule:: darepo.tests.conftest
+.. automodule:: astrodask.tests.conftest
    :members:
    :undoc-members:
    :show-inheritance:
 
-darepo.tests.test\_fields module
+astrodask.tests.test\_fields module
 --------------------------------
 
-.. automodule:: darepo.tests.test_fields
+.. automodule:: astrodask.tests.test_fields
    :members:
    :undoc-members:
    :show-inheritance:
 
-darepo.tests.test\_interface module
+astrodask.tests.test\_interface module
 -----------------------------------
 
-.. automodule:: darepo.tests.test_interface
+.. automodule:: astrodask.tests.test_interface
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ darepo.tests.test\_interface module
 Module contents
 ---------------
 
-.. automodule:: darepo.tests
+.. automodule:: astrodask.tests
    :members:
    :undoc-members:
    :show-inheritance:
