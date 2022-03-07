@@ -1,0 +1,22 @@
+stages:
+  - deploy
+
+pages:
+  stage: deploy
+  image: python:3.7-bullseye
+  script:
+  - apt update && apt install -y pandoc
+  - pip install -U sphinx
+  - pip install -U sphinx_rtd_theme
+  - pip install -U nbsphinx
+  - pip install -U IPython
+  - pip install -U ipykernel
+  - cd docs
+  - make html
+  - cp -r build/html ../public
+  allow_failure: true
+  artifacts:
+    paths:
+    - public
+  only:
+  - main
