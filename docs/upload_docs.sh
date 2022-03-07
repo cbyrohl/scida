@@ -7,4 +7,4 @@ conda activate darepo39
 make html
 
 # copy temporary copy from trusted client to cbyrohl.de
-rsync -arv build/html/* hetzner:/home/cbyrohl/public_content/darepo
+rsync -arv build/html/* hetzner:/home/cbyrohl/public_content/astrodask
