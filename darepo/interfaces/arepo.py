@@ -64,6 +64,7 @@ class ArepoSnapshot(BaseSnapshot):
             for k in self.catalog.data:
                 if k not in self.data:
                     self.data[k] = self.catalog.data[k]
+                self.catalog.data.derivedfields_kwargs["snap"] = self
 
         # Add halo/subhalo IDs to particles (if catalogs available)
         if self.catalog is not None:
