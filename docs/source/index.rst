@@ -1,9 +1,9 @@
-.. darepo documentation master file, created by
+.. astrodask documentation master file, created by
    sphinx-quickstart on Mon Feb 14 19:54:20 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to darepo's documentation!
+Welcome to astrodask's documentation!
 ==================================
 
 .. toctree::

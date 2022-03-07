@@ -1,4 +1,4 @@
-darepo package
+astrodask package
 ==============
 
 Subpackages
@@ -7,55 +7,55 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   darepo.tests
+   astrodask.tests
 
 Submodules
 ----------
 
-darepo.config module
+astrodask.config module
 --------------------
 
-.. automodule:: darepo.config
+.. automodule:: astrodask.config
    :members:
    :undoc-members:
    :show-inheritance:
 
-darepo.fields module
+astrodask.fields module
 --------------------
 
-.. automodule:: darepo.fields
+.. automodule:: astrodask.fields
    :members:
    :undoc-members:
    :show-inheritance:
 
-darepo.helpers\_hdf5 module
+astrodask.helpers\_hdf5 module
 ---------------------------
 
-.. automodule:: darepo.helpers_hdf5
+.. automodule:: astrodask.helpers_hdf5
    :members:
    :undoc-members:
    :show-inheritance:
 
-darepo.helpers\_misc module
+astrodask.helpers\_misc module
 ---------------------------
 
-.. automodule:: darepo.helpers_misc
+.. automodule:: astrodask.helpers_misc
    :members:
    :undoc-members:
    :show-inheritance:
 
-darepo.interface module
+astrodask.interface module
 -----------------------
 
-.. automodule:: darepo.interface
+.. automodule:: astrodask.interface
    :members:
    :undoc-members:
    :show-inheritance:
 
-darepo.utilities module
+astrodask.utilities module
 -----------------------
 
-.. automodule:: darepo.utilities
+.. automodule:: astrodask.utilities
    :members:
    :undoc-members:
    :show-inheritance:
@@ -63,7 +63,7 @@ darepo.utilities module
 Module contents
 ---------------
 
-.. automodule:: darepo
+.. automodule:: astrodask
    :members:
    :undoc-members:
    :show-inheritance:
