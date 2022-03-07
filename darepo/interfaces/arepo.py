@@ -98,7 +98,8 @@ class ArepoSnapshot(BaseSnapshot):
         # Get Offsets for particles in snapshot
         glen = self.data["Group"]["GroupLenType"]
         da_halocelloffsets = da.concatenate([np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0)])
-        self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1]  # remove last entry to match shape
+        # remove last entry to match shapematch shape
+        self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(glen.chunks)
         halocelloffsets = da_halocelloffsets.compute()
 
         subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"].compute()
@@ -193,7 +194,8 @@ class ArepoSnapshot(BaseSnapshot):
         assert name not in self.data[parttype]  # we simply map the name from Group to Particle for now. Should work (?)
         glen = self.data["Group"]["GroupLenType"]
         da_halocelloffsets = da.concatenate([np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0)])
-        self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1]  # remove last entry to match shape
+        if "GroupOffsetsType" not in self.data["Group"]:
+            self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(glen.chunks)  # remove last entry to match shape
         halocelloffsets = da_halocelloffsets.compute()
 
         gidx = self.data[parttype]["uid"]

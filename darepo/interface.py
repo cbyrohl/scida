@@ -14,6 +14,7 @@ from .config import _config
 from .helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
 from .fields import FieldContainerCollection
+from collections.abc import MutableMapping
 
 
 class Dataset(object):
@@ -171,17 +172,19 @@ class Dataset(object):
     def return_data(self):
         return self.data
 
-    def save(self, fname, overwrite=True, zarr_kwargs={}, cast_uints=False):
+    def save(self, fname, overwrite=True, zarr_kwargs=None, cast_uints=False):
         """Saving into zarr format."""
         # We use zarr, as this way we have support to directly write into the file by the workers
         # (rather than passing back the data chunk over the scheduler to the interface)
         # Also, this way we can leverage new features, such as a large variety of compression methods.
         # cast_uints: if true, we cast uints to ints; needed for some compressions (particularly zfp)
+        if zarr_kwargs is None:
+            zarr_kwargs = {}
         store = zarr.DirectoryStore(fname,**zarr_kwargs)
         root = zarr.group(store, overwrite=overwrite)
 
         # Metadata
-        defaultattributes = ["config","header","parameters"]
+        defaultattributes = ["config", "header", "parameters"]
         for dctname in defaultattributes:
             if dctname in self.__dict__:
                 grp = root.create_group(dctname)
@@ -200,8 +203,7 @@ class Dataset(object):
                         arr = arr.astype(np.int64)
                     elif arr.dtype==np.uint32:
                         arr = arr.astype(np.int32)
-
-                task = da.to_zarr(arr, os.path.join(fname, p, k), overwrite=True,compute=False)
+                task = da.to_zarr(arr, os.path.join(fname, p, k), overwrite=True, compute=False)
                 tasks.append(task)
         dask.compute(tasks)
 
@@ -229,7 +231,7 @@ def deepdictkeycopy(olddict,newdict):
     """Recursively walk nested dictionary, only creating empty dictionaries
     for entries that are dictionaries themselves"""
     for k,v in olddict.items():
-        if isinstance(v,dict):
+        if isinstance(v,MutableMapping):
             newdict[k] = {}
             deepdictkeycopy(v,newdict[k])
 
