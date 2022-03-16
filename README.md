@@ -15,6 +15,13 @@ pip install -e .
 
 in the cloned repository.
 
+It is recommended to start from a clean environment. Using the [anaconda](https://www.anaconda.com/products/individual), create an environment from the provided specifications in the cloned repository, e.g.
+
+```
+conda env create -n astrodask -f ./environment.yml
+pip install -e .
+```
+
 # First Steps
 Start up a Jupyter notebook server and begin with the 'Getting Started' section of the documentation. You can also find the underlying notebook [here](docs/source/gettingstarted.ipynb).
 
