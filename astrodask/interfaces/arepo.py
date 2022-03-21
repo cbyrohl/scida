@@ -57,6 +57,11 @@ class ArepoSnapshot(BaseSnapshot):
             h = self.header["HubbleParam"]
             omega0 = self.header["Omega0"]
             self.cosmology = FlatLambdaCDM(H0=100 * h * u.km / u.s / u.Mpc, Om0=omega0)
+        self.redshift = np.nan
+        try:
+            self.redshift = self.header["Redshift"]
+        except KeyError: # no redshift attribute
+            pass
 
         self.catalog = catalog
         if catalog is not None:
