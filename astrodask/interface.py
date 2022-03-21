@@ -12,7 +12,7 @@ import zarr
 from .config import _config
 
 from .helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
-from .helpers_misc import hash_path, RecursiveNamespace, make_serializable
+from .helpers_misc import hash_path, make_serializable
 from .fields import FieldContainerCollection
 from collections.abc import MutableMapping
 
@@ -225,8 +225,6 @@ class BaseSnapshot(Dataset):
             name = k.strip("/").lower()
             if name in defaultattributes:
                 self.__dict__[name] = self.metadata[k]
-
-        self.d = RecursiveNamespace(**self.data)
 
         self.boxsize = np.full(3,np.nan)
 
