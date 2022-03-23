@@ -7,7 +7,7 @@ import numpy as np
 import dask
 from dask import delayed
 import dask.array as da
-from numba import njit
+from numba import njit, jit
 import warnings
 
 from ..interface import BaseSnapshot,Selector
@@ -388,9 +388,7 @@ def get_shcounts_shcells(SubhaloGrNr, hlength):
     i = 0
     hid = 0
     hid_old = 0
-    while True:
-        if i == SubhaloGrNr.shape[0]:
-            break
+    while i<SubhaloGrNr.shape[0]:
         hid = SubhaloGrNr[i]
         if (hid == hid_old):
             shcounts[hid] += 1
