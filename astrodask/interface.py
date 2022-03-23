@@ -46,14 +46,15 @@ class Dataset(object):
             # we are directly given a target file
             self.load_hdf5()
 
-    def __del__(self):
-        """
-        On deletion of object, make sure we close file.
-        """
-        try:
-            self.file.close()
-        except AttributeError:
-            pass  # arises when __init__ fails.
+    # TODO: This does not work as intended. We seem to close the file for other instances as well (?) => problem
+    #def __del__(self):
+    #    """
+    #    On deletion of object, make sure we close file.
+    #    """
+    #    try:
+    #        self.file.close()
+    #    except AttributeError:
+    #        pass  # arises when __init__ fails.
 
     def __hash__(self):
         """Hash for Dataset instance to be derived from the file location."""
