@@ -241,12 +241,13 @@ def deepdictkeycopy(olddict,newdict):
             newdict[k] = {}
             deepdictkeycopy(v,newdict[k])
 
+
 class Selector(object):
     """ Base Class for data selection decorator factory"""
     def __init__(self):
-        self.keys = None
-        self.data_backup = {}
-        self.data = {}
+        self.keys = None  # the keys we check for.
+        self.data_backup = {}  # holds a copy of the species' fields
+        self.data = {}  # holds the species' fields we operate on
 
     def __call__(self, fn, *args, **kwargs):
         def newfn(*args, **kwargs):
@@ -255,22 +256,22 @@ class Selector(object):
             self.data = {}
             deepdictkeycopy(self.data_backup,self.data)
 
-            self.prepare(*args,**kwargs)
+            self.prepare(*args, **kwargs)
             if self.keys is None:
                 raise NotImplementedError("Subclass implementation needed for self.keys!")
-            if(kwargs.pop("dropkeys",True)):
+            if kwargs.pop("dropkeys", True):
                 for k in self.keys:
                     kwargs.pop(k, None)
             try:
                 result = fn(*args, **kwargs)
                 return result
             finally:
-                self.finalize(*args,**kwargs)
+                self.finalize(*args, **kwargs)
         return newfn
 
-    def prepare(self):
+    def prepare(self, *args, **kwargs):
         raise NotImplementedError("Subclass implementation needed!")
 
-    def finalize(self,*args,**kwargs):
+    def finalize(self, *args, **kwargs):
         args[0].data = self.data_backup
 

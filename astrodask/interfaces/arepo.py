@@ -21,18 +21,18 @@ class ArepoSelector(Selector):
         super().__init__()
         self.keys = ["haloID"]
 
-    def prepare(self,*args,**kwargs):
+    def prepare(self, *args, **kwargs):
         snap = args[0]
         if snap.catalog is None:
             raise ValueError("Cannot select for haloID without catalog loaded.")
-        haloID = kwargs.get("haloID",None)
-        if haloID is None:
+        halo_id = kwargs.get("haloID", None)
+        if halo_id is None:
             return
-        lengths = self.data_backup["Group"]["GroupLenType"][haloID,:].compute()
-        offsets = self.data_backup["Group"]["GroupOffsetsType"][haloID,:].compute()
+        lengths = self.data_backup["Group"]["GroupLenType"][halo_id, :].compute()
+        offsets = self.data_backup["Group"]["GroupOffsetsType"][halo_id, :].compute()
         for p in self.data_backup:
             splt = p.split("PartType")
-            if len(splt)==1:
+            if len(splt) == 1:
                 for k,v in self.data_backup[p].items():
                     self.data[p][k] = v
             else:
