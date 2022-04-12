@@ -122,9 +122,8 @@ class Dataset(object):
 
     def load_from_tree(self,tree,groups_load=None):
         """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
-        inline_array = False  # inline arrays in dask; heavily reduces memory usage. However, doesnt work with h5py (need h5pickle wrapper or zarr).
+        inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
         if type(self.file) == h5py._hl.files.File:
-            logging.warning("Install h5pickle ('pip install h5pickle') to allow inlining arrays. This will increase performance significantly.")
             inline_array = False
 
         if groups_load is None:
@@ -147,7 +146,7 @@ class Dataset(object):
                 toload = any([dataset[0].startswith("/"+g+"/") for g in groups_with_datasets])
             if toload:
                 group = dataset[0].split("/")[1]  # TODO: Still dont support more nested groups
-                name = "Dataset"+str(self.__hash__())+dataset[0].replace("/","_")
+                name = "Dataset"+str(self.__dask_tokenize__())+dataset[0].replace("/","_")
                 if "__dask_tokenize__" in self.file: # check if the file contains the dask name.
                     name = self.file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
                 ds = da.from_array(self.file[dataset[0]], chunks=self.chunksize, name=name, inline_array=inline_array)
