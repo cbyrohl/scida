@@ -33,7 +33,7 @@ class Dataset(object):
         self.data = FieldContainerCollection()
 
         if not os.path.exists(self.path):
-            raise Exception("Specified path does not exist.")
+            raise Exception("Specified path '%s' does not exist."%self.path)
 
         if os.path.isdir(path):
             if os.path.isfile(os.path.join(path,".zgroup")):
