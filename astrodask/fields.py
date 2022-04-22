@@ -100,7 +100,10 @@ class FieldContainer(MutableMapping):
         self.fields[key] = value
 
     def __getitem__(self, key):
-        if key in self.fields:
+        return self._getitem(key)
+
+    def _getitem(self, key, force_derived=False, update_dict=True):
+        if key in self.fields and not force_derived:
             return self.fields[key]
         else:
             if key in self.derivedfields:
@@ -113,8 +116,10 @@ class FieldContainer(MutableMapping):
                 # next, we add all optional arguments if func is accepting **kwargs and varname not yet in signature
                 if accept_kwargs:
                     kwargs.update(**{k: v for k, v in dkwargs.items() if k not in inspect.getfullargspec(func).args})
-                self.fields[key] = func(self,**kwargs)
-                return self.fields[key]
+                field = func(self,**kwargs) 
+                if update_dict:
+                    self.fields[key] = field 
+                return field 
             else:
                 raise KeyError("Unknown field '%s'" % key)
 
@@ -129,12 +134,12 @@ class FieldContainer(MutableMapping):
     def __len__(self):
         return len(self.fields)
 
-    def get(self, key, value=None, allow_derived=True):
+    def get(self, key, value=None, allow_derived=True, force_derived=False):
         if key in self.derivedfields and not allow_derived:
             raise KeyError("Field '%s' is derived (allow_derived=False)" % key)
         else:
             try:
-                return self.__getitem__(key)
+                return self._getitem(key, force_derived=force_derived, update_dict=False)
             except KeyError:
                 return value
 
