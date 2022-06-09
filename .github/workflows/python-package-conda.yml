@@ -4,6 +4,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build-linux:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
