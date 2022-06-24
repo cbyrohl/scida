@@ -9,7 +9,7 @@ import numpy as np
 import h5py
 import zarr
 
-from .config import _config
+from .config import get_config
 
 from .helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from .helpers_misc import hash_path, make_serializable
@@ -92,6 +92,7 @@ class Dataset(object):
         sortidx = np.argsort(nmbrs)
         files = files[sortidx]
 
+        _config = get_config()
         if "cachedir" in _config:
             # we create a virtual file in the cache directory
             dataset_cachedir = os.path.join(_config["cachedir"], hash_path(self.path))
