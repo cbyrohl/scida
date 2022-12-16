@@ -45,7 +45,7 @@ Start up a Jupyter notebook server and begin with the 'Getting Started' section 
 
 ## License
 
-Distributed under the terms of the [MIT license][license],
+Distributed under the terms of the [MIT license](LICENSE),
 _astrodask_ is free and open source software.
 
 ## Issues
