@@ -5,6 +5,10 @@ description = "Convenience wrapper around astrophysical datasets to process with
 authors = ["Chris Byrohl"]
 readme = "README.md"
 
+packages = [
+    { include = "astrodask", from = "src" }
+]
+
 [tool.poetry.dependencies]
 python = "^3.7"
 
