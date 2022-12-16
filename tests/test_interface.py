@@ -2,17 +2,20 @@ import numpy as np
 import pytest
 
 
-from ..interface import BaseSnapshot
-from ..interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
-from ..config import _config
+from astrodask.interface import BaseSnapshot
+from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
+from astrodask.config import _config
 
 from .conftest import flag_test_long  # Set to true to run time-taking tests.
+
 
 def test_snapshot_load(snp):
     assert snp.file is not None
 
+
 def test_groups_load(grp):
     assert grp.file is not None
+
 
 def test_snapshot_load_usecache(snp, monkeypatch, tmp_path):
     d = tmp_path / "cachedir"
@@ -22,27 +25,29 @@ def test_snapshot_load_usecache(snp, monkeypatch, tmp_path):
     print("CONF", dict(_config))
     assert snp.file is not None
 
+
 def test_groups_load_nonvirtual(tng50_grouppath):
     snp = BaseSnapshot(tng50_grouppath, virtualcache=False)
 
 
-@pytest.mark.skipif(not(flag_test_long), reason="Not requesting time-taking tasks")
+@pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
 def test_snapshot_save(snp):
     snp.save("test.zarr")
 
 
-@pytest.mark.skipif(not(flag_test_long), reason="Not requesting time-taking tasks")
+@pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
 def test_snapshot_load_zarr(snp):
     snp.save("test.zarr")
     snp_zarr = BaseSnapshot("test.zarr")
-    for k,o in snp.data.items():
-        for l,u in o.items():
-            assert u.shape==snp_zarr.data[k][l].shape
+    for k, o in snp.data.items():
+        for l, u in o.items():
+            assert u.shape == snp_zarr.data[k][l].shape
 
 
 def test_areposnapshot_load(areposnp):
     snp = areposnp
     assert len(snp.data.keys()) == 5
+
 
 def test_areposnapshot_halooperation(areposnpfull):
     snap = areposnpfull
@@ -60,8 +65,12 @@ def test_areposnapshot_halooperation(areposnpfull):
         return GroupID[-1]
 
     counttask = snap.map_halo_operation(calculate_count, compute=False, Nmin=20)
-    partcounttask = snap.map_halo_operation(calculate_partcount, compute=False, chunksize=int(3e6))
-    hidtask = snap.map_halo_operation(calculate_haloid, compute=False, chunksize=int(3e6))
+    partcounttask = snap.map_halo_operation(
+        calculate_partcount, compute=False, chunksize=int(3e6)
+    )
+    hidtask = snap.map_halo_operation(
+        calculate_haloid, compute=False, chunksize=int(3e6)
+    )
     count = counttask.compute()
     partcount = partcounttask.compute()
     hid = hidtask.compute()
@@ -71,7 +80,8 @@ def test_areposnapshot_halooperation(areposnpfull):
     assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(diff0.tolist())
     if not (np.diff(hid).max() == np.diff(hid).min() == 1):
         assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(
-            diff0.tolist())  # gotta check; potentially empty halos
+            diff0.tolist()
+        )  # gotta check; potentially empty halos
         assert np.all(counttask.compute() <= 1)
     else:
         assert np.all(counttask.compute() == 1)
@@ -94,4 +104,4 @@ def test_areposnapshot_map_hquantity(areposnpfull):
     areposnpfull.add_groupquantity_to_particles("GroupSFR")
     partarr = areposnpfull.data["PartType0"]["GroupSFR"]
     haloarr = areposnpfull.data["Group"]["GroupSFR"]
-    assert partarr[0].compute()==haloarr[0].compute()
+    assert partarr[0].compute() == haloarr[0].compute()

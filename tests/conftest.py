@@ -7,7 +7,7 @@ import os
 import astrodask.interface
 from astrodask.interface import BaseSnapshot
 from astrodask.interfaces.arepo import ArepoSnapshot
-from astrodask.tests import path, gpath
+from tests import path, gpath
 
 
 flag_test_long = False  # Set to true to run time-taking tests.
@@ -15,15 +15,17 @@ force_download = False  # forcing download of TNG50 snapshots over local discove
 
 scope_snapshot = "function"
 
+
 def pytest_configure(config):
     os.environ["cachedir"] = "TEST"
 
+
 def download_and_extract(url, path, progress=False):
     with requests.get(url, stream=True) as r:
-        ltot = int(r.headers.get('content-length'))
-        with open(path, 'wb') as f:
+        ltot = int(r.headers.get("content-length"))
+        with open(path, "wb") as f:
             dl = 0
-            for data in r.iter_content(chunk_size=2 ** 24):
+            for data in r.iter_content(chunk_size=2**24):
                 dl += len(data)
                 f.write(data)
                 d = int(32 * dl / ltot)
@@ -32,10 +34,12 @@ def download_and_extract(url, path, progress=False):
                     sys.stdout.flush()
     tar = tarfile.open(path, "r:gz")
     tar.extractall(path.parents[0])
-    foldername = tar.getmembers()[0].name # the parent folder of the extracted TNG tar.gz
-    os.remove(path) # remove downloaded tar.gz
+    foldername = tar.getmembers()[
+        0
+    ].name  # the parent folder of the extracted TNG tar.gz
+    os.remove(path)  # remove downloaded tar.gz
     tar.close()
-    return os.path.join(path.parents[0],foldername)
+    return os.path.join(path.parents[0], foldername)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -48,6 +52,7 @@ def tng50_snappath(tmp_path_factory):
         fn = tmp_path_factory.mktemp("data") / filename
         datapath = download_and_extract(url, fn)
     return datapath
+
 
 @pytest.fixture(scope="session", autouse=True)
 def tng50_grouppath(tmp_path_factory):
@@ -74,10 +79,11 @@ def grp(tng50_grouppath) -> BaseSnapshot:
 
 @pytest.fixture(scope="function")
 def areposnp(tng50_snappath) -> ArepoSnapshot:
-    from ..interfaces.arepo import ArepoSnapshot
+    from astrodask.interfaces.arepo import ArepoSnapshot
+
     return ArepoSnapshot(tng50_snappath)
 
 
 @pytest.fixture(scope="function")
-def areposnpfull(tng50_snappath,tng50_grouppath) -> ArepoSnapshot:
+def areposnpfull(tng50_snappath, tng50_grouppath) -> ArepoSnapshot:
     return ArepoSnapshot(tng50_snappath, catalog=tng50_grouppath)
