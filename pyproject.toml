@@ -5,16 +5,21 @@ description = "Convenience wrapper around astrophysical datasets to process with
 authors = ["Chris Byrohl"]
 readme = "README.md"
 
-packages = [
-    { include = "astrodask", from = "src" }
-]
-
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
+numpy = "^1.18"
+dask = "^2022.12"
+h5py = "^3.7.0"
+zarr = "^v2.10.0"
+astropy = "^5.0"
+numba = "^0.56"
+
 
 [tool.poetry.dev-dependencies]
 black = ">=22.1.0"
 pre-commit = ">=2.17.0"
+pytest = ">=6.2.5"
+requests = ">=2.2.7"
 
 [build-system]
 requires = ["poetry-core"]
