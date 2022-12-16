@@ -4,15 +4,19 @@ import sys
 import tarfile
 import os
 
-from ..interface import BaseSnapshot
-from ..interfaces.arepo import ArepoSnapshot
-from . import path,gpath
+import astrodask.interface
+from astrodask.interface import BaseSnapshot
+from astrodask.interfaces.arepo import ArepoSnapshot
+from astrodask.tests import path, gpath
 
 
 flag_test_long = False  # Set to true to run time-taking tests.
-force_download = False # forcing download of TNG50 snapshots over local discovery
+force_download = False  # forcing download of TNG50 snapshots over local discovery
 
 scope_snapshot = "function"
+
+def pytest_configure(config):
+    os.environ["cachedir"] = "TEST"
 
 def download_and_extract(url, path, progress=False):
     with requests.get(url, stream=True) as r:
@@ -57,17 +61,22 @@ def tng50_grouppath(tmp_path_factory):
         datapath = download_and_extract(url, fn)
     return datapath
 
+
 @pytest.fixture(scope="function")
 def snp(tng50_snappath) -> BaseSnapshot:
     return BaseSnapshot(tng50_snappath)
+
 
 @pytest.fixture(scope="function")
 def grp(tng50_grouppath) -> BaseSnapshot:
     return BaseSnapshot(tng50_grouppath)
 
+
 @pytest.fixture(scope="function")
 def areposnp(tng50_snappath) -> ArepoSnapshot:
+    from ..interfaces.arepo import ArepoSnapshot
     return ArepoSnapshot(tng50_snappath)
+
 
 @pytest.fixture(scope="function")
 def areposnpfull(tng50_snappath,tng50_grouppath) -> ArepoSnapshot:

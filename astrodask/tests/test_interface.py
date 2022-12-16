@@ -4,15 +4,23 @@ import pytest
 
 from ..interface import BaseSnapshot
 from ..interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
+from ..config import _config
 
 from .conftest import flag_test_long  # Set to true to run time-taking tests.
-
 
 def test_snapshot_load(snp):
     assert snp.file is not None
 
 def test_groups_load(grp):
     assert grp.file is not None
+
+def test_snapshot_load_usecache(snp, monkeypatch, tmp_path):
+    d = tmp_path / "cachedir"
+    d.mkdir()
+    print(str(d))
+    monkeypatch.setenv("ASTRODASK_CACHEDIR", str(d))
+    print("CONF", dict(_config))
+    assert snp.file is not None
 
 def test_groups_load_nonvirtual(tng50_grouppath):
     snp = BaseSnapshot(tng50_grouppath, virtualcache=False)
