@@ -229,8 +229,6 @@ def wrap_func_scalar(func, halolengths_in_chunks, *arrs, block_info=None, block_
     return np.array(res)
 
 
-
-
 class ArepoSnapshotWithUnits(ArepoSnapshot):
     def __init__(self, path, catalog=None):
         super().__init__(path, catalog=catalog)
