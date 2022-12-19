@@ -1,6 +1,18 @@
 stages:
   - deploy
+  - test
 
+
+# templates
+.install-deps:
+  before_script:
+    - pip install poetry
+    - poetry --version
+    - poetry config settings.virtualenvs.in-project true
+    - poetry install -vv
+
+# stages
+## deploy/doc
 pages:
   stage: deploy
   image: python:3.7-bullseye
@@ -20,3 +32,11 @@ pages:
     - public
   only:
   - main
+
+## test
+run_tests:
+    stage: test
+    image: python:3.9
+    extends: .install-deps
+    script:
+      - poetry run pytest
