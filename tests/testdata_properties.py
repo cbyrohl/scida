@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 silent_unavailable = False  # unav aiet tests wildataset l be constructed but skipped if true (otherwise no construct)
 
-datapath = os.environ.get("ASTRODASK_TESTDATA_DIR", "")
+datapath = os.environ.get("ASTRODASK_TESTDATA_DIR", os.getcwd())
 testdata_local = []
 if datapath is not None:
     testdata_local = [f for f in os.listdir(datapath)]
