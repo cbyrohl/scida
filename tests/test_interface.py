@@ -5,52 +5,60 @@ import pytest
 from astrodask.interface import BaseSnapshot
 from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
 from astrodask.config import _config
-
 from .conftest import flag_test_long  # Set to true to run time-taking tests.
+from tests.testdata_properties import require_testdata, require_testdata_path
 
 
-def test_snapshot_load(snp):
+@require_testdata("interface")
+def test_interface_load(testdata_interface):
+    assert testdata_interface.file is not None
+
+
+# TODO: revisit how to do this smartly and assert that cache speeds things up
+# @pytest.mark.skip()
+# def test_snapshot_load_usecache(snp, monkeypatch, tmp_path):
+#    d = tmp_path / "cachedir"
+#    d.mkdir()
+#    print(str(d))
+#    monkeypatch.setenv("ASTRODASK_CACHEDIR", str(d))
+#    print("CONF", dict(_config))
+#    assert snp.file is not None
+
+
+@require_testdata_path("interface")
+def test_groups_load_nonvirtual(testdatapath_interface):
+    snp = BaseSnapshot(testdatapath_interface, virtualcache=False)
     assert snp.file is not None
 
 
-def test_groups_load(grp):
-    assert grp.file is not None
-
-
-def test_snapshot_load_usecache(snp, monkeypatch, tmp_path):
-    d = tmp_path / "cachedir"
-    d.mkdir()
-    print(str(d))
-    monkeypatch.setenv("ASTRODASK_CACHEDIR", str(d))
-    print("CONF", dict(_config))
-    assert snp.file is not None
-
-
-def test_groups_load_nonvirtual(tng50_grouppath):
-    snp = BaseSnapshot(tng50_grouppath, virtualcache=False)
-
-
+# TODO: revisit additional flags
+# TODO: setup and teardown savepath correctly
 @pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
-def test_snapshot_save(snp):
+@require_testdata("interface", only="TNG50-4_snapshot")
+def test_snapshot_save(testdata_interface):
+    snp = testdata_interface
     snp.save("test.zarr")
 
 
-@pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
-def test_snapshot_load_zarr(snp):
-    snp.save("test.zarr")
-    snp_zarr = BaseSnapshot("test.zarr")
-    for k, o in snp.data.items():
-        for l, u in o.items():
-            assert u.shape == snp_zarr.data[k][l].shape
+# @pytest.mark.skip()
+# @pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
+# def test_snapshot_load_zarr(snp):
+#    snp.save("test.zarr")
+#    snp_zarr = BaseSnapshot("test.zarr")
+#    for k, o in snp.data.items():
+#        for l, u in o.items():
+#            assert u.shape == snp_zarr.data[k][l].shape
 
 
-def test_areposnapshot_load(areposnp):
-    snp = areposnp
+@require_testdata("areposnapshot")
+def test_areposnapshot_load(testdata_areposnapshot):
+    snp = testdata_areposnapshot
     assert len(snp.data.keys()) == 5
 
 
-def test_areposnapshot_halooperation(areposnpfull):
-    snap = areposnpfull
+@require_testdata("areposnapshot_withcatalog")
+def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
+    snap = testdata_areposnapshot_withcatalog
 
     def calculate_count(GroupID, parttype="PartType0"):
         """Halo Count per halo. Has to be 1 exactly."""
@@ -90,18 +98,22 @@ def test_areposnapshot_halooperation(areposnpfull):
     assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
 
 
-def test_areposnapshot_load_withcatalog(areposnpfull):
-    snp = areposnpfull
+@require_testdata("areposnapshot_withcatalog")
+def test_areposnapshot_load_withcatalog(testdata_areposnapshot_withcatalog):
+    snp = testdata_areposnapshot_withcatalog
     assert len(snp.data.keys()) == 7
 
 
-def test_areposnapshot_load_withcatalogandunits(tng50_snappath, tng50_grouppath):
-    snp = ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
+@require_testdata("areposnapshot_withcatalog")
+def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatalog):
+    snp = testdata_areposnapshot_withcatalog
     assert snp.file is not None
 
 
-def test_areposnapshot_map_hquantity(areposnpfull):
-    areposnpfull.add_groupquantity_to_particles("GroupSFR")
-    partarr = areposnpfull.data["PartType0"]["GroupSFR"]
-    haloarr = areposnpfull.data["Group"]["GroupSFR"]
+@require_testdata("areposnapshot_withcatalog")
+def test_areposnapshot_map_hquantity(testdata_areposnapshot_withcatalog):
+    snp = testdata_areposnapshot_withcatalog
+    snp.add_groupquantity_to_particles("GroupSFR")
+    partarr = snp.data["PartType0"]["GroupSFR"]
+    haloarr = snp.data["Group"]["GroupSFR"]
     assert partarr[0].compute() == haloarr[0].compute()
