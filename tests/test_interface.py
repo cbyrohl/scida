@@ -33,7 +33,8 @@ def test_groups_load_nonvirtual(testdatapath_interface):
 
 # TODO: revisit additional flags
 # TODO: setup and teardown savepath correctly
-@pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
+#@pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
+@pytest.mark.skip()
 @require_testdata("interface", only="TNG50-4_snapshot")
 def test_snapshot_save(testdata_interface):
     snp = testdata_interface
