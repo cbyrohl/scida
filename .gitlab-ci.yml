@@ -7,9 +7,12 @@ stages:
 .install-deps:
   before_script:
     - pip install poetry
+    - pipx install nox
+    - pipx inject nox nox-poetry
     - poetry --version
     - poetry config virtualenvs.in-project true
     - poetry install -vv
+
 
 # stages
 ## deploy/doc
