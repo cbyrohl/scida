@@ -35,6 +35,8 @@ pages:
 
 ## test
 run_tests:
+    tags:
+      - smalldatasets
     stage: test
     image: python:3.9
     extends: .install-deps
