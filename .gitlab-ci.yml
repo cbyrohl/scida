@@ -41,7 +41,7 @@ run_tests:
     image: python:3.9
     extends: .install-deps
     script:
-      - export ASTRODASK_TESTDATA_DIR=/testdata
+      - export ASTRODASK_TESTDATA_DIR=/home/runner/testdata_astrodask
       - echo "testdata directory ($ASTRODASK_TESTDATA_DIR) content:"
       - ls $ASTRODASK_TESTDATA_DIR # test whether testdata mounted
       - poetry run pytest
