@@ -45,19 +45,19 @@ add_testdata_entry(
     "TNG50-4_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|A|0|2"],
 )
-add_testdata_entry(
-    "TNG50-3_snapshot",
-    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
-)
-add_testdata_entry(
-    "SIMBA50converted_snapshot",
-    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
-)
-add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
-add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
-add_testdata_entry(
-    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|A|1|2"]
-)
+#add_testdata_entry(
+#    "TNG50-3_snapshot",
+#    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
+#)
+#add_testdata_entry(
+#    "SIMBA50converted_snapshot",
+#    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
+#)
+#add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+#add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+#add_testdata_entry(
+#    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|A|1|2"]
+#)
 
 
 def parse_typestring(typestr):
