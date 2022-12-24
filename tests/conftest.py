@@ -1,30 +1,13 @@
 import pytest
-import requests
-import sys
-import tarfile
-from collections import namedtuple
 import os
 
-import astrodask.interface
 from astrodask.interface import BaseSnapshot
 from astrodask.container import BaseContainer
-from tests.testdata_properties import get_params
 from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
 
 flag_test_long = False  # Set to true to run time-taking tests.
-# force_download = False  # forcing download of TNG50 snapshots over local discovery
 
 scope_snapshot = "function"
-
-testdatadict = (
-    {}
-)  # dict (by data types) of lists of dataset names, e.g. testdata[datatype][dataset]
-testdatadict["interface"] = [
-    "TNG50-4_snapshot",
-    "TNG50-4_group",
-    "TNG50-3_snapshot",
-]  # TNG50-4 at z=0.0
-testdatadict["container"] = ["TNG50-4"]
 
 
 def pytest_configure(config):
