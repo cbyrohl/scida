@@ -46,7 +46,7 @@ run_tests:
     - export ASTRODASK_TESTDATA_DIR=/testdata
     - echo "testdata directory ($ASTRODASK_TESTDATA_DIR) content:"
     - ls $ASTRODASK_TESTDATA_DIR # test whether testdata mounted
-    - nox --python=3.9 -v --junitxml=report.xml
+    - nox --python=3.9
   artifacts:
     when: always
     reports:
