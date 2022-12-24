@@ -10,6 +10,7 @@ stages:
     - pip install pipx
     - pipx install nox
     - pipx inject nox nox-poetry
+    - pipx ensurepath
     - poetry --version
     - poetry config virtualenvs.in-project true
     - poetry install -vv
