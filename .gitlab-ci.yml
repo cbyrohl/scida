@@ -41,4 +41,5 @@ run_tests:
     image: python:3.9
     extends: .install-deps
     script:
+      - ls /testdata # test whether testdata mounted?
       - poetry run pytest
