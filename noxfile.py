@@ -9,7 +9,7 @@ python_versions = ["3.10", "3.9", "3.8"]
 def tests(session):
     session.install("coverage[toml]", "pytest", "pygments")
     session.install(".")
-    session.run("pytest", "-v")
+    session.run("pytest", "-v", "--junitxml=report.xml")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
     finally:
