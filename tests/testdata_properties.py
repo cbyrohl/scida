@@ -1,15 +1,17 @@
-import pytest
 import os
-from os.path import join
-from typing import Union, List, Dict
 from dataclasses import dataclass, field
+from typing import Dict, List, Union
+
+import pytest
 
 silent_unavailable = False  # unav aiet tests wildataset l be constructed but skipped if true (otherwise no construct)
 
 datapath = os.environ.get("ASTRODASK_TESTDATA_DIR", os.getcwd())
+testdataskip = os.environ.get("ASTRODASK_TESTDATA_SKIP", "")
+testdataskip = testdataskip.split()
 testdata_local = []
 if datapath is not None:
-    testdata_local = [f for f in os.listdir(datapath)]
+    testdata_local = [f for f in os.listdir(datapath) if f not in testdataskip]
 
 
 @dataclass
@@ -45,16 +47,16 @@ add_testdata_entry(
     "TNG50-4_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|A|0|2"],
 )
-# add_testdata_entry(
-#    "TNG50-3_snapshot",
-#    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
-# )
-# add_testdata_entry(
-#    "SIMBA50converted_snapshot",
-#    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
-# )
-# add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
-# add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+add_testdata_entry(
+    "TNG50-3_snapshot",
+    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
+)
+add_testdata_entry(
+    "SIMBA50converted_snapshot",
+    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
+)
+add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
 # add_testdata_entry(
 #    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|A|1|2"]
 # )
