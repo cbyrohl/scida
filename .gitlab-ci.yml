@@ -44,8 +44,11 @@ run_tests:
   extends: .install-deps
   script:
     - export ASTRODASK_TESTDATA_DIR=/testdata
+    - export ASTRODASK_TESTDATA_SKIP="TNG50-3_snapshot"
     - echo "testdata directory ($ASTRODASK_TESTDATA_DIR) content:"
     - ls $ASTRODASK_TESTDATA_DIR # test whether testdata mounted
+    - echo "testdata to be skipped:"
+    - ls $ASTRODASK_TESTDATA_SKIP
     - nox --python=3.9
     - nox --session=coverage --python=3.9
     - poetry run coverage xml
