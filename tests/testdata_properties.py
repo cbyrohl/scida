@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import pytest
 
@@ -104,7 +104,7 @@ def init_param_from_testdata(
     return param
 
 
-def get_testdata_params_ids(datatype, only=None):
+def get_testdata_params_ids(datatype, only: Optional[List[str]] = None):
     params, ids = [], []
     for k, td in testdatadict.items():
         if only is not None and k not in only:
@@ -165,10 +165,18 @@ def require_testdata(name, scope="function", only=None):
     )
 
 
-def require_testdata_path(name, scope="function", specific=False):
+def require_testdata_path(
+    name,
+    scope: str = "function",
+    specific: bool = False,
+    only: Optional[List[str]] = None,
+):
     fixturename = "testdatapath"
     if specific:
         fixturename += "_" + name
     return pytest.mark.parametrize(
-        fixturename, get_params(name), ids=get_ids(name), scope=scope
+        fixturename,
+        get_params(name, only=only),
+        ids=get_ids(name, only=only),
+        scope=scope,
     )

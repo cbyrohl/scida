@@ -5,9 +5,10 @@ from astrodask.interface import BaseSnapshot
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
-@require_testdata("interface")
-def test_interface_load(testdata_interface):
-    assert testdata_interface.file is not None
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_load(testdatapath):
+    snp = BaseSnapshot(testdatapath, virtualcache=False)
+    assert snp.file is not None
 
 
 # TODO: revisit how to do this smartly and assert that cache speeds things up
@@ -21,7 +22,7 @@ def test_interface_load(testdata_interface):
 #    assert snp.file is not None
 
 
-@require_testdata_path("interface")
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_groups_load_nonvirtual(testdatapath):
     snp = BaseSnapshot(testdatapath, virtualcache=False)
     assert snp.file is not None
@@ -31,7 +32,7 @@ def test_groups_load_nonvirtual(testdatapath):
 # TODO: setup and teardown savepath correctly
 # @pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
 @pytest.mark.skip()
-@require_testdata("interface", only="TNG50-4_snapshot")
+@require_testdata("interface", only=["TNG50-4_snapshot"])
 def test_snapshot_save(testdata_interface):
     snp = testdata_interface
     snp.save("test.zarr")
