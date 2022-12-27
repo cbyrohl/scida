@@ -1,20 +1,19 @@
-import os
-import logging
-import tempfile
 import hashlib
+import logging
+import os
+import tempfile
+from collections.abc import MutableMapping
 
-import dask.array as da
 import dask
-import numpy as np
+import dask.array as da
 import h5py
+import numpy as np
 import zarr
 
 from .config import get_config
-
+from .fields import FieldContainerCollection
 from .helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from .helpers_misc import hash_path, make_serializable
-from .fields import FieldContainerCollection
-from collections.abc import MutableMapping
 
 
 class Dataset(object):
@@ -94,9 +93,11 @@ class Dataset(object):
         files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
         files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
         prfxs = [f.split(".")[0] for f in files]
-        assert (
-            len(set(prfxs)) == 1
-        ), "more than one file prefix in directory, specify fileprefix"
+        if len(set(prfxs)) > 1:
+            print("Available prefixes:", set(prfxs))
+            raise ValueError(
+                "More than one file prefix in directory, specify 'fileprefix'."
+            )
         nmbrs = [int(f.split(".")[-2]) for f in files]
         sortidx = np.argsort(nmbrs)
         files = files[sortidx]
@@ -140,7 +141,7 @@ class Dataset(object):
         if groups_load is None:
             toload = True
             groups_with_datasets = set([d[0].split("/")[1] for d in tree["datasets"]])
-        ## groups
+        # groups
         for group in tree["groups"]:
             # TODO: Do not hardcode dataset/field groups
             if groups_load is not None:
@@ -149,7 +150,7 @@ class Dataset(object):
                 toload = any([group == "/" + g for g in groups_with_datasets])
             if toload:
                 self.data[group.split("/")[1]] = {}
-        ## datasets
+        # datasets
         for dataset in tree["datasets"]:
             if groups_load is not None:
                 toload = any([dataset[0].startswith(gname) for gname in groups_load])
@@ -180,7 +181,7 @@ class Dataset(object):
                 )
                 self.data[group][dataset[0].split("/")[-1]] = ds
 
-        ## Make each datadict entry a FieldContainer
+        # Make each datadict entry a FieldContainer
         data = FieldContainerCollection(
             self.data.keys(), derivedfields_kwargs=dict(snap=self)
         )
@@ -202,7 +203,7 @@ class Dataset(object):
 
             self.data[p]["uid"] = da.arange(nparts, chunks=chunks)
 
-        ## attrs
+        # attrs
         self.metadata = tree["attrs"]
 
     def return_data(self):
