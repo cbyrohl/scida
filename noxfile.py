@@ -1,8 +1,9 @@
-from nox_poetry import session, Session
 from pathlib import Path
 
+from nox_poetry import Session, session
 
 python_versions = ["3.10", "3.9", "3.8"]
+python_dflt = "3.9"
 
 
 @session(python=python_versions)
@@ -17,7 +18,7 @@ def tests(session):
             session.notify("coverage", posargs=[])
 
 
-@session(python=python_versions[0])
+@session(python=python_dflt)
 def coverage(session: Session) -> None:
     args = session.posargs or ["report"]
     session.install("coverage[toml]")
