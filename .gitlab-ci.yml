@@ -47,7 +47,12 @@ run_tests:
     - echo "testdata directory ($ASTRODASK_TESTDATA_DIR) content:"
     - ls $ASTRODASK_TESTDATA_DIR # test whether testdata mounted
     - nox --python=3.9
+    - coverage xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     when: always
     reports:
       junit: report.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
