@@ -2,7 +2,7 @@ import pytest
 import os
 
 from astrodask.interface import BaseSnapshot
-from astrodask.container import BaseContainer
+from astrodask.series import DatasetSeries
 from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
 
 flag_test_long = False  # Set to true to run time-taking tests.
@@ -70,7 +70,7 @@ def testdata_interface(request) -> BaseSnapshot:
 
 
 @pytest.fixture(scope="function")
-def testdata_container(request) -> BaseContainer:
+def testdata_container(request) -> DatasetSeries:
     path = request.param
     return BaseContainer(path)
 
