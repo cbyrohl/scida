@@ -1,8 +1,10 @@
-import types
 import hashlib
-import numpy as np
 import inspect
 import re
+import types
+
+import numpy as np
+
 
 def hash_path(path):
     sha = hashlib.sha256()
@@ -36,6 +38,7 @@ def make_serializable(v):
         v = v.decode("utf-8")
     return v
 
+
 def get_kwargs(func):
     signature = inspect.signature(func)
     return {
@@ -44,11 +47,14 @@ def get_kwargs(func):
         if v.default is not inspect.Parameter.empty
     }
 
+
 def get_args(func):
     signature = inspect.signature(func)
-    return [k for k,v in signature.parameters.items()
-        if v.default is inspect.Parameter.empty]
-
+    return [
+        k
+        for k, v in signature.parameters.items()
+        if v.default is inspect.Parameter.empty
+    ]
 
 
 def computedecorator(func):
@@ -68,7 +74,7 @@ units = {"B": 1, "KIB": 2**10, "MIB": 2**20, "GIB": 2**30, "TIB": 2**40}
 
 def parse_humansize(size):
     size = size.upper()
-    if not re.match(r' ', size):
-        size = re.sub(r'([KMGT]?I*B)', r' \1', size)
+    if not re.match(r" ", size):
+        size = re.sub(r"([KMGT]?I*B)", r" \1", size)
     number, unit = [string.strip() for string in size.split()]
-    return int(float(number)*units[unit])
+    return int(float(number) * units[unit])
