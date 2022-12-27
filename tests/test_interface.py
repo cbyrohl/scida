@@ -1,11 +1,7 @@
 import numpy as np
 import pytest
 
-
 from astrodask.interface import BaseSnapshot
-from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
-from astrodask.config import _config
-from .conftest import flag_test_long  # Set to true to run time-taking tests.
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
@@ -26,14 +22,14 @@ def test_interface_load(testdata_interface):
 
 
 @require_testdata_path("interface")
-def test_groups_load_nonvirtual(testdatapath_interface):
-    snp = BaseSnapshot(testdatapath_interface, virtualcache=False)
+def test_groups_load_nonvirtual(testdatapath):
+    snp = BaseSnapshot(testdatapath, virtualcache=False)
     assert snp.file is not None
 
 
 # TODO: revisit additional flags
 # TODO: setup and teardown savepath correctly
-#@pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
+# @pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
 @pytest.mark.skip()
 @require_testdata("interface", only="TNG50-4_snapshot")
 def test_snapshot_save(testdata_interface):
