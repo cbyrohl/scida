@@ -17,7 +17,14 @@ from .helpers_misc import hash_path, make_serializable
 
 
 class Dataset(object):
-    def __init__(self, path, chunksize="auto", virtualcache=True, overwritecache=False):
+    def __init__(
+        self,
+        path,
+        chunksize="auto",
+        virtualcache=True,
+        overwritecache=False,
+        fileprefix="",
+    ):
         super().__init__()
         self.path = path
         self.file = None
@@ -42,7 +49,9 @@ class Dataset(object):
                 self.load_zarr()
             else:
                 # otherwise expect this is a chunked HDF5 file
-                self.load_chunkedhdf5(overwrite=self.overwritecache)
+                self.load_chunkedhdf5(
+                    overwrite=self.overwritecache, fileprefix=fileprefix
+                )
         else:
             # we are directly given a target file
             self.load_hdf5()
