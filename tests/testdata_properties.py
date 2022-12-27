@@ -45,19 +45,20 @@ add_testdata_entry(
     "TNG50-4_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|A|0|2"],
 )
-#add_testdata_entry(
+# add_testdata_entry(
 #    "TNG50-3_snapshot",
 #    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
-#)
-#add_testdata_entry(
+# )
+# add_testdata_entry(
 #    "SIMBA50converted_snapshot",
 #    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
-#)
-#add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
-#add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
-#add_testdata_entry(
+# )
+# add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+# add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+# add_testdata_entry(
 #    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|A|1|2"]
-#)
+# )
+add_testdata_entry("TNGvariation_simulation", ["container", "areposimulation"])
 
 
 def parse_typestring(typestr):
@@ -162,7 +163,10 @@ def require_testdata(name, scope="function", only=None):
     )
 
 
-def require_testdata_path(name, scope="function"):
+def require_testdata_path(name, scope="function", specific=False):
+    fixturename = "testdatapath"
+    if specific:
+        fixturename += "_" + name
     return pytest.mark.parametrize(
-        "testdatapath_" + name, get_params(name), ids=get_ids(name), scope=scope
+        fixturename, get_params(name), ids=get_ids(name), scope=scope
     )
