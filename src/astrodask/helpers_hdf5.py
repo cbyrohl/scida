@@ -153,9 +153,9 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
             else:  # copied dataset. For performance, we iterate differently: Loop over each file's fields
                 for field in groupfields:
                     totentries = np.array([k[1] for k in chunks[field]]).sum()
-                    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][
-                        1:
-                    ]
+                    extrashapes = shapes[field][next(iter(shapes[field]))][1:]
+                    newshape = (totentries,) + extrashapes
+                    hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
                 counters = {field: 0 for field in groupfields}
                 for k in range(len(files)):
                     with h5py.File(files[k]) as hf_load:
