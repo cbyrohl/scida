@@ -1,9 +1,11 @@
 import os
 from os.path import join
+
 from astrodask.interface import BaseSnapshot
+from astrodask.registries import dataset_type_registry
 
 
-def load(path: str):
+def load(path: str, **kwargs):
     if os.path.exists(path):
         # datasets on disk
         pass
@@ -20,4 +22,6 @@ def load(path: str):
                 bp = "/virgotng/universe/IllustrisTNG"
                 pathdict = {"TNG50-%i" % i: join(bp, "TNG50-%i" % i) for i in range(4)}
                 path = pathdict[path.split(":")[1]]
-    return BaseSnapshot(path)
+
+    print(dataset_type_registry)
+    return BaseSnapshot(path, **kwargs)

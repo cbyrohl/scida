@@ -1,16 +1,20 @@
 import os
-import numpy as np
-from typing import Optional
 from os.path import join
 from pathlib import Path
-from astrodask.misc import map_interface_args
+from typing import List, Optional
+
+import numpy as np
+
 from astrodask.interfaces.arepo import ArepoSnapshot
+from astrodask.misc import map_interface_args
 
 
 class DatasetSeries(object):
     """A container for collection of interface instances"""
 
-    def __init__(self, paths, *interface_args, datasetclass=None, **interface_kwargs):
+    def __init__(
+        self, paths: List[Path], *interface_args, datasetclass=None, **interface_kwargs
+    ):
         self._dataset_cls = datasetclass
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
         self.datasets = [datasetclass(p, *a, **kw) for p, a, kw in gen]

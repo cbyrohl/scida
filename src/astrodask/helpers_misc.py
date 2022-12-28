@@ -8,7 +8,7 @@ import numpy as np
 
 def hash_path(path):
     sha = hashlib.sha256()
-    sha.update(path.strip("/ ").encode())
+    sha.update(str(path).strip("/ ").encode())
     return sha.hexdigest()[:16]
 
 

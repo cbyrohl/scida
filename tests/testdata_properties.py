@@ -8,10 +8,6 @@ silent_unavailable = False  # unav aiet tests wildataset l be constructed but sk
 
 datapath = os.environ.get("ASTRODASK_TESTDATA_DIR", os.getcwd())
 testdataskip = os.environ.get("ASTRODASK_TESTDATA_SKIP", "")
-testdataskip = testdataskip.split()
-testdata_local = []
-if datapath is not None:
-    testdata_local = [f for f in os.listdir(datapath) if f not in testdataskip]
 
 
 @dataclass
@@ -31,13 +27,17 @@ skip_unavail = pytest.mark.skip(reason="testdata not available")
 testdatadict: Dict[str, TestDataProperties] = {}
 
 
-def add_testdata_entry(name, types=None, marks=None, path=None):
+def add_testdata_entry(name, types=None, marks=None, fn=None):
     if types is None:
         types = []
     if marks is None:
         marks = []
-    if path is None:
+    if fn is None:
         path = os.path.join(datapath, name)
+    elif not os.path.isabs(fn):
+        path = os.path.join(datapath, fn)
+    else:
+        path = fn
     if name in testdatadict:
         raise ValueError("Testdata '%s' already exists." % name)
     testdatadict[name] = TestDataProperties(path, types, marks)
@@ -55,12 +55,23 @@ add_testdata_entry(
     "SIMBA50converted_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|C|0|2"],
 )
+add_testdata_entry("EAGLEsmall_snapshot", ["interface"], fn="EAGLEsmall.hdf5")
 add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
 add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|B|1|2"])
 # add_testdata_entry(
 #    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|C|1|2"]
 # )
 add_testdata_entry("TNGvariation_simulation", ["container", "areposimulation"])
+
+
+testdataskip = testdataskip.split()
+testdata_local = []
+if datapath is not None:
+    testdata_local_fns = [f for f in os.listdir(datapath) if f not in testdataskip]
+    path_to_name_dict = {
+        v.path.split(datapath)[-1].split("/")[-1]: k for k, v in testdatadict.items()
+    }
+    testdata_local = [path_to_name_dict.get(k, k) for k in testdata_local_fns]
 
 
 def parse_typestring(typestr):
@@ -155,9 +166,12 @@ def get_ids(datatype, **kwargs):
     return ids
 
 
-def require_testdata(name, scope="function", only=None):
+def require_testdata(name, scope="function", only=None, specific=True):
+    fixturename = "testdata"
+    if specific:
+        fixturename += "_" + name
     return pytest.mark.parametrize(
-        "testdata_" + name,
+        fixturename,
         get_params(name, only=only),
         ids=get_ids(name, only=only),
         indirect=True,

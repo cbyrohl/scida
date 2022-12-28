@@ -1,22 +1,26 @@
+import abc
 import hashlib
-import logging
 import os
-import tempfile
 from collections.abc import MutableMapping
 
 import dask
 import dask.array as da
-import h5py
 import numpy as np
 import zarr
 
-from .config import get_config
-from .fields import FieldContainerCollection
-from .helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
-from .helpers_misc import hash_path, make_serializable
+from astrodask.fields import FieldContainerCollection
+from astrodask.helpers_misc import make_serializable
+from astrodask.io import BaseLoader
+from astrodask.registries import dataset_type_registry
 
 
-class Dataset(object):
+class Dataset(abc.ABC):
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def _loader(cls):  # each class has to have a loader
+        raise NotImplementedError
+
     def __init__(
         self,
         path,
@@ -43,28 +47,27 @@ class Dataset(object):
         if not os.path.exists(self.path):
             raise Exception("Specified path '%s' does not exist." % self.path)
 
-        if os.path.isdir(path):
-            if os.path.isfile(os.path.join(path, ".zgroup")):
-                # object is a zarr object
-                self.load_zarr()
-            else:
-                # otherwise expect this is a chunked HDF5 file
-                self.load_chunkedhdf5(
-                    overwrite=self.overwritecache, fileprefix=fileprefix
-                )
-        else:
-            # we are directly given a target file
-            self.load_hdf5()
+        loadkwargs = dict(
+            overwrite=self.overwritecache,
+            fileprefix=fileprefix,
+            virtualcache=virtualcache,
+            derivedfields_kwargs=dict(snap=self),
+        )
 
-    # TODO: This does not work as intended. We seem to close the file for other instances as well (?) => problem
-    # def __del__(self):
-    #    """
-    #    On deletion of object, make sure we close file.
-    #    """
-    #    try:
-    #        self.file.close()
-    #    except AttributeError:
-    #        pass  # arises when __init__ fails.
+        loader = self._loader(path)
+        self.data, self.metadata = loader.load(**loadkwargs)
+        self.file = loader.file
+        print(self.file)
+
+    def __init_subclass__(cls, *args, **kwargs):
+        super().__init_subclass__(*args, **kwargs)
+        dataset_type_registry[cls.__name__] = cls
+
+    @classmethod
+    @abc.abstractmethod
+    def is_valid(cls, path, *args, **kwargs):
+        # estimate whether we have a valid path for this dataset
+        return False
 
     def __hash__(self):
         """Hash for Dataset instance to be derived from the file location."""
@@ -77,143 +80,6 @@ class Dataset(object):
 
     def __dask_tokenize__(self):
         return self.__hash__()
-
-    def load_hdf5(self):
-        self.location = self.path
-        tree = {}
-        walk_hdf5file(self.location, tree=tree)
-        try:
-            import h5pickle
-
-            self.file = h5pickle.File(self.location, "r")
-        except ImportError:
-            self.file = h5py.File(self.location, "r")
-        self.load_from_tree(tree)
-
-    def load_zarr(self):
-        self.location = self.path
-        tree = {}
-        walk_zarrfile(self.location, tree=tree)
-        self.file = zarr.open(self.location)
-        self.load_from_tree(tree)
-
-    def load_chunkedhdf5(self, overwrite=False, fileprefix=""):
-        files = [os.path.join(self.path, f) for f in os.listdir(self.path)]
-        files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
-        files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
-        prfxs = [f.split(".")[0] for f in files]
-        if len(set(prfxs)) > 1:
-            print("Available prefixes:", set(prfxs))
-            raise ValueError(
-                "More than one file prefix in directory, specify 'fileprefix'."
-            )
-        nmbrs = [int(f.split(".")[-2]) for f in files]
-        sortidx = np.argsort(nmbrs)
-        files = files[sortidx]
-
-        _config = get_config()
-        if "cachedir" in _config:
-            # we create a virtual file in the cache directory
-            dataset_cachedir = os.path.join(_config["cachedir"], hash_path(self.path))
-            fp = os.path.join(dataset_cachedir, "data.hdf5")
-            if not os.path.exists(dataset_cachedir):
-                os.mkdir(dataset_cachedir)
-            if not os.path.isfile(fp) or overwrite:
-                create_mergedhdf5file(fp, files, virtual=self.virtualcache)
-            self.location = fp
-        else:
-            # otherwise, we create a temporary file
-            self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
-            self.location = self.tempfile.name
-            create_mergedhdf5file(self.location, files, virtual=self.virtualcache)
-            logging.warning(
-                "No caching directory specified. Initial file read will remain slow."
-            )
-
-        try:
-            import h5pickle
-
-            self.file = h5pickle.File(self.location, "r")
-        except ImportError:
-            self.file = h5py.File(self.location, "r")
-
-        tree = {}
-        walk_hdf5file(self.location, tree)
-        self.load_from_tree(tree)
-
-    def load_from_tree(self, tree, groups_load=None):
-        """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
-        inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
-        if type(self.file) == h5py._hl.files.File:
-            inline_array = False
-
-        if groups_load is None:
-            toload = True
-            groups_with_datasets = set([d[0].split("/")[1] for d in tree["datasets"]])
-        # groups
-        for group in tree["groups"]:
-            # TODO: Do not hardcode dataset/field groups
-            if groups_load is not None:
-                toload = any([group.startswith(gname) for gname in groups_load])
-            else:
-                toload = any([group == "/" + g for g in groups_with_datasets])
-            if toload:
-                self.data[group.split("/")[1]] = {}
-        # datasets
-        for dataset in tree["datasets"]:
-            if groups_load is not None:
-                toload = any([dataset[0].startswith(gname) for gname in groups_load])
-            else:
-                toload = any(
-                    [dataset[0].startswith("/" + g + "/") for g in groups_with_datasets]
-                )
-            if toload:
-                group = dataset[0].split("/")[
-                    1
-                ]  # TODO: Still dont support more nested groups
-                name = (
-                    "Dataset"
-                    + str(self.__dask_tokenize__())
-                    + dataset[0].replace("/", "_")
-                )
-                if (
-                    "__dask_tokenize__" in self.file
-                ):  # check if the file contains the dask name.
-                    name = self.file["__dask_tokenize__"].attrs.get(
-                        dataset[0].strip("/"), name
-                    )
-                ds = da.from_array(
-                    self.file[dataset[0]],
-                    chunks=self.chunksize,
-                    name=name,
-                    inline_array=inline_array,
-                )
-                self.data[group][dataset[0].split("/")[-1]] = ds
-
-        # Make each datadict entry a FieldContainer
-        data = FieldContainerCollection(
-            self.data.keys(), derivedfields_kwargs=dict(snap=self)
-        )
-        for k in self.data:
-            data.new_container(k, **self.data[k])
-        self.data = data
-
-        # Add a unique identifier for each element for each data type
-        for p in self.data:
-            for k, v in self.data[p].items():
-                nparts = v.shape[0]
-                if len(v.chunks) == 1:
-                    # make same shape as other 1D arrays.
-                    chunks = v.chunks
-                    break
-                else:
-                    # alternatively, attempt to use chunks from multi-dim array until found something better.
-                    chunks = (v.chunks[0],)
-
-            self.data[p]["uid"] = da.arange(nparts, chunks=chunks)
-
-        # attrs
-        self.metadata = tree["attrs"]
 
     def return_data(self):
         return self.data
@@ -257,6 +123,9 @@ class Dataset(object):
 
 
 class BaseSnapshot(Dataset):
+    # TODO: Think more careful about hierarchy here. Right now BaseSnapshot is for Gadget-style sims
+    _loader = BaseLoader
+
     def __init__(self, path, chunksize="auto", virtualcache=True):
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache)
 
@@ -267,6 +136,13 @@ class BaseSnapshot(Dataset):
                 self.__dict__[name] = self.metadata[k]
 
         self.boxsize = np.full(3, np.nan)
+
+    @classmethod
+    def is_valid(cls, path, *args, **kwargs):
+        return True  # TODO (stub)
+        # prfxs = [f.split(".")[0] for f in files]
+        # if len(set(prfxs)) > 1:
+        #    return False
 
     def register_field(self, parttype, name=None, description=""):
         return self.data.register_field(parttype, name=name, description=description)

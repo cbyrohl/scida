@@ -1,9 +1,10 @@
-import pytest
 import os
 
+import pytest
+
 from astrodask.interface import BaseSnapshot
-from astrodask.series import DatasetSeries
 from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
+from astrodask.series import DatasetSeries
 
 flag_test_long = False  # Set to true to run time-taking tests.
 
@@ -66,13 +67,13 @@ def pytest_configure(config):
 @pytest.fixture(scope="function")
 def testdata_interface(request) -> BaseSnapshot:
     path = request.param
-    return BaseSnapshot(path)
+    yield BaseSnapshot(path)
 
 
 @pytest.fixture(scope="function")
-def testdata_container(request) -> DatasetSeries:
+def testdata_series(request) -> DatasetSeries:
     path = request.param
-    return BaseContainer(path)
+    return DatasetSeries(path)
 
 
 @pytest.fixture(scope="function")
@@ -91,3 +92,9 @@ def testdata_areposnapshot_withcatalog(request) -> ArepoSnapshot:
 def testdata_areposnapshot_withcatalog_andunits(request) -> ArepoSnapshotWithUnits:
     tng50_snappath, tng50_grouppath = request.param[0], request.param[1]
     return ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
+
+
+@pytest.fixture(scope="function")
+def cachedir(monkeypatch, tmp_path_factory):
+    path = tmp_path_factory.mktemp("cache")
+    monkeypatch.setenv("ASTRODASK_CACHEDIR", path)

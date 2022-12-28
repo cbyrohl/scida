@@ -23,7 +23,8 @@ def test_interface_load(testdatapath):
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_groups_load_nonvirtual(testdatapath):
+def test_load_nonvirtual(testdatapath):
+    # TODO: Make sure to delete file created
     snp = BaseSnapshot(testdatapath, virtualcache=False)
     assert snp.file is not None
 
