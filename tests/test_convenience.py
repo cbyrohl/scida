@@ -3,7 +3,7 @@ from tests.testdata_properties import require_testdata_path
 
 
 @require_testdata_path("interface")
-def test_load(cachedir, testdatapath):
+def test_load(testdatapath):
     obj = load(testdatapath)
     assert obj.file is not None
     assert obj.data is not None
@@ -11,7 +11,7 @@ def test_load(cachedir, testdatapath):
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_load_areposnap(cachedir, testdatapath):
+def test_load_areposnap(testdatapath):
     obj = load(testdatapath)
     assert obj.file is not None
     assert obj.data is not None

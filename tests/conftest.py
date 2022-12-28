@@ -94,7 +94,7 @@ def testdata_areposnapshot_withcatalog_andunits(request) -> ArepoSnapshotWithUni
     return ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="function", autouse=True)
 def cachedir(monkeypatch, tmp_path_factory):
     path = tmp_path_factory.mktemp("cache")
-    monkeypatch.setenv("ASTRODASK_CACHEDIR", path)
+    monkeypatch.setenv("ASTRODASK_CACHEDIR", str(path))
