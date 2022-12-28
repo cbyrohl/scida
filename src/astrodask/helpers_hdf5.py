@@ -117,9 +117,8 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
                 continue
 
             # fill fields
-            if (
-                virtual
-            ):  # for virtual datasets, iterate over all fields and concat each file to virtual dataset
+            if virtual:
+                # for virtual datasets, iterate over all fields and concat each file to virtual dataset
                 for field in groupfields:
                     totentries = np.array([k[1] for k in chunks[field]]).sum()
                     newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][

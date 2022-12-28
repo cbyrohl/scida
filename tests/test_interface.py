@@ -6,8 +6,8 @@ from tests.testdata_properties import require_testdata, require_testdata_path
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_interface_load(testdatapath):
-    snp = BaseSnapshot(testdatapath, virtualcache=False)
+def test_interface_load(cachedir, testdatapath):
+    snp = BaseSnapshot(testdatapath, virtualcache=True)
     assert snp.file is not None
 
 
