@@ -28,6 +28,7 @@ class Dataset(abc.ABC):
         virtualcache=True,
         overwritecache=False,
         fileprefix="",
+        **kwargs
     ):
         super().__init__()
         self.path = path
@@ -126,8 +127,8 @@ class BaseSnapshot(Dataset):
     # TODO: Think more careful about hierarchy here. Right now BaseSnapshot is for Gadget-style sims
     _loader = BaseLoader
 
-    def __init__(self, path, chunksize="auto", virtualcache=True):
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache)
+    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs):
+        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
         defaultattributes = ["config", "header", "parameters"]
         for k in self.metadata:

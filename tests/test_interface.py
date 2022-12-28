@@ -54,6 +54,13 @@ def test_areposnapshot_load(testdata_areposnapshot):
     assert len(snp.data.keys()) == 5
 
 
+@require_testdata("illustrisgroup")
+def test_illustrisgroup_load(testdata_illustrisgroup):
+    grp = testdata_illustrisgroup
+    assert "Group" in grp.data.keys()
+    assert "Subhalo" in grp.data.keys()
+
+
 @require_testdata("areposnapshot_withcatalog")
 def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
     snap = testdata_areposnapshot_withcatalog

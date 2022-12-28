@@ -4,6 +4,7 @@ import pytest
 
 from astrodask.interface import BaseSnapshot
 from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
+from astrodask.interfaces.illustris import IllustrisSnapshot
 from astrodask.series import DatasetSeries
 
 flag_test_long = False  # Set to true to run time-taking tests.
@@ -92,6 +93,24 @@ def testdata_areposnapshot_withcatalog(request) -> ArepoSnapshot:
 def testdata_areposnapshot_withcatalog_andunits(request) -> ArepoSnapshotWithUnits:
     tng50_snappath, tng50_grouppath = request.param[0], request.param[1]
     return ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
+
+
+@pytest.fixture(scope="function")
+def testdata_illustrissnapshot(request) -> IllustrisSnapshot:
+    tng_snappath = request.param
+    return IllustrisSnapshot(tng_snappath)
+
+
+@pytest.fixture(scope="function")
+def testdata_illustrisgroup(request) -> IllustrisSnapshot:
+    tng_snappath = request.param
+    return IllustrisSnapshot(tng_snappath, fileprefix="group")
+
+
+@pytest.fixture(scope="function")
+def testdata_illustrissnapshot_withcatalog(request) -> IllustrisSnapshot:
+    tng_snappath, tng_grouppath = request.param[0], request.param[1]
+    return IllustrisSnapshot(tng_snappath, catalog=tng_grouppath)
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -57,7 +57,15 @@ add_testdata_entry(
 )
 add_testdata_entry("EAGLEsmall_snapshot", ["interface"], fn="EAGLEsmall.hdf5")
 add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
-add_testdata_entry("TNG50-3_group", ["interface", "areposnapshot_withcatalog|B|1|2"])
+add_testdata_entry(
+    "TNG50-3_group",
+    [
+        "interface",
+        "illustrissnapshot",
+        "areposnapshot_withcatalog|B|1|2",
+        "illustrisgroup",
+    ],
+)
 # add_testdata_entry(
 #    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|C|1|2"]
 # )
