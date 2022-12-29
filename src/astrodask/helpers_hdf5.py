@@ -102,7 +102,7 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
         groupchunks[field] = arr0
 
     # next fill merger file
-    with h5py.File(fn, "w") as hf:
+    with h5py.File(fn, "w", libver="latest") as hf:
         # create groups
         for group in sorted(groups):
             if group == "/":
