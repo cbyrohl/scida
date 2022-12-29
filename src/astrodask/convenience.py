@@ -1,11 +1,11 @@
 import os
 from os.path import join
+from typing import List
 
-from astrodask.interface import BaseSnapshot
 from astrodask.registries import dataset_type_registry
 
 
-def load(path: str, **kwargs):
+def load(path: str, strict=False, **kwargs):
     if os.path.exists(path):
         # datasets on disk
         pass
@@ -22,6 +22,21 @@ def load(path: str, **kwargs):
                 bp = "/virgotng/universe/IllustrisTNG"
                 pathdict = {"TNG50-%i" % i: join(bp, "TNG50-%i" % i) for i in range(4)}
                 path = pathdict[path.split(":")[1]]
+    else:
+        raise ValueError("Specified path unknown.")
 
-    print(dataset_type_registry)
-    return BaseSnapshot(path, **kwargs)
+    available_dtypes: List[str] = []
+    for k, dtype in dataset_type_registry.items():
+        if dtype.validate_path(path):
+            available_dtypes.append(k)
+            print("AVAIL:", k)
+        else:
+            print("UNAVAIL:", k)
+    if len(available_dtypes) == 0:
+        raise ValueError("Unknown data type.")
+    elif strict and len(available_dtypes) > 1:
+        raise ValueError("Ambiguous data type.")
+    dtype = available_dtypes[0]
+    # TODO: Check for most specific class to take if ambiguous.
+
+    return dataset_type_registry[dtype](path, **kwargs)

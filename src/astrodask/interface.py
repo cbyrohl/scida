@@ -66,7 +66,7 @@ class Dataset(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def is_valid(cls, path, *args, **kwargs):
+    def validate_path(cls, path, *args, **kwargs):
         # estimate whether we have a valid path for this dataset
         return False
 
@@ -139,11 +139,18 @@ class BaseSnapshot(Dataset):
         self.boxsize = np.full(3, np.nan)
 
     @classmethod
-    def is_valid(cls, path, *args, **kwargs):
-        return True  # TODO (stub)
-        # prfxs = [f.split(".")[0] for f in files]
-        # if len(set(prfxs)) > 1:
-        #    return False
+    def validate_path(cls, path, *args, **kwargs):
+        if path.endswith(".hdf5") or path.endswith(".zarr"):
+            return True
+        if os.path.isdir(path):
+            files = os.listdir(path)
+            prfxs = [f.split(".")[0] for f in files]
+            sufxs = [f.split(".")[-1] for f in files]
+            if len(set(prfxs)) > 1 or len(set(sufxs)) > 1:
+                return False
+            if sufxs[0] in ["hdf5", "zarr"]:
+                return True
+        return False
 
     def register_field(self, parttype, name=None, description=""):
         return self.data.register_field(parttype, name=name, description=description)
