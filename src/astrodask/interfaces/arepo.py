@@ -1,5 +1,5 @@
-import logging
 import numbers
+import os
 import re
 import warnings
 
@@ -52,7 +52,9 @@ class ArepoSnapshot(BaseSnapshot):
         self.header = {}
         self.config = {}
         self.parameters = {}
-        super().__init__(path, chunksize=chunksize, **kwargs)
+        prfx = self._get_fileprefix(path)
+        prfx = kwargs.pop("fileprefix", prfx)
+        super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
         self.cosmology = None
         if "HubbleParam" in self.header and "Omega0" in self.header:
             import astropy.units as u
@@ -90,6 +92,37 @@ class ArepoSnapshot(BaseSnapshot):
         else:
             # Have not thought about non-cubic cases yet.
             raise NotImplementedError
+
+    @classmethod
+    def validate_path(cls, path, *args, **kwargs):
+        if path.endswith(".hdf5") or path.endswith(".zarr"):
+            return True
+        if os.path.isdir(path):
+            files = os.listdir(path)
+            cls._get_fileprefix(path)
+            sufxs = [f.split(".")[-1] for f in files]
+            if len(set(sufxs)) > 1:
+                return False
+            if sufxs[0] in ["hdf5", "zarr"]:
+                return True
+        return False
+
+    @classmethod
+    def _get_fileprefix(cls, path) -> str:
+        if os.path.isfile(path):
+            return ""  # nothing to do, we have a single file, not a directory
+        # order matters: groups will be taken before fof_subhalo, requires py>3.7 for dict order
+        prfxs_prfx_sim = dict.fromkeys(["groups", "fof_subhalo", "snap"])
+        files = os.listdir(path)
+        prfxs = [f.split(".")[0] for f in files]
+        prfxs = [p for s in prfxs_prfx_sim for p in prfxs if p.startswith(s)]
+        prfxs = dict.fromkeys(prfxs)
+        if len(prfxs) > 1:
+            print(
+                "Note: We have more than one prefix avail:", prfxs
+            )  # TODO: Remove verbosity eventually.
+        prfx = list(prfxs.keys())[0]
+        return prfx
 
     @ArepoSelector()
     def return_data(self):
@@ -299,25 +332,25 @@ def wrap_func_scalar(
     return np.array(res)
 
 
-class ArepoSnapshotWithUnits(ArepoSnapshot):
-    def __init__(self, path, catalog=None):
-        super().__init__(path, catalog=catalog)
-        # unitdict = get_units_from_AREPOdocs(unitstr_arepo, self.header) # from AREPO public docs
-        unitdict = get_units_from_TNGdocs(self.header)  # from TNG public docs
-        for k in self.data:
-            if k.startswith("PartType"):
-                dct = unitdict["particles"]
-            elif k == "Group":
-                dct = unitdict["groups"]
-            elif k == "Subhalo":
-                dct = unitdict["subhalos"]
-            else:
-                dct = unitdict[k]
-            for name in self.data[k]:
-                if name in dct:
-                    self.data[k][name] = self.data[k][name] * dct[name]
-                else:
-                    logging.info("No units for '%s'" % name)
+# class ArepoSnapshotWithUnits(ArepoSnapshot):
+#    def __init__(self, path, catalog=None):
+#        super().__init__(path, catalog=catalog)
+#        # unitdict = get_units_from_AREPOdocs(unitstr_arepo, self.header) # from AREPO public docs
+#        unitdict = get_units_from_TNGdocs(self.header)  # from TNG public docs
+#        for k in self.data:
+#            if k.startswith("PartType"):
+#                dct = unitdict["particles"]
+#            elif k == "Group":
+#                dct = unitdict["groups"]
+#            elif k == "Subhalo":
+#                dct = unitdict["subhalos"]
+#            else:
+#                dct = unitdict[k]
+#            for name in self.data[k]:
+#                if name in dct:
+#                    self.data[k][name] = self.data[k][name] * dct[name]
+#                else:
+#                    logging.info("No units for '%s'" % name)
 
 
 @njit

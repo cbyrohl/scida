@@ -1,2 +1,9 @@
 [flake8]
-ignore = E203,E501,W503
+ignore = E203,
+         # black compatibility concerning line length
+         E501,
+         # black compatibility (https://github.com/psf/black/issues/52)
+         W503
+
+# fix error on imports in __init__.py
+per-file-ignores = */__init__.py: F401
