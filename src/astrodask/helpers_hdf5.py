@@ -88,18 +88,16 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
         if group == "/":
             group = ""  # this is needed to have consistent levels for 0th level
         groupfields = [f for f in shapes.keys() if f.startswith(group)]
-        groupfields = [f for f in groupfields if f.count("/") == group.count("/")]
+        groupfields = [f for f in groupfields if f.count("/") - 1 == group.count("/")]
         groupfields = sorted(groupfields)
         if len(groupfields) == 0:
             continue
         arr0 = chunks[groupfields[0]]
         for field in groupfields[1:]:
             arr = np.array(chunks[field])
-            for a0, a in zip(arr0, arr):
-                print(groupfields[0], field, a0, a)
             assert np.array_equal(arr0, arr)
-        # then save the chunking information for this group
-        groupchunks[field] = arr0
+            # then save the chunking information for this group
+            groupchunks[field] = arr0
 
     # next fill merger file
     with h5py.File(fn, "w", libver="latest") as hf:
@@ -170,6 +168,7 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
         # save information regarding chunks
         grp = hf.create_group("_chunks")
         for k, v in groupchunks.items():
+            print(k)
             grp.attrs[k] = v
 
         # write the attributes
