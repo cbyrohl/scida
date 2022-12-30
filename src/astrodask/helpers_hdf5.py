@@ -47,7 +47,23 @@ def walk_hdf5file(fn, tree, get_attrs=True):
     return tree
 
 
-def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
+def create_mergedhdf5file(
+    fn, files, max_workers=16, virtual=True, groupwise_shape=False
+):
+    """
+
+    Parameters
+    ----------
+    fn: file to write to
+    files: files to merge
+    max_workers: parallel workers to process files
+    virtual: whether to create linked ("virtual") dataset on disk (otherwise copy)
+    groupwise_shape: Require shapes to be the same within a group
+
+    Returns
+    -------
+
+    """
     """Creates a virtual hdf5 file from list of given files. Virtual by default."""
     # first obtain all datasets and groups
     trees = [{} for i in range(len(files))]
@@ -57,7 +73,6 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
     result = list(result)
 
     groups = set([item for r in result for item in r["groups"]])
-    datasets = groups = set([item for r in result for item in r["groups"]])
     datasets = set([item[0] for r in result for item in r["datasets"]])
 
     def todct(lst):
@@ -95,7 +110,8 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
         arr0 = chunks[groupfields[0]]
         for field in groupfields[1:]:
             arr = np.array(chunks[field])
-            assert np.array_equal(arr0, arr)
+            if groupwise_shape and not np.array_equal(arr0, arr):
+                raise ValueError("Requiring same shape (see 'groupwise_shape' flag)")
             # then save the chunking information for this group
             groupchunks[field] = arr0
 
@@ -168,7 +184,6 @@ def create_mergedhdf5file(fn, files, max_workers=16, virtual=True):
         # save information regarding chunks
         grp = hf.create_group("_chunks")
         for k, v in groupchunks.items():
-            print(k)
             grp.attrs[k] = v
 
         # write the attributes
