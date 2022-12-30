@@ -3,7 +3,7 @@ import os
 import pytest
 
 from astrodask.interface import BaseSnapshot
-from astrodask.interfaces.arepo import ArepoSnapshot, ArepoSnapshotWithUnits
+from astrodask.interfaces.arepo import ArepoSnapshot  # ArepoSnapshotWithUnits
 from astrodask.interfaces.illustris import IllustrisSnapshot
 from astrodask.series import DatasetSeries
 
@@ -89,10 +89,10 @@ def testdata_areposnapshot_withcatalog(request) -> ArepoSnapshot:
     return ArepoSnapshot(tng50_snappath, catalog=tng50_grouppath)
 
 
-@pytest.fixture(scope="function")
-def testdata_areposnapshot_withcatalog_andunits(request) -> ArepoSnapshotWithUnits:
-    tng50_snappath, tng50_grouppath = request.param[0], request.param[1]
-    return ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
+# @pytest.fixture(scope="function")
+# def testdata_areposnapshot_withcatalog_andunits(request) -> ArepoSnapshotWithUnits:
+#    tng50_snappath, tng50_grouppath = request.param[0], request.param[1]
+#    return ArepoSnapshotWithUnits(tng50_snappath, catalog=tng50_grouppath)
 
 
 @pytest.fixture(scope="function")

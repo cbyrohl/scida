@@ -52,6 +52,7 @@ def test_snapshot_save(testdata_interface):
 def test_areposnapshot_load(testdata_areposnapshot):
     snp = testdata_areposnapshot
     assert len(snp.data.keys()) == 5
+    print("chunks", list(snp.file["_chunks"].attrs.keys()))
 
 
 @require_testdata("illustrisgroup")
