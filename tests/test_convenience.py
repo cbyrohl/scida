@@ -7,7 +7,6 @@ def test_load(testdatapath):
     obj = load(testdatapath)
     assert obj.file is not None
     assert obj.data is not None
-    print(obj.metadata)
 
 
 # TODO: Need to write test for TNG50-4_snapshot+TNG50-4_group using require_testdata(..., only=...)
