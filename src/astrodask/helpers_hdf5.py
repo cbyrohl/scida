@@ -209,7 +209,6 @@ def create_mergedhdf5file(
                 if isinstance(attrval0, np.ndarray):
                     if not (np.all([np.array_equal(attrval0, v) for v in attrvallist])):
                         logging.info(apath, k, "has different values.")
-                        print(apath, k)
                         attrs_differ[apath][k] = np.stack(attrvallist)
                         continue
                 else:
@@ -219,8 +218,8 @@ def create_mergedhdf5file(
                         attrs_differ[apath][k] = np.array(attrval0)
                         continue
                 attrs_same[apath][k] = attrval0
-            for apath in attrs0paths:
-                for k, v in attrs_same.get(apath, {}).items():
-                    hf[apath].attrs[k] = v
-                for k, v in attrs_differ.get(apath, {}).items():
-                    hf[apath].attrs[k] = v
+        for apath in attrs0paths:
+            for k, v in attrs_same.get(apath, {}).items():
+                hf[apath].attrs[k] = v
+            for k, v in attrs_differ.get(apath, {}).items():
+                hf[apath].attrs[k] = v

@@ -1,6 +1,8 @@
 import inspect
 from collections.abc import MutableMapping
+from typing import Dict
 
+import dask.array as da
 import dask.dataframe as dd
 
 from .helpers_misc import get_kwargs
@@ -95,10 +97,11 @@ class FieldContainerCollection(MutableMapping):
 
 
 class FieldContainer(MutableMapping):
-    """A mutable collection of fields. Attempt to construct from derived fields recipes if needed."""
+    """A mutable collection of fields. Attempt to construct from derived fields recipes
+    if needed."""
 
     def __init__(self, *args, derivedfields_kwargs=None, **kwargs):
-        self.fields = {}
+        self.fields: Dict[da.Array] = {}
         self.fields.update(*args, **kwargs)
         self.derivedfields = {}
         self.derivedfields_kwargs = (
