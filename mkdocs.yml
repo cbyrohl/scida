@@ -1,0 +1,25 @@
+site_name: astrodask
+repo_url: https://gitlab.mpcdf.mpg.de/byrohlc/astrodask
+theme:
+  name: material
+
+nav:
+  - Introduction: 'index.md'
+  - api_docs.md
+
+markdown_extensions:
+  - pymdownx.snippets:
+      check_paths: true
+
+plugins:
+  - search:
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_signature_annotations: true
+            show_source: true
+            show_submodules: true
+      watch:
+        - src/astrodask
