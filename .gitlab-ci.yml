@@ -15,7 +15,7 @@ stages:
 
 # stages
 ## deploy/doc
-#pages:
+pages:
   stage: deploy
   image: python:3.9
   script:
