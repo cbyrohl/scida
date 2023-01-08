@@ -68,6 +68,6 @@ class ArepoSimulation(DatasetSeries):
             raise ValueError("Specify index or redshift.")
         elif redshift is not None:
             dz = np.abs(self.redshifts - redshift)
-            index = np.argmin(dz)
+            index = int(np.argmin(dz))
             assert np.isclose(redshift, self.redshifts[index], rtol=redshift_reltol)
         return super().get_dataset(index=index)
