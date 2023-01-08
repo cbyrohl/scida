@@ -19,6 +19,7 @@ class Loader(abc.ABC):
     def __init__(self, path):
         self.path = path
         self.file = None  # open file handle if available
+        self.tempfile = None  # reference to tempfile where needed
 
     @abc.abstractmethod
     def load(self):
@@ -218,6 +219,7 @@ class BaseLoader(Loader):
     def __init__(self, path):
         super().__init__(path)
         self.location = ""
+        self.tempfile = None
 
     def load(self, **kwargs):
         if os.path.isdir(self.path):
@@ -232,4 +234,5 @@ class BaseLoader(Loader):
             loader = HDF5Loader(self.path)
         data, metadata = loader.load(**kwargs)
         self.file = loader.file
+        self.tempfile = loader.tempfile
         return data, metadata

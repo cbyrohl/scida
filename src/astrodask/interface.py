@@ -16,7 +16,7 @@ from astrodask.registries import dataset_type_registry
 
 class Dataset(abc.ABC):
     @classmethod
-    @property
+    @property  # TODO: chaining property and classmethod deprecated in py 3.11: remove!
     @abc.abstractmethod
     def _loader(cls):  # each class has to have a loader
         raise NotImplementedError
@@ -57,6 +57,7 @@ class Dataset(abc.ABC):
 
         loader = self._loader(path)
         self.data, self.metadata = loader.load(**loadkwargs)
+        self.tempfile = loader.tempfile
         self.file = loader.file
         print(self.file)
 
