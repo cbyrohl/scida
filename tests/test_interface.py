@@ -1,3 +1,4 @@
+import dask.array as da
 import numpy as np
 import pytest
 
@@ -99,15 +100,42 @@ def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
         assert np.all(counttask.compute() <= 1)
     else:
         assert np.all(counttask.compute() == 1)
-    assert count.shape == counttask.compute().shape
+    print(count.shape, counttask.compute().shape)
+    assert (
+        count.shape == counttask.compute().shape
+    ), "Expected shape different from result's shape."
     assert count.shape[0] == snap.data["Group"]["GroupPos"].shape[0]
     assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
 
 
 @require_testdata("areposnapshot_withcatalog")
+def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
+    snp = testdata_areposnapshot_withcatalog
+    # check bound mass sums as a start
+    g = snp.grouped("Masses")
+    boundmass = np.sum(g.sum().evaluate())
+    boundmass2 = da.sum(
+        snp.data["PartType0"]["Masses"][: np.sum(snp.get_grouplengths())]
+    ).compute()
+    assert np.isclose(boundmass, boundmass2)
+    # Test chaining
+    assert np.sum(g.half().sum().evaluate()) < np.sum(g.sum().evaluate())
+
+
+@require_testdata("areposnapshot_withcatalog")
 def test_areposnapshot_load_withcatalog(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
-    assert len(snp.data.keys()) == 7
+    parttypes = {
+        "PartType0",
+        "PartType1",
+        "PartType3",
+        "PartType4",
+        "PartType5",
+        "Group",
+        "Subhalo",
+    }
+    overlap = set(snp.data.keys()) & parttypes
+    assert len(overlap) == 7
 
 
 @require_testdata("areposnapshot_withcatalog")

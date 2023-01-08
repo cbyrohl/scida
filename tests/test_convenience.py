@@ -10,6 +10,7 @@ def test_load(testdatapath):
     print(obj.metadata)
 
 
+# TODO: Need to write test for TNG50-4_snapshot+TNG50-4_group using require_testdata(..., only=...)
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_load_areposnap(testdatapath):
     obj = load(testdatapath)

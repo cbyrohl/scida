@@ -1,14 +1,19 @@
+import copy
 import numbers
 import os
 import re
 import warnings
+from collections import Counter
+from functools import reduce
+from typing import Union
 
 import astropy.units as u
 import dask
 import dask.array as da
 import numpy as np
 from dask import delayed
-from numba import njit
+from numba import jit, njit
+from numpy.typing import NDArray
 
 from ..helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
 from ..interface import BaseSnapshot, Selector
@@ -52,6 +57,7 @@ class ArepoSnapshot(BaseSnapshot):
         self.header = {}
         self.config = {}
         self.parameters = {}
+        self._grouplengths = {}
         prfx = self._get_fileprefix(path)
         prfx = kwargs.pop("fileprefix", prfx)
         super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
@@ -114,9 +120,9 @@ class ArepoSnapshot(BaseSnapshot):
         # order matters: groups will be taken before fof_subhalo, requires py>3.7 for dict order
         prfxs_prfx_sim = dict.fromkeys(["groups", "fof_subhalo", "snap"])
         files = os.listdir(path)
-        prfxs = [f.split(".")[0] for f in files]
-        prfxs = [p for s in prfxs_prfx_sim for p in prfxs if p.startswith(s)]
-        prfxs = dict.fromkeys(prfxs)
+        prfxs_lst = [f.split(".")[0] for f in files]
+        prfxs_lst = [p for s in prfxs_prfx_sim for p in prfxs_lst if p.startswith(s)]
+        prfxs = dict.fromkeys(prfxs_lst)
         if len(prfxs) > 1:
             print(
                 "Note: We have more than one prefix avail:", prfxs
@@ -148,7 +154,7 @@ class ArepoSnapshot(BaseSnapshot):
         # Get Offsets for particles in snapshot
         glen = self.data["Group"]["GroupLenType"]
         da_halocelloffsets = da.concatenate(
-            [np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0)]
+            [np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0, dtype=np.int64)]
         )
         # remove last entry to match shapematch shape
         self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(
@@ -191,96 +197,24 @@ class ArepoSnapshot(BaseSnapshot):
         Nmin=None,
         chunksize_bytes=None,
     ):
-        if chunksize is not None:
-            warnings.warn(
-                '"chunksize" parameter is depreciated and has no effect. Specify Nmin for control.',
-                DeprecationWarning,
-            )
         dfltkwargs = get_kwargs(func)
         fieldnames = dfltkwargs.get("fieldnames", None)
-        parttype = dfltkwargs.get("parttype", "PartType0")
-        shape = dfltkwargs.get("shape", (1,))
-        dtype = dfltkwargs.get("dtype", "float64")
-        default = dfltkwargs.get("default", 0)
-        partnum = int(parttype[-1])
-
         if fieldnames is None:
             fieldnames = get_args(func)
-
-        lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
-        offsets = np.concatenate([[0], np.cumsum(lengths)])
-
-        # Determine chunkedges automatically
-        # TODO: very messy and inefficient routine. improve some time.
-        # TODO: Set entry_bytes_out
-        entry_nbytes_in = np.sum(
-            [self.data[parttype][f][0].nbytes for f in fieldnames]
-        )  # nbytes
-        nbytes_dtype_out = 4  # TODO: hardcode 4 byte output dtype as estimate for now
-        entry_nbytes_out = nbytes_dtype_out * np.product(shape)
-        list_chunkedges = map_halo_operation_get_chunkedges(
+        parttype = dfltkwargs.get("parttype", "PartType0")
+        entry_nbytes_in = np.sum([self.data[parttype][f][0].nbytes for f in fieldnames])
+        lengths = self.get_grouplengths(parttype=parttype)
+        arrdict = self.data[parttype]
+        return map_halo_operation(
+            func,
             lengths,
-            entry_nbytes_in,
-            entry_nbytes_out,
+            arrdict,
+            chunksize=chunksize,
             cpucost_halo=cpucost_halo,
             Nmin=Nmin,
             chunksize_bytes=chunksize_bytes,
+            entry_nbytes_in=entry_nbytes_in,
         )
-
-        # TODO: Get rid of oindex; only here because have not adjusted code to map_halo_operation_get_chunkedges
-        totlength = offsets[-1]
-        oindex = np.array(list(list_chunkedges[:, 0]) + [list_chunkedges[-1, -1]])
-
-        new_axis = None
-        chunks = np.diff(oindex)
-        chunks[-1] += lengths.shape[0]
-        chunks = [tuple(chunks.tolist())]
-        if isinstance(shape, tuple) and shape != (1,):
-            chunks += [(s,) for s in shape]
-            new_axis = np.arange(1, len(shape) + 1).tolist()
-
-        slcoffsets = offsets[oindex]
-        slclengths = np.diff(slcoffsets)
-
-        slcs = [slice(oindex[i], oindex[i + 1]) for i in range(len(oindex) - 1)]
-        slcs[-1] = slice(
-            oindex[-2], oindex[-1] + 2
-        )  # hacky! why needed? see TODO above.
-
-        halolengths_in_chunks = [lengths[slc] for slc in slcs]
-
-        d_hic = delayed(halolengths_in_chunks)
-
-        arrs = [self.data[parttype][f][:totlength] for f in fieldnames]
-        for i, arr in enumerate(arrs):
-            arrchunks = (tuple(slclengths.tolist()),)
-            if len(arr.shape) > 1:
-                arrchunks = arrchunks + (arr.shape[1:],)
-            arrs[i] = arr.rechunk(chunks=arrchunks)
-        arrdims = np.array([len(arr.shape) for arr in arrs])
-        assert np.all(
-            arrdims == arrdims[0]
-        )  # Cannot handle different input dims for now
-
-        drop_axis = []
-        if arrdims[0] > 1:
-            drop_axis = np.arange(1, arrdims[0])
-
-        calc = da.map_blocks(
-            wrap_func_scalar,
-            func,
-            d_hic,
-            *arrs,
-            dtype=dtype,
-            chunks=chunks,
-            new_axis=new_axis,
-            drop_axis=drop_axis,
-            func_output_shape=shape,
-            func_output_dtype=dtype,
-            func_output_default=default
-        )
-
-        return calc
 
     def add_groupquantity_to_particles(self, name, parttype="PartType0"):
         assert (
@@ -302,6 +236,81 @@ class ArepoSnapshot(BaseSnapshot):
             gidx, halocelloffsets[:, num], self.data["Group"][name]
         )
         self.data[parttype][name] = hquantity
+
+    def get_grouplengths(self, parttype="PartType0"):
+        # todo: write/use PartType func always using integer rather than string?
+        if parttype not in self._grouplengths:
+            partnum = int(parttype[-1])
+            lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
+            self._grouplengths[parttype] = lengths
+        return self._grouplengths[parttype]
+
+    def grouped(self, field: Union[str, da.Array], parttype="PartType0"):
+        if isinstance(field, str):
+            field = self.data[parttype][field]
+        gop = GroupAwareOperation(self.get_grouplengths(parttype=parttype), field)
+        return gop
+
+
+class GroupAwareOperation:
+    __slots__ = ("arr", "ops", "lengths")
+
+    def __init__(self, lengths: NDArray, arr: da.Array, ops=None):
+        self.lengths = lengths
+        self.arr = arr
+        if ops is None:
+            self.ops = []
+        else:
+            self.ops = ops
+
+    def copy(self, add_op=None):
+        c = copy.copy(self)
+        if add_op is not None:
+            c.ops.append(add_op)
+        return c
+
+    def min(self):
+        return self.copy(add_op="min")
+
+    def max(self):
+        return self.copy(add_op="max")
+
+    def sum(self):
+        return self.copy(add_op="sum")
+
+    def half(self):  # dummy operation for testing halfing particle count.
+        return self.copy(add_op="half")
+
+    def __copy__(self):
+        # overwrite method so that copy holds a new ops list.
+        c = type(self)(self.lengths, self.arr, ops=list(self.ops))
+        return c
+
+    def evaluate(self, compute=True):
+        # final operations: those that can only be at end of chain
+        # intermediate operations: those that can only be prior to end of chain
+        finalops = {"min", "max", "sum"}
+        overlap = set(self.ops) & finalops
+        nfinalops = sum([v for k, v in Counter(self.ops).items() if k in finalops])
+        print(nfinalops, self.ops)
+        assert (
+            nfinalops == 1 and overlap.pop() == self.ops[-1]
+        )  # TODO: turn into Exceptions
+        funcdict = dict(min=np.min, max=np.max, sum=np.sum, half=lambda x: x[::2])
+
+        # https://stackoverflow.com/questions/34613543/is-there-a-chain-calling-method-in-python
+        def chain(*funcs):
+            def chained_call(arg):
+                return reduce(lambda r, f: f(r), funcs, arg)
+
+            return chained_call
+
+        func = chain(*[funcdict[k] for k in self.ops])
+        arrdict = {"dummy": self.arr}
+        res = map_halo_operation(func, self.lengths, arrdict, fieldnames=["dummy"])
+        if compute:
+            res = res.compute()
+        return res
 
 
 def wrap_func_scalar(
@@ -367,7 +376,9 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
         An array holding the starting cell offset for each halo. Needs to include the
         offset after the last halo. The required shape is thus (Nhalo+1,).
     """
-    res = -1 * np.ones(gidx_count, dtype=np.int32)
+    dtype = np.int64
+    index_unbound = np.iinfo(dtype).max
+    res = index_unbound * np.ones(gidx_count, dtype=dtype)
     # find initial celloffset
     hidx_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
     if hidx_idx + 1 >= celloffsets.shape[0]:
@@ -397,7 +408,10 @@ def get_hidx_daskwrap(gidx, halocelloffsets):
 
 def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
     hidx = get_hidx_daskwrap(gidx, halocelloffsets)
-    result = np.where(hidx > -1, valarr[hidx], -1)
+    dmax = np.iinfo(hidx.dtype).max
+    mask = ~((hidx == -1) | (hidx == dmax))
+    result = -1.0 * np.ones(hidx.shape, dtype=valarr.dtype)
+    result[mask] = valarr[hidx[mask]]
     return result
 
 
@@ -419,8 +433,15 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     )
 
 
-@njit
-def get_shidx(gidx_start, gidx_count, celloffsets, shnumber, shcounts, shcellcounts):
+@jit
+def get_shidx(
+    gidx_start: int,
+    gidx_count: int,
+    celloffsets: NDArray[np.int64],
+    shnumber,
+    shcounts,
+    shcellcounts,
+):
     res = -1 * np.ones(gidx_count, dtype=np.int32)  # fuzz has negative index.
 
     # find initial Group we are in
@@ -439,7 +460,7 @@ def get_shidx(gidx_start, gidx_count, celloffsets, shnumber, shcounts, shcellcou
         shcellcounts[shnumber[hidx] : shnumber[hidx] + shcounts[hidx]]
     )  # collect halo's subhalo offsets
     shcumsum += celloffsets[hidx_start_idx]
-    sidx_start_idx = np.searchsorted(shcumsum, gidx_start, side="right") - 1
+    sidx_start_idx: int = int(np.searchsorted(shcumsum, gidx_start, side="right") - 1)
     if sidx_start_idx < shcounts[hidx]:
         endid = shcumsum[sidx_start_idx + 1] - gidx_start
 
@@ -484,7 +505,13 @@ def get_shidx(gidx_start, gidx_count, celloffsets, shnumber, shcounts, shcellcou
     return res
 
 
-def get_shidx_daskwrap(gidx, halocelloffsets, shnumber, shcounts, shcellcounts):
+def get_shidx_daskwrap(
+    gidx: NDArray[np.int64],
+    halocelloffsets: NDArray[np.int64],
+    shnumber,
+    shcounts,
+    shcellcounts,
+) -> np.ndarray:
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
     return get_shidx(
@@ -492,7 +519,9 @@ def get_shidx_daskwrap(gidx, halocelloffsets, shnumber, shcounts, shcellcounts):
     )
 
 
-def compute_subhaloindex(gidx, halocelloffsets, shnumber, shcounts, shcellcounts):
+def compute_subhaloindex(
+    gidx, halocelloffsets, shnumber, shcounts, shcellcounts
+) -> da.Array:
     return da.map_blocks(
         get_shidx_daskwrap,
         gidx,
@@ -721,3 +750,97 @@ def map_halo_operation_get_chunkedges(
         )
     )
     return list_chunkedges
+
+
+def map_halo_operation(
+    func,
+    lengths,
+    arrdict,
+    chunksize=int(3e7),
+    cpucost_halo=1e4,
+    Nmin=None,
+    chunksize_bytes=None,
+    entry_nbytes_in=4,
+    fieldnames=None,
+):
+    if chunksize is not None:
+        warnings.warn(
+            '"chunksize" parameter is depreciated and has no effect. Specify Nmin for control.',
+            DeprecationWarning,
+        )
+    dfltkwargs = get_kwargs(func)
+    if fieldnames is None:
+        fieldnames = dfltkwargs.get("fieldnames", None)
+    if fieldnames is None:
+        fieldnames = get_args(func)
+    shape = dfltkwargs.get("shape", (1,))
+    dtype = dfltkwargs.get("dtype", "float64")
+    default = dfltkwargs.get("default", 0)
+
+    offsets = np.concatenate([[0], np.cumsum(lengths)])
+
+    # Determine chunkedges automatically
+    # TODO: very messy and inefficient routine. improve some time.
+    # TODO: Set entry_bytes_out
+    nbytes_dtype_out = 4  # TODO: hardcode 4 byte output dtype as estimate for now
+    entry_nbytes_out = nbytes_dtype_out * np.product(shape)
+    list_chunkedges = map_halo_operation_get_chunkedges(
+        lengths,
+        entry_nbytes_in,
+        entry_nbytes_out,
+        cpucost_halo=cpucost_halo,
+        Nmin=Nmin,
+        chunksize_bytes=chunksize_bytes,
+    )
+
+    # TODO: Get rid of oindex; only here because have not adjusted code to map_halo_operation_get_chunkedges
+    totlength = offsets[-1]
+    oindex = np.array(list(list_chunkedges[:, 0]) + [list_chunkedges[-1, -1]])
+
+    new_axis = None
+    chunks = np.diff(oindex)
+    # TODO: Where does the next line come from? Does not make sense
+    # chunks[-1] += lengths.shape[0]
+    chunks = [tuple(chunks.tolist())]
+    if isinstance(shape, tuple) and shape != (1,):
+        chunks += [(s,) for s in shape]
+        new_axis = np.arange(1, len(shape) + 1).tolist()
+
+    slcoffsets = offsets[oindex]
+    slclengths = np.diff(slcoffsets)
+
+    slcs = [slice(oindex[i], oindex[i + 1]) for i in range(len(oindex) - 1)]
+    slcs[-1] = slice(oindex[-2], oindex[-1] + 2)  # hacky! why needed? see TODO above.
+
+    halolengths_in_chunks = [lengths[slc] for slc in slcs]
+
+    d_hic = delayed(halolengths_in_chunks)
+
+    arrs = [arrdict[f][:totlength] for f in fieldnames]
+    for i, arr in enumerate(arrs):
+        arrchunks = (tuple(slclengths.tolist()),)
+        if len(arr.shape) > 1:
+            arrchunks = arrchunks + (arr.shape[1:],)
+        arrs[i] = arr.rechunk(chunks=arrchunks)
+    arrdims = np.array([len(arr.shape) for arr in arrs])
+    assert np.all(arrdims == arrdims[0])  # Cannot handle different input dims for now
+
+    drop_axis = []
+    if arrdims[0] > 1:
+        drop_axis = np.arange(1, arrdims[0])
+
+    calc = da.map_blocks(
+        wrap_func_scalar,
+        func,
+        d_hic,
+        *arrs,
+        dtype=dtype,
+        chunks=chunks,
+        new_axis=new_axis,
+        drop_axis=drop_axis,
+        func_output_shape=shape,
+        func_output_dtype=dtype,
+        func_output_default=default
+    )
+
+    return calc
