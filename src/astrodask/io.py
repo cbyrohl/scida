@@ -105,9 +105,9 @@ class ChunkedHDF5Loader(Loader):
         files = files[sortidx]
 
         _config = get_config()
-        if "cachedir" in _config:
+        if "cache_path" in _config:
             # we create a virtual file in the cache directory
-            dataset_cachedir = os.path.join(_config["cachedir"], hash_path(self.path))
+            dataset_cachedir = os.path.join(_config["cache_path"], hash_path(self.path))
             fp = os.path.join(dataset_cachedir, "data.hdf5")
             if not os.path.exists(dataset_cachedir):
                 os.mkdir(dataset_cachedir)

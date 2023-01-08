@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from astrodask.interface import BaseSnapshot
@@ -13,7 +11,6 @@ scope_snapshot = "function"
 
 
 def pytest_configure(config):
-    os.environ["cachedir"] = "TEST"
     config.addinivalue_line("markers", "slow: mark test as slow to run")
     config.addinivalue_line("markers", "big: mark test as big")
 
@@ -124,4 +121,4 @@ def testdata_illustrissnapshot_withcatalog(request) -> IllustrisSnapshot:
 @pytest.fixture(scope="function", autouse=True)
 def cachedir(monkeypatch, tmp_path_factory):
     path = tmp_path_factory.mktemp("cache")
-    monkeypatch.setenv("ASTRODASK_CACHEDIR", str(path))
+    monkeypatch.setenv("ASTRODASK_CACHE_PATH", str(path))
