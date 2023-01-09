@@ -19,8 +19,7 @@ repos:
       - id: nb-clean
         exclude: |
             (?x)(
-                ^foo/|
-                ^bar/
+                ^docs/notebooks/largedatasets.ipynb
             )
   - repo: local
     hooks:
