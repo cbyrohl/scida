@@ -4,9 +4,12 @@ from typing import Dict, List, Optional, Union
 
 import pytest
 
+from astrodask.config import get_config
+
 silent_unavailable = False  # unav aiet tests wildataset l be constructed but skipped if true (otherwise no construct)
 
-datapath = os.environ.get("ASTRODASK_TESTDATA_DIR", os.getcwd())
+datapath = get_config().get("testdata_path", os.getcwd())
+print(datapath)
 testdataskip = os.environ.get("ASTRODASK_TESTDATA_SKIP", "")
 
 
@@ -55,8 +58,15 @@ add_testdata_entry(
     "SIMBA50converted_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|C|0|2"],
 )
+add_testdata_entry(
+    "AURIGA66_snapshot",
+    ["interface", "areposnapshot", "areposnapshot_withcatalog|D|0|2"],
+)
 add_testdata_entry("EAGLEsmall_snapshot", ["interface"], fn="EAGLEsmall.hdf5")
 add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+# add_testdata_entry(
+#    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|C|1|2"]
+# )
 add_testdata_entry(
     "TNG50-3_group",
     [
@@ -66,9 +76,10 @@ add_testdata_entry(
         "illustrisgroup",
     ],
 )
-# add_testdata_entry(
-#    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|C|1|2"]
-# )
+add_testdata_entry(
+    "AURIGA66_group",
+    ["interface", "illustrissnapshot", "areposnapshot_withcatalog|D|1|2"],
+)
 add_testdata_entry("TNGvariation_simulation", ["container", "areposimulation"])
 
 

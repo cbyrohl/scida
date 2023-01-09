@@ -52,7 +52,9 @@ def test_snapshot_save(testdata_interface):
 @require_testdata("areposnapshot")
 def test_areposnapshot_load(testdata_areposnapshot):
     snp = testdata_areposnapshot
-    assert len(snp.data.keys()) == 5
+    expected_types = {"PartType" + str(i) for i in range(6)}
+    overlap = set(snp.data.keys()) & expected_types
+    assert len(overlap) >= 5
     print("chunks", list(snp.file["_chunks"].attrs.keys()))
 
 

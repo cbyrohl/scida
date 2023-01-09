@@ -1,5 +1,3 @@
-import yaml
-
 from astrodask.convenience import load
 from tests.testdata_properties import require_testdata_path
 
@@ -12,11 +10,11 @@ def test_load(testdatapath):
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_load_resource(tmp_path, monkeypatch, testdatapath):
-    p = tmp_path / "conf.yaml"
-    config = dict(resources=dict(mpcdf="1"))
-    with open(p, "w") as file:
-        yaml.dump(config, file)
+def test_load_resource(testdatapath):
+    # p = tmp_path / "conf.yaml"
+    # config = dict(resources=dict(mpcdf="1"))
+    # with open(p, "w") as file:
+    #    yaml.dump(config, file)
     # monkeypatch.setenv("ASTRODASK_CONFIG_PATH", str(p))
     from astrodask.convenience import get_dataset, get_dataset_candidates
 

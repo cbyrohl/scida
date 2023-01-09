@@ -23,8 +23,7 @@ def load(path: str, strict=False, **kwargs):
         else:
             # potentially custom dataset.
             # TODO: The following hardcoded cases should be loaded through a config file
-            config = get_config()
-            print("CONF", config)
+            # config = get_config()
             if databackend in ["mpcdf", "virgotng"]:
                 bp = "/virgotng/universe/IllustrisTNG"
                 pathdict = {"TNG50-%i" % i: join(bp, "TNG50-%i" % i) for i in range(4)}
@@ -89,7 +88,6 @@ def get_datasets_by_props(**kwargs):
             if pk not in props:
                 match = False
                 break
-            print(k, pk, pv, props[pk])
             if props[pk] != pv:
                 match = False
                 break
