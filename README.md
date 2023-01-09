@@ -41,7 +41,7 @@ pip install -e .
 ```
 
 ## First Steps
-Start up a Jupyter notebook server and begin with the 'Getting Started' section of the documentation. You can also find the underlying notebook [here](docs/source/gettingstarted.ipynb).
+Start up a Jupyter notebook server and begin with the 'Getting Started' section of the documentation. You can also find the underlying notebook [here](docs/notebooks/gettingstarted.ipynb).
 
 ## License
 
