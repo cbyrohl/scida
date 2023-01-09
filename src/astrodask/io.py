@@ -1,5 +1,4 @@
 import abc
-import logging
 import os
 import tempfile
 from os.path import join
@@ -119,8 +118,9 @@ class ChunkedHDF5Loader(Loader):
             self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
             self.location = self.tempfile.name
             create_mergedhdf5file(self.location, files, virtual=virtualcache)
-            logging.warning(
-                "No caching directory specified. Initial file read will remain slow."
+            print(
+                "WARNING:",
+                "No caching directory specified. Initial file read will remain slow.",
             )
 
         self.file = h5py.File(self.location, "r")

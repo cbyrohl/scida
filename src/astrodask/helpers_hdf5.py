@@ -1,4 +1,3 @@
-import logging
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
 
@@ -208,13 +207,13 @@ def create_mergedhdf5file(
                 attrval0 = attrvallist[0]
                 if isinstance(attrval0, np.ndarray):
                     if not (np.all([np.array_equal(attrval0, v) for v in attrvallist])):
-                        logging.info(apath, k, "has different values.")
+                        print("INFO:", apath, k, "has different values.")
                         attrs_differ[apath][k] = np.stack(attrvallist)
                         continue
                 else:
                     # assert len(set(vals)) == 1, k + " has different values."  # TODO
                     if not len(set(attrvallist)) == 1:
-                        logging.info(apath, k, "has different values.")
+                        print("INFO:", apath, k, "has different values.")
                         attrs_differ[apath][k] = np.array(attrval0)
                         continue
                 attrs_same[apath][k] = attrval0
