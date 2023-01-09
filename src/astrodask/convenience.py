@@ -78,9 +78,9 @@ def get_dataset_by_name(name):
 def get_datasets_by_props(**kwargs):
     dnames = []
     c = get_config()
-    datasets = copy.deepcopy(c["datasets"])
     if "datasets" not in c:
         return dnames
+    datasets = copy.deepcopy(c["datasets"])
     for k, v in datasets.items():
         props = v.get("properties", {})
         match = True
