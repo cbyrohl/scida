@@ -1,0 +1,6 @@
+# example for astrodask config. copy to ~/.astrodask.yaml and modify accordingly
+
+---
+
+cache_path: ~/cachedir
+testdata_path: /data/public/testdata-astrodask
