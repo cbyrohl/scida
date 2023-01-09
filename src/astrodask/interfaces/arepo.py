@@ -127,8 +127,9 @@ class ArepoSnapshot(BaseSnapshot):
             print(
                 "Note: We have more than one prefix avail:", prfxs
             )  # TODO: Remove verbosity eventually.
-        prfx = list(prfxs.keys())[0]
-        return prfx
+        elif len(prfxs) == 0:
+            return ""
+        return list(prfxs.keys())[0]
 
     @ArepoSelector()
     def return_data(self):
