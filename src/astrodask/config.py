@@ -10,7 +10,9 @@ def get_config():
         for k, v in os.environ.items()
         if k.startswith(prefix)
     }
-    path = os.path.join(os.path.expanduser("~"), ".astrodask.yaml")
+    path = envconf.pop("config_path", None)
+    if path is None:
+        path = os.path.join(os.path.expanduser("~"), ".astrodask.yaml")
     config = {}
     if os.path.isfile(path):
         with open(path, "r") as file:

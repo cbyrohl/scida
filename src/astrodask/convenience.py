@@ -1,3 +1,4 @@
+import copy
 import os
 from collections import Counter
 from functools import reduce
@@ -5,6 +6,7 @@ from inspect import getmro
 from os.path import join
 from typing import List
 
+from astrodask.config import get_config
 from astrodask.registries import dataset_type_registry
 
 
@@ -21,6 +23,8 @@ def load(path: str, strict=False, **kwargs):
         else:
             # potentially custom dataset.
             # TODO: The following hardcoded cases should be loaded through a config file
+            config = get_config()
+            print("CONF", config)
             if databackend in ["mpcdf", "virgotng"]:
                 bp = "/virgotng/universe/IllustrisTNG"
                 pathdict = {"TNG50-%i" % i: join(bp, "TNG50-%i" % i) for i in range(4)}
@@ -51,3 +55,59 @@ def load(path: str, strict=False, **kwargs):
     dtype = available_dtypes[0]
 
     return dataset_type_registry[dtype](path, **kwargs)
+
+
+def get_dataset_by_name(name):
+    c = get_config()
+    datasets = copy.deepcopy(c["datasets"])
+    dname = None
+    if name in datasets:
+        dname = name
+    else:
+        # could still be an alias
+        for k, v in datasets.items():
+            if "aliases" not in v:
+                continue
+            if name in v["aliases"]:
+                dname = k
+                break
+    return dname
+
+
+def get_datasets_by_props(**kwargs):
+    c = get_config()
+    datasets = copy.deepcopy(c["datasets"])
+    dnames = []
+    for k, v in datasets.items():
+        props = v.get("properties", {})
+        match = True
+        for pk, pv in kwargs.items():
+            if pk not in props:
+                match = False
+                break
+            print(k, pk, pv, props[pk])
+            if props[pk] != pv:
+                match = False
+                break
+        if match:
+            dnames.append(k)
+    return dnames
+
+
+def get_dataset_candidates(name=None, props=None):
+    if name is not None:
+        dnames = [get_dataset_by_name(name)]
+        return dnames
+    if props is not None:
+        dnames = get_datasets_by_props(**props)
+        return dnames
+    raise ValueError("Need to specify name or properties.")
+
+
+def get_dataset(name=None, props=None):
+    dnames = get_dataset_candidates(name=name, props=props)
+    if len(dnames) > 1:
+        raise ValueError("Too many dataset candidates.")
+    elif len(dnames) == 0:
+        raise ValueError("No dataset candidate found.")
+    return dnames[0]
