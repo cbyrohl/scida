@@ -21,6 +21,7 @@ pages:
   extends: .install-deps
   script:
   - poetry run mkdocs build
+  - poetry run python -m ipykernel install --name astrodask
   - mv ./site ./public
   allow_failure: true
   artifacts:
