@@ -58,9 +58,11 @@ def load(path: str, strict=False, **kwargs):
 
 
 def get_dataset_by_name(name):
-    c = get_config()
-    datasets = copy.deepcopy(c["datasets"])
     dname = None
+    c = get_config()
+    if "datasets" not in c:
+        return dname
+    datasets = copy.deepcopy(c["datasets"])
     if name in datasets:
         dname = name
     else:
