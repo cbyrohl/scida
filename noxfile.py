@@ -10,9 +10,17 @@ python_dflt = "3.9"
 def tests(session):
     session.install("coverage[toml]", "pytest", "pygments")
     session.install(".")
-    session.run("pytest", "-v", "--junitxml=report.xml")
     try:
-        session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
+        session.run(
+            "coverage",
+            "run",
+            "--parallel",
+            "-m",
+            "pytest",
+            "-v",
+            "--junitxml=report.xml",
+            *session.posargs
+        )
     finally:
         if session.interactive:
             session.notify("coverage", posargs=[])
