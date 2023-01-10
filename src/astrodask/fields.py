@@ -41,6 +41,9 @@ class FieldContainerCollection(MutableMapping):
     def __len__(self):
         return len(self.store)
 
+    def keys(self):
+        return self.store.keys()
+
     def new_container(self, key, **kwargs):
         self[key] = FieldContainer(
             **kwargs, derivedfields_kwargs=self.derivedfields_kwargs
