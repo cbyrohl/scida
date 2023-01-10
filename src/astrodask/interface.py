@@ -59,7 +59,6 @@ class Dataset(abc.ABC):
         self.data, self.metadata = loader.load(**loadkwargs)
         self.tempfile = loader.tempfile
         self.file = loader.file
-        print(self.file)
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)

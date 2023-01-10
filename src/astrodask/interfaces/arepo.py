@@ -54,6 +54,8 @@ class ArepoSelector(Selector):
 
 class ArepoSnapshot(BaseSnapshot):
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs):
+        print(path)
+        print(catalog)
         self.header = {}
         self.config = {}
         self.parameters = {}
@@ -152,9 +154,19 @@ class ArepoSnapshot(BaseSnapshot):
         # TODO: make these delayed objects and properly pass into (delayed?) numba functions:
         # https://docs.dask.org/en/stable/delayed-best-practices.html#avoid-repeatedly-putting-large-inputs-into-delayed-calls
 
-        # Get Offsets for particles in snapshot
+        # Group ID
+        if "Group" not in self.data:  # can happen for empty catalogs
+            for key in self.data:
+                if not (key.startswith("PartType")):
+                    continue
+                maxint = np.iinfo(np.int64).max
+                uid = self.data[key]["uid"]
+                self.data[key]["GroupID"] = maxint * da.ones_like(uid, dtype=np.int64)
+                self.data[key]["SubhaloID"] = -1 * da.ones_like(uid, dtype=np.int64)
+            return
+
         glen = self.data["Group"]["GroupLenType"]
-        da_halocelloffsets = da.concatenate(
+        da_halocelloffsets = da.concatenate(  # TODO: Do not hardcode shape of 6 particle types!
             [np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0, dtype=np.int64)]
         )
         # remove last entry to match shapematch shape
@@ -163,6 +175,22 @@ class ArepoSnapshot(BaseSnapshot):
         )
         halocelloffsets = da_halocelloffsets.compute()
 
+        for key in self.data:
+            if not (key.startswith("PartType")):
+                continue
+            num = int(key[-1])
+            gidx = self.data[key]["uid"]
+            hidx = compute_haloindex(gidx, halocelloffsets[:, num])
+            self.data[key]["GroupID"] = hidx
+
+        # Subhalo ID
+        if "Subhalo" not in self.data:  # can happen for empty catalogs
+            for key in self.data:
+                if not (key.startswith("PartType")):
+                    continue
+                self.data[key]["SubhaloID"] = -1 * da.ones_like(da[key]["uid"], dtype=np.int64)
+            return
+
         subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"].compute()
         subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"].compute()
 
@@ -170,12 +198,6 @@ class ArepoSnapshot(BaseSnapshot):
             if not (key.startswith("PartType")):
                 continue
             num = int(key[-1])
-
-            # Group ID
-            gidx = self.data[key]["uid"]
-            hidx = compute_haloindex(gidx, halocelloffsets[:, num])
-            self.data[key]["GroupID"] = hidx
-            # Subhalo ID
             gidx = self.data[key]["uid"]
             shcounts, shnumber = get_shcounts_shcells(
                 subhalogrnr, halocelloffsets[:, num].shape[0]
@@ -293,7 +315,6 @@ class GroupAwareOperation:
         finalops = {"min", "max", "sum"}
         overlap = set(self.ops) & finalops
         nfinalops = sum([v for k, v in Counter(self.ops).items() if k in finalops])
-        print(nfinalops, self.ops)
         assert (
             nfinalops == 1 and overlap.pop() == self.ops[-1]
         )  # TODO: turn into Exceptions

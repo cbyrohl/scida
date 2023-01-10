@@ -107,11 +107,16 @@ class ChunkedHDF5Loader(Loader):
         if "cache_path" in _config:
             # we create a virtual file in the cache directory
             dataset_cachedir = os.path.join(_config["cache_path"], hash_path(self.path))
+            dataset_cachedir = os.path.expanduser(dataset_cachedir)
             fp = os.path.join(dataset_cachedir, "data.hdf5")
             if not os.path.exists(dataset_cachedir):
                 os.mkdir(dataset_cachedir)
             if not os.path.isfile(fp) or overwrite:
-                create_mergedhdf5file(fp, files, virtual=virtualcache)
+                try:
+                    create_mergedhdf5file(fp, files, virtual=virtualcache)
+                except Exception as ex:
+                    os.remove(fp)  # remove failed attempt at merging file
+                    raise ex
             self.location = fp
         else:
             # otherwise, we create a temporary file
@@ -145,7 +150,6 @@ def load_datadict_old(
     # TODO: Refactor and rename
     data = {}
     tree = {}
-    print(location, file)
     walk_hdf5file(location, tree)
     """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
     inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).

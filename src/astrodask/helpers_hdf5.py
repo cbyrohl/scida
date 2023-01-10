@@ -190,20 +190,29 @@ def create_mergedhdf5file(
         attrs_key_lists = [
             list(v["attrs"].keys()) for v in result
         ]  # attribute paths for each file
-        attrs0paths = attrs_key_lists[0]
-        if len(attrs0paths) != len(set(attrs0paths).intersection(*attrs_key_lists)):
-            raise NotImplementedError(
-                "Some attribute paths not present in each partial data file."
-            )
+        attrspaths_all = set().union(*attrs_key_lists)
+        attrspaths_intersec = set(attrspaths_all).intersection(*attrs_key_lists)
+        attrspath_diff = attrspaths_all.difference(attrspaths_intersec)
+        if attrspaths_all != attrspaths_intersec:
+            # if difference only stems from missing datasets (and their assoc. attrs); thats fine
+            if not attrspath_diff.issubset(datasets):
+                raise NotImplementedError(
+                    "Some attribute paths not present in each partial data file."
+                )
         # check for common key+values across all files
         attrs_same = {}
         attrs_differ = {}
 
-        for apath in attrs0paths:
+        attrs0paths = attrs_key_lists[0]
+        nfiles = len(files)
+
+        for apath in sorted(attrspaths_all):
             attrs_same[apath] = {}
             attrs_differ[apath] = {}
-            for k in result[0]["attrs"][apath]:
-                attrvallist = [result[i]["attrs"][apath][k] for i in range(len(files))]
+            attrsnames = set().union(*[result[i]["attrs"][apath] for i in range(nfiles) if apath in result[i]["attrs"]])
+            for k in attrsnames:
+                # we ignore apaths existing in some datasets.
+                attrvallist = [result[i]["attrs"][apath][k] for i in range(nfiles) if apath in result[i]["attrs"]]
                 attrval0 = attrvallist[0]
                 if isinstance(attrval0, np.ndarray):
                     if not (np.all([np.array_equal(attrval0, v) for v in attrvallist])):
@@ -217,7 +226,7 @@ def create_mergedhdf5file(
                         attrs_differ[apath][k] = np.array(attrval0)
                         continue
                 attrs_same[apath][k] = attrval0
-        for apath in attrs0paths:
+        for apath in attrspaths_all:
             for k, v in attrs_same.get(apath, {}).items():
                 hf[apath].attrs[k] = v
             for k, v in attrs_differ.get(apath, {}).items():
