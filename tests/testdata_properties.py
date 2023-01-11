@@ -47,6 +47,14 @@ def add_testdata_entry(name, types=None, marks=None, fn=None):
 
 
 add_testdata_entry(
+    "TNG50-4",
+    ["series", "areposimulation"],
+)
+add_testdata_entry(
+    "TNGvariation_simulation",
+    ["series", "areposimulation"],
+)
+add_testdata_entry(
     "TNG50-4_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|A|0|2"],
 )
@@ -80,7 +88,6 @@ add_testdata_entry(
     "AURIGA66_group",
     ["interface", "illustrissnapshot", "areposnapshot_withcatalog|D|1|2"],
 )
-add_testdata_entry("TNGvariation_simulation", ["container", "areposimulation"])
 
 
 testdataskip = testdataskip.split()

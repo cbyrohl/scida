@@ -6,7 +6,7 @@ from inspect import getmro
 from typing import List
 
 from astrodask.config import get_config
-from astrodask.registries import dataset_type_registry
+from astrodask.registries import dataseries_type_registry, dataset_type_registry
 
 
 def load(path: str, strict=False, **kwargs):
@@ -37,7 +37,10 @@ def load(path: str, strict=False, **kwargs):
         raise ValueError("Specified path unknown.")
 
     available_dtypes: List[str] = []
-    reg = dataset_type_registry
+    reg = dict()
+    reg.update(**dataset_type_registry)
+    reg.update(**dataseries_type_registry)
+
     for k, dtype in reg.items():
         if dtype.validate_path(path):
             available_dtypes.append(k)
@@ -58,7 +61,7 @@ def load(path: str, strict=False, **kwargs):
                 print("Note: Multiple dataset candidates: ", available_dtypes)
     dtype = available_dtypes[0]
 
-    return dataset_type_registry[dtype](path, **kwargs)
+    return reg[dtype](path, **kwargs)
 
 
 def get_dataset_by_name(name):
