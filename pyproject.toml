@@ -6,7 +6,7 @@ authors = ["Chris Byrohl"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8.1"
 numpy = "^1.18"
 dask = {extras = ["array", "dataframe", "distributed"], version = "^2022.12.1"}
 distributed = "^2022.07"
@@ -36,6 +36,8 @@ mkdocs-jupyter = "^0.22.0"
 ipykernel = "^6.19.4"
 matplotlib = "^3.6.2"
 ipywidgets = "^8.0.4"
+isort = "^5.11.4"
+flake8 = "^6.0.0"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]

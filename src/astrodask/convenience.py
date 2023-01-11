@@ -3,7 +3,6 @@ import os
 from collections import Counter
 from functools import reduce
 from inspect import getmro
-from os.path import join
 from typing import List
 
 from astrodask.config import get_config
@@ -16,18 +15,24 @@ def load(path: str, strict=False, **kwargs):
         pass
     elif len(path.split(":")) > 1:
         # check different alternative backends
-        databackend = path.split(":")[0]
+        databackend = path.split("://")[0]
+        dataname = path.split("://")[1]
         if databackend in ["http", "https"]:
             # dataset on the internet
             raise NotImplementedError("TODO.")
         else:
             # potentially custom dataset.
             # TODO: The following hardcoded cases should be loaded through a config file
-            # config = get_config()
-            if databackend in ["mpcdf", "virgotng"]:
-                bp = "/virgotng/universe/IllustrisTNG"
-                pathdict = {"TNG50-%i" % i: join(bp, "TNG50-%i" % i) for i in range(4)}
-                path = pathdict[path.split(":")[1]]
+            config = get_config()
+            resources = config.get("resources", {})
+            if databackend not in resources:
+                raise ValueError("Unknown resource '%s'" % databackend)
+            r = resources[databackend]
+            if dataname not in r:
+                raise ValueError(
+                    "Unknown dataset '%s' in resource '%s'" % (dataname, databackend)
+                )
+            path = os.path.expanduser(r[dataname]["path"])
     else:
         raise ValueError("Specified path unknown.")
 
