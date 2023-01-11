@@ -59,7 +59,7 @@ class ArepoSimulation(DatasetSeries):
         self.name = os.path.basename(path)
         p = Path(path)
         if not(p.exists()):
-            raise ValueError("Specified path does not exist.")
+            raise ValueError("Specified path '%s' does not exist." % path)
         outpath = join(path, "output")
         gpaths = sorted([p for p in Path(outpath).glob("groups_*")])
         spaths = sorted([p for p in Path(outpath).glob("snapdir_*")])
