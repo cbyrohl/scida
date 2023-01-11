@@ -37,3 +37,10 @@ def test_load_areposnap(testdatapath):
     assert all([k in obj.data for k in ["PartType%i" % i for i in [0, 1, 3, 4, 5]]])
     assert "Coordinates" in obj.data["PartType0"]
     assert obj.header["BoxSize"] == 35000.0
+
+
+@require_testdata_path("series", only=["TNGvariation_simulation"])
+def test_load_areposim(testdatapath):
+    print(testdatapath)
+    obj = load(testdatapath)
+    print(obj)

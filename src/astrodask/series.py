@@ -7,29 +7,43 @@ import numpy as np
 
 from astrodask.interfaces.arepo import ArepoSnapshot
 from astrodask.misc import map_interface_args
+from astrodask.registries import dataseries_type_registry
 
 
 class DatasetSeries(object):
     """A container for collection of interface instances"""
 
     def __init__(
-        self, paths: Union[List[str], List[Path]], *interface_args, datasetclass=None, **interface_kwargs
+        self,
+        paths: Union[List[str], List[Path]],
+        *interface_args,
+        datasetclass=None,
+        **interface_kwargs
     ):
         self._dataset_cls = datasetclass
         for p in paths:
-            if not(isinstance(p, Path)):
+            if not (isinstance(p, Path)):
                 p = Path(p)
-            if not(p.exists()):
+            if not (p.exists()):
                 raise ValueError("Specified path '%s' does not exist." % p)
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
         self.datasets = [datasetclass(p, *a, **kw) for p, a, kw in gen]
+
+    def __init_subclass__(cls, *args, **kwargs):
+        super().__init_subclass__(*args, **kwargs)
+        dataseries_type_registry[cls.__name__] = cls
+
+    @classmethod
+    def validate_path(cls, path, *args, **kwargs):
+        # estimate whether we have a valid path for this dataseries
+        return False
 
     @classmethod
     def from_directory(
         cls, path, *interface_args, datasetclass=None, pattern=None, **interface_kwargs
     ):
         p = Path(path)
-        if not(p.exists()):
+        if not (p.exists()):
             raise ValueError("Specified path does not exist.")
         if pattern is None:
             pattern = "*"
@@ -64,10 +78,22 @@ class ArepoSimulation(DatasetSeries):
         gpaths = sorted([p for p in Path(outpath).glob("groups_*")])
         spaths = sorted([p for p in Path(outpath).glob("snapdir_*")])
         assert len(gpaths) == len(spaths)
-        super().__init__(spaths, datasetclass=ArepoSnapshot, catalog=gpaths, **interface_kwargs)
+        super().__init__(
+            spaths, datasetclass=ArepoSnapshot, catalog=gpaths, **interface_kwargs
+        )
 
         # get redshifts
         self.redshifts = np.array([ds.redshift for ds in self.datasets])
+
+    @classmethod
+    def validate_path(cls, path, *args, **kwargs):
+        fns = os.listdir(path)
+        if "output" in fns:
+            opath = join(path, "output")
+            folders = os.listdir(opath)
+            folders = [f for f in folders if os.path.isdir(join(opath, f))]
+            return any([f.startswith("snapdir") for f in folders])
+        return False
 
     def get_dataset(
         self,
@@ -81,5 +107,7 @@ class ArepoSimulation(DatasetSeries):
             dz = np.abs(self.redshifts - redshift)
             index = int(np.argmin(dz))
             if not np.isclose(redshift, self.redshifts[index], rtol=redshift_reltol):
-                raise ValueError("Requested redshift unavailable, consider increasing tolerance 'redshift_reltol'.")
+                raise ValueError(
+                    "Requested redshift unavailable, consider increasing tolerance 'redshift_reltol'."
+                )
         return super().get_dataset(index=index)

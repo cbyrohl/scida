@@ -2,3 +2,4 @@
 from typing import Dict, Type
 
 dataset_type_registry: Dict[str, Type] = {}
+dataseries_type_registry: Dict[str, Type] = {}
