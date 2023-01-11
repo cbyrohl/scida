@@ -1,5 +1,6 @@
 import yaml
 
+from astrodask.config import get_config
 from astrodask.convenience import load
 from astrodask.interface import Dataset
 from tests.testdata_properties import require_testdata_path
@@ -19,6 +20,7 @@ def test_load_resource(tmp_path, monkeypatch, testdatapath):
     with open(p, "w") as file:
         yaml.dump(config, file)
     monkeypatch.setenv("ASTRODASK_CONFIG_PATH", str(p))
+    get_config(reload=True)
     assert isinstance(load("dummyresource://dataset"), Dataset)
 
     # from astrodask.convenience import get_dataset, get_dataset_candidates
