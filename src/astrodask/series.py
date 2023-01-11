@@ -72,7 +72,7 @@ class ArepoSimulation(DatasetSeries):
     def __init__(self, path, **interface_kwargs):
         self.name = os.path.basename(path)
         p = Path(path)
-        if not(p.exists()):
+        if not (p.exists()):
             raise ValueError("Specified path '%s' does not exist." % path)
         outpath = join(path, "output")
         gpaths = sorted([p for p in Path(outpath).glob("groups_*")])
@@ -87,6 +87,8 @@ class ArepoSimulation(DatasetSeries):
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
+        if not os.path.isdir(path):
+            return False
         fns = os.listdir(path)
         if "output" in fns:
             opath = join(path, "output")
