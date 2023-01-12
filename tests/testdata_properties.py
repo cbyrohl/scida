@@ -62,6 +62,7 @@ add_testdata_entry(
     "TNG50-3_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
 )
+
 add_testdata_entry(
     "SIMBA50converted_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|C|0|2"],
@@ -69,6 +70,10 @@ add_testdata_entry(
 add_testdata_entry(
     "AURIGA66_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|D|0|2"],
+)
+add_testdata_entry(
+    "Illustris-3_snapshot",
+    ["interface", "areposnapshot", "areposnapshot_withcatalog|E|0|2"],
 )
 add_testdata_entry("EAGLEsmall_snapshot", ["interface"], fn="EAGLEsmall.hdf5")
 add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
@@ -86,7 +91,11 @@ add_testdata_entry(
 )
 add_testdata_entry(
     "AURIGA66_group",
-    ["interface", "illustrissnapshot", "areposnapshot_withcatalog|D|1|2"],
+    ["interface", "areposnapshot_withcatalog|D|1|2"],
+)
+add_testdata_entry(
+    "Illustris-3_group",
+    ["interface", "illustrissnapshot", "areposnapshot_withcatalog|E|1|2"],
 )
 
 
@@ -192,14 +201,19 @@ def get_ids(datatype, **kwargs):
     return ids
 
 
-def require_testdata(name, scope="function", only=None, specific=True):
+def require_testdata(name, scope="function", only=None, specific=True, nmax=None):
     fixturename = "testdata"
     if specific:
         fixturename += "_" + name
+    params = get_params(name, only=only)
+    ids = get_ids(name, only=only)
+    if isinstance(nmax, int):
+        params = params[:nmax]
+        ids = ids[:nmax]
     return pytest.mark.parametrize(
         fixturename,
-        get_params(name, only=only),
-        ids=get_ids(name, only=only),
+        params,
+        ids=ids,
         indirect=True,
         scope=scope,
     )
