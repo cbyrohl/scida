@@ -111,6 +111,9 @@ class FieldContainer(MutableMapping):
             derivedfields_kwargs if derivedfields_kwargs is not None else {}
         )
 
+    def keys(self):
+        return self.fields.keys()
+
     def register_field(self, name=None, description=""):
         # we only construct field upon first call to it (default)
         def decorator(func, name=name, description=description):
