@@ -110,7 +110,7 @@ def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
     assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
 
 
-@require_testdata("areposnapshot_withcatalog")
+@require_testdata("areposnapshot_withcatalog", nmax=1)
 def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
     # check bound mass sums as a start
@@ -122,6 +122,11 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     assert np.isclose(boundmass, boundmass2)
     # Test chaining
     assert np.sum(g.half().sum().evaluate()) < np.sum(g.sum().evaluate())
+
+    # Test custom function apply
+    assert np.allclose(
+        g.apply(lambda x: x[::2]).sum().evaluate(), g.half().sum().evaluate()
+    )
 
 
 @require_testdata("areposnapshot_withcatalog")

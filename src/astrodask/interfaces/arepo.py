@@ -3,7 +3,6 @@ import numbers
 import os
 import re
 import warnings
-from collections import Counter
 from functools import reduce
 from typing import Union
 
@@ -166,8 +165,13 @@ class ArepoSnapshot(BaseSnapshot):
             return
 
         glen = self.data["Group"]["GroupLenType"]
-        da_halocelloffsets = da.concatenate(  # TODO: Do not hardcode shape of 6 particle types!
-            [np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0, dtype=np.int64)]
+        da_halocelloffsets = (
+            da.concatenate(  # TODO: Do not hardcode shape of 6 particle types!
+                [
+                    np.zeros((1, 6), dtype=np.int64),
+                    da.cumsum(glen, axis=0, dtype=np.int64),
+                ]
+            )
         )
         # remove last entry to match shapematch shape
         self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(
@@ -188,7 +192,9 @@ class ArepoSnapshot(BaseSnapshot):
             for key in self.data:
                 if not (key.startswith("PartType")):
                     continue
-                self.data[key]["SubhaloID"] = -1 * da.ones_like(da[key]["uid"], dtype=np.int64)
+                self.data[key]["SubhaloID"] = -1 * da.ones_like(
+                    da[key]["uid"], dtype=np.int64
+                )
             return
 
         subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"].compute()
@@ -276,33 +282,51 @@ class ArepoSnapshot(BaseSnapshot):
 
 
 class GroupAwareOperation:
-    __slots__ = ("arr", "ops", "lengths")
+    opfuncs = dict(min=np.min, max=np.max, sum=np.sum, half=lambda x: x[::2])
+    finalops = {"min", "max", "sum"}
+    __slots__ = ("arr", "ops", "lengths", "final", "opfuncs_custom")
 
     def __init__(self, lengths: NDArray, arr: da.Array, ops=None):
         self.lengths = lengths
         self.arr = arr
+        self.opfuncs_custom = {}
+        self.final = False
         if ops is None:
             self.ops = []
         else:
             self.ops = ops
 
-    def copy(self, add_op=None):
+    def chain(self, add_op=None, final=False):
+        if self.final:
+            raise ValueError("Cannot chain any additional operation.")
         c = copy.copy(self)
+        c.final = final
+        c.opfuncs_custom = self.opfuncs_custom
         if add_op is not None:
-            c.ops.append(add_op)
+            if isinstance(add_op, str):
+                c.ops.append(add_op)
+            elif callable(add_op):
+                name = "custom" + str(len(self.opfuncs_custom) + 1)
+                c.opfuncs_custom[name] = add_op
+                c.ops.append(name)
+            else:
+                raise ValueError("Unknown operation of type '%s'" % str(type(add_op)))
         return c
 
     def min(self):
-        return self.copy(add_op="min")
+        return self.chain(add_op="min", final=True)
 
     def max(self):
-        return self.copy(add_op="max")
+        return self.chain(add_op="max", final=True)
 
     def sum(self):
-        return self.copy(add_op="sum")
+        return self.chain(add_op="sum", final=True)
 
     def half(self):  # dummy operation for testing halfing particle count.
-        return self.copy(add_op="half")
+        return self.chain(add_op="half", final=False)
+
+    def apply(self, func, final=False):
+        return self.chain(add_op=func, final=final)
 
     def __copy__(self):
         # overwrite method so that copy holds a new ops list.
@@ -312,22 +336,18 @@ class GroupAwareOperation:
     def evaluate(self, compute=True):
         # final operations: those that can only be at end of chain
         # intermediate operations: those that can only be prior to end of chain
-        finalops = {"min", "max", "sum"}
-        overlap = set(self.ops) & finalops
-        nfinalops = sum([v for k, v in Counter(self.ops).items() if k in finalops])
-        assert (
-            nfinalops == 1 and overlap.pop() == self.ops[-1]
-        )  # TODO: turn into Exceptions
-        funcdict = dict(min=np.min, max=np.max, sum=np.sum, half=lambda x: x[::2])
+        funcdict = dict()
+        funcdict.update(**self.opfuncs)
+        funcdict.update(**self.opfuncs_custom)
 
         # https://stackoverflow.com/questions/34613543/is-there-a-chain-calling-method-in-python
-        def chain(*funcs):
+        def chainops(*funcs):
             def chained_call(arg):
                 return reduce(lambda r, f: f(r), funcs, arg)
 
             return chained_call
 
-        func = chain(*[funcdict[k] for k in self.ops])
+        func = chainops(*[funcdict[k] for k in self.ops])
         arrdict = {"dummy": self.arr}
         res = map_halo_operation(func, self.lengths, arrdict, fieldnames=["dummy"])
         if compute:
