@@ -20,6 +20,17 @@ def load(path: str, strict=False, **kwargs):
         if databackend in ["http", "https"]:
             # dataset on the internet
             raise NotImplementedError("TODO.")
+        elif databackend == "testdata":
+            config = get_config()
+            tdpath = config.get("testdata_path", None)
+            if tdpath is None:
+                raise ValueError("Test data directory not specified in configuration")
+            if not os.path.isdir(tdpath):
+                raise ValueError("Invalid test data path")
+            res = {f: os.path.join(tdpath, f) for f in os.listdir(tdpath)}
+            if dataname not in res.keys():
+                raise ValueError("Specified test data not available.")
+            path = res[dataname]
         else:
             # potentially custom dataset.
             # TODO: The following hardcoded cases should be loaded through a config file
