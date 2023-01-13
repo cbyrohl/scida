@@ -19,7 +19,7 @@ plugins:
   - search:
   - mkdocs-jupyter:
       execute: true
-      execute_ignore: "notebooks/largedatasets.ipynb"  # waiting for list support (https://github.com/danielfrg/mkdocs-jupyter/issues/119)
+      execute_ignore: "notebooks/static/*.ipynb"  # waiting for list support (https://github.com/danielfrg/mkdocs-jupyter/issues/119)
       kernel_name: astrodask
   - mkdocstrings:
       default_handler: python
