@@ -7,8 +7,9 @@ nav:
   - Readme: 'index.md'
   - 'Tutorial':
     - 'Getting Started': notebooks/gettingstarted.ipynb
-    - 'Processing Large Data Sets': notebooks/largedatasets.ipynb
+    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
     - 'Series': notebooks/series.ipynb
+    - 'Interactive Visualization': notebooks/static/visualization.ipynb
   - api_docs.md
 
 markdown_extensions:
