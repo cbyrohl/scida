@@ -12,6 +12,7 @@ stages:
     - poetry config virtualenvs.in-project true
     - poetry install -vv
     - export ASTRODASK_TESTDATA_PATH=/testdata
+    - export ASTRODASK_TESTDATA_SKIP="Illustris-3_snapshot"
 
 
 
