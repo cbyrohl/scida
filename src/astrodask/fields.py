@@ -132,11 +132,38 @@ class FieldContainer(MutableMapping):
 
     @property
     def dataframe(self):
+        return self.get_dataframe()
+
+    def get_dataframe(self, fields=None):
         dss = {}
-        for k, v in self.items():
+        if fields is None:
+            fields = self.keys()
+        for k in fields:
+            idim = None
+            if k not in self.keys():
+                # could still be an index two 2D dataset
+                i = -1
+                while k[i:].isnumeric():
+                    i += -1
+                i += 1
+                if i == 0:
+                    raise ValueError("Field '%s' not found" % k)
+                idim = int(k[i:])
+                k = k.split(k[i:])[0]
+            v = self[k]
+            assert v.ndim <= 2  # cannot support more than 2 here...
+            if idim is not None:
+                if v.ndim <= 1:
+                    raise ValueError("No second dimensional index for %s" % k)
+                if idim >= v.shape[1]:
+                    raise ValueError(
+                        "Second dimensional index %i not defined for %s" % (idim, k)
+                    )
+
             if v.ndim > 1:
                 for i in range(v.shape[1]):
-                    dss[k + str(i)] = v[:, i]
+                    if idim is None or idim == i:
+                        dss[k + str(i)] = v[:, i]
             else:
                 dss[k] = v
         dfs = [dd.from_dask_array(v, columns=[k]) for k, v in dss.items()]

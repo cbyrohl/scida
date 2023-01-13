@@ -9,6 +9,19 @@ from astrodask.config import get_config
 from astrodask.registries import dataseries_type_registry, dataset_type_registry
 
 
+def get_testdata(name):
+    config = get_config()
+    tdpath = config.get("testdata_path", None)
+    if tdpath is None:
+        raise ValueError("Test data directory not specified in configuration")
+    if not os.path.isdir(tdpath):
+        raise ValueError("Invalid test data path")
+    res = {f: os.path.join(tdpath, f) for f in os.listdir(tdpath)}
+    if name not in res.keys():
+        raise ValueError("Specified test data not available.")
+    return res[name]
+
+
 def load(path: str, strict=False, **kwargs):
     if os.path.exists(path):
         # datasets on disk
@@ -21,16 +34,8 @@ def load(path: str, strict=False, **kwargs):
             # dataset on the internet
             raise NotImplementedError("TODO.")
         elif databackend == "testdata":
-            config = get_config()
-            tdpath = config.get("testdata_path", None)
-            if tdpath is None:
-                raise ValueError("Test data directory not specified in configuration")
-            if not os.path.isdir(tdpath):
-                raise ValueError("Invalid test data path")
-            res = {f: os.path.join(tdpath, f) for f in os.listdir(tdpath)}
-            if dataname not in res.keys():
-                raise ValueError("Specified test data not available.")
-            path = res[dataname]
+            path = get_testdata(dataname)
+
         else:
             # potentially custom dataset.
             # TODO: The following hardcoded cases should be loaded through a config file
