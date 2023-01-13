@@ -8,6 +8,7 @@ nav:
   - 'Tutorial':
     - 'Getting Started': notebooks/gettingstarted.ipynb
     - 'Processing Large Data Sets': notebooks/largedatasets.ipynb
+    - 'Series': notebooks/series.ipynb
   - api_docs.md
 
 markdown_extensions:
