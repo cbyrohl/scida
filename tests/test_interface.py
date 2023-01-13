@@ -128,6 +128,28 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
         g.apply(lambda x: x[::2]).sum().evaluate(), g.half().sum().evaluate()
     )
 
+    # Test unspecified fieldnames when grouping
+    g2 = snp.grouped()
+
+    def customfunc(arr, fieldnames="Masses"):
+        return arr[::2]
+
+    s = g2.apply(customfunc).sum()
+    assert np.allclose(s.evaluate(), g.half().sum().evaluate())
+
+    # Test custom dask array input
+    arr = snp.data["PartType0"]["Density"] * snp.data["PartType0"]["Masses"]
+    boundvol2 = snp.grouped(arr).sum().evaluate().sum()
+    assert 0.0 < boundvol2 < 1.0
+
+    # Test multifield
+    def customfunc(dens, vol, fieldnames=["Density", "Masses"]):
+        return dens * vol
+
+    s = g2.apply(customfunc).sum()
+    boundvol = s.evaluate().sum()
+    assert np.isclose(boundvol, boundvol2)
+
 
 @require_testdata("areposnapshot_withcatalog")
 def test_areposnapshot_load_withcatalog(testdata_areposnapshot_withcatalog):

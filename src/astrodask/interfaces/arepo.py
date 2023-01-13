@@ -3,8 +3,7 @@ import numbers
 import os
 import re
 import warnings
-from functools import reduce
-from typing import Union
+from typing import Dict, List, Union
 
 import astropy.units as u
 import dask
@@ -274,23 +273,43 @@ class ArepoSnapshot(BaseSnapshot):
             self._grouplengths[parttype] = lengths
         return self._grouplengths[parttype]
 
-    def grouped(self, field: Union[str, da.Array], parttype="PartType0"):
-        if isinstance(field, str):
-            field = self.data[parttype][field]
-        gop = GroupAwareOperation(self.get_grouplengths(parttype=parttype), field)
+    def grouped(
+        self, fields: Union[str, da.Array, List[str]] = "", parttype="PartType0"
+    ):
+        inputfields = None
+        if isinstance(fields, str):
+            if fields == "":  # if nothing is specified, we pass all we have.
+                arrdict = self.data[parttype]
+            else:
+                arrdict = dict(field=self.data[parttype][fields])
+                inputfields = [fields]
+        elif isinstance(fields, da.Array):
+            arrdict = dict(daskarr=fields)
+            inputfields = [fields.name]
+        elif isinstance(fields, list):
+            arrdict = {k: self.data[parttype][k] for k in fields}
+            inputfields = fields
+        else:
+            raise ValueError("Unknown input type.")
+        gop = GroupAwareOperation(
+            self.get_grouplengths(parttype=parttype), arrdict, inputfields=inputfields
+        )
         return gop
 
 
 class GroupAwareOperation:
     opfuncs = dict(min=np.min, max=np.max, sum=np.sum, half=lambda x: x[::2])
     finalops = {"min", "max", "sum"}
-    __slots__ = ("arr", "ops", "lengths", "final", "opfuncs_custom")
+    __slots__ = ("arrs", "ops", "lengths", "final", "inputfields", "opfuncs_custom")
 
-    def __init__(self, lengths: NDArray, arr: da.Array, ops=None):
+    def __init__(
+        self, lengths: NDArray, arrs: Dict[str, da.Array], ops=None, inputfields=None
+    ):
         self.lengths = lengths
-        self.arr = arr
+        self.arrs = arrs
         self.opfuncs_custom = {}
         self.final = False
+        self.inputfields = inputfields
         if ops is None:
             self.ops = []
         else:
@@ -313,13 +332,25 @@ class GroupAwareOperation:
                 raise ValueError("Unknown operation of type '%s'" % str(type(add_op)))
         return c
 
-    def min(self):
+    def min(self, field=None):
+        if field is not None:
+            if self.inputfields is not None:
+                raise ValueError("Cannot change input field anymore.")
+            self.inputfields = [field]
         return self.chain(add_op="min", final=True)
 
-    def max(self):
+    def max(self, field=None):
+        if field is not None:
+            if self.inputfields is not None:
+                raise ValueError("Cannot change input field anymore.")
+            self.inputfields = [field]
         return self.chain(add_op="max", final=True)
 
-    def sum(self):
+    def sum(self, field=None):
+        if field is not None:
+            if self.inputfields is not None:
+                raise ValueError("Cannot change input field anymore.")
+            self.inputfields = [field]
         return self.chain(add_op="sum", final=True)
 
     def half(self):  # dummy operation for testing halfing particle count.
@@ -330,7 +361,9 @@ class GroupAwareOperation:
 
     def __copy__(self):
         # overwrite method so that copy holds a new ops list.
-        c = type(self)(self.lengths, self.arr, ops=list(self.ops))
+        c = type(self)(
+            self.lengths, self.arrs, ops=list(self.ops), inputfields=self.inputfields
+        )
         return c
 
     def evaluate(self, compute=True):
@@ -340,16 +373,40 @@ class GroupAwareOperation:
         funcdict.update(**self.opfuncs)
         funcdict.update(**self.opfuncs_custom)
 
-        # https://stackoverflow.com/questions/34613543/is-there-a-chain-calling-method-in-python
         def chainops(*funcs):
-            def chained_call(arg):
-                return reduce(lambda r, f: f(r), funcs, arg)
+            def chained_call(*args):
+                cf = None
+                for i, f in enumerate(funcs):
+                    # first chain element can be multiple fields. treat separately
+                    if i == 0:
+                        cf = f(*args)
+                    else:
+                        cf = f(cf)
+                return cf
 
             return chained_call
 
         func = chainops(*[funcdict[k] for k in self.ops])
-        arrdict = {"dummy": self.arr}
-        res = map_halo_operation(func, self.lengths, arrdict, fieldnames=["dummy"])
+
+        fieldnames = list(self.arrs.keys())
+        if self.inputfields is None:
+            opname = self.ops[0]
+            if opname.startswith("custom"):
+                dfltkwargs = get_kwargs(self.opfuncs_custom[opname])
+                fieldnames = dfltkwargs.get("fieldnames", None)
+                if isinstance(fieldnames, str):
+                    fieldnames = [fieldnames]
+                if fieldnames is None:
+                    raise ValueError(
+                        "Either pass fields to grouped(fields=...) "
+                        "or specify fieldnames=... in applied func."
+                    )
+            else:
+                raise ValueError(
+                    "Specify field to operate on in operation or grouped()."
+                )
+
+        res = map_halo_operation(func, self.lengths, self.arrs, fieldnames=fieldnames)
         if compute:
             res = res.compute()
         return res
