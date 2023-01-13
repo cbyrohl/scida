@@ -11,6 +11,8 @@ stages:
     - poetry --version
     - poetry config virtualenvs.in-project true
     - poetry install -vv
+    - export ASTRODASK_TESTDATA_PATH=/testdata
+
 
 
 # stages
@@ -38,8 +40,6 @@ run_tests:
   image: python:3.9
   extends: .install-deps
   script:
-    - export ASTRODASK_TESTDATA_PATH=/testdata
-    - export ASTRODASK_TESTDATA_SKIP="TNG50-3_snapshot"
     - echo "testdata directory ($ASTRODASK_TESTDATA_PATH) content:"
     - ls $ASTRODASK_TESTDATA_PATH # test whether testdata mounted
     - echo "testdata to be skipped:"
