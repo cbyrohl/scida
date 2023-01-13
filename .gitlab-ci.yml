@@ -19,6 +19,8 @@ stages:
 # stages
 ## deploy/doc
 pages:
+  tags:
+    - datasets
   stage: deploy
   image: python:3.9
   extends: .install-deps
