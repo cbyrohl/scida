@@ -44,6 +44,7 @@ class Dataset(abc.ABC):
 
         # Let's find the data and metadata for the object at 'path'
         self.metadata = {}
+        self._metadata_raw = {}
         self.data = FieldContainerCollection()
 
         if not os.path.exists(self.path):
@@ -57,9 +58,12 @@ class Dataset(abc.ABC):
         )
 
         loader = self._loader(path)
-        self.data, self.metadata = loader.load(**loadkwargs)
+        self.data, self._metadata_raw = loader.load(**loadkwargs)
         self.tempfile = loader.tempfile
         self.file = loader.file
+
+    def _info_custom(self):
+        return None
 
     def info(self, listfields=False):
         rep = ""
@@ -67,6 +71,8 @@ class Dataset(abc.ABC):
         props = self._repr_dict()
         for k, v in props.items():
             rep += sprint("%s: %s" % (k, v))
+        if self._info_custom() is not None:
+            rep += sprint(self._info_custom())
         rep += sprint("=== data ===")
         for k, v in self.data.items():
             if isinstance(v, FieldContainer):
@@ -177,10 +183,10 @@ class BaseSnapshot(Dataset):
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
         defaultattributes = ["config", "header", "parameters"]
-        for k in self.metadata:
+        for k in self._metadata_raw:
             name = k.strip("/").lower()
             if name in defaultattributes:
-                self.__dict__[name] = self.metadata[k]
+                self.__dict__[name] = self._metadata_raw[k]
 
         self.boxsize = np.full(3, np.nan)
 

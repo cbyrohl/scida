@@ -13,6 +13,8 @@ from dask import delayed
 from numba import jit, njit
 from numpy.typing import NDArray
 
+from astrodask.interfaces.mixins import CosmologyMixin
+
 from ..helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
 from ..interface import BaseSnapshot, Selector
 from .arepo_units import (
@@ -59,19 +61,19 @@ class ArepoSnapshot(BaseSnapshot):
         prfx = self._get_fileprefix(path)
         prfx = kwargs.pop("fileprefix", prfx)
         super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
-        self.cosmology = None
-        if "HubbleParam" in self.header and "Omega0" in self.header:
-            import astropy.units as u
-            from astropy.cosmology import FlatLambdaCDM
+        # self.cosmology = None
+        # if "HubbleParam" in self.header and "Omega0" in self.header:
+        #    import astropy.units as u
+        #    from astropy.cosmology import FlatLambdaCDM
 
-            h = self.header["HubbleParam"]
-            omega0 = self.header["Omega0"]
-            self.cosmology = FlatLambdaCDM(H0=100 * h * u.km / u.s / u.Mpc, Om0=omega0)
-        self.redshift = np.nan
-        try:
-            self.redshift = self.header["Redshift"]
-        except KeyError:  # no redshift attribute
-            pass
+        #    h = self.header["HubbleParam"]
+        #    omega0 = self.header["Omega0"]
+        #    self.cosmology = FlatLambdaCDM(H0=100 * h * u.km / u.s / u.Mpc, Om0=omega0)
+        # self.redshift = np.nan
+        # try:
+        #    self.redshift = self.header["Redshift"]
+        # except KeyError:  # no redshift attribute
+        #    pass
 
         self.catalog = catalog
         if catalog is not None:
@@ -299,6 +301,11 @@ class ArepoSnapshot(BaseSnapshot):
             self.get_grouplengths(parttype=parttype), arrdict, inputfields=inputfields
         )
         return gop
+
+
+class CosmologicalArepoSnapshot(CosmologyMixin, ArepoSnapshot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class GroupAwareOperation:
