@@ -5,9 +5,28 @@ from typing import List, Optional, Union
 
 import numpy as np
 
+from astrodask.helpers_misc import hash_path
 from astrodask.interfaces.arepo import ArepoSnapshot
-from astrodask.misc import map_interface_args
+from astrodask.misc import map_interface_args, return_cachefile_path
 from astrodask.registries import dataseries_type_registry
+
+
+def delay_init(cls):
+    class Delay(cls):
+        def __init__(self, *arg, **kwarg):
+            self._arg = arg
+            self._kwarg = kwarg
+
+        def __getattribute__(self, name):
+            self.__class__ = cls
+            arg = self._arg
+            kwarg = self._kwarg
+            del self._arg
+            del self._kwarg
+            self.__init__(*arg, **kwarg)
+            return getattr(self, name)
+
+    return Delay
 
 
 class DatasetSeries(object):
@@ -21,6 +40,11 @@ class DatasetSeries(object):
         **interface_kwargs
     ):
         self._dataset_cls = datasetclass
+        self.hash = hash_path("".join([str(p) for p in paths]))
+        print(self.hash)
+        print("".join([str(p) for p in paths]))
+        # self.metadata = self._metadatacache()
+        # print(self.metadata)
         for p in paths:
             if not (isinstance(p, Path)):
                 p = Path(p)
@@ -58,6 +82,13 @@ class DatasetSeries(object):
             raise ValueError("Specify index.")
         return self.datasets[index]
 
+    def _metadatacache(self, overwrite=False):
+        fp = return_cachefile_path(os.path.join(self.hash, "data.hdf5"))
+        if os.path.exists(fp) and not (overwrite):
+            return None  # read config from file
+        else:
+            pass  # create file
+
 
 class DirectoryCatalog(object):
     """A catalog consisting of interface instances contained in a directory."""
@@ -70,6 +101,7 @@ class ArepoSimulation(DatasetSeries):
     """A container for an arepo simulation."""
 
     def __init__(self, path, **interface_kwargs):
+        self.path = path
         self.name = os.path.basename(path)
         p = Path(path)
         if not (p.exists()):
@@ -77,6 +109,7 @@ class ArepoSimulation(DatasetSeries):
         outpath = join(path, "output")
         gpaths = sorted([p for p in Path(outpath).glob("groups_*")])
         spaths = sorted([p for p in Path(outpath).glob("snapdir_*")])
+
         assert len(gpaths) == len(spaths)
         super().__init__(
             spaths, datasetclass=ArepoSnapshot, catalog=gpaths, **interface_kwargs
