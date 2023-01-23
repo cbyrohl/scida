@@ -22,6 +22,37 @@ def get_testdata(name):
     return res[name]
 
 
+def _determine_type(path, test_datasets=True, test_dataseries=True, strict=False):
+    available_dtypes: List[str] = []
+    reg = dict()
+    if test_datasets:
+        reg.update(**dataset_type_registry)
+    if test_dataseries:
+        reg.update(**dataseries_type_registry)
+
+    for k, dtype in reg.items():
+        if dtype.validate_path(path):
+            available_dtypes.append(k)
+    if len(available_dtypes) == 0:
+        raise ValueError("Unknown data type.")
+    if len(available_dtypes) > 1:
+        # reduce candidates by looking at most specific ones.
+        inheritancecounters = [Counter(getmro(reg[k])) for k in available_dtypes]
+        # try to find candidate that shows up only once across all inheritance trees.
+        # => this will be the most specific candidate(s).
+        count = reduce(lambda x, y: x + y, inheritancecounters)
+        available_dtypes = [k for k in available_dtypes if count[reg[k]] == 1]
+        if len(available_dtypes) > 1:
+            # after looking for the most specific candidate(s), do we still have multiple?
+            if strict:
+                raise ValueError(
+                    "Ambiguous data type. Available types:", available_dtypes
+                )
+            else:
+                print("Note: Multiple dataset candidates: ", available_dtypes)
+    return available_dtypes, [reg[k] for k in available_dtypes]
+
+
 def load(path: str, strict=False, **kwargs):
     if os.path.exists(path):
         # datasets on disk
@@ -52,32 +83,13 @@ def load(path: str, strict=False, **kwargs):
     else:
         raise ValueError("Specified path unknown.")
 
-    available_dtypes: List[str] = []
     reg = dict()
     reg.update(**dataset_type_registry)
     reg.update(**dataseries_type_registry)
 
-    for k, dtype in reg.items():
-        if dtype.validate_path(path):
-            available_dtypes.append(k)
-    if len(available_dtypes) == 0:
-        raise ValueError("Unknown data type.")
-    if len(available_dtypes) > 1:
-        # reduce candidates by looking at most specific ones.
-        inheritancecounters = [Counter(getmro(reg[k])) for k in available_dtypes]
-        # try to find candidate that shows up only once across all inheritance trees.
-        # => this will be the most specific candidate(s).
-        count = reduce(lambda x, y: x + y, inheritancecounters)
-        available_dtypes = [k for k in available_dtypes if count[reg[k]] == 1]
-        if len(available_dtypes) > 1:
-            # after looking for the most specific candidate(s), do we still have multiple?
-            if strict:
-                raise ValueError("Ambiguous data type.")
-            else:
-                print("Note: Multiple dataset candidates: ", available_dtypes)
-    dtype = available_dtypes[0]
+    cls = _determine_type(path)[1][0]
 
-    return reg[dtype](path, **kwargs)
+    return cls(path, **kwargs)
 
 
 def get_dataset_by_name(name):

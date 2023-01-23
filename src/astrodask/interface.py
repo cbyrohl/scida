@@ -191,6 +191,7 @@ class BaseSnapshot(Dataset):
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
+        path = str(path)
         if path.endswith(".hdf5") or path.endswith(".zarr"):
             return True
         if os.path.isdir(path):

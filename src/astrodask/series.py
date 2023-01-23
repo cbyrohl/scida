@@ -1,3 +1,4 @@
+import json
 import os
 from os.path import join
 from pathlib import Path
@@ -5,8 +6,8 @@ from typing import List, Optional, Union
 
 import numpy as np
 
+from astrodask.convenience import _determine_type
 from astrodask.helpers_misc import hash_path
-from astrodask.interfaces.arepo import ArepoSnapshot
 from astrodask.misc import map_interface_args, return_cachefile_path
 from astrodask.registries import dataseries_type_registry
 
@@ -41,8 +42,7 @@ class DatasetSeries(object):
     ):
         self._dataset_cls = datasetclass
         self.hash = hash_path("".join([str(p) for p in paths]))
-        print(self.hash)
-        print("".join([str(p) for p in paths]))
+        self._metadata = None
         # self.metadata = self._metadatacache()
         # print(self.metadata)
         for p in paths:
@@ -51,7 +51,18 @@ class DatasetSeries(object):
             if not (p.exists()):
                 raise ValueError("Specified path '%s' does not exist." % p)
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
-        self.datasets = [datasetclass(p, *a, **kw) for p, a, kw in gen]
+        dec = delay_init
+        if self.metadata is None:
+            # have to fetch metadata first => no lazy load
+            def dec(x):
+                return x
+
+        self.datasets = [dec(datasetclass)(p, *a, **kw) for p, a, kw in gen]
+        if self.metadata is None:
+            dct = {}
+            for i, d in enumerate(self.datasets):
+                dct[i] = d.metadata
+            self.metadata = dct
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -76,18 +87,71 @@ class DatasetSeries(object):
             paths, *interface_args, datasetclass=datasetclass, **interface_kwargs
         )
 
-    def get_dataset(self, index: Optional[int] = None):
+    def get_dataset(self, index: Optional[int] = None, reltol=1e-2, **kwargs):
         """Get dataset by some metadata property. In the base class, we go by list index."""
-        if index is None:
-            raise ValueError("Specify index.")
-        return self.datasets[index]
+        if index is None and len(kwargs) == 0:
+            raise ValueError("Specify index or some parameter to select for.")
+        if index is not None:
+            return self.datasets[index]
+        candidates = []
+        candidates_props = {}
+        props_compare = set()  # save names of fields we want to compare
+        for k, v in kwargs.items():
+            candidates_props[k] = []
+        for i, (j, dm) in enumerate(self.metadata.items()):
+            assert int(i) == int(j)
+            is_candidate = True
+            for k, v in kwargs.items():
+                if k not in dm:
+                    is_candidate = False
+                    continue
+                if isinstance(v, int) or isinstance(v, float):
+                    candidates_props[k].append(dm[k])
+                    print(candidates_props[k])
+                    props_compare.add(k)
+                elif v != dm[k]:
+                    is_candidate = False
+            if is_candidate:
+                candidates.append(i)
+            else:  # unroll changes
+                for p, lst in candidates_props.items():
+                    if len(lst) > len(candidates):
+                        lst.pop()
+        # find candidate closest to request
+        idxlist = []
+        for k in props_compare:
+            print("Ccc", candidates_props[k])
+            idx = np.argmin(np.abs(np.array(candidates_props[k]) - kwargs[k]))
+            idxlist.append(idx)
+        print("idxlist", idxlist)
+        if len(set(idxlist)) != 1:
+            raise ValueError("Ambiguous selection request")
+        index = candidates[idxlist[0]]
+        # TODO: reintroduce tolerance check
+        return self.get_dataset(index=index)
 
     def _metadatacache(self, overwrite=False):
-        fp = return_cachefile_path(os.path.join(self.hash, "data.hdf5"))
-        if os.path.exists(fp) and not (overwrite):
+        fp = return_cachefile_path(os.path.join(self.hash, "data.json"))
+        if os.path.exists(fp) and not overwrite:
             return None  # read config from file
-        else:
-            pass  # create file
+        return None
+
+    @property
+    def metadata(self):
+        if self._metadata is not None:
+            return self._metadata
+        fp = return_cachefile_path(os.path.join(self.hash, "data.json"))
+        if os.path.exists(fp):
+            self._metadata = json.load(open(fp, "r"))
+            return self._metadata
+        return None
+
+    @metadata.setter
+    def metadata(self, dct):
+        self._metadata = dct
+        fp = return_cachefile_path(os.path.join(self.hash, "data.json"))
+        if not os.path.exists(fp):
+            json.dump(dct, open(fp, "w"))
 
 
 class DirectoryCatalog(object):
@@ -95,6 +159,14 @@ class DirectoryCatalog(object):
 
     def __init__(self, path):
         self.path = path
+
+
+class HomogeneousSeries(DatasetSeries):
+    """Series consisting of same-type data sets."""
+
+    def __init__(self, path, **interface_kwargs):
+        super().__init__()
+        pass  # TODO
 
 
 class ArepoSimulation(DatasetSeries):
@@ -111,9 +183,8 @@ class ArepoSimulation(DatasetSeries):
         spaths = sorted([p for p in Path(outpath).glob("snapdir_*")])
 
         assert len(gpaths) == len(spaths)
-        super().__init__(
-            spaths, datasetclass=ArepoSnapshot, catalog=gpaths, **interface_kwargs
-        )
+        dscls = _determine_type(spaths[0])[1][0]
+        super().__init__(spaths, datasetclass=dscls, catalog=gpaths, **interface_kwargs)
 
         # get redshifts
         # self.redshifts = np.array([ds.redshift for ds in self.datasets])
@@ -129,20 +200,3 @@ class ArepoSimulation(DatasetSeries):
             folders = [f for f in folders if os.path.isdir(join(opath, f))]
             return any([f.startswith("snapdir") for f in folders])
         return False
-
-    def get_dataset(
-        self,
-        index: Optional[int] = None,
-        redshift: Optional[float] = None,
-        redshift_reltol=1e-2,
-    ):
-        if index is None and redshift is None:
-            raise ValueError("Specify index or redshift.")
-        elif redshift is not None:
-            dz = np.abs(self.redshifts - redshift)
-            index = int(np.argmin(dz))
-            if not np.isclose(redshift, self.redshifts[index], rtol=redshift_reltol):
-                raise ValueError(
-                    "Requested redshift unavailable, consider increasing tolerance 'redshift_reltol'."
-                )
-        return super().get_dataset(index=index)

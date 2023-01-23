@@ -1,10 +1,9 @@
 import os
 
-from astrodask.interfaces.arepo import ArepoSnapshot
-from astrodask.interfaces.mixins import CosmologyMixin
+from astrodask.interfaces.arepo import CosmologicalArepoSnapshot
 
 
-class IllustrisSnapshot(ArepoSnapshot, CosmologyMixin):
+class IllustrisSnapshot(CosmologicalArepoSnapshot):
     _fileprefix_catalog = "groups"
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs):
