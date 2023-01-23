@@ -52,8 +52,6 @@ class ArepoSelector(Selector):
 
 class ArepoSnapshot(BaseSnapshot):
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs):
-        print(path)
-        print(catalog)
         self.header = {}
         self.config = {}
         self.parameters = {}
@@ -274,7 +272,9 @@ class ArepoSnapshot(BaseSnapshot):
         return self._grouplengths[parttype]
 
     def grouped(
-        self, fields: Union[str, da.Array, List[str]] = "", parttype="PartType0"
+        self,
+        fields: Union[str, da.Array, List[str], Dict[str, da.Array]] = "",
+        parttype="PartType0",
     ):
         inputfields = None
         if isinstance(fields, str):
@@ -289,6 +289,10 @@ class ArepoSnapshot(BaseSnapshot):
         elif isinstance(fields, list):
             arrdict = {k: self.data[parttype][k] for k in fields}
             inputfields = fields
+        elif isinstance(fields, dict):
+            arrdict = {}
+            arrdict.update(**fields)
+            inputfields = list(arrdict.keys())
         else:
             raise ValueError("Unknown input type.")
         gop = GroupAwareOperation(
