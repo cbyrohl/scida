@@ -8,8 +8,7 @@ from astrodask.config import get_config
 
 silent_unavailable = False  # unav aiet tests wildataset l be constructed but skipped if true (otherwise no construct)
 
-datapath = get_config().get("testdata_path", os.getcwd())
-print(datapath)
+datapath = os.path.expanduser(get_config().get("testdata_path", os.getcwd()))
 testdataskip = os.environ.get("ASTRODASK_TESTDATA_SKIP", "")
 
 
