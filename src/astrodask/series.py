@@ -83,7 +83,7 @@ class ArepoSimulation(DatasetSeries):
         )
 
         # get redshifts
-        self.redshifts = np.array([ds.redshift for ds in self.datasets])
+        # self.redshifts = np.array([ds.redshift for ds in self.datasets])
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
