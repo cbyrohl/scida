@@ -111,6 +111,18 @@ class FieldContainer(MutableMapping):
             derivedfields_kwargs if derivedfields_kwargs is not None else {}
         )
 
+    @property
+    def fieldcount(self):
+        return len(self.fields)
+
+    @property
+    def fieldlength(self):
+        first = next(iter(self.fields.values()))
+        if all(first.shape[0] == v.shape[0] for v in self.fields.values()):
+            return first.shape[0]
+        else:
+            return None
+
     def keys(self):
         return self.fields.keys()
 

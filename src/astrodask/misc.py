@@ -1,3 +1,15 @@
+import io
+
+
+def sprint(*args, **kwargs):
+    """print to string"""
+    output = io.StringIO()
+    print(*args, file=output, **kwargs)
+    contents = output.getvalue()
+    output.close()
+    return contents
+
+
 def map_interface_args(paths, *args, **kwargs):
     """Map arguments for interface if they are not lists"""
     n = len(paths)

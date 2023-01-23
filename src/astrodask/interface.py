@@ -8,9 +8,10 @@ import dask.array as da
 import numpy as np
 import zarr
 
-from astrodask.fields import FieldContainerCollection
+from astrodask.fields import FieldContainer, FieldContainerCollection
 from astrodask.helpers_misc import make_serializable
 from astrodask.io import BaseLoader
+from astrodask.misc import sprint
 from astrodask.registries import dataset_type_registry
 
 
@@ -59,6 +60,53 @@ class Dataset(abc.ABC):
         self.data, self.metadata = loader.load(**loadkwargs)
         self.tempfile = loader.tempfile
         self.file = loader.file
+
+    def info(self, listfields=False):
+        rep = ""
+        rep += sprint(self.__class__.__name__)
+        props = self._repr_dict()
+        for k, v in props.items():
+            rep += sprint("%s: %s" % (k, v))
+        rep += sprint("=== data ===")
+        for k, v in self.data.items():
+            if isinstance(v, FieldContainer):
+                length = v.fieldlength
+                count = v.fieldcount
+                if length is not None:
+                    rep += sprint(
+                        "+", k, "(fields: %i, entries: %i, )" % (length, count)
+                    )
+                else:
+                    rep += sprint("+", k)
+                if not listfields:
+                    continue
+                for k2, v2 in v.items():
+                    rep += sprint("--", k2)
+            else:
+                rep += sprint("--", k)
+        rep += sprint("============")
+        print(rep)
+
+    def _repr_dict(self):
+        props = dict()
+        if self.file is not None:
+            if hasattr(self.file, "filename"):
+                props["cache"] = self.file.filename
+        props["source"] = self.path
+        return props
+
+    def __repr__(self):
+        props = self._repr_dict()
+        clsname = self.__class__.__name__
+        result = clsname + "["
+        for k, v in props.items():
+            result += "%s=%s, " % (k, v)
+        result = result[:-2] + "]"
+        return result
+
+    def _repr_pretty_(self, p, cycle):
+        repr = self.__repr__()
+        p.text(repr)
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
