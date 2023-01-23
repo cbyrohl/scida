@@ -73,9 +73,7 @@ class Dataset(abc.ABC):
                 length = v.fieldlength
                 count = v.fieldcount
                 if length is not None:
-                    rep += sprint(
-                        "+", k, "(fields: %i, entries: %i, )" % (length, count)
-                    )
+                    rep += sprint("+", k, "(fields: %i, entries: %i)" % (count, length))
                 else:
                     rep += sprint("+", k)
                 if not listfields:
