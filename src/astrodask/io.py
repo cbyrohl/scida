@@ -12,6 +12,7 @@ from astrodask.config import get_config
 from astrodask.fields import FieldContainerCollection
 from astrodask.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from astrodask.helpers_misc import hash_path
+from astrodask.misc import return_cachefile_path
 
 
 class Loader(abc.ABC):
@@ -106,11 +107,7 @@ class ChunkedHDF5Loader(Loader):
         _config = get_config()
         if "cache_path" in _config:
             # we create a virtual file in the cache directory
-            dataset_cachedir = os.path.join(_config["cache_path"], hash_path(self.path))
-            dataset_cachedir = os.path.expanduser(dataset_cachedir)
-            fp = os.path.join(dataset_cachedir, "data.hdf5")
-            if not os.path.exists(dataset_cachedir):
-                os.mkdir(dataset_cachedir)
+            fp = return_cachefile_path(os.path.join(hash_path(self.path), "data.hdf5"))
             if not os.path.isfile(fp) or overwrite:
                 try:
                     create_mergedhdf5file(fp, files, virtual=virtualcache)

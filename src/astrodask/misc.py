@@ -1,4 +1,26 @@
 import io
+import os
+from typing import Optional
+
+from astrodask.config import get_config
+from astrodask.helpers_misc import hash_path
+
+
+def return_cachefile_path(fname: str) -> Optional[str]:
+    "If cannot be generated, return False"
+    config = get_config()
+    if "cache_path" not in config:
+        return None
+    cp = config["cache_path"]
+    cp = os.path.expanduser(cp)
+    if not os.path.exists(cp):
+        os.mkdir(cp)
+    fp = os.path.join(cp, hash_path(fname))
+    fp = os.path.expanduser(fp)
+    bp = os.path.dirname(fp)
+    if not os.path.exists(bp):
+        os.mkdir(bp)
+    return fp
 
 
 def sprint(*args, **kwargs):
