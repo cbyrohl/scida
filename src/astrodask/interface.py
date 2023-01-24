@@ -34,9 +34,8 @@ class Dataset(abc.ABC):
         super().__init__()
         self.path = path
         self.file = None
-        self.tempfile = (
-            None  # need this reference to keep garbage collection away for the tempfile
-        )
+        # need this 'tempfile' reference to keep garbage collection away for the tempfile
+        self.tempfile = None
         self.location = None
         self.chunksize = chunksize
         self.virtualcache = virtualcache
@@ -72,7 +71,7 @@ class Dataset(abc.ABC):
         for k, v in props.items():
             rep += sprint("%s: %s" % (k, v))
         if self._info_custom() is not None:
-            rep += sprint(self._info_custom())
+            rep += self._info_custom()
         rep += sprint("=== data ===")
         for k, v in self.data.items():
             if isinstance(v, FieldContainer):
@@ -93,9 +92,9 @@ class Dataset(abc.ABC):
 
     def _repr_dict(self):
         props = dict()
-        if self.file is not None:
-            if hasattr(self.file, "filename"):
-                props["cache"] = self.file.filename
+        # if self.file is not None:
+        #     if hasattr(self.file, "filename"):
+        #         props["cache"] = self.file.filename
         props["source"] = self.path
         return props
 
@@ -192,6 +191,7 @@ class BaseSnapshot(Dataset):
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
+        path = str(path)
         if path.endswith(".hdf5") or path.endswith(".zarr"):
             return True
         if os.path.isdir(path):

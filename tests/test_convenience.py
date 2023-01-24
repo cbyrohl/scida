@@ -24,10 +24,6 @@ def test_load_resource(tmp_path, monkeypatch, testdatapath):
     ds = load("dummyresource://dataset")
     assert isinstance(ds, Dataset)
 
-    # from astrodask.convenience import get_dataset, get_dataset_candidates
-    # print("DS", get_dataset("IllustrisTNG50"))
-    # print("DS2", get_dataset_candidates(props=dict(res=2160)))
-
 
 # TODO: Need to write test for TNG50-4_snapshot+TNG50-4_group using require_testdata(..., only=...)
 @require_testdata_path("interface", only=["Illustris-3_snapshot"])
@@ -42,6 +38,5 @@ def test_load_areposnap(testdatapath):
 
 @require_testdata_path("series", only=["TNGvariation_simulation"])
 def test_load_areposim(testdatapath):
-    print(testdatapath)
     obj = load(testdatapath)
-    print(obj)
+    assert obj is not None

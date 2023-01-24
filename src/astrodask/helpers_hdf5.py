@@ -1,9 +1,12 @@
+import logging
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
 
 import h5py
 import numpy as np
 import zarr
+
+log = logging.getLogger(__name__)
 
 
 def walk_group(obj, tree, get_attrs=False):
@@ -203,26 +206,35 @@ def create_mergedhdf5file(
         attrs_same = {}
         attrs_differ = {}
 
-        attrs0paths = attrs_key_lists[0]
         nfiles = len(files)
 
         for apath in sorted(attrspaths_all):
             attrs_same[apath] = {}
             attrs_differ[apath] = {}
-            attrsnames = set().union(*[result[i]["attrs"][apath] for i in range(nfiles) if apath in result[i]["attrs"]])
+            attrsnames = set().union(
+                *[
+                    result[i]["attrs"][apath]
+                    for i in range(nfiles)
+                    if apath in result[i]["attrs"]
+                ]
+            )
             for k in attrsnames:
                 # we ignore apaths existing in some datasets.
-                attrvallist = [result[i]["attrs"][apath][k] for i in range(nfiles) if apath in result[i]["attrs"]]
+                attrvallist = [
+                    result[i]["attrs"][apath][k]
+                    for i in range(nfiles)
+                    if apath in result[i]["attrs"]
+                ]
                 attrval0 = attrvallist[0]
                 if isinstance(attrval0, np.ndarray):
                     if not (np.all([np.array_equal(attrval0, v) for v in attrvallist])):
-                        print("INFO:", apath, k, "has different values.")
+                        log.info("%s: %s has different values." % (apath, k))
                         attrs_differ[apath][k] = np.stack(attrvallist)
                         continue
                 else:
                     # assert len(set(vals)) == 1, k + " has different values."  # TODO
                     if not len(set(attrvallist)) == 1:
-                        print("INFO:", apath, k, "has different values.")
+                        log.info("%s: %s has different values." % (apath, k))
                         attrs_differ[apath][k] = np.array(attrval0)
                         continue
                 attrs_same[apath][k] = attrval0
