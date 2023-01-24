@@ -1,4 +1,5 @@
 import copy
+import logging
 import numbers
 import os
 import re
@@ -22,6 +23,8 @@ from .arepo_units import (
     get_unittuples_from_TNGdocs_particles,
     get_unittuples_from_TNGdocs_subhalos,
 )
+
+log = logging.getLogger(__name__)
 
 
 class ArepoSelector(Selector):
@@ -125,9 +128,7 @@ class ArepoSnapshot(BaseSnapshot):
         prfxs_lst = [p for s in prfxs_prfx_sim for p in prfxs_lst if p.startswith(s)]
         prfxs = dict.fromkeys(prfxs_lst)
         if len(prfxs) > 1:
-            print(
-                "Note: We have more than one prefix avail:", prfxs
-            )  # TODO: Remove verbosity eventually.
+            log.info("We have more than one prefix avail:", prfxs)
         elif len(prfxs) == 0:
             return ""
         return list(prfxs.keys())[0]
