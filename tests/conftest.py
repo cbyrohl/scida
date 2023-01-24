@@ -1,5 +1,6 @@
 import pytest
 
+from astrodask.config import get_config
 from astrodask.interface import BaseSnapshot
 from astrodask.interfaces.arepo import ArepoSnapshot  # ArepoSnapshotWithUnits
 from astrodask.interfaces.illustris import IllustrisSnapshot
@@ -75,3 +76,11 @@ def testdata_illustrissnapshot_withcatalog(request) -> IllustrisSnapshot:
 def cachedir(monkeypatch, tmp_path_factory):
     path = tmp_path_factory.mktemp("cache")
     monkeypatch.setenv("ASTRODASK_CACHE_PATH", str(path))
+    return path
+
+
+@pytest.fixture(scope="function", autouse=True)
+def cleancache(cachedir):
+    """Always start with empty cache."""
+    get_config(reload=True)
+    return cachedir

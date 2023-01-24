@@ -40,11 +40,11 @@ class DatasetSeries(object):
         datasetclass=None,
         **interface_kwargs
     ):
+        self.paths = paths
         self._dataset_cls = datasetclass
         self.hash = hash_path("".join([str(p) for p in paths]))
         self._metadata = None
-        # self.metadata = self._metadatacache()
-        # print(self.metadata)
+        self._metadatafile = return_cachefile_path(os.path.join(self.hash, "data.json"))
         for p in paths:
             if not (isinstance(p, Path)):
                 p = Path(p)
@@ -107,7 +107,6 @@ class DatasetSeries(object):
                     continue
                 if isinstance(v, int) or isinstance(v, float):
                     candidates_props[k].append(dm[k])
-                    print(candidates_props[k])
                     props_compare.add(k)
                 elif v != dm[k]:
                     is_candidate = False
@@ -120,36 +119,33 @@ class DatasetSeries(object):
         # find candidate closest to request
         idxlist = []
         for k in props_compare:
-            print("Ccc", candidates_props[k])
             idx = np.argmin(np.abs(np.array(candidates_props[k]) - kwargs[k]))
             idxlist.append(idx)
-        print("idxlist", idxlist)
         if len(set(idxlist)) != 1:
             raise ValueError("Ambiguous selection request")
         index = candidates[idxlist[0]]
         # TODO: reintroduce tolerance check
         return self.get_dataset(index=index)
 
-    def _metadatacache(self, overwrite=False):
-        fp = return_cachefile_path(os.path.join(self.hash, "data.json"))
-        if os.path.exists(fp) and not overwrite:
-            return None  # read config from file
-        return None
-
     @property
     def metadata(self):
         if self._metadata is not None:
             return self._metadata
-        fp = return_cachefile_path(os.path.join(self.hash, "data.json"))
+        fp = self._metadatafile
         if os.path.exists(fp):
-            self._metadata = json.load(open(fp, "r"))
+            md = json.load(open(fp, "r"))
+            ikeys = sorted([int(k) for k in md.keys()])
+            mdnew = {}
+            for ik in ikeys:
+                mdnew[ik] = md[str(ik)]
+            self._metadata = mdnew
             return self._metadata
         return None
 
     @metadata.setter
     def metadata(self, dct):
         self._metadata = dct
-        fp = return_cachefile_path(os.path.join(self.hash, "data.json"))
+        fp = self._metadatafile
         if not os.path.exists(fp):
             json.dump(dct, open(fp, "w"))
 
