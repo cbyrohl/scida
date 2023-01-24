@@ -52,6 +52,8 @@ def load(path: str, strict=False, **kwargs):
     else:
         raise ValueError("Specified path unknown.")
 
+    path = os.path.realpath(path)
+
     available_dtypes: List[str] = []
     reg = dict()
     reg.update(**dataset_type_registry)
