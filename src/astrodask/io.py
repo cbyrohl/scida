@@ -216,24 +216,23 @@ def load_datadict_old(
     return data, metadata
 
 
-class BaseLoader(Loader):
-    def __init__(self, path):
-        super().__init__(path)
-        self.location = ""
-        self.tempfile = None
-
-    def load(self, **kwargs):
-        if os.path.isdir(self.path):
-            if os.path.isfile(os.path.join(self.path, ".zgroup")):
-                # object is a zarr object
-                loader = ZarrLoader(self.path)
-            else:
-                # otherwise expect this is a chunked HDF5 file
-                loader = ChunkedHDF5Loader(self.path)
+def determine_loader(path):
+    if os.path.isdir(path):
+        if os.path.isfile(os.path.join(path, ".zgroup")):
+            # object is a zarr object
+            loader = ZarrLoader(path)
         else:
-            # we are directly given a target file
-            loader = HDF5Loader(self.path)
-        data, metadata = loader.load(**kwargs)
-        self.file = loader.file
-        self.tempfile = loader.tempfile
-        return data, metadata
+            # otherwise expect this is a chunked HDF5 file
+            loader = ChunkedHDF5Loader(path)
+    else:
+        # we are directly given a target file
+        loader = HDF5Loader(path)
+    return loader
+
+
+def load(path, **kwargs):
+    loader = determine_loader(path)
+    data, metadata = loader.load(**kwargs)
+    file = loader.file
+    tmpfile = loader.tempfile
+    return data, metadata, file, tmpfile

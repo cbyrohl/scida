@@ -8,20 +8,14 @@ import dask.array as da
 import numpy as np
 import zarr
 
+import astrodask.io
 from astrodask.fields import FieldContainer, FieldContainerCollection
 from astrodask.helpers_misc import make_serializable
-from astrodask.io import BaseLoader
 from astrodask.misc import sprint
 from astrodask.registries import dataset_type_registry
 
 
 class Dataset(abc.ABC):
-    @classmethod
-    @property  # TODO: chaining property and classmethod deprecated in py 3.11: remove!
-    @abc.abstractmethod
-    def _loader(cls):  # each class has to have a loader
-        raise NotImplementedError
-
     def __init__(
         self,
         path,
@@ -56,10 +50,12 @@ class Dataset(abc.ABC):
             derivedfields_kwargs=dict(snap=self),
         )
 
-        loader = self._loader(path)
-        self.data, self._metadata_raw = loader.load(**loadkwargs)
-        self.tempfile = loader.tempfile
-        self.file = loader.file
+        res = astrodask.io.load(path, **loadkwargs)
+        self.data = res[0]
+        self._metadata_raw = res[1]
+        self.file = res[2]
+        self.tempfile = res[3]
+        self._cached = False
 
     def _info_custom(self):
         return None
@@ -108,8 +104,8 @@ class Dataset(abc.ABC):
         return result
 
     def _repr_pretty_(self, p, cycle):
-        repr = self.__repr__()
-        p.text(repr)
+        rpr = self.__repr__()
+        p.text(rpr)
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -175,9 +171,6 @@ class Dataset(abc.ABC):
 
 
 class BaseSnapshot(Dataset):
-    # TODO: Think more careful about hierarchy here. Right now BaseSnapshot is for Gadget-style sims
-    _loader = BaseLoader
-
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs):
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 

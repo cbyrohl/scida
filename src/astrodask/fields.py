@@ -19,6 +19,8 @@ class FieldContainerCollection(MutableMapping):
     """A mutable collection of FieldContainers."""
 
     def __init__(self, types=None, derivedfields_kwargs=None):
+        if derivedfields_kwargs is None:
+            derivedfields_kwargs = {}
         if types is None:
             types = []
         self.store = {
