@@ -55,12 +55,12 @@ add_testdata_entry(
 )
 add_testdata_entry(
     "SWIFTcosmo_snapshot",
-    ["interface", "areposimulation"],
+    ["interface"],
     fn="SWIFTcosmo_snapshot.hdf5",
 )
 add_testdata_entry(
     "SWIFTnoncosmo_snapshot",
-    ["interface", "areposimulation"],
+    ["interface"],
     fn="SWIFTnoncosmo_snapshot.hdf5",
 )
 add_testdata_entry(
