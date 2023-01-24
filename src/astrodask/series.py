@@ -21,7 +21,7 @@ def delay_init(cls):
             self._arg = arg
             self._kwarg = kwarg
 
-        def __getattribute__(self, name):
+        def __getattr__(self, name):
             self.__class__ = cls
             arg = self._arg
             kwarg = self._kwarg
