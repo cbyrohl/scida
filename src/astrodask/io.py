@@ -1,4 +1,5 @@
 import abc
+import logging
 import os
 import tempfile
 from os.path import join
@@ -8,11 +9,11 @@ import h5py
 import numpy as np
 import zarr
 
-from astrodask.config import get_config
 from astrodask.fields import FieldContainerCollection
 from astrodask.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
-from astrodask.helpers_misc import hash_path
-from astrodask.misc import return_cachefile_path
+from astrodask.misc import return_hdf5cachepath
+
+log = logging.getLogger(__name__)
 
 
 class Loader(abc.ABC):
@@ -91,6 +92,19 @@ class ChunkedHDF5Loader(Loader):
         virtualcache=False,
         derivedfields_kwargs=None,
     ):
+
+        cachefp = return_hdf5cachepath(self.path)
+        if cachefp is not None and os.path.isfile(cachefp):
+            if not overwrite:
+                # we are done; just use cached version
+                datadict = self.load_singlehdf5(
+                    cachefp,
+                    token=token,
+                    chunksize=chunksize,
+                    derivedfields_kwargs=derivedfields_kwargs,
+                )
+                return datadict
+
         files = [join(self.path, f) for f in os.listdir(self.path)]
         files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
         files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
@@ -104,30 +118,34 @@ class ChunkedHDF5Loader(Loader):
         sortidx = np.argsort(nmbrs)
         files = files[sortidx]
 
-        _config = get_config()
-        if "cache_path" in _config:
-            # we create a virtual file in the cache directory
-            fp = return_cachefile_path(os.path.join(hash_path(self.path), "data.hdf5"))
-            if not os.path.isfile(fp) or overwrite:
-                try:
-                    create_mergedhdf5file(fp, files, virtual=virtualcache)
-                except Exception as ex:
-                    os.remove(fp)  # remove failed attempt at merging file
-                    raise ex
-            self.location = fp
-        else:
-            # otherwise, we create a temporary file
+        self.location = cachefp
+        if cachefp is None:
+            # no filepath available
             self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
             self.location = self.tempfile.name
-            create_mergedhdf5file(self.location, files, virtual=virtualcache)
-            print(
-                "WARNING:",
-                "No caching directory specified. Initial file read will remain slow.",
+            log.warning(
+                "No caching directory specified. Initial file read will remain slow."
             )
 
-        self.file = h5py.File(self.location, "r")
-        datadict = load_datadict_old(
+        try:
+            create_mergedhdf5file(cachefp, files, virtual=virtualcache)
+        except Exception as ex:
+            os.remove(cachefp)  # remove failed attempt at merging file
+            raise ex
+        datadict = self.load_singlehdf5(
             self.location,
+            token=token,
+            chunksize=chunksize,
+            derivedfields_kwargs=derivedfields_kwargs,
+        )
+        return datadict
+
+    def load_singlehdf5(
+        self, location, token="", chunksize="auto", derivedfields_kwargs=None
+    ):
+        self.file = h5py.File(location, "r")
+        datadict = load_datadict_old(
+            location,
             self.file,
             token=token,
             chunksize=chunksize,

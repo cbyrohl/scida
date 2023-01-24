@@ -3,6 +3,20 @@ import os
 from typing import Optional
 
 from astrodask.config import get_config
+from astrodask.helpers_misc import hash_path
+
+
+def return_hdf5cachepath(path_original) -> str:
+    fp = return_cachefile_path(os.path.join(hash_path(path_original), "data.hdf5"))
+    return fp
+
+
+def path_hdf5cachefile_exists(path) -> bool:
+    """Checks whether a cache file exists for given path."""
+    fp = return_hdf5cachepath(path)
+    if os.path.isfile(fp):
+        return True
+    return False
 
 
 def return_cachefile_path(fname: str) -> Optional[str]:
