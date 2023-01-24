@@ -59,6 +59,12 @@ add_testdata_entry(
     fn="SWIFTcosmo_snapshot.hdf5",
 )
 add_testdata_entry(
+    "FIRE2_snapshot",
+    ["interface"],
+    fn="FIRE2_snapshot.hdf5",
+)
+add_testdata_entry("SIMBA50_snapshot", ["interface"], fn="SIMBA50_snapshot.hdf5")
+add_testdata_entry(
     "SWIFTnoncosmo_snapshot",
     ["interface"],
     fn="SWIFTnoncosmo_snapshot.hdf5",
@@ -71,7 +77,6 @@ add_testdata_entry(
     "TNG50-3_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
 )
-
 add_testdata_entry(
     "SIMBA50converted_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|C|0|2"],
