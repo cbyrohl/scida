@@ -48,3 +48,11 @@ def map_interface_args(paths, *args, **kwargs):
             else:
                 tkwargs[k] = v[i]
         yield path, targs, tkwargs
+
+
+def str_is_float(element: str) -> bool:
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False

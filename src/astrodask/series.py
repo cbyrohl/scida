@@ -22,6 +22,7 @@ def delay_init(cls):
             self._kwarg = kwarg
 
         def __getattr__(self, name):
+            print(name)
             self.__class__ = cls
             arg = self._arg
             kwarg = self._kwarg
@@ -62,7 +63,8 @@ class DatasetSeries(object):
         if self.metadata is None:
             print("Have not cached this data series. Can take a while.")
             for i, ds in enumerate(tqdm(self.datasets)):
-                ds.__repr__()  # just need some call to evaluate
+                # do not remove! this will suffice to evaluate the lazy instance
+                ds.path
 
         if self.metadata is None:
             dct = {}

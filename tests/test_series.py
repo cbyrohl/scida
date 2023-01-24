@@ -7,7 +7,7 @@ from astrodask.series import ArepoSimulation
 from tests.testdata_properties import require_testdata_path
 
 
-@require_testdata_path("areposimulation")
+@require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_load(testdatapath):
     bs = ArepoSimulation(testdatapath)
     ds = bs.datasets[0]
@@ -48,5 +48,9 @@ def test_areposimulation_caching(cachedir, testdatapath):
     assert 5 * dt2 < dt1 < dt0, "dataseries caching does not speed up as intended"
 
     # try to use a dataset from cached version
-    ds = bs2.get_dataset(0)
-    assert ds.header is not None
+    redshift = 2.0
+    ds1 = bs1.get_dataset(redshift=redshift)
+    ds2 = bs2.get_dataset(redshift=redshift)
+    assert np.isclose(ds1.metadata["redshift"], redshift, rtol=1e-2)
+    assert np.isclose(ds2.metadata["redshift"], redshift, rtol=1e-2)
+    assert ds2.header is not None
