@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
+
 # tqdm.auto does not consistently give jupyter support to all users
 from tqdm import tqdm
 
@@ -40,6 +41,7 @@ class DatasetSeries(object):
         paths: Union[List[str], List[Path]],
         *interface_args,
         datasetclass=None,
+        overwrite_cache=False,
         **interface_kwargs
     ):
         self.paths = paths
@@ -52,27 +54,15 @@ class DatasetSeries(object):
                 p = Path(p)
             if not (p.exists()):
                 raise ValueError("Specified path '%s' does not exist." % p)
-        dec = delay_init
-        # if self.metadata is None:
-        #    # have to fetch metadata first => no lazy load
-        #    def dec(x):
-        #        return x
+        dec = delay_init  # lazy loading
 
-        # if __name__ == '__main__':
-        #    with Pool(2) as p:
-        #        r = list(tqdm.tqdm(p.imap(_foo, range(30)), total=30))
-        # we already use multiprocessing for files within each dataseries,
-        # so lets not overdo it...
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
-        # with ProcessPoolExecutor(max_workers=4) as executor:
-        #    results = list(tqdm(executor.map(f, my_iter), total=len(my_iter)))
         self.datasets = [dec(datasetclass)(p, *a, **kw) for p, a, kw in gen]
 
         if self.metadata is None:
             print("Have not cached this data series. Can take a while.")
             for i, ds in enumerate(tqdm(self.datasets)):
                 ds.__repr__()  # just need some call to evaluate
-
 
         if self.metadata is None:
             dct = {}
