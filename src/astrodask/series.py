@@ -43,6 +43,7 @@ class DatasetSeries(object):
         *interface_args,
         datasetclass=None,
         overwrite_cache=False,
+        lazy=False,  # lazy will only initialize data sets on demand.
         **interface_kwargs
     ):
         self.paths = paths
@@ -50,6 +51,7 @@ class DatasetSeries(object):
         self.hash = hash_path("".join([str(p) for p in paths]))
         self._metadata = None
         self._metadatafile = return_cachefile_path(os.path.join(self.hash, "data.json"))
+        self.lazy = True
         for p in paths:
             if not (isinstance(p, Path)):
                 p = Path(p)
@@ -60,15 +62,10 @@ class DatasetSeries(object):
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
         self.datasets = [dec(datasetclass)(p, *a, **kw) for p, a, kw in gen]
 
-        if self.metadata is None:
+        if self.metadata is None and not lazy:
             print("Have not cached this data series. Can take a while.")
-            for i, ds in enumerate(tqdm(self.datasets)):
-                # do not remove! this will suffice to evaluate the lazy instance
-                ds.path
-
-        if self.metadata is None:
             dct = {}
-            for i, d in enumerate(self.datasets):
+            for i, d in enumerate(tqdm(self.datasets)):
                 dct[i] = d.metadata
             self.metadata = dct
 
@@ -101,6 +98,12 @@ class DatasetSeries(object):
             raise ValueError("Specify index or some parameter to select for.")
         if index is not None:
             return self.datasets[index]
+        if len(kwargs) > 0 and self.metadata is None:
+            if self.lazy:
+                raise ValueError(
+                    "Cannot select by given keys before dataset evaluation."
+                )
+            raise ValueError("Unknown error.")  # should not happen?
         candidates = []
         candidates_props = {}
         props_compare = set()  # save names of fields we want to compare
@@ -176,7 +179,7 @@ class HomogeneousSeries(DatasetSeries):
 class ArepoSimulation(DatasetSeries):
     """A container for an arepo simulation."""
 
-    def __init__(self, path, **interface_kwargs):
+    def __init__(self, path, lazy=False, **interface_kwargs):
         self.path = path
         self.name = os.path.basename(path)
         p = Path(path)
