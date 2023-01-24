@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
-from tqdm.autonotebook import tqdm
+# tqdm.auto does not consistently give jupyter support to all users
+from tqdm import tqdm
 
 from astrodask.convenience import _determine_type
 from astrodask.helpers_misc import hash_path
@@ -71,6 +72,7 @@ class DatasetSeries(object):
             print("Have not cached this data series. Can take a while.")
             for i, ds in enumerate(tqdm(self.datasets)):
                 ds.__repr__()  # just need some call to evaluate
+
 
         if self.metadata is None:
             dct = {}
