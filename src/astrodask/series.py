@@ -9,6 +9,7 @@ import numpy as np
 # tqdm.auto does not consistently give jupyter support to all users
 from tqdm import tqdm
 
+import astrodask.io
 from astrodask.convenience import _determine_type
 from astrodask.helpers_misc import hash_path
 from astrodask.misc import map_interface_args, return_cachefile_path
@@ -43,6 +44,7 @@ class DatasetSeries(object):
         datasetclass=None,
         overwrite_cache=False,
         lazy=False,  # lazy will only initialize data sets on demand.
+        async_caching=False,
         **interface_kwargs
     ):
         self.paths = paths
@@ -67,6 +69,12 @@ class DatasetSeries(object):
             for i, d in enumerate(tqdm(self.datasets)):
                 dct[i] = d.metadata
             self.metadata = dct
+        elif async_caching:
+            # hacky and should not be here this explicitly, just a proof of concept
+            for p in paths:
+                loader = astrodask.io.determine_loader(p)
+                print(p, loader)
+            pass
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -178,7 +186,7 @@ class HomogeneousSeries(DatasetSeries):
 class ArepoSimulation(DatasetSeries):
     """A container for an arepo simulation."""
 
-    def __init__(self, path, lazy=False, **interface_kwargs):
+    def __init__(self, path, lazy=False, async_caching=False, **interface_kwargs):
         self.path = path
         self.name = os.path.basename(path)
         p = Path(path)
@@ -190,7 +198,14 @@ class ArepoSimulation(DatasetSeries):
 
         assert len(gpaths) == len(spaths)
         dscls = _determine_type(spaths[0])[1][0]
-        super().__init__(spaths, datasetclass=dscls, catalog=gpaths, **interface_kwargs)
+        super().__init__(
+            spaths,
+            datasetclass=dscls,
+            catalog=gpaths,
+            lazy=lazy,
+            async_caching=async_caching,
+            **interface_kwargs
+        )
 
         # get redshifts
         # self.redshifts = np.array([ds.redshift for ds in self.datasets])

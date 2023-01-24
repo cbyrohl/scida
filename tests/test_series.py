@@ -21,6 +21,28 @@ def test_areposimulation_load(testdatapath):
     # assert testdatapath_areposimulation.file is not None
 
 
+# @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
+# def test_areposimulation_asynccaching(cachedir, testdatapath):
+#    tstart = time.process_time()
+#    bs = ArepoSimulation(testdatapath, lazy=True, async_caching=True)
+#    dt0 = time.process_time() - tstart
+#    assert type(bs.datasets[0]).__name__ == "Delay"
+
+
+@require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
+def test_areposimulation_lazy(cachedir, testdatapath):
+    tstart = time.process_time()
+    bs = ArepoSimulation(testdatapath, lazy=True)
+    dt0 = time.process_time() - tstart
+    assert type(bs.datasets[0]).__name__ == "Delay"
+
+    tstart = time.process_time()
+    bs = ArepoSimulation(testdatapath, lazy=False)
+    dt1 = time.process_time() - tstart
+    assert type(bs.datasets[0]).__name__ != "Delay"
+    assert 10 * dt0 < dt1
+
+
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_caching(cachedir, testdatapath):
     # first call to cache datasets
@@ -29,10 +51,14 @@ def test_areposimulation_caching(cachedir, testdatapath):
     dt0 = time.process_time() - tstart
     os.remove(bs._metadatafile)  # remove series metadata cache file
 
+    print("1")
+
     # second call to cache dataseries, and only series
     tstart = time.process_time()
     bs1 = ArepoSimulation(testdatapath)
     dt1 = time.process_time() - tstart
+
+    print("2")
 
     # third to benchmark use with dataseries cache
     tstart = time.process_time()
