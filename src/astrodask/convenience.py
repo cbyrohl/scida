@@ -87,6 +87,7 @@ def load(path: str, strict=False, **kwargs):
     reg.update(**dataset_type_registry)
     reg.update(**dataseries_type_registry)
 
+    path = os.path.realpath(path)
     cls = _determine_type(path)[1][0]
 
     return cls(path, **kwargs)
