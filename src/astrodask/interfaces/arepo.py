@@ -96,10 +96,12 @@ class ArepoSnapshot(BaseSnapshot):
             self.add_catalogIDs()
 
         # Add certain metadata to class __dict__
-        if isinstance(self.header["BoxSize"], float):
+        bs = self.header["BoxSize"]
+        if isinstance(bs, float) or isinstance(bs, np.ndarray):
             self.boxsize[:] = self.header["BoxSize"]
         else:
             # Have not thought about non-cubic cases yet.
+            print("Boxsize:", bs)
             raise NotImplementedError
 
     @classmethod

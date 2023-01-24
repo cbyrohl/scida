@@ -54,6 +54,16 @@ add_testdata_entry(
     ["series", "areposimulation"],
 )
 add_testdata_entry(
+    "SWIFTcosmo_snapshot",
+    ["interface", "areposimulation"],
+    fn="SWIFTcosmo_snapshot.hdf5",
+)
+add_testdata_entry(
+    "SWIFTnoncosmo_snapshot",
+    ["interface", "areposimulation"],
+    fn="SWIFTnoncosmo_snapshot.hdf5",
+)
+add_testdata_entry(
     "TNG50-4_snapshot",
     ["interface", "areposnapshot", "areposnapshot_withcatalog|A|0|2"],
 )
