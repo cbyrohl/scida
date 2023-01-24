@@ -53,4 +53,5 @@ def test_areposimulation_caching(cachedir, testdatapath):
     ds2 = bs2.get_dataset(redshift=redshift)
     assert np.isclose(ds1.metadata["redshift"], redshift, rtol=1e-2)
     assert np.isclose(ds2.metadata["redshift"], redshift, rtol=1e-2)
+
     assert ds2.header is not None
