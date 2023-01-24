@@ -1,3 +1,5 @@
+import time
+
 import dask.array as da
 import numpy as np
 import pytest
@@ -7,20 +9,21 @@ from tests.testdata_properties import require_testdata, require_testdata_path
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_interface_load(cachedir, testdatapath):
-    snp = BaseSnapshot(testdatapath, virtualcache=True)
+def test_interface_load(testdatapath):
+    snp = BaseSnapshot(testdatapath)
     assert snp.file is not None
 
 
-# TODO: revisit how to do this smartly and assert that cache speeds things up
-# @pytest.mark.skip()
-# def test_snapshot_load_usecache(snp, monkeypatch, tmp_path):
-#    d = tmp_path / "cachedir"
-#    d.mkdir()
-#    print(str(d))
-#    monkeypatch.setenv("ASTRODASK_CACHEDIR", str(d))
-#    print("CONF", dict(_config))
-#    assert snp.file is not None
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_snapshot_load_usecache(testdatapath):
+    tstart = time.process_time()
+    snp = BaseSnapshot(testdatapath)
+    dt0 = time.process_time() - tstart
+    tstart = time.process_time()
+    snp = BaseSnapshot(testdatapath)
+    dt1 = time.process_time() - tstart
+    assert 4 * dt1 < dt0
+    assert snp.file is not None
 
 
 @require_testdata_path("interface", only=["TNG50-4_group"])

@@ -97,7 +97,7 @@ class ChunkedHDF5Loader(Loader):
         if cachefp is not None and os.path.isfile(cachefp):
             if not overwrite:
                 # we are done; just use cached version
-                datadict = self.load_singlehdf5(
+                datadict = self.load_cachefile(
                     cachefp,
                     token=token,
                     chunksize=chunksize,
@@ -105,6 +105,18 @@ class ChunkedHDF5Loader(Loader):
                 )
                 return datadict
 
+        self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
+
+        datadict = self.load_cachefile(
+            self.location,
+            token=token,
+            chunksize=chunksize,
+            derivedfields_kwargs=derivedfields_kwargs,
+        )
+        return datadict
+
+    def create_cachefile(self, fileprefix="", virtualcache=False):
+        cachefp = return_hdf5cachepath(self.path)
         files = [join(self.path, f) for f in os.listdir(self.path)]
         files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
         files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
@@ -132,15 +144,8 @@ class ChunkedHDF5Loader(Loader):
         except Exception as ex:
             os.remove(cachefp)  # remove failed attempt at merging file
             raise ex
-        datadict = self.load_singlehdf5(
-            self.location,
-            token=token,
-            chunksize=chunksize,
-            derivedfields_kwargs=derivedfields_kwargs,
-        )
-        return datadict
 
-    def load_singlehdf5(
+    def load_cachefile(
         self, location, token="", chunksize="auto", derivedfields_kwargs=None
     ):
         self.file = h5py.File(location, "r")
