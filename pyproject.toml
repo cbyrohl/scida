@@ -45,6 +45,7 @@ holoviews = {extras = ["recommended"], version = "^1.15.3"}
 xarray = "^2022.12.0"
 datashader = "^0.14.3"
 pyinstrument = "^4.4.0"
+scalene = "^1.5.19"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]

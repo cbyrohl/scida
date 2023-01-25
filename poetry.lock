@@ -3454,6 +3454,18 @@ files = [
 markdown = ">=3.2"
 
 [[package]]
+name = "pynvml"
+version = "11.4.1"
+description = "Python Bindings for the NVIDIA Management Library"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pynvml-11.4.1-py3-none-any.whl", hash = "sha256:d27be542cd9d06558de18e2deffc8022ccd7355bc7382255d477038e7e424c6c"},
+    {file = "pynvml-11.4.1.tar.gz", hash = "sha256:b2e4a33b80569d093b513f5804db0c7f40cfc86f15a013ae7a8e99c5e175d5dd"},
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
@@ -3917,6 +3929,58 @@ files = [
 ]
 
 [[package]]
+name = "rich"
+version = "13.2.0"
+description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
+category = "dev"
+optional = false
+python-versions = ">=3.7.0"
+files = [
+    {file = "rich-13.2.0-py3-none-any.whl", hash = "sha256:7c963f0d03819221e9ac561e1bc866e3f95a02248c1234daa48954e6d381c003"},
+    {file = "rich-13.2.0.tar.gz", hash = "sha256:f1a00cdd3eebf999a15d85ec498bfe0b1a77efe9b34f645768a54132ef444ac5"},
+]
+
+[package.dependencies]
+markdown-it-py = ">=2.1.0,<3.0.0"
+pygments = ">=2.6.0,<3.0.0"
+typing-extensions = {version = ">=4.0.0,<5.0", markers = "python_version < \"3.9\""}
+
+[package.extras]
+jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
+
+[[package]]
+name = "scalene"
+version = "1.5.19"
+description = "Scalene: A high-resolution, low-overhead CPU, GPU, and memory profiler for Python"
+category = "dev"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "scalene-1.5.19-cp310-cp310-macosx_11_7_universal2.whl", hash = "sha256:78480f92f5098fffdcba4e4cd540fdb6b7a95ff933ee93e1056b0aa2ab746643"},
+    {file = "scalene-1.5.19-cp310-cp310-manylinux_2_24_x86_64.whl", hash = "sha256:1da57151f00c70446309c9b52843ce7b437bbf32d336a7c309d4fe0b8deda2a2"},
+    {file = "scalene-1.5.19-cp310-cp310-win_amd64.whl", hash = "sha256:cdb9be734cfb6b42eef1105fee1876a5c465eb72e109c0d0ceea6e6bdbce21c6"},
+    {file = "scalene-1.5.19-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:dd2b29bd13eaafdd98090108357680c1a6fa88067b4e71313252aa065bbe6ec1"},
+    {file = "scalene-1.5.19-cp311-cp311-manylinux_2_24_x86_64.whl", hash = "sha256:2dac52555518c7159d2fd9c8c7c31ffa8b6a74f21d1b40a9d315a77f4a7f97ed"},
+    {file = "scalene-1.5.19-cp311-cp311-win_amd64.whl", hash = "sha256:eeef31408df35972e54a39ae2d2f1aeab111f2d53d0a78061e45dcf024c6e01d"},
+    {file = "scalene-1.5.19-cp37-cp37m-macosx_10_15_universal2.whl", hash = "sha256:58fb40d031081a55e813f292b2d85b64d7558a372832d8e456f7fe2113adf182"},
+    {file = "scalene-1.5.19-cp37-cp37m-manylinux_2_24_x86_64.whl", hash = "sha256:50084cd5c2c4732f845011a7a5407c567df52160b5604a8b4b01ee8b0afee985"},
+    {file = "scalene-1.5.19-cp38-cp38-macosx_10_15_universal2.whl", hash = "sha256:0997b1f1ec90e079a73349d702b18df60e6b24c31c255d3e8d6ec6a8b03493c8"},
+    {file = "scalene-1.5.19-cp38-cp38-manylinux_2_24_x86_64.whl", hash = "sha256:f67f39321548c06de440319bdd70c41c14b6c50d4748226a101402995677cade"},
+    {file = "scalene-1.5.19-cp38-cp38-win_amd64.whl", hash = "sha256:7a1d452ad4d32cf8adb8b86cae4e5b9c7bff866fff1c43618f9ad114b9ecac32"},
+    {file = "scalene-1.5.19-cp39-cp39-macosx_11_7_universal2.whl", hash = "sha256:6c08f3bc0b6355db3c34f0e9aea1b291e64675bb832e19758ee751918787cac0"},
+    {file = "scalene-1.5.19-cp39-cp39-manylinux_2_24_x86_64.whl", hash = "sha256:d8bc53334b13e486ed6ba03fe4b7595ad4038d05537793eed9999952ba1b34c6"},
+    {file = "scalene-1.5.19-cp39-cp39-win_amd64.whl", hash = "sha256:d1fd5d83f3c022ddc46049f29823351b8dbdb8590f5803358fa6034784601f24"},
+    {file = "scalene-1.5.19.tar.gz", hash = "sha256:59c5eaaa64f4990444f9606e841b268d49f55dcd7467162e48f9658150a9cd1e"},
+]
+
+[package.dependencies]
+cloudpickle = ">=1.5.0"
+Jinja2 = ">=3.0.3"
+pynvml = ">=11.0.0"
+rich = ">=10.7.0"
+wheel = ">=0.36.1"
+
+[[package]]
 name = "scipy"
 version = "1.9.3"
 description = "Fundamental algorithms for scientific computing in Python"
@@ -4363,6 +4427,21 @@ optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
 
 [[package]]
+name = "wheel"
+version = "0.38.4"
+description = "A built-package format for Python"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "wheel-0.38.4-py3-none-any.whl", hash = "sha256:b60533f3f5d530e971d6737ca6d58681ee434818fab630c83a734bb10c083ce8"},
+    {file = "wheel-0.38.4.tar.gz", hash = "sha256:965f5259b566725405b05e7cf774052044b1ed30119b5d586b2703aafe8719ac"},
+]
+
+[package.extras]
+test = ["pytest (>=3.0.0)"]
+
+[[package]]
 name = "widgetsnbextension"
 version = "4.0.5"
 description = "Jupyter interactive widgets for Jupyter Notebook"
@@ -4454,4 +4533,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "fc12d170dc01c72e2b97d8ae3fb8e201cce07669026cec6c5efc3828af3450b0"
+content-hash = "7e20557dd4e1de67f4fb26bb261c8dcff7cca93f5b3cefd5d0aff80da476b8d9"

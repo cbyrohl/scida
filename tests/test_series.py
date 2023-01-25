@@ -55,7 +55,9 @@ def test_areposimulation_lazy(cachedir, testdatapath):
     assert 10 * dt0 < dt1
 
     assert type(bs1.datasets[1]).__name__ == "Delay"
+    print(type(bs1.datasets[1]))
     bs1.datasets[1].evaluate_lazy()
+    print(type(bs1.datasets[1]))
     assert type(bs1.datasets[1]).__name__ != "Delay"
 
 
