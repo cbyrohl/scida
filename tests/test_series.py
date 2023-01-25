@@ -2,6 +2,7 @@ import os
 import time
 
 import numpy as np
+import psutil
 
 from astrodask.series import ArepoSimulation
 from tests.testdata_properties import require_testdata_path
@@ -21,26 +22,41 @@ def test_areposimulation_load(testdatapath):
     # assert testdatapath_areposimulation.file is not None
 
 
-# @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
-# def test_areposimulation_asynccaching(cachedir, testdatapath):
-#    tstart = time.process_time()
-#    bs = ArepoSimulation(testdatapath, lazy=True, async_caching=True)
-#    dt0 = time.process_time() - tstart
-#    assert type(bs.datasets[0]).__name__ == "Delay"
+@require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
+def test_areposimulation_asynccaching(cachedir, testdatapath):
+    mstart = psutil.Process().memory_info().rss
+    print(mstart)
+    print(psutil.Process().memory_full_info())
+    # d = np.zeros((1024,1024,1024))
+    tstart = time.process_time()
+    bs = ArepoSimulation(testdatapath)  # , lazy=True, async_caching=True)
+    dt0 = time.process_time() - tstart
+    print(dt0)
+    m0 = psutil.Process().memory_info().rss - mstart
+    print(psutil.Process().memory_info().rss)
+    print(psutil.Process().memory_full_info())
+    print(m0 / (1024.0**2))
+    print(bs)
+
+    # assert type(bs.datasets[0]).__name__ == "Delay"
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_lazy(cachedir, testdatapath):
     tstart = time.process_time()
-    bs = ArepoSimulation(testdatapath, lazy=True)
+    bs1 = ArepoSimulation(testdatapath, lazy=True)
     dt0 = time.process_time() - tstart
-    assert type(bs.datasets[0]).__name__ == "Delay"
+    assert type(bs1.datasets[0]).__name__ == "Delay"
 
     tstart = time.process_time()
-    bs = ArepoSimulation(testdatapath, lazy=False)
+    bs2 = ArepoSimulation(testdatapath, lazy=False)
     dt1 = time.process_time() - tstart
-    assert type(bs.datasets[0]).__name__ != "Delay"
+    assert type(bs2.datasets[0]).__name__ != "Delay"
     assert 10 * dt0 < dt1
+
+    assert type(bs1.datasets[1]).__name__ == "Delay"
+    bs1.datasets[1].evaluate_lazy()
+    assert type(bs1.datasets[1]).__name__ != "Delay"
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
