@@ -18,20 +18,19 @@ from astrodask.registries import dataseries_type_registry
 
 def delay_init(cls):
     class Delay(cls):
-        def __init__(self, *args, **kwargs):
-            self.__class__ = self.__class__
-            self._args = args
-            self._kwargs = kwargs
+        def __init__(self, *arg, **kwarg):
+            self._arg = arg
+            self._kwarg = kwarg
 
         def __getattr__(self, name):
+            arg = self._arg
+            kwarg = self._kwarg
             self.__class__ = cls
-            args = self._args
-            kwargs = self._kwargs
-            del self._args
-            del self._kwargs
-            self.__init__(*args, **kwargs)
+            del self._arg
+            del self._kwarg
+            self.__init__(*arg, **kwarg)
             if name == "evaluate_lazy":
-                return lambda *a: None  # this attr only requests conversion of lazy obj
+                return getattr(self, "__repr__")  # some dummy
             return getattr(self, name)
 
     return Delay
