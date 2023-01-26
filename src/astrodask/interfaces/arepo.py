@@ -200,22 +200,22 @@ class ArepoSnapshot(BaseSnapshot):
                 )
             return
 
-        subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"].compute()
-        subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"].compute()
+        subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"]
+        subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"]
 
         for key in self.data:
             if not (key.startswith("PartType")):
                 continue
             num = int(key[-1])
             gidx = self.data[key]["uid"]
-            shcounts, shnumber = get_shcounts_shcells(
+            dlyd = delayed(get_shcounts_shcells)(
                 subhalogrnr, halocelloffsets[:, num].shape[0]
             )
             sidx = compute_subhaloindex(
                 gidx,
                 halocelloffsets[:, num],
-                shnumber,
-                shcounts,
+                dlyd[1],
+                dlyd[0],
                 subhalocellcounts[:, num],
             )
             self.data[key]["SubhaloID"] = sidx
