@@ -3,6 +3,7 @@ import logging
 import os
 import tempfile
 from os.path import join
+from functools import partial
 
 import dask.array as da
 import h5py
@@ -166,6 +167,7 @@ def load_datadict_old(
     token="",
     chunksize=None,
     derivedfields_kwargs=None,
+    lazy=True, # if true, call da.from_array delayed
 ):
     # TODO: Refactor and rename
     data = {}
@@ -189,8 +191,18 @@ def load_datadict_old(
             toload = any([group == "/" + g for g in groups_with_datasets])
         if toload:
             data[group.split("/")[1]] = {}
+
+    # Make each datadict entry a FieldContainer
+    datanew = FieldContainerCollection(
+        data.keys(),
+        derivedfields_kwargs=derivedfields_kwargs,
+    )
+    for k in data:
+        datanew.new_container(k)
+
     # datasets
-    for dataset in tree["datasets"]:
+
+    for i, dataset in enumerate(tree["datasets"]):
         if groups_load is not None:
             toload = any([dataset[0].startswith(gname) for gname in groups_load])
         else:
@@ -199,25 +211,36 @@ def load_datadict_old(
             )
         if toload:
             # TODO: Still dont support more nested groups
-            group = dataset[0].split("/")[1]
+            splt = dataset[0].rstrip("/").split("/")
+            group = splt[1]
+            fieldname = splt[-1]
             name = "Dataset" + str(token) + dataset[0].replace("/", "_")
             if "__dask_tokenize__" in file:  # check if the file contains the dask name.
                 name = file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
-            ds = da.from_array(
-                file[dataset[0]],
-                chunks=chunksize,
-                name=name,
-                inline_array=inline_array,
-            )
-            data[group][dataset[0].split("/")[-1]] = ds
-
-    # Make each datadict entry a FieldContainer
-    datanew = FieldContainerCollection(
-        data.keys(),
-        derivedfields_kwargs=derivedfields_kwargs,
-    )
-    for k in data:
-        datanew.new_container(k, **data[k])
+            if lazy and i>0: # need one non-lazy entry though later on...
+                hds = file[dataset[0]]
+                def field(arrs, snap=None, h5path="", chunksize="", name="", inline_array=False,
+                          file=None, **kwargs):
+                    hds = file[h5path]
+                    arr = da.from_array(
+                        hds,
+                        chunks=chunksize,
+                        name=name,
+                        inline_array=inline_array,
+                    )
+                    return arr 
+                fnc = partial(field, h5path = dataset[0], chunksize=chunksize, name=name, inline_array=inline_array,
+                              file=file)
+                datanew[group].register_field(name=fieldname, description=fieldname+": lazy field from disk")(fnc)
+            else:
+                hds = file[dataset[0]]
+                ds = da.from_array(
+                    hds,
+                    chunks=chunksize,
+                    name=name,
+                    inline_array=inline_array,
+                )
+                datanew[group][fieldname] = ds
     data = datanew
 
     # Add a unique identifier for each element for each data type
