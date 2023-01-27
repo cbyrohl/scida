@@ -13,14 +13,19 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: mixed-line-ending
-  - repo: https://github.com/srstevenson/nb-clean
-    rev: "2.4.0"
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.6.0
     hooks:
-      - id: nb-clean
-        exclude: |
-            (?x)(
-                ^docs/notebooks/largedatasets.ipynb
-            )
+      - id: nbstripout
+	    exclude: ^(docs/notebooks/static/)
+        #  - repo: https://github.com/srstevenson/nb-clean
+        #    rev: "2.4.0"
+        #    hooks:
+        #      - id: nb-clean
+        #        exclude: |
+        #            (?x)(
+        #                ^docs/notebooks/largedatasets.ipynb
+        #            )
   - repo: local
     hooks:
       - id: black

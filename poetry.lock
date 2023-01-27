@@ -2201,6 +2201,46 @@ files = [
 psutil = "*"
 
 [[package]]
+name = "memray"
+version = "1.6.0"
+description = "A memory profiler for Python applications"
+category = "dev"
+optional = false
+python-versions = ">=3.7.0"
+files = [
+    {file = "memray-1.6.0-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:5de6ab0660c97c50c27333a6e4d7c41cf6ef43d8d17b173b7abd109800a9e235"},
+    {file = "memray-1.6.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2003a78b4f2725f69cf2f6d9fd7c81006639803d8904b6c4a089a3f48de6f1aa"},
+    {file = "memray-1.6.0-cp310-cp310-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:d7547349cf56decff0686f87b766a1d81784b0b86b2a1013b12ee5c1236e2b41"},
+    {file = "memray-1.6.0-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:e96cb195736ae8f16879c976849b1af01bb667bfdcead49598bf54b09e7f4e18"},
+    {file = "memray-1.6.0-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:3436c58ad132c8cf060a55cd7428fa13924a40c1cb22dfaaf2a9d68e06969289"},
+    {file = "memray-1.6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:4193b5109cb2ef057cedf4615277096050fc04efd02ac6628a08391e1b4b6d53"},
+    {file = "memray-1.6.0-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:60e6c50861ade399ee26756c651e7f5f1105b3f1a64f63d6a0495edcc34d5242"},
+    {file = "memray-1.6.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:232c9b7c64b57000c40cb859b9bd987f04044fb0758d255c3e7282f9c4bc28b0"},
+    {file = "memray-1.6.0-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:32d8bf124c9e16f8eeefc00e0afae480e1a9a5ed8e194d23f075af5fcbb55348"},
+    {file = "memray-1.6.0-cp37-cp37m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:790b4c559765be716c1e4e073f547e7fc3b38e2fb23f43d24684cb2041e61cb4"},
+    {file = "memray-1.6.0-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:532b81e80d112a2035ef00e35774cc0f4a701c6fbd2955f546bbf10340d38627"},
+    {file = "memray-1.6.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:63f96a94392e2bb80a1d3d0a10dcb9d6bbc697340d566a66717bffbf42f28310"},
+    {file = "memray-1.6.0-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:91e1d709771bd1b598dedf114cbcd128a06252a2da2192eb5270304264db62e8"},
+    {file = "memray-1.6.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:71dec332f2fdbfa550e15dbf82a7df2699a303a24a6da52d21ab1f3edec59bd1"},
+    {file = "memray-1.6.0-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:8673f7d90603f4b3b3e96f3a2f9943776c123867b00b161433c751beaf3a155f"},
+    {file = "memray-1.6.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:052fc4f47956b10f91b087543c2aafb858605d70b89907e439bf4949af9e6c37"},
+    {file = "memray-1.6.0-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:09f89ea9a61f965d51abdc76dee6929eccfba5e2dd21f6ddfd45ec23d3e4b6cb"},
+    {file = "memray-1.6.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:21c17bae6969c58bdbe266b84cefb76992af1c79597c6af5ee147dcc742d7772"},
+    {file = "memray-1.6.0.tar.gz", hash = "sha256:e22ad913c46f7402c1eb0ac0b3e61cac43f4f1411fb987da492a71403317e45f"},
+]
+
+[package.dependencies]
+jinja2 = "*"
+rich = ">=11.2.0"
+
+[package.extras]
+benchmark = ["asv"]
+dev = ["Cython", "asv", "black", "bump2version", "check-manifest", "flake8", "furo", "greenlet", "ipython", "isort", "mypy", "pytest", "pytest-cov", "sphinx", "sphinx-argparse", "towncrier"]
+docs = ["IPython", "bump2version", "furo", "sphinx", "sphinx-argparse", "towncrier"]
+lint = ["black", "check-manifest", "flake8", "isort", "mypy"]
+test = ["Cython", "greenlet", "ipython", "pytest", "pytest-cov"]
+
+[[package]]
 name = "mergedeep"
 version = "1.3.4"
 description = "A deep merge function for 🐍."
@@ -3029,6 +3069,13 @@ files = [
     {file = "Pillow-9.4.0-1-cp39-cp39-macosx_10_10_x86_64.whl", hash = "sha256:b8c2f6eb0df979ee99433d8b3f6d193d9590f735cf12274c108bd954e30ca858"},
     {file = "Pillow-9.4.0-1-pp38-pypy38_pp73-macosx_10_10_x86_64.whl", hash = "sha256:b70756ec9417c34e097f987b4d8c510975216ad26ba6e57ccb53bc758f490dab"},
     {file = "Pillow-9.4.0-1-pp39-pypy39_pp73-macosx_10_10_x86_64.whl", hash = "sha256:43521ce2c4b865d385e78579a082b6ad1166ebed2b1a2293c3be1d68dd7ca3b9"},
+    {file = "Pillow-9.4.0-2-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:9d9a62576b68cd90f7075876f4e8444487db5eeea0e4df3ba298ee38a8d067b0"},
+    {file = "Pillow-9.4.0-2-cp311-cp311-macosx_10_10_x86_64.whl", hash = "sha256:87708d78a14d56a990fbf4f9cb350b7d89ee8988705e58e39bdf4d82c149210f"},
+    {file = "Pillow-9.4.0-2-cp37-cp37m-macosx_10_10_x86_64.whl", hash = "sha256:8a2b5874d17e72dfb80d917213abd55d7e1ed2479f38f001f264f7ce7bae757c"},
+    {file = "Pillow-9.4.0-2-cp38-cp38-macosx_10_10_x86_64.whl", hash = "sha256:83125753a60cfc8c412de5896d10a0a405e0bd88d0470ad82e0869ddf0cb3848"},
+    {file = "Pillow-9.4.0-2-cp39-cp39-macosx_10_10_x86_64.whl", hash = "sha256:9e5f94742033898bfe84c93c831a6f552bb629448d4072dd312306bab3bd96f1"},
+    {file = "Pillow-9.4.0-2-pp38-pypy38_pp73-macosx_10_10_x86_64.whl", hash = "sha256:013016af6b3a12a2f40b704677f8b51f72cb007dac785a9933d5c86a72a7fe33"},
+    {file = "Pillow-9.4.0-2-pp39-pypy39_pp73-macosx_10_10_x86_64.whl", hash = "sha256:99d92d148dd03fd19d16175b6d355cc1b01faf80dae93c6c3eb4163709edc0a9"},
     {file = "Pillow-9.4.0-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:2968c58feca624bb6c8502f9564dd187d0e1389964898f5e9e1fbc8533169157"},
     {file = "Pillow-9.4.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:c5c1362c14aee73f50143d74389b2c158707b4abce2cb055b7ad37ce60738d47"},
     {file = "Pillow-9.4.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bd752c5ff1b4a870b7661234694f24b1d2b9076b8bf337321a814c612665f343"},
@@ -4533,4 +4580,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "7e20557dd4e1de67f4fb26bb261c8dcff7cca93f5b3cefd5d0aff80da476b8d9"
+content-hash = "08c9a8e35f84b077bd385c96bda20ff954a12c1f40be833d6f448e443339da11"
