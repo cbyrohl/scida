@@ -2,7 +2,8 @@
 
 ![buildstatus](https://github.com/cbyrohl/astrodask/actions/workflows/python-package-conda.yml/badge.svg)
 
-Analysis tool for astrophysical data, particularly galaxy formation and cosmological simulations run with AREPO. This tool tries to leverage the dask package for calculation of relevant properties. astrophysical datasets + dask = astrodask.
+astrodask is an out-of-the-box analysis tool for large astrophysical datasets, particularly cosmological and galaxy formation simulations using particles or unstructured meshes.
+This tool uses dask, allowing analysis to scale up from your personal computer to HPC resources and the cloud.
 
 ## Features
 
