@@ -17,7 +17,7 @@ repos:
     rev: 0.6.0
     hooks:
       - id: nbstripout
-	    exclude: ^(docs/notebooks/static/)
+        exclude: ^(docs/notebooks/static/)
         #  - repo: https://github.com/srstevenson/nb-clean
         #    rev: "2.4.0"
         #    hooks:
