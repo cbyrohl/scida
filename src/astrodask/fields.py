@@ -125,13 +125,14 @@ class FieldContainer(MutableMapping):
         else:
             return None
 
-    #def keys(self) -> set:
+    # def keys(self) -> set:
     #    # TODO: hacky; also know that we have not / can not write .items() right now
     #    # which will lead to unintended behaviour down the line
     #    return set(self.fields.keys()) | set(self.derivedfields.keys())
-    def keys(self):
+    def keys(self, allfields=False):
+        if allfields:
+            return list(set(self.fields.keys()) | set(self.derivedfields.keys()))
         return self.fields.keys()
-
 
     def register_field(self, name=None, description=""):
         # we only construct field upon first call to it (default)

@@ -14,7 +14,7 @@ from dask import delayed
 from numba import jit, njit
 from numpy.typing import NDArray
 
-from astrodask.interfaces.mixins import CosmologyMixin
+from astrodask.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin
 
 from ..helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
 from ..interface import BaseSnapshot, Selector
@@ -55,7 +55,7 @@ class ArepoSelector(Selector):
         snap.data = self.data
 
 
-class ArepoSnapshot(BaseSnapshot):
+class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs):
         self.header = {}
         self.config = {}
@@ -94,15 +94,6 @@ class ArepoSnapshot(BaseSnapshot):
         # Add halo/subhalo IDs to particles (if catalogs available)
         if self.catalog is not None:
             self.add_catalogIDs()
-
-        # Add certain metadata to class __dict__
-        bs = self.header["BoxSize"]
-        if isinstance(bs, float) or isinstance(bs, np.ndarray):
-            self.boxsize[:] = self.header["BoxSize"]
-        else:
-            # Have not thought about non-cubic cases yet.
-            print("Boxsize:", bs)
-            raise NotImplementedError
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):

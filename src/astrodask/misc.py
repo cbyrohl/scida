@@ -2,6 +2,9 @@ import io
 import os
 from typing import Optional
 
+import dask.array as da
+import numpy as np
+
 from astrodask.config import get_config
 from astrodask.helpers_misc import hash_path
 
@@ -70,3 +73,31 @@ def str_is_float(element: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def rectangular_cutout_mask(
+    center, width, coords, pbc=True, boxsize=None, backend="dask", chunksize="auto"
+):
+    center = np.array(center)
+    width = np.array(width)
+    if backend == "dask":
+        be = da
+    else:
+        be = np
+
+    dists = coords - center
+    dists = be.fabs(dists)
+    if pbc:
+        if boxsize is None:
+            raise ValueError("Need to specify for boxsize for PBC.")
+        dists = be.where(dists > 0.5 * boxsize, be.fabs(boxsize - dists), dists)
+
+    kwargs = {}
+    if backend == "dask":
+        kwargs["chunks"] = chunksize
+    mask = be.ones(coords.shape[0], dtype=np.bool, **kwargs)
+    for i in range(3):
+        mask &= dists[:, i] < (
+            width[i] / 2.0
+        )  # TODO: This interval is not closed on the left side.
+    return mask
