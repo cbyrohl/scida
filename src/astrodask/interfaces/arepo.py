@@ -180,7 +180,7 @@ class ArepoSnapshot(BaseSnapshot):
         self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(
             glen.chunks
         )
-        halocelloffsets = da_halocelloffsets
+        halocelloffsets = da_halocelloffsets.rechunk(-1)
 
         for key in self.data:
             if not (key.startswith("PartType")):
