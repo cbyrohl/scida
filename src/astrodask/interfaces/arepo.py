@@ -61,8 +61,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         self.config = {}
         self.parameters = {}
         self._grouplengths = {}
-        prfx = self._get_fileprefix(path)
-        prfx = kwargs.pop("fileprefix", prfx)
+        prfx = kwargs.pop("fileprefix", None)
+        if prfx is None:
+            prfx = self._get_fileprefix(path)
         super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
         # self.cosmology = None
         # if "HubbleParam" in self.header and "Omega0" in self.header:
@@ -102,7 +103,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             return True
         if os.path.isdir(path):
             files = os.listdir(path)
-            cls._get_fileprefix(path)
+            cls._get_fileprefix(path, **kwargs)
             sufxs = [f.split(".")[-1] for f in files]
             if len(set(sufxs)) > 1:
                 return False
@@ -111,20 +112,25 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         return False
 
     @classmethod
-    def _get_fileprefix(cls, path) -> str:
+    def _get_fileprefix(cls, path, **kwargs) -> str:
         if os.path.isfile(path):
             return ""  # nothing to do, we have a single file, not a directory
         # order matters: groups will be taken before fof_subhalo, requires py>3.7 for dict order
         prfxs_prfx_sim = dict.fromkeys(["groups", "fof_subhalo", "snap"])
         files = os.listdir(path)
-        prfxs_lst = [f.split(".")[0] for f in files]
+        prfxs_lst = []  # [f.split(".")[0] for f in files]
+        for fn in files:
+            s = re.search(r"^([a-zA-Z0-9]*)_([\d]*)", files[0])
+            if s is not None:
+                prfxs_lst.append(s.group(1))
         prfxs_lst = [p for s in prfxs_prfx_sim for p in prfxs_lst if p.startswith(s)]
         prfxs = dict.fromkeys(prfxs_lst)
+        prfxs = list(prfxs.keys())
         if len(prfxs) > 1:
-            log.info("We have more than one prefix avail:", prfxs)
+            log.info("We have more than one prefix avail: %s" % prfxs)
         elif len(prfxs) == 0:
             return ""
-        return list(prfxs.keys())[0]
+        return prfxs[0]
 
     @ArepoSelector()
     def return_data(self):

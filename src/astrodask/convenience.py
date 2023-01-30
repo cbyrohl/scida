@@ -22,7 +22,9 @@ def get_testdata(name):
     return res[name]
 
 
-def _determine_type(path, test_datasets=True, test_dataseries=True, strict=False):
+def _determine_type(
+    path, test_datasets=True, test_dataseries=True, strict=False, **kwargs
+):
     available_dtypes: List[str] = []
     reg = dict()
     if test_datasets:
@@ -31,7 +33,7 @@ def _determine_type(path, test_datasets=True, test_dataseries=True, strict=False
         reg.update(**dataseries_type_registry)
 
     for k, dtype in reg.items():
-        if dtype.validate_path(path):
+        if dtype.validate_path(path, **kwargs):
             available_dtypes.append(k)
     if len(available_dtypes) == 0:
         raise ValueError("Unknown data type.")
@@ -88,7 +90,7 @@ def load(path: str, strict=False, **kwargs):
     reg.update(**dataseries_type_registry)
 
     path = os.path.realpath(path)
-    cls = _determine_type(path)[1][0]
+    cls = _determine_type(path, **kwargs)[1][0]
 
     return cls(path, **kwargs)
 
