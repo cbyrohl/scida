@@ -117,10 +117,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             return ""  # nothing to do, we have a single file, not a directory
         # order matters: groups will be taken before fof_subhalo, requires py>3.7 for dict order
         prfxs_prfx_sim = dict.fromkeys(["groups", "fof_subhalo", "snap"])
-        files = os.listdir(path)
-        prfxs_lst = []  # [f.split(".")[0] for f in files]
+        files = sorted(os.listdir(path))
+        prfxs_lst = []
         for fn in files:
-            s = re.search(r"^([a-zA-Z0-9]*)_([\d]*)", files[0])
+            s = re.search(r"^(\w*)_(\d*)", fn)
             if s is not None:
                 prfxs_lst.append(s.group(1))
         prfxs_lst = [p for s in prfxs_prfx_sim for p in prfxs_lst if p.startswith(s)]
