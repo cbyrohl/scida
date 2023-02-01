@@ -1,0 +1,160 @@
+---
+fields:
+  PartType0:
+    AExpMaximumTemperature:
+      cgsunits:
+    Coordinates:
+      cgsunits: cm
+    Density:
+      cgsunits: g/cm**3
+    Entropy:
+      cgsunits: g*cm**2/s**2/K
+    GroupNumber:
+      cgsunits:
+    HostHalo_TVir_Mass:
+      cgsunits: K
+    InternalEnergy:
+      cgsunits: cm**2/s**2
+    IronMassFracFromSNIa:
+      cgsunits:
+    Mass:
+      cgsunits: g
+    MaximumTemperature:
+      cgsunits: K
+    MetalMassFracFromAGB:
+      cgsunits:
+    MetalMassFracFromSNII:
+      cgsunits:
+    MetalMassFracFromSNIa:
+      cgsunits:
+    Metallicity:
+      cgsunits:
+    OnEquationOfState:
+      cgsunits:
+    ParticleIDs:
+      cgsunits:
+    SmoothedIronMassFracFromSNIa:
+      cgsunits:
+    SmoothedMetallicity:
+      cgsunits:
+    SmoothingLength:
+      cgsunits: cm
+    StarFormationRate:
+      cgsunits: g/s
+    SubGroupNumber:
+      cgsunits:
+    Temperature:
+      cgsunits: K
+    TotalMassFromAGB:
+      cgsunits: g
+    TotalMassFromSNII:
+      cgsunits: g
+    TotalMassFromSNIa:
+      cgsunits: g
+    Velocity:
+      cgsunits: cm/s
+  PartType1:
+    Coordinates:
+      cgsunits: cm
+    GroupNumber:
+      cgsunits:
+    ParticleIDs:
+      cgsunits:
+    SubGroupNumber:
+      cgsunits:
+    Velocity:
+      cgsunits: cm/s
+  PartType4:
+    AExpMaximumTemperature:
+      cgsunits:
+    BirthDensity:
+      cgsunits: g/cm**3
+    Coordinates:
+      cgsunits: cm
+    Feedback_EnergyFraction:
+      cgsunits:
+    GroupNumber:
+      cgsunits:
+    HostHalo_TVir:
+      cgsunits: K
+    HostHalo_TVir_Mass:
+      cgsunits: K
+    InitialMass:
+      cgsunits: g
+    IronMassFracFromSNIa:
+      cgsunits:
+    Mass:
+      cgsunits: g
+    MaximumTemperature:
+      cgsunits: K
+    MetalMassFracFromAGB:
+      cgsunits:
+    MetalMassFracFromSNII:
+      cgsunits:
+    MetalMassFracFromSNIa:
+      cgsunits:
+    Metallicity:
+      cgsunits:
+    ParticleIDs:
+      cgsunits:
+    PreviousStellarEnrichment:
+      cgsunits:
+    SmoothedIronMassFracFromSNIa:
+      cgsunits:
+    SmoothedMetallicity:
+      cgsunits:
+    SmoothingLength:
+      cgsunits:
+    StellarEnrichmentCounter:
+      cgsunits:
+    StellarFormationTime:
+      cgsunits:
+    SubGroupNumber:
+      cgsunits:
+    TotalMassFromAGB:
+      cgsunits:
+    TotalMassFromSNII:
+      cgsunits:
+    TotalMassFromSNIa:
+      cgsunits:
+    Velocity:
+      cgsunits:
+  PartType5:
+    BH_CumlAccrMass:
+      cgsunits: g
+    BH_CumlNumSeeds:
+      cgsunits:
+    BH_Density:
+      cgsunits: g/cm**3
+    BH_FormationTime:
+      cgsunits:
+    BH_Mass:
+      cgsunits: g
+    BH_Mdot:
+      cgsunits: g/s
+    BH_MostMassiveProgenitorID:
+      cgsunits:
+    BH_Pressure:
+      cgsunits: g/cm/s**2
+    BH_SoundSpeed:
+      cgsunits: cm/s
+    BH_SurroundingGasVel:
+      cgsunits: cm/s
+    BH_TimeLastMerger:
+      cgsunits:
+    Coordinates:
+      cgsunits: cm
+    GroupNumber:
+      cgsunits:
+    HostHalo_TVir_Mass:
+      cgsunits: K
+    Mass:
+      cgsunits: g
+    ParticleIDs:
+      cgsunits:
+    SmoothingLength:
+      cgsunits: cm
+    SubGroupNumber:
+      cgsunits:
+    Velocity:
+      cgsunits: cm/s
