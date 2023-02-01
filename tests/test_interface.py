@@ -97,7 +97,9 @@ def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
 
     count0 = np.where(partcount == 0)[0]
     diff0 = np.sort(np.concatenate((count0, count0 - 1)))
+    # determine halos that hold no particles.
     assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(diff0.tolist())
+
     if not (np.diff(hid).max() == np.diff(hid).min() == 1):
         assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(
             diff0.tolist()
@@ -168,6 +170,9 @@ def test_areposnapshot_load_withcatalog(testdata_areposnapshot_withcatalog):
     }
     overlap = set(snp.data.keys()) & parttypes
     assert len(overlap) == 7
+
+    # Check whether the group catalog makes sense
+    print(snp.data["Group"].keys())
 
 
 @require_testdata("areposnapshot_withcatalog")

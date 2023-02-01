@@ -3,7 +3,8 @@ import yaml
 from astrodask.config import get_config
 from astrodask.convenience import load
 from astrodask.interface import Dataset
-from tests.testdata_properties import require_testdata_path
+from astrodask.misc import check_config_for_dataset
+from tests.testdata_properties import require_testdata, require_testdata_path
 
 
 @require_testdata_path("interface")
@@ -40,3 +41,31 @@ def test_load_areposnap(testdatapath):
 def test_load_areposim(testdatapath):
     obj = load(testdatapath)
     assert obj is not None
+
+
+@require_testdata_path("interface")
+def test_load_units(testdatapath):
+    obj = load(testdatapath, units=True)
+    assert "UnitMixin" in type(obj).__name__
+
+
+@require_testdata_path("interface", only=["EAGLEsmall_snapshot"])
+def test_load_units_manualpath(testdatapath):
+    # commented out tests wont work in CI for now.
+    # # test absolute path
+    # obj = load(testdatapath, units="~/.config/astrodask/units/eagle2.yaml")
+    # assert "UnitMixin" in type(obj).__name__
+    # # test relative path
+    # obj = load(testdatapath, units="eagle2.yaml")
+    # assert "UnitMixin" in type(obj).__name__
+    # test package resource
+    obj = load(testdatapath, units="eagle.yaml")
+    assert "UnitMixin" in type(obj).__name__
+
+
+@require_testdata("interface", only=["TNG50-4_snapshot"])
+def test_guess_nameddataset(testdata_interface):
+    snp = testdata_interface
+    metadata = snp._metadata_raw
+    candidates = check_config_for_dataset(metadata)
+    print("cds", candidates)

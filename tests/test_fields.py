@@ -1,4 +1,3 @@
-# We test on a snapshot from TNG50-4
 import dask.array as da
 import pytest
 

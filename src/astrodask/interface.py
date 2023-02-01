@@ -1,5 +1,6 @@
 import abc
 import hashlib
+import logging
 import os
 from collections.abc import MutableMapping
 
@@ -11,8 +12,10 @@ import zarr
 import astrodask.io
 from astrodask.fields import FieldContainer, FieldContainerCollection
 from astrodask.helpers_misc import make_serializable
-from astrodask.misc import sprint
+from astrodask.misc import check_config_for_dataset, sprint
 from astrodask.registries import dataset_type_registry
+
+log = logging.getLogger(__name__)
 
 
 class MixinMeta(type):
@@ -73,6 +76,13 @@ class Dataset(metaclass=MixinMeta):
         self.file = res[2]
         self.tempfile = res[3]
         self._cached = False
+
+        # any identifying metadata?
+        candidates = check_config_for_dataset(self._metadata_raw)
+        if len(candidates) > 0:
+            dsname = candidates[0]
+            print("Dataset is identified as '%s'." % dsname)
+            self.hints["dsname"] = dsname
 
     def _info_custom(self):
         return None

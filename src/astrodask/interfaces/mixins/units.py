@@ -3,13 +3,31 @@ import logging
 import os
 import re
 
+import numpy as np
 import unyt
 import yaml
 from unyt import UnitRegistry
 
+from astrodask.config import get_config
 from astrodask.interfaces.mixins.base import Mixin
 
 log = logging.getLogger(__name__)
+
+
+def str_to_unit(unitstr):
+    unit = 1.0
+    pattern = r"\s*[*/]*[a-zA-Z]+(\*\*-*\d+)*"
+    # unitstr = "".join(unitstr.split())  # remove all whitespaces
+    for u in re.finditer(pattern, unitstr):
+        ustr = u.group()
+        if u.group()[0] == "/":
+            unit /= unyt.unyt_quantity.from_string(ustr[1:])
+        elif u.group()[0] == "*":
+            unit *= unyt.unyt_quantity.from_string(ustr[1:])
+        else:
+            # this should be the first unit in str
+            unit *= unyt.unyt_quantity.from_string(ustr)
+    return unit
 
 
 def extract_units_from_attrs(attrs, require=False):
@@ -26,31 +44,31 @@ def extract_units_from_attrs(attrs, require=False):
     cgsfactor = attrs[cgskey]
     # get dimensions
     unit = cgsfactor
+    if isinstance(unit, np.ndarray):
+        assert len(unit) == 1
+        unit = unit[0]
     # TODO: Missing h scaling!
     if any(
         [k + "_scaling" in attrs.keys() for k in ["length", "mass", "velocity", "time"]]
-    ):
+    ):  # like TNG
         # try to infer from dimensional scaling attributes
         unit *= unyt.cm ** attrs.get("length_scaling", 0.0)
         unit *= unyt.g ** attrs.get("mass_scaling", 0.0)
         unit *= (unyt.cm / unyt.s) ** attrs.get("velocity_scaling", 0.0)
         unit *= unyt.s ** attrs.get("time_scaling", 0.0)
-    elif "cgsunits" in attrs.keys():
+    elif "Conversion factor" in attrs.keys():  # like SWIFT
+        ustr = str(attrs["Conversion factor"])
+        ustr = ustr.split("[")[-1].split("]")[0]
+        if ustr.strip() == "-":  # no units, done
+            return unit
+        unit *= str_to_unit(ustr)
+    elif "cgsunits" in attrs.keys():  # like EAGLE
         if attrs["cgsunits"] is not None:  # otherwise, this field has no units
             unitstr = attrs["cgsunits"]
             # bugged unyt: https://github.com/yt-project/unyt/issues/361
             # thus cannot pass all in one; instead pass unit one by one
-            pattern = r"\s*[*/]*[a-zA-Z]+(\*\*-*\d+)*"
-            unitstr = "".join(unitstr.split())  # remove all whitespaces
-            for u in re.finditer(pattern, unitstr):
-                ustr = u.group()
-                if u.group()[0] == "/":
-                    unit /= unyt.unyt_quantity.from_string(ustr[1:])
-                elif u.group()[0] == "*":
-                    unit *= unyt.unyt_quantity.from_string(ustr[1:])
-                else:
-                    # this should be the first unit in str
-                    unit *= unyt.unyt_quantity.from_string(ustr)
+            unit *= str_to_unit(unitstr)
+
     elif require:
         raise ValueError("Could not find units.")
     return unit
@@ -91,11 +109,14 @@ class UnitMixin(Mixin):
 
         # discover units
         units = kwargs.pop("units")
-        if isinstance(units, bool):
-            # TODO: scan whether there is a unit configuration available for this simulation.
-            # otherwise continue with the automatic detection from the dataset source.
-            unithints = {}
-        else:
+        unithints = {}
+        if "dsname" in self.hints:
+            c = get_config()
+            print("hints", self.hints)
+            dsprops = c["data"][self.hints["dsname"]]
+            units = dsprops.get("unitfile", units)
+
+        if not isinstance(units, bool):
             # assuming that 'units' holds the path to the configuration
             unithints = get_unithints_fromfile(units)
         for ptype in self.data:

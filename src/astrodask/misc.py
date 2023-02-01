@@ -101,3 +101,37 @@ def rectangular_cutout_mask(
             width[i] / 2.0
         )  # TODO: This interval is not closed on the left side.
     return mask
+
+
+def check_config_for_dataset(metadata, unique=True):
+    """Check whether the given dataset can be identified to be a certain simulation (type) by its metadata"""
+    c = get_config()
+    candidates = []
+    if "data" not in c:
+        return candidates
+    for k, vals in c["data"].items():
+        if vals is None:
+            continue
+        possible_candidate = True
+        if "identifiers" in vals:
+            idtfrs = vals["identifiers"]
+            for grp, v in idtfrs.items():
+                h5path = "/" + grp
+                if h5path not in metadata:
+                    possible_candidate = False
+                    break
+                attrs = metadata[h5path]
+                for ikey, ival in v.items():
+                    if ikey not in attrs:
+                        possible_candidate = False
+                        break
+                    if attrs[ikey].decode("UTF-8") != ival:
+                        possible_candidate = False
+                        break
+        else:
+            possible_candidate = False
+        if possible_candidate:
+            candidates.append(k)
+    if unique and len(candidates) > 1:
+        raise ValueError("Multiple dataset candidates (set unique=False?):", candidates)
+    return candidates

@@ -160,35 +160,3 @@ def get_dataset(name=None, props=None):
     elif len(dnames) == 0:
         raise ValueError("No dataset candidate found.")
     return dnames[0]
-
-
-def check_config_for_dataset(metadata):
-    c = get_config()
-    candidates = []
-    if "data" not in c:
-        return
-    for k, v in c["data"].items():
-        possible_candidate = True
-        if v is None:
-            possible_candidate = False
-            continue
-        if "identifiers" in v:
-            idtfrs = v["identifiers"]
-            for grp, v in idtfrs.items():
-                h5path = "/" + grp
-                if h5path not in metadata:
-                    possible_candidate = False
-                    break
-                attrs = metadata[h5path]
-                for ikey, ival in v.items():
-                    if ikey not in attrs:
-                        possible_candidate = False
-                        break
-                    if attrs[ikey].decode("UTF-8") != ival:
-                        possible_candidate = False
-                        break
-        else:
-            possible_candidate = False
-        if possible_candidate:
-            candidates.append(k)
-    return candidates
