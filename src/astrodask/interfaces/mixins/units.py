@@ -1,33 +1,33 @@
 import importlib.resources
 import logging
 import os
-import re
 
 import numpy as np
-import unyt
 import yaml
-from unyt import UnitRegistry
+from pint import UnitRegistry
 
 from astrodask.config import get_config
 from astrodask.interfaces.mixins.base import Mixin
 
 log = logging.getLogger(__name__)
+ureg = UnitRegistry()
 
 
 def str_to_unit(unitstr):
-    unit = 1.0
-    pattern = r"\s*[*/]*[a-zA-Z]+(\*\*-*\d+)*"
-    # unitstr = "".join(unitstr.split())  # remove all whitespaces
-    for u in re.finditer(pattern, unitstr):
-        ustr = u.group()
-        if u.group()[0] == "/":
-            unit /= unyt.unyt_quantity.from_string(ustr[1:])
-        elif u.group()[0] == "*":
-            unit *= unyt.unyt_quantity.from_string(ustr[1:])
-        else:
-            # this should be the first unit in str
-            unit *= unyt.unyt_quantity.from_string(ustr)
-    return unit
+    return 1.0 * ureg(unitstr)
+    # unit = 1.0
+    # pattern = r"\s*[*/]*[a-zA-Z]+(\*\*-*\d+)*"
+    # # unitstr = "".join(unitstr.split())  # remove all whitespaces
+    # for u in re.finditer(pattern, unitstr):
+    #    ustr = u.group()
+    #    if u.group()[0] == "/":
+    #        unit /= unyt.unyt_quantity.from_string(ustr[1:])
+    #    elif u.group()[0] == "*":
+    #        unit *= unyt.unyt_quantity.from_string(ustr[1:])
+    #    else:
+    #        # this should be the first unit in str
+    #        unit *= unyt.unyt_quantity.from_string(ustr)
+    # return unit
 
 
 def extract_units_from_attrs(attrs, require=False):
@@ -47,15 +47,17 @@ def extract_units_from_attrs(attrs, require=False):
     if isinstance(unit, np.ndarray):
         assert len(unit) == 1
         unit = unit[0]
+    if unit == 0.0:
+        unit = 1.0  # zero makes no sense.
     # TODO: Missing h scaling!
     if any(
         [k + "_scaling" in attrs.keys() for k in ["length", "mass", "velocity", "time"]]
     ):  # like TNG
         # try to infer from dimensional scaling attributes
-        unit *= unyt.cm ** attrs.get("length_scaling", 0.0)
-        unit *= unyt.g ** attrs.get("mass_scaling", 0.0)
-        unit *= (unyt.cm / unyt.s) ** attrs.get("velocity_scaling", 0.0)
-        unit *= unyt.s ** attrs.get("time_scaling", 0.0)
+        unit *= ureg.cm ** attrs.get("length_scaling", 0.0)
+        unit *= ureg.g ** attrs.get("mass_scaling", 0.0)
+        unit *= (ureg.cm / ureg.s) ** attrs.get("velocity_scaling", 0.0)
+        unit *= ureg.s ** attrs.get("time_scaling", 0.0)
     elif "Conversion factor" in attrs.keys():  # like SWIFT
         ustr = str(attrs["Conversion factor"])
         ustr = ustr.split("[")[-1].split("]")[0]
