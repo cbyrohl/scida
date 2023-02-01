@@ -3,12 +3,13 @@ import logging
 import numpy as np
 
 from astrodask.fields import DerivedField
+from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import rectangular_cutout_mask
 
 log = logging.getLogger(__name__)
 
 
-class SpatialMixin:
+class SpatialMixin(Mixin):
     pass
 
 

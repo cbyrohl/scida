@@ -1,9 +1,10 @@
 import numpy as np
 
+from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
 
 
-class CosmologyMixin:
+class CosmologyMixin(Mixin):
     def __init__(self, *args, **kwargs):
         self.metadata = {}
         super().__init__(*args, **kwargs)

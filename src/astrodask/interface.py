@@ -11,11 +11,27 @@ import zarr
 import astrodask.io
 from astrodask.fields import FieldContainer, FieldContainerCollection
 from astrodask.helpers_misc import make_serializable
+from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
 from astrodask.registries import dataset_type_registry
 
 
-class Dataset(abc.ABC):
+class MixinMeta(type):
+    def __call__(cls, *args, **kwargs):
+        newcls = cls
+        mixins = kwargs.pop("mixins", None)
+        print("mixins", mixins, cls)
+        if isinstance(mixins, list) and len(mixins) > 0:
+            name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
+            # adjust entry point if __init__ available in some mixin
+            nms = dict(cls.__dict__)
+            # need to make sure first mixin init is called over cls init
+            nms["__init__"] = mixins[0].__init__
+            newcls = type(name, (*mixins, cls), nms)
+        return type.__call__(newcls, *args, **kwargs)
+
+
+class Dataset(metaclass=MixinMeta):
     def __init__(
         self,
         path,
@@ -23,9 +39,11 @@ class Dataset(abc.ABC):
         virtualcache=True,
         overwritecache=False,
         fileprefix="",
+        hints=None,
         **kwargs
     ):
         super().__init__()
+        self.hints = hints if hints is not None else {}
         self.path = path
         self.file = None
         # need this 'tempfile' reference to keep garbage collection away for the tempfile
@@ -109,6 +127,8 @@ class Dataset(abc.ABC):
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
+        if issubclass(cls, Mixin):
+            return  # do not register classes with mixins.
         dataset_type_registry[cls.__name__] = cls
 
     @classmethod

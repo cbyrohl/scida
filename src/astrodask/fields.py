@@ -9,10 +9,11 @@ from .helpers_misc import get_kwargs
 
 
 class DerivedField(object):
-    def __init__(self, name, func, description=""):
+    def __init__(self, name, func, description="", units=None):
         self.name = name
         self.func = func
         self.description = description
+        self.units = units
 
 
 class FieldContainerCollection(MutableMapping):
@@ -134,9 +135,9 @@ class FieldContainer(MutableMapping):
             return list(set(self.fields.keys()) | set(self.derivedfields.keys()))
         return self.fields.keys()
 
-    def register_field(self, name=None, description=""):
+    def register_field(self, name=None, description="", units=None):
         # we only construct field upon first call to it (default)
-        def decorator(func, name=name, description=description):
+        def decorator(func, name=name, description=description, units=units):
             if name is None:
                 name = func.__name__
             self.derivedfields[name] = DerivedField(name, func, description=description)

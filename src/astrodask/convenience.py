@@ -3,9 +3,10 @@ import os
 from collections import Counter
 from functools import reduce
 from inspect import getmro
-from typing import List
+from typing import List, Union
 
 from astrodask.config import get_config
+from astrodask.interfaces.mixins import UnitMixin
 from astrodask.registries import dataseries_type_registry, dataset_type_registry
 
 
@@ -55,7 +56,7 @@ def _determine_type(
     return available_dtypes, [reg[k] for k in available_dtypes]
 
 
-def load(path: str, strict=False, **kwargs):
+def load(path: str, strict=False, units: Union[bool, str] = False, **kwargs):
     if os.path.exists(path):
         # datasets on disk
         pass
@@ -85,6 +86,7 @@ def load(path: str, strict=False, **kwargs):
     else:
         raise ValueError("Specified path unknown.")
 
+    # determine dataset class
     reg = dict()
     reg.update(**dataset_type_registry)
     reg.update(**dataseries_type_registry)
@@ -92,7 +94,13 @@ def load(path: str, strict=False, **kwargs):
     path = os.path.realpath(path)
     cls = _determine_type(path, **kwargs)[1][0]
 
-    return cls(path, **kwargs)
+    # determine additional mixins not set by class
+    mixins = []
+    if units:
+        mixins.append(UnitMixin)
+        kwargs["units"] = units
+
+    return cls(path, mixins=mixins, **kwargs)
 
 
 def get_dataset_by_name(name):
@@ -152,3 +160,35 @@ def get_dataset(name=None, props=None):
     elif len(dnames) == 0:
         raise ValueError("No dataset candidate found.")
     return dnames[0]
+
+
+def check_config_for_dataset(metadata):
+    c = get_config()
+    candidates = []
+    if "data" not in c:
+        return
+    for k, v in c["data"].items():
+        possible_candidate = True
+        if v is None:
+            possible_candidate = False
+            continue
+        if "identifiers" in v:
+            idtfrs = v["identifiers"]
+            for grp, v in idtfrs.items():
+                h5path = "/" + grp
+                if h5path not in metadata:
+                    possible_candidate = False
+                    break
+                attrs = metadata[h5path]
+                for ikey, ival in v.items():
+                    if ikey not in attrs:
+                        possible_candidate = False
+                        break
+                    if attrs[ikey].decode("UTF-8") != ival:
+                        possible_candidate = False
+                        break
+        else:
+            possible_candidate = False
+        if possible_candidate:
+            candidates.append(k)
+    return candidates
