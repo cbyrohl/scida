@@ -11,7 +11,6 @@ import zarr
 import astrodask.io
 from astrodask.fields import FieldContainer, FieldContainerCollection
 from astrodask.helpers_misc import make_serializable
-from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
 from astrodask.registries import dataset_type_registry
 
@@ -127,8 +126,10 @@ class Dataset(metaclass=MixinMeta):
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
-        if issubclass(cls, Mixin):
-            return  # do not register classes with mixins.
+        if cls.__name__ == "Delay":
+            return  # nothing to register for Delay objects
+        if "Mixin" in cls.__name__:
+            return  # do not register classes with Mixins
         dataset_type_registry[cls.__name__] = cls
 
     @classmethod
