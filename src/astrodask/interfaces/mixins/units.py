@@ -8,6 +8,7 @@ from pint import UnitRegistry
 
 from astrodask.config import get_config
 from astrodask.interfaces.mixins.base import Mixin
+from astrodask.misc import sprint
 
 log = logging.getLogger(__name__)
 ureg = UnitRegistry()
@@ -123,7 +124,8 @@ class UnitMixin(Mixin):
             unithints = get_unithints_fromfile(units)
         for ptype in self.data:
             self.units[ptype] = {}
-            for k in self.data[ptype].keys(allfields=True):
+            pfields = self.data[ptype]
+            for k in pfields.keys(allfields=True):
                 h5path = "/" + ptype + "/" + k
                 if h5path in self._metadata_raw.keys():
                     # any hints available?
@@ -140,4 +142,17 @@ class UnitMixin(Mixin):
                             "Could not find units for '%s/%s'" % (ptype, k)
                         )
                     self.units[ptype][k] = unit
-        # redefine dask arrays with unyt units ?
+
+                    # redefine dask arrays with units
+                    # TODO: This will instatiate all dask fields, need to user register_field
+                    # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
+                    pfields[k] = unit * pfields[k]
+
+    def _info_custom(self):
+        rep = ""
+        if hasattr(super(), "_info_custom"):
+            if super()._info_custom() is not None:
+                rep += super()._info_custom()
+        rep += sprint("=== Unit-aware Dataset ===")
+        rep += sprint("==========================")
+        return rep

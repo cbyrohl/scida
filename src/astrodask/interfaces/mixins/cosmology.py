@@ -15,8 +15,11 @@ class CosmologyMixin(Mixin):
             from astropy.cosmology import FlatLambdaCDM
 
             h = self.header["HubbleParam"]
-            omega0 = self.header["Omega0"]
-            self.cosmology = FlatLambdaCDM(H0=100 * h * u.km / u.s / u.Mpc, Om0=omega0)
+            om0 = self.header["Omega0"]
+            ob0 = self.header["OmegaBaryon"]
+            self.cosmology = FlatLambdaCDM(
+                H0=100 * h * u.km / u.s / u.Mpc, Om0=om0, Ob0=ob0
+            )
         try:
             self.redshift = self.header["Redshift"]
         except KeyError:  # no redshift attribute
