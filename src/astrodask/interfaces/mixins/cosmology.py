@@ -16,7 +16,7 @@ class CosmologyMixin(Mixin):
 
             h = self.header["HubbleParam"]
             om0 = self.header["Omega0"]
-            ob0 = self.header["OmegaBaryon"]
+            ob0 = self.header.get("OmegaBaryon", None)
             self.cosmology = FlatLambdaCDM(
                 H0=100 * h * u.km / u.s / u.Mpc, Om0=om0, Ob0=ob0
             )
