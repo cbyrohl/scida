@@ -2,8 +2,8 @@ import abc
 import logging
 import os
 import tempfile
-from os.path import join
 from functools import partial
+from os.path import join
 
 import dask.array as da
 import h5py
@@ -167,7 +167,7 @@ def load_datadict_old(
     token="",
     chunksize=None,
     derivedfields_kwargs=None,
-    lazy=True, # if true, call da.from_array delayed
+    lazy=True,  # if true, call da.from_array delayed
 ):
     # TODO: Refactor and rename
     data = {}
@@ -217,10 +217,19 @@ def load_datadict_old(
             name = "Dataset" + str(token) + dataset[0].replace("/", "_")
             if "__dask_tokenize__" in file:  # check if the file contains the dask name.
                 name = file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
-            if lazy and i>0: # need one non-lazy entry though later on...
+            if lazy and i > 0:  # need one non-lazy entry though later on...
                 hds = file[dataset[0]]
-                def field(arrs, snap=None, h5path="", chunksize="", name="", inline_array=False,
-                          file=None, **kwargs):
+
+                def field(
+                    arrs,
+                    snap=None,
+                    h5path="",
+                    chunksize="",
+                    name="",
+                    inline_array=False,
+                    file=None,
+                    **kwargs
+                ):
                     hds = file[h5path]
                     arr = da.from_array(
                         hds,
@@ -228,10 +237,19 @@ def load_datadict_old(
                         name=name,
                         inline_array=inline_array,
                     )
-                    return arr 
-                fnc = partial(field, h5path = dataset[0], chunksize=chunksize, name=name, inline_array=inline_array,
-                              file=file)
-                datanew[group].register_field(name=fieldname, description=fieldname+": lazy field from disk")(fnc)
+                    return arr
+
+                fnc = partial(
+                    field,
+                    h5path=dataset[0],
+                    chunksize=chunksize,
+                    name=name,
+                    inline_array=inline_array,
+                    file=file,
+                )
+                datanew[group].register_field(
+                    name=fieldname, description=fieldname + ": lazy field from disk"
+                )(fnc)
             else:
                 hds = file[dataset[0]]
                 ds = da.from_array(
@@ -245,7 +263,8 @@ def load_datadict_old(
 
     # Add a unique identifier for each element for each data type
     for p in data:
-        for k, v in data[p].items():
+        for k in data[p].keys(allfields=True):
+            v = data[p][k]
             nparts = v.shape[0]
             if len(v.chunks) == 1:
                 # make same shape as other 1D arrays.

@@ -120,7 +120,8 @@ class FieldContainer(MutableMapping):
 
     @property
     def fieldlength(self):
-        first = next(iter(self.fields.values()))
+        itr = iter(self.fields.values())
+        first = next(itr)
         if all(first.shape[0] == v.shape[0] for v in self.fields.values()):
             return first.shape[0]
         else:
