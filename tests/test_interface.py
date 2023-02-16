@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from astrodask.interface import BaseSnapshot
+from astrodask.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
@@ -12,6 +13,17 @@ from tests.testdata_properties import require_testdata, require_testdata_path
 def test_interface_load(testdatapath):
     snp = BaseSnapshot(testdatapath)
     assert snp.file is not None
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_loadmetadata(testdatapath):
+    loader = ChunkedHDF5Loader(testdatapath)
+    metadata1 = loader.load_metadata()
+    assert len(metadata1.keys()) > 0
+    BaseSnapshot(testdatapath)  # load once, so this gets cached
+    metadata2 = loader.load_metadata()
+    assert len(metadata2.keys()) > 0
+    assert metadata2.get("/_chunks", None) is not None
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])

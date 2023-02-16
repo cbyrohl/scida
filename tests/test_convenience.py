@@ -59,7 +59,7 @@ def test_load_units_manualpath(testdatapath):
     # obj = load(testdatapath, units="eagle2.yaml")
     # assert "UnitMixin" in type(obj).__name__
     # test package resource
-    obj = load(testdatapath, units="eagle.yaml")
+    obj = load(testdatapath, units=True, unitfile="eagle.yaml")
     assert "UnitMixin" in type(obj).__name__
 
 
