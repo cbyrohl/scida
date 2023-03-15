@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: check-ast
       - id: check-added-large-files
+        args: ['--maxkb=5000']
       - id: check-merge-conflict
       - id: check-case-conflict
       - id: check-docstring-first

@@ -1541,6 +1541,53 @@ pygments = "*"
 test = ["pexpect"]
 
 [[package]]
+name = "jupyter-contrib-core"
+version = "0.4.2"
+description = "Common utilities for jupyter-contrib projects."
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "jupyter_contrib_core-0.4.2.tar.gz", hash = "sha256:1887212f3ca9d4487d624c0705c20dfdf03d5a0b9ea2557d3aaeeb4c38bdcabb"},
+]
+
+[package.dependencies]
+jupyter_core = "*"
+notebook = ">=4.0"
+setuptools = "*"
+tornado = "*"
+traitlets = "*"
+
+[package.extras]
+testing-utils = ["mock", "nose"]
+
+[[package]]
+name = "jupyter-contrib-nbextensions"
+version = "0.7.0"
+description = "A collection of Jupyter nbextensions."
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "jupyter_contrib_nbextensions-0.7.0.tar.gz", hash = "sha256:06e33f005885eb92f89cbe82711e921278201298d08ab0d886d1ba09e8c3e9ca"},
+]
+
+[package.dependencies]
+ipython_genutils = "*"
+jupyter_contrib_core = ">=0.3.3"
+jupyter_core = "*"
+jupyter_highlight_selected_word = ">=0.1.1"
+jupyter_nbextensions_configurator = ">=0.4.0"
+lxml = "*"
+nbconvert = ">=6.0"
+notebook = ">=6.0"
+tornado = "*"
+traitlets = ">=4.1"
+
+[package.extras]
+test = ["mock", "nbformat", "nose", "pip", "requests"]
+
+[[package]]
 name = "jupyter-core"
 version = "5.1.2"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
@@ -1583,6 +1630,40 @@ traitlets = ">=5.3"
 cli = ["click", "rich"]
 docs = ["jupyterlite-sphinx", "myst-parser", "pydata-sphinx-theme", "sphinxcontrib-spelling"]
 test = ["click", "coverage", "pre-commit", "pytest (>=7.0)", "pytest-asyncio (>=0.19.0)", "pytest-console-scripts", "pytest-cov", "rich"]
+
+[[package]]
+name = "jupyter-highlight-selected-word"
+version = "0.2.0"
+description = "Jupyter notebook extension that enables highlighting every instance of the current word in the notebook."
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "jupyter_highlight_selected_word-0.2.0-py2.py3-none-any.whl", hash = "sha256:9545dfa9cb057eebe3a5795604dcd3a5294ea18637e553f61a0b67c1b5903c58"},
+    {file = "jupyter_highlight_selected_word-0.2.0.tar.gz", hash = "sha256:9fa740424859a807950ca08d2bfd28a35154cd32dd6d50ac4e0950022adc0e7b"},
+]
+
+[[package]]
+name = "jupyter-nbextensions-configurator"
+version = "0.6.1"
+description = "jupyter serverextension providing configuration interfaces for nbextensions."
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "jupyter_nbextensions_configurator-0.6.1.tar.gz", hash = "sha256:4b9e1270ccc1f8e0a421efb8979a737f586813023a4855b9453f61c3ca599b82"},
+]
+
+[package.dependencies]
+jupyter_contrib_core = ">=0.3.3"
+jupyter_core = "*"
+notebook = ">=6.0"
+pyyaml = "*"
+tornado = "*"
+traitlets = "*"
+
+[package.extras]
+test = ["jupyter_contrib_core[testing-utils]", "mock", "nose", "requests", "selenium"]
 
 [[package]]
 name = "jupyter-server"
@@ -2359,6 +2440,21 @@ files = [
     {file = "mkdocs_material_extensions-1.1.1-py3-none-any.whl", hash = "sha256:e41d9f38e4798b6617ad98ca8f7f1157b1e4385ac1459ca1e4ea219b556df945"},
     {file = "mkdocs_material_extensions-1.1.1.tar.gz", hash = "sha256:9c003da71e2cc2493d910237448c672e00cefc800d3d6ae93d2fc69979e3bd93"},
 ]
+
+[[package]]
+name = "mkdocs-video"
+version = "1.4.0"
+description = ""
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "mkdocs-video-1.4.0.tar.gz", hash = "sha256:997a636cfba06b0babeea0163c9b9c9aeb594b2524960108445968847de7177f"},
+    {file = "mkdocs_video-1.4.0-py3-none-any.whl", hash = "sha256:ea63b2e3f68a8dc1ef7ee461b9ca181e8c0a5f6a7183f9e06c1e0cbfa52a4c77"},
+]
+
+[package.dependencies]
+mkdocs = ">=1.1.0,<2"
 
 [[package]]
 name = "mkdocstrings"
@@ -4594,4 +4690,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "dfeecf3964cb69bc7dda04789c525658547ae6b255ca160684a0a1e5fd5e6a09"
+content-hash = "063a0b9fb0b28a3fa9162fbad8e5699f4d23ac6096e6cdda92fc8fbea66a43e9"
