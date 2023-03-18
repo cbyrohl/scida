@@ -68,6 +68,7 @@ class Dataset(metaclass=MixinMeta):
             fileprefix=fileprefix,
             virtualcache=virtualcache,
             derivedfields_kwargs=dict(snap=self),
+            token=self.__dask_tokenize__(),
         )
 
         res = astrodask.io.load(path, **loadkwargs)
