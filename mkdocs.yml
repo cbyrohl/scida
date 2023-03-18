@@ -18,6 +18,12 @@ markdown_extensions:
 
 plugins:
   - search:
+  - mkdocs-video:
+      css_style:
+        float: left
+        vertical-align: top
+        height: 12.172vw
+        width: 12.172vw
   - mkdocs-jupyter:
       execute: true
       execute_ignore: "notebooks/static/*.ipynb"  # waiting for list support (https://github.com/danielfrg/mkdocs-jupyter/issues/119)

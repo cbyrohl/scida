@@ -22,7 +22,7 @@ class MixinMeta(type):
     def __call__(cls, *args, **kwargs):
         newcls = cls
         mixins = kwargs.pop("mixins", None)
-        print("mixins", mixins, cls)
+        # print("mixins", mixins, cls)
         if isinstance(mixins, list) and len(mixins) > 0:
             name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
             # adjust entry point if __init__ available in some mixin

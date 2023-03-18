@@ -40,13 +40,24 @@ def get_cosmology_from_rawmetadata(metadata_raw):
     import astropy.units as u
     from astropy.cosmology import FlatLambdaCDM
 
-    h = metadata_raw.get("/Parameters", {}).get("HubbleParam", None)
-    print(metadata_raw.keys())
-    om0 = metadata_raw.get("/Parameters", {}).get("Omega0", None)
-    ob0 = metadata_raw.get("/Parameters", {}).get("OmegaBaryon", None)
-    if None in [h, om0, ob0]:
+    aliasdict = dict(h=["HubbleParam"], om0=["Omega0"], ob0=["OmegaBaryon"])
+    cparams = dict(h=None, om0=None, ob0=None)
+    for grp in ["Parameters", "Header"]:
+        for p, v in cparams.items():
+            if v is not None:
+                continue  # already acquired some value for this item.
+            for alias in aliasdict[p]:
+                cparams[p] = metadata_raw.get("/" + grp, {}).get(alias, cparams[p])
+
+    h, om0, ob0 = cparams["h"], cparams["om0"], cparams["ob0"]
+    if None in [h, om0]:
         print("Cannot infer cosmology.")
         return None
+    elif ob0 is None:
+        print(
+            "Info: No Omega baryon given, we will assume a value of '0.0486' for the cosmology."
+        )
+        ob0 = 0.0486
     H0 = 100.0 * h * u.km / u.s / u.Mpc
     cosmology = FlatLambdaCDM(H0=H0, Om0=om0, Ob0=ob0)
     return cosmology
