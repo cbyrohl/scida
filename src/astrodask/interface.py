@@ -50,7 +50,7 @@ class Dataset(metaclass=MixinMeta):
         self.file = None
         # need this 'tempfile' reference to keep garbage collection away for the tempfile
         self.tempfile = None
-        self.location = path
+        self.location = str(path)
         self.chunksize = chunksize
         self.virtualcache = virtualcache
         self.overwritecache = overwritecache
