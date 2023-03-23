@@ -218,6 +218,7 @@ class Dataset(metaclass=MixinMeta):
                     arr = self.data[p][k]
                 if np.any(np.isnan(arr.shape)):
                     arr.compute_chunk_sizes()  # very inefficient (have to do it separately for every array)
+                    arr = arr.rechunk(chunks="auto")
                 if cast_uints:
                     if arr.dtype == np.uint64:
                         arr = arr.astype(np.int64)
