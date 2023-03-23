@@ -3,7 +3,7 @@ import hashlib
 import logging
 import os
 from collections.abc import MutableMapping
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 import dask
 import dask.array as da
@@ -168,7 +168,7 @@ class Dataset(metaclass=MixinMeta):
     def save(
         self,
         fname,
-        fields: Union[str, Dict] = "all",
+        fields: Union[str, Dict[str, Union[List[str], Dict[str, da.Array]]]] = "all",
         overwrite=True,
         zarr_kwargs=None,
         cast_uints=False,
@@ -207,9 +207,15 @@ class Dataset(metaclass=MixinMeta):
             if fields == "all":
                 fieldkeys = self.data[p]
             else:
-                fieldkeys = fields[p].keys()
+                if isinstance(fields[p], dict):
+                    fieldkeys = fields[p].keys()
+                else:
+                    fieldkeys = fields[p]
             for k in fieldkeys:
-                arr = self.data[p][k]
+                if not isinstance(fields, str) and isinstance(fields[p], dict):
+                    arr = fields[p][k]
+                else:
+                    arr = self.data[p][k]
                 if cast_uints:
                     if arr.dtype == np.uint64:
                         arr = arr.astype(np.int64)
