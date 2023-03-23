@@ -111,7 +111,8 @@ def load(
         mixins.append(UnitMixin)
         kwargs["units"] = units
 
-    return cls(path, mixins=mixins, **kwargs)
+    instance = cls(path, mixins=mixins, **kwargs)
+    return instance
 
 
 def get_dataset_by_name(name):

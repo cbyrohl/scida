@@ -125,7 +125,10 @@ def check_config_for_dataset(metadata, unique=True):
                     if ikey not in attrs:
                         possible_candidate = False
                         break
-                    if attrs[ikey].decode("UTF-8") != ival:
+                    av = attrs[ikey]
+                    if isinstance(av, bytes):
+                        av = av.decode("UTF-8")
+                    if av != ival:
                         possible_candidate = False
                         break
         else:

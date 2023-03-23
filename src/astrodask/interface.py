@@ -184,11 +184,11 @@ class Dataset(metaclass=MixinMeta):
         root = zarr.group(store, overwrite=overwrite)
 
         # Metadata
-        defaultattributes = ["config", "header", "parameters"]
+        defaultattributes = ["Cconfig", "Header", "Parameters"]
         for dctname in defaultattributes:
-            if dctname in self.__dict__:
+            if dctname.lower() in self.__dict__:
                 grp = root.create_group(dctname)
-                dct = self.__dict__[dctname]
+                dct = self.__dict__[dctname.lower()]
                 for k, v in dct.items():
                     v = make_serializable(v)
                     grp.attrs[k] = v
@@ -233,6 +233,7 @@ class Dataset(metaclass=MixinMeta):
 
 class BaseSnapshot(Dataset):
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs):
+        self.boxsize = np.full(3, np.nan)
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
         defaultattributes = ["config", "header", "parameters"]
@@ -240,8 +241,6 @@ class BaseSnapshot(Dataset):
             name = k.strip("/").lower()
             if name in defaultattributes:
                 self.__dict__[name] = self._metadata_raw[k]
-
-        self.boxsize = np.full(3, np.nan)
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):

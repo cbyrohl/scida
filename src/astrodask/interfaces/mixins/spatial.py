@@ -26,15 +26,13 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         # TODO: Dynamically determine location of boxsize
         self.boxsize = np.nan * np.ones(3)
         bs = self.header["BoxSize"]
-        if isinstance(bs, float) or (
-            isinstance(bs, np.ndarray) and np.all(bs == bs[0])
-        ):
-            self.boxsize[:] = self.header["BoxSize"]
+        is_cubical = isinstance(bs, np.ndarray) and np.all(bs == bs[0])
+        if isinstance(bs, float) or is_cubical:
+            self.boxsize[:] = bs
         else:
             # Have not thought about non-cubic cases yet.
             print("Boxsize:", bs)
             raise NotImplementedError
-        self.boxsize = self.header["BoxSize"]
         common_coord_names = ["Coordinates", "Position", "GroupPos", "SubhaloPos"]
         for k, cntr in self.data.items():
             for ccn in common_coord_names:
