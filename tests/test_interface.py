@@ -2,7 +2,6 @@ import time
 
 import dask.array as da
 import numpy as np
-import pytest
 
 from astrodask.interface import BaseSnapshot
 from astrodask.io import ChunkedHDF5Loader
@@ -44,11 +43,8 @@ def test_load_nonvirtual(testdatapath):
     assert snp.file is not None
 
 
-# TODO: revisit additional flags
 # TODO: setup and teardown savepath correctly
-# @pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
-@pytest.mark.skip()
-@require_testdata("interface", only=["TNG50-4_snapshot"])
+@require_testdata("interface", only=["TNG50-4_group"])
 def test_snapshot_save(testdata_interface):
     snp = testdata_interface
     snp.save("test.zarr")

@@ -3,6 +3,7 @@ import hashlib
 import logging
 import os
 from collections.abc import MutableMapping
+from typing import Dict, Union
 
 import dask
 import dask.array as da
@@ -164,7 +165,14 @@ class Dataset(metaclass=MixinMeta):
     def return_data(self):
         return self.data
 
-    def save(self, fname, overwrite=True, zarr_kwargs=None, cast_uints=False):
+    def save(
+        self,
+        fname,
+        fields: Union[str, Dict] = "all",
+        overwrite=True,
+        zarr_kwargs=None,
+        cast_uints=False,
+    ):
         """Saving into zarr format."""
         # We use zarr, as this way we have support to directly write into the file by the workers
         # (rather than passing back the data chunk over the scheduler to the interface)
@@ -186,9 +194,21 @@ class Dataset(metaclass=MixinMeta):
                     grp.attrs[k] = v
         # Data
         tasks = []
-        for p in self.data:
+        ptypes = self.data.keys()
+        if isinstance(fields, dict):
+            ptypes = fields.keys()
+        elif isinstance(fields, str):
+            if not fields == "all":
+                raise ValueError("Invalid field specifier.")
+        else:
+            raise ValueError("Invalid type for fields.")
+        for p in ptypes:
             root.create_group(p)
-            for k in self.data[p]:
+            if fields == "all":
+                fieldkeys = self.data[p]
+            else:
+                fieldkeys = fields[p].keys()
+            for k in fieldkeys:
                 arr = self.data[p][k]
                 if cast_uints:
                     if arr.dtype == np.uint64:
