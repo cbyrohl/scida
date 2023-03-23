@@ -81,7 +81,15 @@ class ZarrLoader(Loader):
         tree = {}
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
-        self.load_from_tree(tree)
+        datadict = load_datadict_old(
+            self.path,
+            self.file,
+            token=token,
+            chunksize=chunksize,
+            derivedfields_kwargs=derivedfields_kwargs,
+            filetype="zarr",
+        )
+        return datadict
 
 
 class ChunkedHDF5Loader(Loader):
@@ -190,11 +198,17 @@ def load_datadict_old(
     chunksize=None,
     derivedfields_kwargs=None,
     lazy=True,  # if true, call da.from_array delayed
+    filetype="hdf5",
 ):
     # TODO: Refactor and rename
     data = {}
     tree = {}
-    walk_hdf5file(location, tree)
+    if filetype == "hdf5":
+        walk_hdf5file(location, tree)
+    elif filetype == "zarr":
+        walk_zarrfile(location, tree)
+    else:
+        raise ValueError("Unknown filetype ''" % filetype)
     """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
     inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
     if type(file) == h5py._hl.files.File:

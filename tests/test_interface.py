@@ -3,6 +3,7 @@ import time
 import dask.array as da
 import numpy as np
 
+from astrodask.convenience import load
 from astrodask.interface import BaseSnapshot
 from astrodask.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
@@ -48,6 +49,16 @@ def test_load_nonvirtual(testdatapath):
 def test_snapshot_save(testdata_interface):
     snp = testdata_interface
     snp.save("test.zarr")
+
+
+@require_testdata("interface", only=["TNG50-4_group"])
+def test_snapshot_loadsaved(testdata_interface):
+    snp = testdata_interface
+    pos = snp.data["Group"]["GroupPos"][0].compute()
+    snp.save("test.zarr")
+    ds = load("test.zarr")
+    pos2 = ds.data["Group"]["GroupPos"][0].compute()
+    assert np.all(np.equal(pos, pos2))
 
 
 # @pytest.mark.skip()
