@@ -33,7 +33,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         is_cubical = isinstance(bs, np.ndarray) and np.all(bs == bs[0])
         if isinstance(bs, float) or is_cubical:
             self.boxsize[:] = bs
-        else:
+        elif bs is not None:
             # Have not thought about non-cubic cases yet.
             print("Boxsize:", bs)
             raise NotImplementedError
