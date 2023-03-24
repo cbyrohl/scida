@@ -34,16 +34,17 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
             print("Boxsize:", bs)
             raise NotImplementedError
         common_coord_names = ["Coordinates", "Position", "GroupPos", "SubhaloPos"]
+        self.hints["CoordinatesName"] = dict()
         for k, cntr in self.data.items():
             for ccn in common_coord_names:
                 if ccn in cntr.keys(allfields=True):
                     log.debug("Found CoordinatesName '%s' for species '%s'" % (ccn, k))
-                    self.hints["CoordinatesName"] = ccn
+                    self.hints["CoordinatesName"][k] = ccn
 
                     # register field with field containers as well
                     dfltname = "Coordinates"
-                    if ccn is dfltname:
-                        break
+                    if ccn == dfltname:
+                        break  # nothing to do
 
                     def fnc(arrs, cname=ccn):
                         return arrs[cname]
@@ -55,7 +56,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
                 log.info("Did not find CoordinatesName for species '%s'" % k)
 
     def get_coords(self, parttype="PartType0"):
-        return self.data[parttype][self.hints["CoordinatesName"]]
+        return self.data[parttype][self.hints["CoordinatesName"][parttype]]
 
     def rectangular_cutout_mask(self, center, width, parttype="PartType0"):
         coords = self.get_coords(parttype=parttype)
