@@ -41,7 +41,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
                     self.hints["CoordinatesName"] = ccn
 
                     # register field with field containers as well
-                    dfltname = "CoordinatesS"
+                    dfltname = "Coordinates"
                     if ccn is dfltname:
                         break
 
