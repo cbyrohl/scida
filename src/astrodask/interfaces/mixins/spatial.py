@@ -25,7 +25,11 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         self.pbc = True
         # TODO: Dynamically determine location of boxsize
         self.boxsize = np.nan * np.ones(3)
-        bs = self.header["BoxSize"]
+        try:
+            bs = self.header["BoxSize"]
+        except KeyError:
+            bs = None
+            print("Info: Cannot determine boxsize.")
         is_cubical = isinstance(bs, np.ndarray) and np.all(bs == bs[0])
         if isinstance(bs, float) or is_cubical:
             self.boxsize[:] = bs
