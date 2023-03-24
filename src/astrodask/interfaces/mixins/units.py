@@ -109,7 +109,6 @@ class UnitMixin(Mixin):
         unitfile = ""
         if "dsname" in self.hints:
             c = get_config()
-            print("hints", self.hints)
             dsprops = c["data"][self.hints["dsname"]]
             unitfile = dsprops.get("unitfile", "")
         unitfile = kwargs.pop("unitfile", unitfile)
