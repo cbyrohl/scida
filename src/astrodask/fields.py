@@ -70,6 +70,7 @@ class FieldContainerCollection(MutableMapping):
 
     def merge_derivedfields(self, collection):
         # to be depreciated. Use self.merge.
+        print("Info: merge_derivedfields() to be deprecated, use merge().")
         assert isinstance(collection, FieldContainerCollection)
         for k in collection.store:
             if k not in self.store:
