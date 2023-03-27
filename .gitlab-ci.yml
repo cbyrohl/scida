@@ -25,6 +25,7 @@ pages:
   stage: deploy
   image: python:3.9
   extends: .install-deps
+  needs: []
   script:
   - poetry run python -m ipykernel install --name astrodask
   - poetry run mkdocs build
@@ -60,6 +61,7 @@ run_tests:
   stage: test
   image: python:3.9
   extends: .install-deps
+  needs: []
   script:
     - echo "testdata directory ($ASTRODASK_TESTDATA_PATH) content:"
     - ls $ASTRODASK_TESTDATA_PATH # test whether testdata mounted
