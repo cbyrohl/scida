@@ -117,9 +117,6 @@ class Dataset(metaclass=MixinMeta):
 
     def _repr_dict(self):
         props = dict()
-        # if self.file is not None:
-        #     if hasattr(self.file, "filename"):
-        #         props["cache"] = self.file.filename
         props["source"] = self.path
         return props
 
