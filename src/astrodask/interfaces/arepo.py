@@ -83,6 +83,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         if catalog is not None:
             virtualcache = False  # copy catalog for better performance
             catalog_kwargs = kwargs.get("catalog_kwargs", {})
+            catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
             fileprefix = catalog_kwargs.get("fileprefix", "")
             self.catalog = ArepoSnapshot(
                 catalog, virtualcache=virtualcache, fileprefix=fileprefix

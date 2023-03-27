@@ -62,6 +62,7 @@ def load(
     strict=False,
     units: Union[bool, str] = False,
     unitfile: str = "",
+    overwrite: bool = False,
     **kwargs
 ):
     if os.path.exists(path):
@@ -110,6 +111,8 @@ def load(
     if units:
         mixins.append(UnitMixin)
         kwargs["units"] = units
+
+    kwargs["overwritecache"] = overwrite
 
     instance = cls(path, mixins=mixins, **kwargs)
     return instance
