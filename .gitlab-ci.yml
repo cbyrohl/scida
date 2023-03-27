@@ -37,6 +37,14 @@ pages:
   - main
 
 ## test
+include:
+  - template: Code-Quality.gitlab-ci.yml
+code_quality:
+  services:            # Shut off Docker-in-Docker
+  tags:
+    - cq-sans-dind     # Set this job to only run on our new specialized runner
+
+
 run_tests:
   tags:
     - datasets
