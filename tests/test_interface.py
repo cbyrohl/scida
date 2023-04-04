@@ -2,9 +2,10 @@ import time
 
 import dask.array as da
 import numpy as np
-import pytest
 
+from astrodask.convenience import load
 from astrodask.interface import BaseSnapshot
+from astrodask.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
@@ -12,6 +13,17 @@ from tests.testdata_properties import require_testdata, require_testdata_path
 def test_interface_load(testdatapath):
     snp = BaseSnapshot(testdatapath)
     assert snp.file is not None
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_loadmetadata(testdatapath):
+    loader = ChunkedHDF5Loader(testdatapath)
+    metadata1 = loader.load_metadata()
+    assert len(metadata1.keys()) > 0
+    BaseSnapshot(testdatapath)  # load once, so this gets cached
+    metadata2 = loader.load_metadata()
+    assert len(metadata2.keys()) > 0
+    assert metadata2.get("/_chunks", None) is not None
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
@@ -32,14 +44,22 @@ def test_load_nonvirtual(testdatapath):
     assert snp.file is not None
 
 
-# TODO: revisit additional flags
 # TODO: setup and teardown savepath correctly
-# @pytest.mark.skipif(not (flag_test_long), reason="Not requesting time-taking tasks")
-@pytest.mark.skip()
-@require_testdata("interface", only=["TNG50-4_snapshot"])
+@require_testdata("interface", only=["TNG50-4_group"])
 def test_snapshot_save(testdata_interface):
     snp = testdata_interface
     snp.save("test.zarr")
+
+
+@require_testdata("interface", only=["TNG50-4_group"])
+def test_snapshot_loadsaved(testdata_interface):
+    snp = testdata_interface
+    pos = snp.data["Group"]["GroupPos"][0].compute()
+    snp.save("test.zarr")
+    ds = load("test.zarr")
+    pos2 = ds.data["Group"]["GroupPos"][0].compute()
+    assert ds.boxsize[0] == snp.header["BoxSize"]
+    assert np.all(np.equal(pos, pos2))
 
 
 # @pytest.mark.skip()

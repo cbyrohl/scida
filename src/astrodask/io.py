@@ -56,6 +56,12 @@ class HDF5Loader(Loader):
         self.file = file
         return datadict
 
+    def load_metadata(self, **kwargs):
+        """Take a quick glance at the metadata."""
+        tree = {}
+        walk_hdf5file(self.path, tree)
+        return tree["attrs"]
+
 
 class ZarrLoader(Loader):
     def __init__(self, path):
@@ -75,7 +81,15 @@ class ZarrLoader(Loader):
         tree = {}
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
-        self.load_from_tree(tree)
+        datadict = load_datadict_old(
+            self.path,
+            self.file,
+            token=token,
+            chunksize=chunksize,
+            derivedfields_kwargs=derivedfields_kwargs,
+            filetype="zarr",
+        )
+        return datadict
 
 
 class ChunkedHDF5Loader(Loader):
@@ -83,6 +97,18 @@ class ChunkedHDF5Loader(Loader):
         super().__init__(path)
         self.tempfile = ""
         self.location = ""
+
+    def load_metadata(self, fileprefix=""):
+        """Take a quick glance at the metadata."""
+        cachefp = return_hdf5cachepath(self.path)
+        if cachefp is not None and os.path.isfile(cachefp):
+            path = cachefp
+        else:
+            # get data from first file in list
+            path = self.get_chunkedfiles(fileprefix)[0]
+        tree = {}
+        walk_hdf5file(path, tree)
+        return tree["attrs"]
 
     def load(
         self,
@@ -116,8 +142,7 @@ class ChunkedHDF5Loader(Loader):
         )
         return datadict
 
-    def create_cachefile(self, fileprefix="", virtualcache=False):
-        cachefp = return_hdf5cachepath(self.path)
+    def get_chunkedfiles(self, fileprefix) -> list:
         files = [join(self.path, f) for f in os.listdir(self.path)]
         files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
         files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
@@ -130,6 +155,11 @@ class ChunkedHDF5Loader(Loader):
         nmbrs = [int(f.split(".")[-2]) for f in files]
         sortidx = np.argsort(nmbrs)
         files = files[sortidx]
+        return files
+
+    def create_cachefile(self, fileprefix="", virtualcache=False):
+        cachefp = return_hdf5cachepath(self.path)
+        files = self.get_chunkedfiles(fileprefix)
 
         self.location = cachefp
         if cachefp is None:
@@ -168,11 +198,17 @@ def load_datadict_old(
     chunksize=None,
     derivedfields_kwargs=None,
     lazy=True,  # if true, call da.from_array delayed
+    filetype="hdf5",
 ):
     # TODO: Refactor and rename
     data = {}
     tree = {}
-    walk_hdf5file(location, tree)
+    if filetype == "hdf5":
+        walk_hdf5file(location, tree)
+    elif filetype == "zarr":
+        walk_zarrfile(location, tree)
+    else:
+        raise ValueError("Unknown filetype ''" % filetype)
     """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
     inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
     if type(file) == h5py._hl.files.File:

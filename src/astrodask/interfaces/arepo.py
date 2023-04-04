@@ -83,18 +83,27 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         if catalog is not None:
             virtualcache = False  # copy catalog for better performance
             catalog_kwargs = kwargs.get("catalog_kwargs", {})
+            catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
             fileprefix = catalog_kwargs.get("fileprefix", "")
-            self.catalog = BaseSnapshot(
+            self.catalog = ArepoSnapshot(
                 catalog, virtualcache=virtualcache, fileprefix=fileprefix
             )
             for k in self.catalog.data:
                 if k not in self.data:
                     self.data[k] = self.catalog.data[k]
                 self.catalog.data.derivedfields_kwargs["snap"] = self
-
-        # Add halo/subhalo IDs to particles (if catalogs available)
-        if self.catalog is not None:
             self.add_catalogIDs()
+            # merge hints
+            for h in self.catalog.hints:
+                if h not in self.hints:
+                    self.hints[h] = self.catalog.hints[h]
+                elif isinstance(self.hints[h], dict):
+                    # merge dicts
+                    for k in self.catalog.hints[h]:
+                        if k not in self.hints[h]:
+                            self.hints[h][k] = self.catalog.hints[h][k]
+                else:
+                    pass  # nothing to do; we do not overwrite with catalog props
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):

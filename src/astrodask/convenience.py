@@ -57,7 +57,14 @@ def _determine_type(
     return available_dtypes, [reg[k] for k in available_dtypes]
 
 
-def load(path: str, strict=False, units: Union[bool, str] = False, **kwargs):
+def load(
+    path: str,
+    strict=False,
+    units: Union[bool, str] = False,
+    unitfile: str = "",
+    overwrite: bool = False,
+    **kwargs
+):
     if os.path.exists(path):
         # datasets on disk
         pass
@@ -97,11 +104,18 @@ def load(path: str, strict=False, units: Union[bool, str] = False, **kwargs):
 
     # determine additional mixins not set by class
     mixins = []
+    if unitfile:
+        units = True
+        kwargs["unitfile"] = unitfile
+
     if units:
         mixins.append(UnitMixin)
         kwargs["units"] = units
 
-    return cls(path, mixins=mixins, **kwargs)
+    kwargs["overwritecache"] = overwrite
+
+    instance = cls(path, mixins=mixins, **kwargs)
+    return instance
 
 
 def get_dataset_by_name(name):

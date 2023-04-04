@@ -8,23 +8,18 @@ class CosmologyMixin(Mixin):
     def __init__(self, *args, **kwargs):
         self.metadata = {}
         super().__init__(*args, **kwargs)
-        self.cosmology = None
-        self.redshift = np.nan
-        if "HubbleParam" in self.header and "Omega0" in self.header:
-            import astropy.units as u
-            from astropy.cosmology import FlatLambdaCDM
-
-            h = self.header["HubbleParam"]
-            om0 = self.header["Omega0"]
-            ob0 = self.header.get("OmegaBaryon", None)
-            self.cosmology = FlatLambdaCDM(
-                H0=100 * h * u.km / u.s / u.Mpc, Om0=om0, Ob0=ob0
-            )
-        try:
-            self.redshift = self.header["Redshift"]
-        except KeyError:  # no redshift attribute
-            pass
+        metadata_raw = self._metadata_raw
+        c = get_cosmology_from_rawmetadata(metadata_raw)
+        self.cosmology = c
+        z = get_redshift_from_rawmetadata(metadata_raw)
+        self.redshift = z
         self.metadata["redshift"] = self.redshift
+        if hasattr(self, "unitregistry"):
+            if c is not None:
+                self.unitregistry.define("h = %s" % str(c.h))
+            if z is not None:
+                a = 1.0 / (1.0 + z)
+                self.unitregistry.define("a = %s" % str(float(a)))
 
     def _info_custom(self):
         rep = sprint("=== Cosmological Simulation ===")
@@ -34,3 +29,35 @@ class CosmologyMixin(Mixin):
             rep += sprint("cosmology =", str(self.cosmology))
         rep += sprint("===============================")
         return rep
+
+
+def get_redshift_from_rawmetadata(metadata_raw):
+    z = metadata_raw.get("/Header", {}).get("Redshift", np.nan)
+    return z
+
+
+def get_cosmology_from_rawmetadata(metadata_raw):
+    import astropy.units as u
+    from astropy.cosmology import FlatLambdaCDM
+
+    aliasdict = dict(h=["HubbleParam"], om0=["Omega0"], ob0=["OmegaBaryon"])
+    cparams = dict(h=None, om0=None, ob0=None)
+    for grp in ["Parameters", "Header"]:
+        for p, v in cparams.items():
+            if v is not None:
+                continue  # already acquired some value for this item.
+            for alias in aliasdict[p]:
+                cparams[p] = metadata_raw.get("/" + grp, {}).get(alias, cparams[p])
+
+    h, om0, ob0 = cparams["h"], cparams["om0"], cparams["ob0"]
+    if None in [h, om0]:
+        print("Cannot infer cosmology.")
+        return None
+    elif ob0 is None:
+        print(
+            "Info: No Omega baryon given, we will assume a value of '0.0486' for the cosmology."
+        )
+        ob0 = 0.0486
+    H0 = 100.0 * h * u.km / u.s / u.Mpc
+    cosmology = FlatLambdaCDM(H0=H0, Om0=om0, Ob0=ob0)
+    return cosmology

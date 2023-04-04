@@ -11,30 +11,25 @@ from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
 
 log = logging.getLogger(__name__)
-ureg = UnitRegistry()
 
 
-def str_to_unit(unitstr):
-    return 1.0 * ureg(unitstr)
-    # unit = 1.0
-    # pattern = r"\s*[*/]*[a-zA-Z]+(\*\*-*\d+)*"
-    # # unitstr = "".join(unitstr.split())  # remove all whitespaces
-    # for u in re.finditer(pattern, unitstr):
-    #    ustr = u.group()
-    #    if u.group()[0] == "/":
-    #        unit /= unyt.unyt_quantity.from_string(ustr[1:])
-    #    elif u.group()[0] == "*":
-    #        unit *= unyt.unyt_quantity.from_string(ustr[1:])
-    #    else:
-    #        # this should be the first unit in str
-    #        unit *= unyt.unyt_quantity.from_string(ustr)
-    # return unit
-
-
-def extract_units_from_attrs(attrs, require=False):
+def extract_units_from_attrs(attrs, require=False, mode="cgs", ureg=None):
     """
     Extract the units from given attributes
     """
+    assert ureg is not None, "Always require passing registry now."
+    udict = {}
+    if mode == "cgs":
+        udict["length"] = ureg("cm")
+        udict["mass"] = ureg("g")
+        udict["velocity"] = ureg("cm/s")
+        udict["time"] = ureg("s")
+    elif mode == "code":
+        raise NotImplementedError("TBD")
+    else:
+        raise KeyError("Unknown unit mode '%s'." % mode)
+    if "h" in ureg:
+        udict["h"] = ureg("h")
     # the common mode is to expect some hints how to convert to cgs
     # get the conversion factor
     cgskey = [k for k in attrs if "cgs" in k.lower()]
@@ -50,28 +45,23 @@ def extract_units_from_attrs(attrs, require=False):
         unit = unit[0]
     if unit == 0.0:
         unit = 1.0  # zero makes no sense.
+    # TODO: Missing a scaling!
     # TODO: Missing h scaling!
-    if any(
-        [k + "_scaling" in attrs.keys() for k in ["length", "mass", "velocity", "time"]]
-    ):  # like TNG
-        # try to infer from dimensional scaling attributes
-        unit *= ureg.cm ** attrs.get("length_scaling", 0.0)
-        unit *= ureg.g ** attrs.get("mass_scaling", 0.0)
-        unit *= (ureg.cm / ureg.s) ** attrs.get("velocity_scaling", 0.0)
-        unit *= ureg.s ** attrs.get("time_scaling", 0.0)
+    ukeys = ["length", "mass", "velocity", "time", "h"]
+    if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
+        for k in ukeys:
+            aname = k + "_scaling"
+            unit *= udict[k] ** attrs.get(aname, 0.0)
     elif "Conversion factor" in attrs.keys():  # like SWIFT
         ustr = str(attrs["Conversion factor"])
         ustr = ustr.split("[")[-1].split("]")[0]
         if ustr.strip() == "-":  # no units, done
             return unit
-        unit *= str_to_unit(ustr)
+        unit *= ureg(ustr)
     elif "cgsunits" in attrs.keys():  # like EAGLE
         if attrs["cgsunits"] is not None:  # otherwise, this field has no units
             unitstr = attrs["cgsunits"]
-            # bugged unyt: https://github.com/yt-project/unyt/issues/361
-            # thus cannot pass all in one; instead pass unit one by one
-            unit *= str_to_unit(unitstr)
-
+            unit *= ureg(unitstr)
     elif require:
         raise ValueError("Could not find units.")
     return unit
@@ -107,25 +97,34 @@ class UnitMixin(Mixin):
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
-        self.unitregistry = UnitRegistry()  # before unit
+        ureg = UnitRegistry()  # before unit
+        # TODO: Define the default unit registry somewhere else
+        ureg.define("Msun = 1.98847e33 * g")
+        self.unitregistry = ureg
         super().__init__(*args, **kwargs)
 
         # discover units
         units = kwargs.pop("units")
         unithints = {}
+        unitfile = ""
         if "dsname" in self.hints:
             c = get_config()
-            print("hints", self.hints)
             dsprops = c["data"][self.hints["dsname"]]
-            units = dsprops.get("unitfile", units)
+            unitfile = dsprops.get("unitfile", "")
+        unitfile = kwargs.pop("unitfile", unitfile)
 
-        if not isinstance(units, bool):
+        if isinstance(units, bool):
+            assert units is not False, "Mixin should not be called here."
+            units = "cgs"
+        if units not in ["cgs", "code"]:
             # assuming that 'units' holds the path to the configuration
-            unithints = get_unithints_fromfile(units)
-        for ptype in self.data:
+            raise ValueError("Unknown unit mode '%s'" % unitfile)
+        if unitfile != "":
+            unithints = get_unithints_fromfile(unitfile)
+        for ptype in sorted(self.data):
             self.units[ptype] = {}
             pfields = self.data[ptype]
-            for k in pfields.keys(allfields=True):
+            for k in sorted(pfields.keys(allfields=True)):
                 h5path = "/" + ptype + "/" + k
                 if h5path in self._metadata_raw.keys():
                     # any hints available?
@@ -133,7 +132,9 @@ class UnitMixin(Mixin):
                     attrs = dict(self._metadata_raw[h5path])
                     attrs.update(**uh)
                     try:
-                        unit = extract_units_from_attrs(attrs, require=True)
+                        unit = extract_units_from_attrs(
+                            attrs, require=True, mode=units, ureg=self.unitregistry
+                        )
                     except ValueError as e:
                         if str(e) != "Could not find units.":
                             raise e

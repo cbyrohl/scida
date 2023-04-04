@@ -22,21 +22,6 @@ def walk_group(obj, tree, get_attrs=False):
             walk_group(o, tree, get_attrs=get_attrs)
 
 
-# def walk_group(obj, tree, get_attrs=False):
-#    if len(tree) == 0:
-#        tree.update(**dict(attrs={}, groups=[], datasets=[]))
-#        if get_attrs and len(obj.attrs) > 0:
-#            tree["attrs"][obj.name] = dict(obj.attrs)
-#    for k, o in obj.items():
-#        if isinstance(o, (h5py.Group, zarr.Group)):
-#            tree["groups"].append(o.name)  # continue the walk
-#            walk_group(o, tree, get_attrs=get_attrs)
-#        elif isinstance(o, (h5py.Dataset, zarr.Array)):
-#            tree["datasets"].append([o.name, o.shape, o.dtype])
-#        else:
-#            raise TypeError("Unknown type '%s'" % type(o))
-
-
 def walk_zarrfile(fn, tree, get_attrs=True):
     with zarr.open(fn) as z:
         walk_group(z, tree, get_attrs=get_attrs)
@@ -232,7 +217,6 @@ def create_mergedhdf5file(
                         attrs_differ[apath][k] = np.stack(attrvallist)
                         continue
                 else:
-                    # assert len(set(vals)) == 1, k + " has different values."  # TODO
                     if not len(set(attrvallist)) == 1:
                         log.debug("%s: %s has different values." % (apath, k))
                         attrs_differ[apath][k] = np.array(attrval0)
