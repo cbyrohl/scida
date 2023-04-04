@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8.1"
 numpy = "^1.18"
-dask = {extras = ["array", "dataframe", "distributed"], version = "^2022.12.1"}
+dask = {extras = ["array", "dataframe", "distributed"], version = ">=2022.12.1, <2024.1.1"}
 distributed = "^2022.07"
 h5py = "^3.7.0"
 zarr = "^v2.10.0"
