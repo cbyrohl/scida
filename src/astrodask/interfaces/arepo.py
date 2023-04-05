@@ -1,12 +1,10 @@
 import copy
 import logging
-import numbers
 import os
 import re
 import warnings
 from typing import Dict, List, Optional, Union
 
-import astropy.units as u
 import dask
 import dask.array as da
 import numpy as np
@@ -14,15 +12,14 @@ from dask import delayed
 from numba import jit, njit
 from numpy.typing import NDArray
 
-from astrodask.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin
-
-from ..helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
-from ..interface import BaseSnapshot, Selector
-from .arepo_units import (
-    get_unittuples_from_TNGdocs_groups,
-    get_unittuples_from_TNGdocs_particles,
-    get_unittuples_from_TNGdocs_subhalos,
+from astrodask.helpers_misc import (
+    computedecorator,
+    get_args,
+    get_kwargs,
+    parse_humansize,
 )
+from astrodask.interface import BaseSnapshot, Selector
+from astrodask.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin
 
 log = logging.getLogger(__name__)
 
@@ -710,100 +707,6 @@ def get_shcounts_shcells(SubhaloGrNr, hlength):
             hid_old = hid
         i += 1
     return shcounts, shnumber
-
-
-def get_units_from_AREPOdocs(unitstr, codeunitdict):
-    # first, extract list of unit tuples (consisting of unit as string and exponent)
-    unittupledict = {}
-    typemapping = {
-        "Field name": "particles",
-        "Group field name": "groups",
-        "Subhalo field name": "subhalos",
-    }
-    pattern = re.compile(r"\s*(?:ext)*\{*([a-zA-Z]+)\}*\^*\{*([0-9.-]*)\}*")
-    lines = unitstr.split("\n")
-    typekey = None
-    for line in lines:
-        if line.startswith("| "):
-            fieldentry = [s.strip() for s in line.split("|")[1:-1]]
-        else:
-            continue
-        name, blkid, units, desc = fieldentry
-        if " name" in name:
-            typekey = typemapping[name]
-            if typekey not in unittupledict:
-                unittupledict[typekey] = {}
-            continue
-        if len(units) == 0:  # no units
-            unittupledict[typekey][name] = []
-            continue
-
-        unittuples = [ut for ut in pattern.findall(units) if ut[0] != "math"]
-        unittupledict[typekey][name] = unittuples
-
-    # next convert tuples to units
-    unitdict = {}
-    for k, dct in unittupledict.items():
-        unitdict[k] = {}
-        for name, uts in dct.items():
-            units = get_units_from_unittuples(uts, codeunitdict)
-            unitdict[k][name] = units
-    return unitdict
-
-
-def get_units_from_unittuples(unittuples, codeunitdict):
-    # require cgs unitlengths for now
-    assert "UnitLength_in_cm" in codeunitdict
-    assert "UnitMass_in_g" in codeunitdict
-    assert "UnitVelocity_in_cm_per_s" in codeunitdict
-    assert "HubbleParam" in codeunitdict
-    assert "Redshift" in codeunitdict
-    cudict = {}
-    cudict["UnitLength"] = codeunitdict["UnitLength_in_cm"] * u.cm
-    cudict["UnitMass"] = codeunitdict["UnitMass_in_g"] * u.g
-    cudict["UnitVelocity"] = codeunitdict["UnitVelocity_in_cm_per_s"] * u.cm / u.s
-    # Pressure: M/L/T^2 = M/L^3 * V^2
-    cudict["UnitPressure"] = (
-        cudict["UnitMass"] / cudict["UnitLength"] ** 3 * cudict["UnitVelocity"] ** 2
-    )
-    cudict["h"] = codeunitdict["HubbleParam"]
-    cudict["a"] = 1.0 / (1.0 + codeunitdict["Redshift"])
-    cudict["ckpc"] = (
-        cudict["a"] * u.kpc
-    )  # as we express everything physical => multiply with a
-    units = 1.0
-    for ut in unittuples:
-        if isinstance(ut, tuple):
-            ut = list(ut)
-            if len(ut) == 1:
-                ut = ut + [1]
-            elif isinstance(ut[1], str) and len(ut[1]) == 0:
-                ut[1] = 1.0
-        if isinstance(ut[0], numbers.Number):
-            units *= ut[0] ** (float(ut[1]))
-        else:
-            try:
-                units *= cudict[ut[0]] ** (float(ut[1]))
-            except KeyError:
-                units *= u.__dict__[ut[0]] ** (float(ut[1]))
-    return units
-
-
-def get_units_from_TNGdocs(codeunitdict):
-    units = dict(particles={}, groups={}, subhalos={})
-    unittuples = get_unittuples_from_TNGdocs_particles()
-    units["particles"] = {
-        k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()
-    }
-    unittuples = get_unittuples_from_TNGdocs_groups()
-    units["groups"] = {
-        k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()
-    }
-    unittuples = get_unittuples_from_TNGdocs_subhalos()
-    units["subhalos"] = {
-        k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()
-    }
-    return units
 
 
 def partTypeNum(partType):
