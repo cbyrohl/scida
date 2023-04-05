@@ -4,7 +4,7 @@ import numbers
 import os
 import re
 import warnings
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import astropy.units as u
 import dask
@@ -28,11 +28,11 @@ log = logging.getLogger(__name__)
 
 
 class ArepoSelector(Selector):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.keys = ["haloID"]
 
-    def prepare(self, *args, **kwargs):
+    def prepare(self, *args, **kwargs) -> None:
         snap = args[0]
         if snap.catalog is None:
             raise ValueError("Cannot select for haloID without catalog loaded.")
@@ -56,7 +56,7 @@ class ArepoSelector(Selector):
 
 
 class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
-    def __init__(self, path, chunksize="auto", catalog=None, **kwargs):
+    def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:
         self.header = {}
         self.config = {}
         self.parameters = {}
@@ -65,19 +65,6 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         if prfx is None:
             prfx = self._get_fileprefix(path)
         super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
-        # self.cosmology = None
-        # if "HubbleParam" in self.header and "Omega0" in self.header:
-        #    import astropy.units as u
-        #    from astropy.cosmology import FlatLambdaCDM
-
-        #    h = self.header["HubbleParam"]
-        #    omega0 = self.header["Omega0"]
-        #    self.cosmology = FlatLambdaCDM(H0=100 * h * u.km / u.s / u.Mpc, Om0=omega0)
-        # self.redshift = np.nan
-        # try:
-        #    self.redshift = self.header["Redshift"]
-        # except KeyError:  # no redshift attribute
-        #    pass
 
         self.catalog = catalog
         if catalog is not None:
@@ -106,7 +93,20 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                     pass  # nothing to do; we do not overwrite with catalog props
 
     @classmethod
-    def validate_path(cls, path, *args, **kwargs):
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+        """
+        Check if path is valid for this interface.
+        Parameters
+        ----------
+        path: str, os.PathLike
+            path to check
+        args
+        kwargs
+
+        Returns
+        -------
+        bool
+        """
         path = str(path)
         if path.endswith(".hdf5") or path.endswith(".zarr"):
             return True
@@ -121,7 +121,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         return False
 
     @classmethod
-    def _get_fileprefix(cls, path, **kwargs) -> str:
+    def _get_fileprefix(cls, path: Union[str, os.PathLike], **kwargs) -> str:
+        """
+        Get the fileprefix used to identify files belonging to given dataset.
+        Parameters
+        ----------
+        path: str, os.PathLike
+            path to check
+        kwargs
+
+        Returns
+        -------
+        str
+        """
         if os.path.isfile(path):
             return ""  # nothing to do, we have a single file, not a directory
         # order matters: groups will be taken before fof_subhalo, requires py>3.7 for dict order
@@ -143,12 +155,33 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
 
     @ArepoSelector()
     def return_data(self):
+        """
+        Return data.
+        Returns
+        -------
+
+        """
         return super().return_data()
 
-    def register_field(
-        self, parttype, name=None, construct=True
-    ):  # TODO: introduce (immediate) construct option later
+    def register_field(self, parttype: str, name: str = None, construct: bool = True):
+        """
+        Register a field.
+        Parameters
+        ----------
+        parttype: str
+            name of particle type
+        name: str
+            name of field
+        construct: bool
+            construct field immediately
+
+        Returns
+        -------
+
+        """
         num = partTypeNum(parttype)
+        if construct:  # TODO: introduce (immediate) construct option later
+            raise NotImplementedError
         if num == -1:  # TODO: all particle species
             key = "all"
             raise NotImplementedError
@@ -158,7 +191,13 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             key = parttype
         return super().register_field(key, name=name)
 
-    def add_catalogIDs(self):
+    def add_catalogIDs(self) -> None:
+        """
+        Add field for halo and subgroup IDs for all particle types.
+        Returns
+        -------
+
+        """
         # TODO: make these delayed objects and properly pass into (delayed?) numba functions:
         # https://docs.dask.org/en/stable/delayed-best-practices.html#avoid-repeatedly-putting-large-inputs-into-delayed-calls
 
@@ -878,11 +917,29 @@ def map_halo_operation(
     arrdict,
     chunksize=int(3e7),
     cpucost_halo=1e4,
-    Nmin=None,
-    chunksize_bytes=None,
-    entry_nbytes_in=4,
-    fieldnames=None,
-):
+    Nmin: Optional[int] = None,
+    chunksize_bytes: Optional[int] = None,
+    entry_nbytes_in: Optional[int] = 4,
+    fieldnames: Optional[List[str]] = None,
+) -> da.Array:
+    """
+    Map a function to all halos in a halo catalog.
+    Parameters
+    ----------
+    func
+    lengths
+    arrdict
+    chunksize
+    cpucost_halo
+    Nmin
+    chunksize_bytes
+    entry_nbytes_in
+    fieldnames
+
+    Returns
+    -------
+
+    """
     if chunksize is not None:
         warnings.warn(
             '"chunksize" parameter is depreciated and has no effect. Specify Nmin for control.',

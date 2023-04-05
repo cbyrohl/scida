@@ -71,14 +71,10 @@ def test_areposimulation_caching(cachedir, testdatapath):
     dt0 = time.process_time() - tstart
     os.remove(bs._metadatafile)  # remove series metadata cache file
 
-    print("1")
-
     # second call to cache dataseries, and only series
     tstart = time.process_time()
     bs1 = ArepoSimulation(testdatapath)
     dt1 = time.process_time() - tstart
-
-    print("2")
 
     # third to benchmark use with dataseries cache
     tstart = time.process_time()

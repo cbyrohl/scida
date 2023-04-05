@@ -87,9 +87,26 @@ class Dataset(metaclass=MixinMeta):
             self.hints["dsname"] = dsname
 
     def _info_custom(self):
+        """
+        Custom information to be printed by info() method.
+        Returns
+        -------
+
+        """
         return None
 
-    def info(self, listfields=False):
+    def info(self, listfields: bool = False):
+        """
+        Print information about the dataset.
+        Parameters
+        ----------
+        listfields: bool
+            If True, list all fields in the dataset.
+
+        Returns
+        -------
+
+        """
         rep = ""
         rep += sprint(self.__class__.__name__)
         props = self._repr_dict()
@@ -115,12 +132,24 @@ class Dataset(metaclass=MixinMeta):
         rep += sprint("============")
         print(rep)
 
-    def _repr_dict(self):
+    def _repr_dict(self) -> Dict[str, str]:
+        """
+        Return a dictionary of properties to be printed by __repr__ method.
+        Returns
+        -------
+        dict
+        """
         props = dict()
         props["source"] = self.path
         return props
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the object.
+        Returns
+        -------
+        str
+        """
         props = self._repr_dict()
         clsname = self.__class__.__name__
         result = clsname + "["
@@ -130,6 +159,17 @@ class Dataset(metaclass=MixinMeta):
         return result
 
     def _repr_pretty_(self, p, cycle):
+        """
+        Pretty print representation for IPython.
+        Parameters
+        ----------
+        p
+        cycle
+
+        Returns
+        -------
+
+        """
         rpr = self.__repr__()
         p.text(rpr)
 
@@ -144,11 +184,28 @@ class Dataset(metaclass=MixinMeta):
     @classmethod
     @abc.abstractmethod
     def validate_path(cls, path, *args, **kwargs):
-        # estimate whether we have a valid path for this dataset
+        """
+        Validate whether the given path is a valid path for this dataset.
+        Parameters
+        ----------
+        path
+        args
+        kwargs
+
+        Returns
+        -------
+
+        """
         return False
 
-    def __hash__(self):
-        """Hash for Dataset instance to be derived from the file location."""
+    def __hash__(self) -> int:
+        """
+        Hash for Dataset instance to be derived from the file location.
+
+        Returns
+        -------
+        int
+        """
         # determinstic hash; note that hash() on a string is no longer deterministic in python3.
         hash_value = (
             int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16)
@@ -156,10 +213,22 @@ class Dataset(metaclass=MixinMeta):
         )
         return hash_value
 
-    def __dask_tokenize__(self):
+    def __dask_tokenize__(self) -> int:
+        """
+        Token for dask to be derived -- naively from the file location.
+        Returns
+        -------
+        int
+        """
         return self.__hash__()
 
-    def return_data(self):
+    def return_data(self) -> FieldContainerCollection:
+        """
+        Return the data container.
+        Returns
+        -------
+
+        """
         return self.data
 
     def save(
@@ -169,8 +238,26 @@ class Dataset(metaclass=MixinMeta):
         overwrite=True,
         zarr_kwargs=None,
         cast_uints=False,
-    ):
-        """Saving into zarr format."""
+    ) -> None:
+        """
+        Save the dataset to a file using the 'zarr' format.
+        Parameters
+        ----------
+        fname: str
+            Filename to save to.
+        fields: str or dict
+            dictionary of dask arrays to save. If equal to 'all', save all fields in current dataset.
+        overwrite
+            overwrite existing file
+        zarr_kwargs
+            optional arguments to pass to zarr
+        cast_uints
+            need to potentially cast uints to ints for some compressions; TODO: clean this up
+
+        Returns
+        -------
+
+        """
         # We use zarr, as this way we have support to directly write into the file by the workers
         # (rather than passing back the data chunk over the scheduler to the interface)
         # Also, this way we can leverage new features, such as a large variety of compression methods.
@@ -229,7 +316,7 @@ class Dataset(metaclass=MixinMeta):
 
 
 class BaseSnapshot(Dataset):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs):
+    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
         self.boxsize = np.full(3, np.nan)
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
@@ -240,7 +327,7 @@ class BaseSnapshot(Dataset):
                 self.__dict__[name] = self._metadata_raw[k]
 
     @classmethod
-    def validate_path(cls, path, *args, **kwargs):
+    def validate_path(cls, path, *args, **kwargs) -> bool:
         path = str(path)
         if path.endswith(".hdf5") or path.endswith(".zarr"):
             return True
@@ -258,9 +345,18 @@ class BaseSnapshot(Dataset):
         return self.data.register_field(parttype, name=name, description=description)
 
 
-def deepdictkeycopy(olddict, newdict):
-    """Recursively walk nested dictionary, only creating empty dictionaries
-    for entries that are dictionaries themselves"""
+def deepdictkeycopy(olddict, newdict) -> None:
+    """
+    Recursively walk nested dictionary, only creating empty dictionaries for entries that are dictionaries themselves.
+    Parameters
+    ----------
+    olddict
+    newdict
+
+    Returns
+    -------
+
+    """
     for k, v in olddict.items():
         if isinstance(v, MutableMapping):
             newdict[k] = {}
@@ -298,8 +394,8 @@ class Selector(object):
 
         return newfn
 
-    def prepare(self, *args, **kwargs):
+    def prepare(self, *args, **kwargs) -> None:
         raise NotImplementedError("Subclass implementation needed!")
 
-    def finalize(self, *args, **kwargs):
+    def finalize(self, *args, **kwargs) -> None:
         args[0].data = self.data_backup

@@ -11,7 +11,17 @@ from astrodask.interfaces.mixins import UnitMixin
 from astrodask.registries import dataseries_type_registry, dataset_type_registry
 
 
-def get_testdata(name):
+def get_testdata(name: str) -> str:
+    """
+    Get path to test data identifier.
+    Parameters
+    ----------
+    name: str
+        Name of test data.
+    Returns
+    -------
+    str
+    """
     config = get_config()
     tdpath = config.get("testdata_path", None)
     if tdpath is None:
@@ -25,7 +35,11 @@ def get_testdata(name):
 
 
 def _determine_type(
-    path, test_datasets=True, test_dataseries=True, strict=False, **kwargs
+    path: Union[str, os.PathLike],
+    test_datasets: bool = True,
+    test_dataseries: bool = True,
+    strict: bool = False,
+    **kwargs
 ):
     available_dtypes: List[str] = []
     reg = dict()
@@ -118,7 +132,18 @@ def load(
     return instance
 
 
-def get_dataset_by_name(name):
+def get_dataset_by_name(name: str) -> str:
+    """
+    Get dataset name from alias or name found in the configuration files.
+    Parameters
+    ----------
+    name: str
+        Name or alias of dataset.
+
+    Returns
+    -------
+    str
+    """
     dname = None
     c = get_config()
     if "datasets" not in c:
@@ -177,7 +202,18 @@ def get_dataset(name=None, props=None):
     return dnames[0]
 
 
-def copy_configurationexample(overwrite=False):
+def copy_configurationexample(overwrite=False) -> None:
+    """
+    Copy the configuration example to the user's home directory.
+    Parameters
+    ----------
+    overwrite: bool
+        Overwrite existing configuration file.
+
+    Returns
+    -------
+
+    """
     fn = ".astrodask.yaml"
     path = os.path.expanduser("~/" + fn)
     if os.path.exists(path) and not overwrite:
