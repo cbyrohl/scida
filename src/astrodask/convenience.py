@@ -4,7 +4,7 @@ import os
 from collections import Counter
 from functools import reduce
 from inspect import getmro
-from typing import List, Union
+from typing import List, Optional, Union
 
 from astrodask.config import get_config
 from astrodask.interfaces.mixins import UnitMixin
@@ -73,7 +73,6 @@ def _determine_type(
 
 def load(
     path: str,
-    strict=False,
     units: Union[bool, str] = False,
     unitfile: str = "",
     overwrite: bool = False,
@@ -132,7 +131,7 @@ def load(
     return instance
 
 
-def get_dataset_by_name(name: str) -> str:
+def get_dataset_by_name(name: str) -> Optional[str]:
     """
     Get dataset name from alias or name found in the configuration files.
     Parameters

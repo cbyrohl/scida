@@ -1,21 +1,39 @@
-import importlib.resources
 import logging
-import os
+from typing import Optional
 
 import numpy as np
-import yaml
+import pint
 from pint import UnitRegistry
 
-from astrodask.config import get_config
+from astrodask.config import get_config, get_config_fromfile
 from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
 
 log = logging.getLogger(__name__)
 
 
-def extract_units_from_attrs(attrs, require=False, mode="cgs", ureg=None):
+def extract_units_from_attrs(
+    attrs,
+    require: bool = False,
+    mode: str = "cgs",
+    ureg: Optional[pint.UnitRegistry] = None,
+) -> pint.Quantity:
     """
-    Extract the units from given attributes
+    Extract units from given attributes.
+    Parameters
+    ----------
+    attrs
+        The attributes to extract the units from.
+    require
+        Whether to raise an error if no units are found.
+    mode
+        The unit mode to use (right now: cgs or code).
+    ureg
+        The unit registry to use.
+
+    Returns
+    -------
+
     """
     assert ureg is not None, "Always require passing registry now."
     udict = {}
@@ -25,7 +43,10 @@ def extract_units_from_attrs(attrs, require=False, mode="cgs", ureg=None):
         udict["velocity"] = ureg("cm/s")
         udict["time"] = ureg("s")
     elif mode == "code":
-        raise NotImplementedError("TBD")
+        udict["length"] = ureg("code_length")
+        udict["mass"] = ureg("code_mass")
+        udict["velocity"] = ureg("code_velocity")
+        udict["time"] = ureg("code_time")
     else:
         raise KeyError("Unknown unit mode '%s'." % mode)
     if "h" in ureg:
@@ -67,29 +88,12 @@ def extract_units_from_attrs(attrs, require=False, mode="cgs", ureg=None):
     return unit
 
 
-def get_unithints_fromfile(resource):
-    """Find and load of the unit file"""
-    # order:
-    # 1. absolute path?
-    path = os.path.expanduser(resource)
-    if os.path.isabs(path):
-        with open(path, "r") as file:
-            unithints = yaml.safe_load(file)["fields"]
-        return unithints
-    bpath = os.path.expanduser("~/.config/astrodask/units")
-    path = os.path.join(bpath, resource)
-    # 2. non-absolute path?
-    # 2.1. check ~/.config/astrodask/units/
-    if os.path.isfile(path):
-        with open(path, "r") as file:
-            unithints = yaml.safe_load(file)["fields"]
-        return unithints
-    # 2.2 check astrodask package resource units/
-    resource_path = "astrodask.configfiles.units"
-    with importlib.resources.path(resource_path, resource) as fp:
-        with open(fp, "r") as file:
-            unithints = yaml.safe_load(file)["fields"]
-    return unithints
+def update_unitregistry(filepath: str, ureg: UnitRegistry):
+    ulist = []
+    conf = get_config_fromfile("units/illustris.yaml")
+    for k, v in conf.get("units", {}).items():
+        ulist.append("%s = %s" % (k, v))
+    ureg.load_definitions(ulist)
 
 
 class UnitMixin(Mixin):
@@ -97,14 +101,11 @@ class UnitMixin(Mixin):
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
-        ureg = UnitRegistry()  # before unit
-        # TODO: Define the default unit registry somewhere else
-        ureg.define("Msun = 1.98847e33 * g")
-        self.unitregistry = ureg
+
+        # first, initialize self.data by calling super init
         super().__init__(*args, **kwargs)
 
-        # discover units
-        units = kwargs.pop("units")
+        # get unit hints
         unithints = {}
         unitfile = ""
         if "dsname" in self.hints:
@@ -112,15 +113,23 @@ class UnitMixin(Mixin):
             dsprops = c["data"][self.hints["dsname"]]
             unitfile = dsprops.get("unitfile", "")
         unitfile = kwargs.pop("unitfile", unitfile)
+        if unitfile != "":
+            unithints = get_config_fromfile(unitfile)
 
+        units = kwargs.pop("units")
         if isinstance(units, bool):
             assert units is not False, "Mixin should not be called here."
-            units = "cgs"
+            units = "code"
         if units not in ["cgs", "code"]:
             # assuming that 'units' holds the path to the configuration
             raise ValueError("Unknown unit mode '%s'" % unitfile)
-        if unitfile != "":
-            unithints = get_unithints_fromfile(unitfile)
+
+        # initialize unit registry
+        ureg = UnitRegistry()  # before unit
+        update_unitregistry(unitfile, ureg)
+        self.ureg = self.unitregistry = ureg
+
+        # update fields with units
         for ptype in sorted(self.data):
             self.units[ptype] = {}
             pfields = self.data[ptype]

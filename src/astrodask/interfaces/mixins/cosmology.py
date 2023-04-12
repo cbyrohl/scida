@@ -58,6 +58,6 @@ def get_cosmology_from_rawmetadata(metadata_raw):
             "Info: No Omega baryon given, we will assume a value of '0.0486' for the cosmology."
         )
         ob0 = 0.0486
-    H0 = 100.0 * h * u.km / u.s / u.Mpc
-    cosmology = FlatLambdaCDM(H0=H0, Om0=om0, Ob0=ob0)
+    hubble0 = 100.0 * h * u.km / u.s / u.Mpc
+    cosmology = FlatLambdaCDM(H0=hubble0, Om0=om0, Ob0=ob0)
     return cosmology
