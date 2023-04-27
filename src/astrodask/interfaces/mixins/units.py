@@ -71,6 +71,8 @@ def extract_units_from_attrs(
     ukeys = ["length", "mass", "velocity", "time", "h"]
     if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
         for k in ukeys:
+            if mode == "code" and k == "h":
+                continue  # h scaling absorbed into code units
             aname = k + "_scaling"
             unit *= udict[k] ** attrs.get(aname, 0.0)
     elif "Conversion factor" in attrs.keys():  # like SWIFT
@@ -90,7 +92,7 @@ def extract_units_from_attrs(
 
 def update_unitregistry(filepath: str, ureg: UnitRegistry):
     ulist = []
-    conf = get_config_fromfile("units/illustris.yaml")
+    conf = get_config_fromfile(filepath)
     for k, v in conf.get("units", {}).items():
         ulist.append("%s = %s" % (k, v))
     ureg.load_definitions(ulist)

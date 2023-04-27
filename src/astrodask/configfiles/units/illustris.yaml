@@ -7,3 +7,6 @@ units:
   code_velocity: km / s
   code_mass: 1e10 * Msun / h
   code_time: 0.978 * Gyr / h
+fields:
+  PartType0:
+    StarFormationRate: Msun / yr

@@ -38,6 +38,8 @@ def get_config_fromfile(resource: str) -> Dict:
     -------
 
     """
+    if resource == "":
+        raise ValueError("Config name cannot be empty.")
     # order (in descending order of priority):
     # 1. absolute path?
     path = os.path.expanduser(resource)
@@ -59,7 +61,6 @@ def get_config_fromfile(resource: str) -> Dict:
     rname = resource_elements[-1]
     if len(resource_elements) > 1:
         resource_path += "." + ".".join(resource_elements[:-1])
-    print(resource_elements)
     with importlib.resources.path(resource_path, rname) as fp:
         with open(fp, "r") as file:
             conf = yaml.safe_load(file)

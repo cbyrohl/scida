@@ -35,9 +35,14 @@ def test_load_codeunits(testdatapath):
     print(coords.units)
     print(dens.units)
     print(sfr.units)
-    assert coords.units == u.cm / u.h
-    assert dens.units == u.g / u.h / (u.cm / u.h) ** 3
-    assert sfr.units == u.g / u.s
+    assert coords.units == u.code_length
+    assert dens.units == u.code_mass / u.code_length**3
+    # SFR is an important test-case, as the units cannot be inferred from the dimensionality (not in code units)
+    assert (
+        sfr.units != u.code_mass * u.code_velocity / u.code_length
+    )  # == code_mass/code_time is wrong!
+    # we know that TNG uses u.Msun/yr for SFR
+    assert sfr.units == u.Msun / u.yr
 
 
 def test_update_unitregistry():
