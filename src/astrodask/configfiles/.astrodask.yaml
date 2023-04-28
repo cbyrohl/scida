@@ -22,6 +22,7 @@ resources:
 defs:
   tng_params: &tng_params
     dataset_type: ArepoSimulation
+    unitfile: units/illustris.yaml
   tng_props: &tng_props
     code: arepo
     suite: TNG

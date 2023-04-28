@@ -31,16 +31,11 @@ def test_load_codeunits(testdatapath):
     dens = gas["Density"]
     sfr = gas["StarFormationRate"]
     u = ds.ureg
-    print(u.Msun)
-    print(coords.units)
-    print(dens.units)
-    print(sfr.units)
     assert coords.units == u.code_length
     assert dens.units == u.code_mass / u.code_length**3
+    code_time = u.code_velocity / u.code_length
     # SFR is an important test-case, as the units cannot be inferred from the dimensionality (not in code units)
-    assert (
-        sfr.units != u.code_mass * u.code_velocity / u.code_length
-    )  # == code_mass/code_time is wrong!
+    assert sfr.units != u.code_mass / code_time  # == code_mass/code_time is wrong!
     # we know that TNG uses u.Msun/yr for SFR
     assert sfr.units == u.Msun / u.yr
 

@@ -132,10 +132,17 @@ class UnitMixin(Mixin):
         self.ureg = self.unitregistry = ureg
 
         # update fields with units
+        fields_with_units = unithints.get("fields", {})
         for ptype in sorted(self.data):
             self.units[ptype] = {}
             pfields = self.data[ptype]
             for k in sorted(pfields.keys(allfields=True)):
+                # first we check whether we are explicitly given a unit by a unit file
+                if ptype in fields_with_units and k in fields_with_units[ptype]:
+                    unit = ureg(fields_with_units[ptype][k])
+                    pfields[k] = unit * pfields[k]
+                    continue
+                # if not, we try to extract the unit from the metadata
                 h5path = "/" + ptype + "/" + k
                 if h5path in self._metadata_raw.keys():
                     # any hints available?
