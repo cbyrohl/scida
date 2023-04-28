@@ -1,4 +1,4 @@
-import importlib
+import importlib.resources
 import os
 from typing import Dict, List, Optional
 
