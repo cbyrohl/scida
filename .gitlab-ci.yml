@@ -11,7 +11,6 @@ stages:
     - poetry --version
     - poetry config virtualenvs.in-project true
     - poetry install -vv
-    - poetry run python -c "from astrodask.convenience import copy_configurationexample; copy_configurationexample()"
     - export ASTRODASK_TESTDATA_PATH=/testdata
     - export ASTRODASK_TESTDATA_SKIP="Illustris-3_snapshot"
 

@@ -19,17 +19,9 @@ def get_config(reload: bool = False) -> dict:
     # in any case, we make sure that there is some config in the default path.
     path_user = os.path.expanduser("~")
     path_confdir = os.path.join(path_user, ".config/astrodask")
-    if not os.path.exists(path_confdir):
-        os.makedirs(path_confdir, exist_ok=True)
     path_conf = os.path.join(path_confdir, "config.yaml")
     if not os.path.exists(path_conf):
-        # copy default configuration if we do not have one yet.
-        # TODO: properly copy instead of using yaml dump as latter removes useful comments
-        with importlib.resources.path("astrodask.configfiles", "config.yaml") as fp:
-            with open(fp, "r") as file:
-                conf = yaml.safe_load(file)
-        with open(path_conf, "w") as file:
-            yaml.safe_dump(conf, file)
+        copy_defaultconfig(overwrite=False)
 
     # next, we load the config from the default path, unless explicitly overridden.
     path = envconf.pop("config_path", None)
@@ -47,6 +39,33 @@ def get_config(reload: bool = False) -> dict:
     config.update(**envconf)
     _conf = config
     return config
+
+
+def copy_defaultconfig(overwrite=False) -> None:
+    """
+    Copy the configuration example to the user's home directory.
+    Parameters
+    ----------
+    overwrite: bool
+        Overwrite existing configuration file.
+
+    Returns
+    -------
+
+    """
+
+    path_user = os.path.expanduser("~")
+    path_confdir = os.path.join(path_user, ".config/astrodask")
+    if not os.path.exists(path_confdir):
+        os.makedirs(path_confdir, exist_ok=True)
+    path_conf = os.path.join(path_confdir, "config.yaml")
+    if os.path.exists(path_conf) and not overwrite:
+        raise ValueError("Configuration file already exists at '%s'" % path_conf)
+    with importlib.resources.path("astrodask.configfiles", "config.yaml") as fp:
+        with open(fp, "r") as file:
+            content = file.read()
+            with open(path_conf, "w") as newfile:
+                newfile.write(content)
 
 
 def get_config_fromfile(resource: str) -> Dict:

@@ -1,5 +1,4 @@
 import copy
-import importlib.resources
 import os
 from collections import Counter
 from functools import reduce
@@ -199,27 +198,3 @@ def get_dataset(name=None, props=None):
     elif len(dnames) == 0:
         raise ValueError("No dataset candidate found.")
     return dnames[0]
-
-
-def copy_configurationexample(overwrite=False) -> None:
-    """
-    Copy the configuration example to the user's home directory.
-    Parameters
-    ----------
-    overwrite: bool
-        Overwrite existing configuration file.
-
-    Returns
-    -------
-
-    """
-    fn = ".astrodask.yaml"
-    path = os.path.expanduser("~/" + fn)
-    if os.path.exists(path) and not overwrite:
-        raise ValueError("Configuration file already exists at '%s'" % path)
-    resource_path = "astrodask.configfiles"
-    with importlib.resources.path(resource_path, fn) as fp:
-        with open(fp, "r") as file:
-            content = file.read()
-            with open(path, "w") as newfile:
-                newfile.write(content)
