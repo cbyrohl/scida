@@ -15,12 +15,35 @@ def get_config(reload: bool = False) -> dict:
         for k, v in os.environ.items()
         if k.startswith(prefix)
     }
+
+    # in any case, we make sure that there is some config in the default path.
+    path_user = os.path.expanduser("~")
+    path_confdir = os.path.join(path_user, ".config/astrodask")
+    if not os.path.exists(path_confdir):
+        os.makedirs(path_confdir, exist_ok=True)
+    path_conf = os.path.join(path_confdir, "config.yaml")
+    if not os.path.exists(path_conf):
+        # copy default configuration if we do not have one yet.
+        # TODO: properly copy instead of using yaml dump as latter removes useful comments
+        with importlib.resources.path("astrodask.configfiles", "config.yaml") as fp:
+            with open(fp, "r") as file:
+                conf = yaml.safe_load(file)
+        with open(path_conf, "w") as file:
+            yaml.safe_dump(conf, file)
+
+    # next, we load the config from the default path, unless explicitly overridden.
     path = envconf.pop("config_path", None)
     if path is None:
-        path = os.path.join(os.path.expanduser("~"), ".astrodask.yaml")
+        path = path_conf
     if not reload and len(_conf) > 0:
         return _conf
     config = get_config_fromfile(path)
+    if config.get("copied_default", False):
+        print(
+            "Warning! Using default configuration. Please adjust/replace in '%s'."
+            % path
+        )
+
     config.update(**envconf)
     _conf = config
     return config
