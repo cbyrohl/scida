@@ -1,6 +1,6 @@
 stages:
-  - deploy
   - test
+  - deploy
 
 
 # templates
