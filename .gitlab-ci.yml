@@ -87,6 +87,7 @@ publish-package:
   script:
     - poetry config repositories.gitlab https://gitlab.mpcdf.mpg.de/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
     - poetry config http-basic.gitlab gitlab-ci-token ${CI_JOB_TOKEN}
+    - poetry build
     - poetry publish -r gitlab
   only:
     - tags
