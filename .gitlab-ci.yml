@@ -35,6 +35,7 @@ pages:
     - public
   only:
   - main
+  - tags
 
 ## test
 include:
