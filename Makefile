@@ -1,4 +1,4 @@
-.PHONY: all version docs clean
+.PHONY: all version localdocs publicdocs clean
 
 version:
 	@poetry version $(v)
@@ -8,5 +8,10 @@ version:
 	@git push
 	@git push --tags
 	@poetry version
-docs:
+
+localdocs:
 	@poetry run mkdocs build
+
+publicdocs:
+	@poetry run mkdocs build
+	@rsync -arv site/* hetzner:/home/cbyrohl/public_content/astrodask
