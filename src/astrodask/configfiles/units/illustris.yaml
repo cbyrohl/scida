@@ -10,3 +10,51 @@ units:
 fields:
   PartType0:
     StarFormationRate: Msun / yr
+    GFM_AGNRadiation: erg / s / cm ^ 2 * 4 * pi
+  # no metadata attributes in group catalogs, thus have to add all manually
+  Group:
+    GroupBHMass: code_mass
+    GroupBHMdot: code_mass / code_time
+    GroupCM: code_length
+    GroupMass: code_mass
+    GroupMassType: code_mass
+    GroupPos: code_length
+    GroupSFR: Msun / yr
+    GroupVel: km / s / a
+    GroupWindMass: code_mass
+    Group_M_Crit200: code_mass
+    Group_M_Crit500: code_mass
+    Group_M_Mean200: code_mass
+    Group_M_TopHat200: code_mass
+    Group_R_Crit200: code_length
+    Group_R_Crit500: code_length
+    Group_R_Mean200: code_length
+    Group_R_TopHat200: code_length
+  Subhalo:
+    SubhaloBHMass: code_mass
+    SubhaloBHMdot: code_mass / code_time
+    SubhaloCM: code_length
+    SubhaloHalfmassRad: code_length
+    SubhaloHalfmassRadType: code_length
+    SubhaloMass: code_mass
+    SubhaloMassInHalfRad: code_mass
+    SubhaloMassInHalfRadType: code_mass
+    SubhaloMassInMaxRad: code_mass
+    SubhaloMassInMaxRadType: code_mass
+    SubhaloMassInRad: code_mass
+    SubhaloMassInRadType: code_mass
+    SubhaloMassType: code_mass
+    SubhaloPos: code_length
+    SubhaloSFR: Msun / yr
+    SubhaloSFRinHalfRad: Msun / yr
+    SubhaloSFRinMaxRad: Msun / yr
+    SubhaloSFRinRad: Msun / yr
+    SubhaloSpin: kpc / h * km / s
+    SubhaloStellarPhotometrics: "1.0" # for now lets not add unit "mag" (TODO?)
+    SubhaloStellarPhotometricsMassInRad: code_mass
+    SubhaloStellarPhotometricsRad: code_length
+    SubhaloVel: km / s
+    SubhaloVelDisp: km / s
+    SubhaloVmax: km / s
+    SubhaloVmaxRad: code_length
+    SubhaloWindMass: code_mass

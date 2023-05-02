@@ -2,7 +2,74 @@ import numbers
 import re
 from math import pi
 
+# TODO: Switch to pint for unit consistency
+import astropy.units
 import astropy.units as u
+import dask.array as da
+import numpy as np
+import pint
+
+from astrodask.convenience import load
+from tests.testdata_properties import require_testdata_path
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_tng_units(testdatapath):
+    # TODO: TNG50-4_group needs to be a fixture, not just hacked in as here
+    catalog_path = testdatapath.replace("snapshot", "group")
+    print(catalog_path)
+    ds = load(testdatapath, units=True, catalog=catalog_path)
+    ds_nounits = load(testdatapath, units=False, catalog=catalog_path)
+    codeunitdict = {k: v for k, v in ds.header.items() if k.startswith("Unit")}
+    codeunitdict["HubbleParam"] = ds.header["HubbleParam"]
+    codeunitdict["Redshift"] = ds.header["Redshift"]
+    units = get_units_from_TNGdocs(codeunitdict)
+    ureg = ds.ureg
+    ureg.default_system = "cgs"
+    for pk1, pk2 in zip(
+        ["PartType0", "Group", "Subhalo"], ["particles", "groups", "subhalos"]
+    ):
+        # if pk1 not in ds.data.keys():
+        #     continue
+        for k in sorted(ds.data[pk1].keys()):
+            if k in ["uid", "GroupID", "SubhaloID", "GroupOffsetsType"]:
+                continue  # defined in package, dont need to check
+            v = ds.data[pk1][k]
+            print("%s/%s" % (pk1, k))
+            val1 = v[0].astype(np.float64)
+            if isinstance(val1, pint.Quantity):
+                val1 = val1.to_base_units().compute()
+                mag1 = val1.magnitude
+            else:
+                val1 = val1.compute()
+                mag1 = val1
+                print("WARNING (TODO): Field has no units.")
+            u2 = units[pk2][k]
+            mag2 = ds_nounits.data[pk1][k][0].compute()
+            if isinstance(u2, astropy.units.Quantity):
+                print(mag2)
+                mag2 = mag2 * u2.cgs.value
+            print(mag1, mag2)
+            assert np.allclose(mag1, mag2, rtol=1e-4), "%.4f == %.4f" % (mag1, mag2)
+    pass
+
+
+def test_dask_pint1():
+    ureg = pint.UnitRegistry()
+    ureg.default_system = "cgs"
+    ureg.define("halfmeter = 0.5 * meter")
+    arr = da.ones(1) * ureg("halfmeter")
+    print(arr[0].compute().to_base_units())
+
+
+def test_dask_pint2():
+    ureg = pint.UnitRegistry()
+    ureg.default_system = "cgs"
+    ureg.define("halfmeter = 0.5 * meter")
+    arr = da.ones(1) * ureg("halfmeter")
+    print(arr[0].compute().magnitude)
+    print(arr[0].to_base_units().compute())
+
 
 # TODO: only copied over a few functions.
 #  Eventually we want to compare the "manual" units here against the unit discovery
@@ -263,14 +330,14 @@ def get_unittuples_from_TNGdocs_subhalos():
     uts["SubhaloIDMostbound"] = []
     uts["SubhaloLen"] = []
     uts["SubhaloLenType"] = []
-    uts["SubhaloMass"] = uts["SubhaloCM"]
-    uts["SubhaloMassInHalfRad"] = uts["SubhaloCM"]
-    uts["SubhaloMassInHalfRadType"] = uts["SubhaloCM"]
-    uts["SubhaloMassInMaxRad"] = uts["SubhaloCM"]
-    uts["SubhaloMassInMaxRadType"] = uts["SubhaloCM"]
-    uts["SubhaloMassInRad"] = uts["SubhaloCM"]
-    uts["SubhaloMassInRadType"] = uts["SubhaloCM"]
-    uts["SubhaloMassType"] = uts["SubhaloCM"]
+    uts["SubhaloMass"] = uts["SubhaloBHMass"]
+    uts["SubhaloMassInHalfRad"] = uts["SubhaloBHMass"]
+    uts["SubhaloMassInHalfRadType"] = uts["SubhaloBHMass"]
+    uts["SubhaloMassInMaxRad"] = uts["SubhaloBHMass"]
+    uts["SubhaloMassInMaxRadType"] = uts["SubhaloBHMass"]
+    uts["SubhaloMassInRad"] = uts["SubhaloBHMass"]
+    uts["SubhaloMassInRadType"] = uts["SubhaloBHMass"]
+    uts["SubhaloMassType"] = uts["SubhaloBHMass"]
     uts["SubhaloParent"] = []
     uts["SubhaloPos"] = uts["SubhaloCM"]
     uts["SubhaloSFR"] = [("Msun",), ("yr", -1)]
@@ -284,7 +351,9 @@ def get_unittuples_from_TNGdocs_subhalos():
     uts["SubhaloStarMetallicity"] = []
     uts["SubhaloStarMetallicityHalfRad"] = []
     uts["SubhaloStarMetallicityMaxRad"] = []
-    uts["SubhaloStellarPhotometrics"] = [("mag",)]
+    uts[
+        "SubhaloStellarPhotometrics"
+    ] = []  # [("mag",)]  # TODO: Do not treat "mag" unit for now
     uts["SubhaloStellarPhotometricsMassInRad"] = uts["SubhaloBHMass"]
     uts["SubhaloStellarPhotometricsRad"] = uts["SubhaloCM"]
     uts["SubhaloVel"] = [("km",), ("s", -1)]

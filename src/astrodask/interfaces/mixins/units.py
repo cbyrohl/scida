@@ -51,21 +51,27 @@ def extract_units_from_attrs(
         raise KeyError("Unknown unit mode '%s'." % mode)
     if "h" in ureg:
         udict["h"] = ureg("h")
-    # the common mode is to expect some hints how to convert to cgs
-    # get the conversion factor
-    cgskey = [k for k in attrs if "cgs" in k.lower()]
-    if "cgsunits" in cgskey:
-        cgskey.remove("cgsunits")  # these are the units not the normalization factor
-    assert len(cgskey) == 1
-    cgskey = cgskey[0]
-    cgsfactor = attrs[cgskey]
+    cgsfactor = ureg.Quantity(
+        1.0
+    )  # nothing to do if mode == "code" as we take values as they are
+    if mode == "cgs":
+        # the common mode is to expect some hints how to convert to cgs
+        # get the conversion factor
+        cgskey = [k for k in attrs if "cgs" in k.lower()]
+        if "cgsunits" in cgskey:
+            cgskey.remove(
+                "cgsunits"
+            )  # these are the units not the normalization factor
+        assert len(cgskey) == 1
+        cgskey = cgskey[0]
+        cgsfactor = attrs[cgskey]
     # get dimensions
     unit = cgsfactor
     if isinstance(unit, np.ndarray):
         assert len(unit) == 1
         unit = unit[0]
     if unit == 0.0:
-        unit = 1.0  # zero makes no sense.
+        unit = ureg.Quantity(1.0)  # zero makes no sense.
     # TODO: Missing a scaling!
     # TODO: Missing h scaling!
     ukeys = ["length", "mass", "velocity", "time", "h"]
@@ -103,7 +109,6 @@ class UnitMixin(Mixin):
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
-
         # first, initialize self.data by calling super init
         super().__init__(*args, **kwargs)
 
