@@ -19,14 +19,11 @@ repos:
     hooks:
       - id: nbstripout
         exclude: ^(docs/notebooks/static/)
-        #  - repo: https://github.com/srstevenson/nb-clean
-        #    rev: "2.4.0"
-        #    hooks:
-        #      - id: nb-clean
-        #        exclude: |
-        #            (?x)(
-        #                ^docs/notebooks/largedatasets.ipynb
-        #            )
+          #exclude: | # if we want to exclude multiple directories
+          #      (?x)^(
+          #          docs/notebooks/static/.*|
+          #          docs/EXAMPLE2/.*
+          #      )$
   - repo: local
     hooks:
       - id: black

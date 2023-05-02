@@ -1,3 +1,5 @@
+.PHONY: all version docs clean
+
 version:
 	@poetry version $(v)
 	@git add pyproject.toml
@@ -6,3 +8,5 @@ version:
 	@git push
 	@git push --tags
 	@poetry version
+docs:
+	@poetry run mkdocs build

@@ -10,6 +10,8 @@ nav:
     - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
     - 'Series': notebooks/series.ipynb
     - 'Interactive Visualization': notebooks/static/visualization.ipynb
+  - 'Cookbook':
+    - 'Units': notebooks/cookbook/units.ipynb
   - api_docs.md
 
 markdown_extensions:
