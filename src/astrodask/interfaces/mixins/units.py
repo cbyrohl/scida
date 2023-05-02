@@ -135,6 +135,7 @@ class UnitMixin(Mixin):
         ureg = UnitRegistry()  # before unit
         if unitfile != "":
             update_unitregistry(unitfile, ureg)
+        ureg.default_system = "cgs"
         self.ureg = self.unitregistry = ureg
 
         # update fields with units
@@ -152,10 +153,14 @@ class UnitMixin(Mixin):
                         if units + "units" in funit:
                             unit = ureg(funit[units + "units"])
                             pfields[k] = unit * pfields[k]
+                            if units == "cgs" and isinstance(pfields[k], pint.Quantity):
+                                pfields[k] = pfields[k].to_base_units()
                             continue
                     else:
                         unit = ureg(funit)
                         pfields[k] = unit * pfields[k]
+                        if units == "cgs" and isinstance(pfields[k], pint.Quantity):
+                            pfields[k] = pfields[k].to_base_units()
                         continue
                 # if not, we try to extract the unit from the metadata
                 h5path = "/" + ptype + "/" + k
