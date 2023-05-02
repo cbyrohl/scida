@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "astrodask"
-version = "0.1.4"
+version = "0.1.5"
 description = "Convenience wrapper around astrophysical datasets to process with dask."
 authors = ["Chris Byrohl"]
 readme = "README.md"
