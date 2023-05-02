@@ -70,13 +70,8 @@ def _determine_type(
     return available_dtypes, [reg[k] for k in available_dtypes]
 
 
-def load(
-    path: str,
-    units: Union[bool, str] = False,
-    unitfile: str = "",
-    overwrite: bool = False,
-    **kwargs
-):
+def find_path(path):
+    config = get_config()
     if os.path.exists(path):
         # datasets on disk
         pass
@@ -89,11 +84,8 @@ def load(
             raise NotImplementedError("TODO.")
         elif databackend == "testdata":
             path = get_testdata(dataname)
-
         else:
             # potentially custom dataset.
-            # TODO: The following hardcoded cases should be loaded through a config file
-            config = get_config()
             resources = config.get("resources", {})
             if databackend not in resources:
                 raise ValueError("Unknown resource '%s'" % databackend)
@@ -104,8 +96,26 @@ def load(
                 )
             path = os.path.expanduser(r[dataname]["path"])
     else:
-        raise ValueError("Specified path unknown.")
+        found = False
+        if "datafolders" in config:
+            for folder in config["datafolders"]:
+                if os.path.exists(os.path.join(folder, path)):
+                    path = os.path.join(folder, path)
+                    found = True
+                    break
+        if not found:
+            raise ValueError("Specified path unknown.")
+    return path
 
+
+def load(
+    path: str,
+    units: Union[bool, str] = False,
+    unitfile: str = "",
+    overwrite: bool = False,
+    **kwargs
+):
+    path = find_path(path)
     # determine dataset class
     reg = dict()
     reg.update(**dataset_type_registry)

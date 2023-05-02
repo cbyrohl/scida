@@ -4,8 +4,10 @@
 copied_default: True  # if this is set, a warning is printed as the default config has not been adjusted
 # adjust the config to your needs and remove above line to remove warning.
 cache_path: ~/cachedir
-testdata_path: /fastdata/public/testdata-astrodask
+testdata_path: /fastdata/public/testdata-astrodask  # should be replaced by 'datafolders' logic further below eventually
 nthreads: 8
+
+datafolders: ["/fastdata/public/testdata-astrodask", "/vera/ptmp/gc/byrohlc/astrodask-testdata"]
 
 resources:
   mpcdf:

@@ -6,6 +6,12 @@ from astrodask.interface import Dataset
 from astrodask.misc import check_config_for_dataset
 from tests.testdata_properties import require_testdata, require_testdata_path
 
+# eventually replaces 'testdata_path'
+# def test_load_pathdiscovery():
+#    obj = load("TNG50-4_snapshot")
+#    assert obj.file is not None
+#    assert obj.data is not None
+
 
 @require_testdata_path("interface")
 def test_load(testdatapath):
