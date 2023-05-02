@@ -77,3 +77,16 @@ run_tests:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+
+publish-package:
+  stage: publish
+  image: python:3.9
+  extends: .install-deps
+  needs: ["run_tests"]
+  before_script:
+    - poetry config repositories.gitlab https://gitlab.mpcdf.mpg.de/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
+    - poetry config http-basic.gitlab gitlab-ci-token ${CI_JOB_TOKEN}
+  script:
+    - poetry publish -r gitlab
+  only:
+    - tags
