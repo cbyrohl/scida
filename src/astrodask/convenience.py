@@ -117,7 +117,8 @@ def load(
     # determine additional mixins not set by class
     mixins = []
     if unitfile:
-        units = True
+        if not units:
+            units = True
         kwargs["unitfile"] = unitfile
 
     if units:

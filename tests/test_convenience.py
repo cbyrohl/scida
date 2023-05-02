@@ -44,22 +44,14 @@ def test_load_areposim(testdatapath):
 
 
 @require_testdata_path("interface")
-def test_load_units(testdatapath):
-    obj = load(testdatapath, units=True)
+def test_load_units_cgs(testdatapath):
+    obj = load(testdatapath, units="cgs")
     assert "UnitMixin" in type(obj).__name__
 
 
 @require_testdata_path("interface", only=["EAGLEsmall_snapshot"])
 def test_load_units_manualpath(testdatapath):
-    # commented out tests wont work in CI for now.
-    # # test absolute path
-    # obj = load(testdatapath, units="~/.config/astrodask/units/eagle2.yaml")
-    # assert "UnitMixin" in type(obj).__name__
-    # # test relative path
-    # obj = load(testdatapath, units="eagle2.yaml")
-    # assert "UnitMixin" in type(obj).__name__
-    # test package resource
-    obj = load(testdatapath, units=True, unitfile="eagle.yaml")
+    obj = load(testdatapath, units="cgs", unitfile="units/eagle.yaml")
     assert "UnitMixin" in type(obj).__name__
 
 

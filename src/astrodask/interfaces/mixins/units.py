@@ -133,7 +133,8 @@ class UnitMixin(Mixin):
 
         # initialize unit registry
         ureg = UnitRegistry()  # before unit
-        update_unitregistry(unitfile, ureg)
+        if unitfile != "":
+            update_unitregistry(unitfile, ureg)
         self.ureg = self.unitregistry = ureg
 
         # update fields with units
@@ -144,9 +145,18 @@ class UnitMixin(Mixin):
             for k in sorted(pfields.keys(allfields=True)):
                 # first we check whether we are explicitly given a unit by a unit file
                 if ptype in fields_with_units and k in fields_with_units[ptype]:
-                    unit = ureg(fields_with_units[ptype][k])
-                    pfields[k] = unit * pfields[k]
-                    continue
+                    # we have two options: either the unit is given as a string, reflecting code units
+                    # or as a dictionary with either or both keys 'cgsunits' and 'codeunits' who hold the unit strings
+                    funit = fields_with_units[ptype][k]
+                    if isinstance(funit, dict):
+                        if units + "units" in funit:
+                            unit = ureg(funit[units + "units"])
+                            pfields[k] = unit * pfields[k]
+                            continue
+                    else:
+                        unit = ureg(funit)
+                        pfields[k] = unit * pfields[k]
+                        continue
                 # if not, we try to extract the unit from the metadata
                 h5path = "/" + ptype + "/" + k
                 if h5path in self._metadata_raw.keys():

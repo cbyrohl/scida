@@ -8,6 +8,8 @@ import astropy.units as u
 import dask.array as da
 import numpy as np
 import pint
+import pytest
+from packaging import version
 
 from astrodask.convenience import load
 from tests.testdata_properties import require_testdata_path
@@ -54,6 +56,10 @@ def test_tng_units(testdatapath):
     pass
 
 
+@pytest.mark.skipif(
+    version.parse(pint.__version__) <= version.parse("0.20.1"),
+    reason="pint bug, hopefully fixed in next release, see https://github.com/hgrecco/pint/issues/1765",
+)
 def test_dask_pint1():
     ureg = pint.UnitRegistry()
     ureg.default_system = "cgs"

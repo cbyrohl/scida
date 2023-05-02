@@ -85,4 +85,4 @@ data:
     identifiers:
       Header:
         RunLabel: "\"Eagle"
-    unitfile: eagle.yaml
+    unitfile: units/eagle.yaml

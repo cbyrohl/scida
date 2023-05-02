@@ -9,6 +9,7 @@ def test_load_defaultconf():
 
 
 def test_load_multiple_confs():
-    conf = get_config_fromfiles([".astrodask.yaml", "units/illustris.yaml"])
+    conf = get_config_fromfiles(["config.yaml", "units/illustris.yaml"])
     assert conf is not None
-    assert "code_units" in conf
+    assert "units" in conf
+    assert "cache_path" in conf
