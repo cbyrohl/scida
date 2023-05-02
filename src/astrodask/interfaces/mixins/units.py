@@ -109,7 +109,10 @@ class UnitMixin(Mixin):
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
-        # first, initialize self.data by calling super init
+
+        ureg = UnitRegistry()  # before unit
+        self.ureg = self.unitregistry = ureg
+
         super().__init__(*args, **kwargs)
 
         # get unit hints
@@ -132,11 +135,9 @@ class UnitMixin(Mixin):
             raise ValueError("Unknown unit mode '%s'" % unitfile)
 
         # initialize unit registry
-        ureg = UnitRegistry()  # before unit
         if unitfile != "":
-            update_unitregistry(unitfile, ureg)
-        ureg.default_system = "cgs"
-        self.ureg = self.unitregistry = ureg
+            update_unitregistry(unitfile, self.ureg)
+        self.ureg.default_system = "cgs"
 
         # update fields with units
         fields_with_units = unithints.get("fields", {})

@@ -28,6 +28,11 @@ def test_tng_units(testdatapath):
     units = get_units_from_TNGdocs(codeunitdict)
     ureg = ds.ureg
     ureg.default_system = "cgs"
+
+    assert ureg("h").to_base_units().magnitude == 0.6774
+    if not np.isclose(ds.redshift, 0.0):
+        assert ureg("a").to_base_units().magnitude != 1.0
+
     for pk1, pk2 in zip(
         ["PartType0", "Group", "Subhalo"], ["particles", "groups", "subhalos"]
     ):
@@ -37,7 +42,7 @@ def test_tng_units(testdatapath):
             if k in ["uid", "GroupID", "SubhaloID", "GroupOffsetsType"]:
                 continue  # defined in package, dont need to check
             v = ds.data[pk1][k]
-            print("%s/%s" % (pk1, k))
+            # print("%s/%s" % (pk1, k))
             val1 = v[0].astype(np.float64)
             if isinstance(val1, pint.Quantity):
                 val1 = val1.to_base_units().compute()
@@ -49,9 +54,8 @@ def test_tng_units(testdatapath):
             u2 = units[pk2][k]
             mag2 = ds_nounits.data[pk1][k][0].compute()
             if isinstance(u2, astropy.units.Quantity):
-                print(mag2)
                 mag2 = mag2 * u2.cgs.value
-            print(mag1, mag2)
+            # print(mag1, mag2)
             assert np.allclose(mag1, mag2, rtol=1e-4), "%.4f == %.4f" % (mag1, mag2)
     pass
 
