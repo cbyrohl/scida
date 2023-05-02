@@ -79,7 +79,7 @@ run_tests:
         path: coverage.xml
 
 publish-package:
-  stage: publish
+  stage: deploy
   image: python:3.9
   extends: .install-deps
   needs: ["run_tests"]
