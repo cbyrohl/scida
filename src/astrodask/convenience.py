@@ -236,6 +236,11 @@ def load(
     **kwargs
 ):
     path = find_path(path, overwrite=overwrite)
+
+    if "catalog" in kwargs and kwargs["catalog"] is not None:
+        if not isinstance(kwargs["catalog"], list):
+            kwargs["catalog"] = find_path(kwargs["catalog"], overwrite=overwrite)
+
     # determine dataset class
     reg = dict()
     reg.update(**dataset_type_registry)
