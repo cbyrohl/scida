@@ -13,6 +13,16 @@ from tests.testdata_properties import require_testdata, require_testdata_path
 #    assert obj.data is not None
 
 
+def test_load_https():
+    # TNG50-4 snapshot
+    # url = "https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl=1"
+    # TNG50-4 group
+    url = "https://heibox.uni-heidelberg.de/f/ff27fb6975fb4dc391ef/?dl=1"
+    obj = load(url)
+    assert obj.file is not None
+    assert obj.data is not None
+
+
 @require_testdata_path("interface")
 def test_load(testdatapath):
     obj = load(testdatapath)

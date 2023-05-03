@@ -1,13 +1,79 @@
 import copy
+import hashlib
 import os
+import pathlib
+import shutil
+import sys
+import tarfile
+import time
 from collections import Counter
 from functools import reduce
 from inspect import getmro
 from typing import List, Optional, Union
 
+import requests
+
 from astrodask.config import get_config
 from astrodask.interfaces.mixins import UnitMixin
 from astrodask.registries import dataseries_type_registry, dataset_type_registry
+
+
+def download_and_extract(
+    url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False
+):
+    """
+    Download and extract a file from a given url.
+    Parameters
+    ----------
+    url: str
+        The url to download from.
+    path: pathlib.Path
+        The path to download to.
+    progressbar: bool
+        Whether to show a progress bar.
+    overwrite: bool
+        Whether to overwrite an existing file.
+    Returns
+    -------
+    str
+        The path to the downloaded and extracted file(s).
+    """
+    if path.exists() and not overwrite:
+        raise ValueError("Target path '%s' already exists." % path)
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        totlength = int(r.headers.get("content-length", 0))
+        lread = 0
+        t1 = time.time()
+        with open(path, "wb") as f:
+            for chunk in r.iter_content(chunk_size=2**22):  # chunks of 4MB
+                t2 = time.time()
+                f.write(chunk)
+                lread += len(chunk)
+                if progressbar:
+                    rate = (lread / 2**20) / (t2 - t1)
+                    sys.stdout.write(
+                        "\rDownloaded %.2f/%.2f Megabytes (%.2f%%, %.2f MB/s)"
+                        % (
+                            lread / 2**20,
+                            totlength / 2**20,
+                            100.0 * lread / totlength,
+                            rate,
+                        )
+                    )
+                    sys.stdout.flush()
+        sys.stdout.write("\n")
+    tar = tarfile.open(path, "r:gz")
+    for t in tar:
+        if t.isdir():
+            t.mode = int("0755", base=8)
+        else:
+            t.mode = int("0644", base=8)
+    tar.extractall(path.parents[0])
+    foldername = tar.getmembers()[0].name  # parent folder of extracted tar.gz
+    tar.close()
+    os.remove(path)
+    return os.path.join(path.parents[0], foldername)
 
 
 def get_testdata(name: str) -> str:
@@ -70,7 +136,19 @@ def _determine_type(
     return available_dtypes, [reg[k] for k in available_dtypes]
 
 
-def find_path(path):
+def find_path(path, overwrite=False):
+    """
+    Find path to dataset.
+    Parameters
+    ----------
+    path: str
+    overwrite: bool
+        Only for remote datasets. Whether to overwrite an existing download.
+
+    Returns
+    -------
+
+    """
     config = get_config()
     if os.path.exists(path):
         # datasets on disk
@@ -81,7 +159,49 @@ def find_path(path):
         dataname = path.split("://")[1]
         if databackend in ["http", "https"]:
             # dataset on the internet
-            raise NotImplementedError("TODO.")
+            savepath = config.get("download_path", None)
+            if savepath is None:
+                print(
+                    "Have not specified 'download_path' in config. Using 'cache_path' instead."
+                )
+                savepath = config.get("cache_path")
+            savepath = os.path.expanduser(savepath)
+            savepath = pathlib.Path(savepath)
+            urlhash = str(
+                int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8
+            )
+            savepath = savepath / ("download" + urlhash)
+            filename = "archive.tar.gz"
+            if not savepath.exists():
+                os.makedirs(savepath, exist_ok=True)
+            elif overwrite:
+                # delete all files in folder
+                for f in os.listdir(savepath):
+                    fp = os.path.join(savepath, f)
+                    if os.path.isfile(fp):
+                        os.unlink(fp)
+                    else:
+                        shutil.rmtree(fp)
+            foldercontent = [f for f in savepath.glob("*")]
+            if len(foldercontent) == 0:
+                savepath = savepath / filename
+                extractpath = download_and_extract(
+                    path, savepath, progressbar=True, overwrite=overwrite
+                )
+            else:
+                extractpath = savepath
+            extractpath = pathlib.Path(extractpath)
+
+            print("ep", extractpath)
+            # count folders in savepath
+            nfolders = len([f for f in extractpath.glob("*") if f.is_dir()])
+            nobjects = len([f for f in extractpath.glob("*") if f.is_dir()])
+            if nobjects == 1 and nfolders == 1:
+                extractpath = (
+                    extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
+                )
+            path = extractpath
+            print(path)
         elif databackend == "testdata":
             path = get_testdata(dataname)
         else:
@@ -115,7 +235,7 @@ def load(
     overwrite: bool = False,
     **kwargs
 ):
-    path = find_path(path)
+    path = find_path(path, overwrite=overwrite)
     # determine dataset class
     reg = dict()
     reg.update(**dataset_type_registry)
