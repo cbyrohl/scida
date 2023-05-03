@@ -224,7 +224,7 @@ def find_path(path, overwrite=False):
                     found = True
                     break
         if not found:
-            raise ValueError("Specified path unknown.")
+            raise ValueError("Specified path '%s' unknown." % path)
     return path
 
 
