@@ -84,6 +84,9 @@ class DatasetSeries(object):
         super().__init_subclass__(*args, **kwargs)
         dataseries_type_registry[cls.__name__] = cls
 
+    def __len__(self):
+        return len(self.datasets)
+
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
         # estimate whether we have a valid path for this dataseries

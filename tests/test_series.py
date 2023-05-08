@@ -17,7 +17,7 @@ def test_areposimulation_load(testdatapath):
     redshift = 2.0
     ds = bs.get_dataset(redshift=redshift)
     print(ds)
-    print(redshift, ds.redshift)
+    assert len(bs) == 5
     assert np.isclose(redshift, ds.redshift, rtol=1e-2)
     # assert testdatapath_areposimulation.file is not None
 
