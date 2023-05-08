@@ -268,7 +268,7 @@ class Dataset(metaclass=MixinMeta):
         root = zarr.group(store, overwrite=overwrite)
 
         # Metadata
-        defaultattributes = ["Cconfig", "Header", "Parameters"]
+        defaultattributes = ["Config", "Header", "Parameters"]
         for dctname in defaultattributes:
             if dctname.lower() in self.__dict__:
                 grp = root.create_group(dctname)
