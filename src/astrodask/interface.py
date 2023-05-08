@@ -3,7 +3,7 @@ import hashlib
 import logging
 import os
 from collections.abc import MutableMapping
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import dask
 import dask.array as da
@@ -235,9 +235,10 @@ class Dataset(metaclass=MixinMeta):
         self,
         fname,
         fields: Union[str, Dict[str, Union[List[str], Dict[str, da.Array]]]] = "all",
-        overwrite=True,
-        zarr_kwargs=None,
-        cast_uints=False,
+        overwrite: bool = True,
+        zarr_kwargs: Optional[dict] = None,
+        cast_uints: bool = False,
+        extra_attrs: Optional[dict] = None,
     ) -> None:
         """
         Save the dataset to a file using the 'zarr' format.
@@ -276,6 +277,9 @@ class Dataset(metaclass=MixinMeta):
                 for k, v in dct.items():
                     v = make_serializable(v)
                     grp.attrs[k] = v
+        if extra_attrs is not None:
+            for k, v in extra_attrs.items():
+                root.attrs[k] = v
         # Data
         tasks = []
         ptypes = self.data.keys()

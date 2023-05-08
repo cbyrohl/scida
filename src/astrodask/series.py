@@ -47,9 +47,11 @@ class DatasetSeries(object):
         overwrite_cache=False,
         lazy=False,  # lazy will only initialize data sets on demand.
         async_caching=False,
+        names=None,
         **interface_kwargs
     ):
         self.paths = paths
+        self.names = names
         self._dataset_cls = datasetclass
         self.hash = hash_path("".join([str(p) for p in paths]))
         self._metadata = None
@@ -101,12 +103,24 @@ class DatasetSeries(object):
             paths, *interface_args, datasetclass=datasetclass, **interface_kwargs
         )
 
-    def get_dataset(self, index: Optional[int] = None, reltol=1e-2, **kwargs):
+    def get_dataset(
+        self,
+        index: Optional[int] = None,
+        name: Optional[str] = None,
+        reltol=1e-2,
+        **kwargs
+    ):
         """Get dataset by some metadata property. In the base class, we go by list index."""
-        if index is None and len(kwargs) == 0:
-            raise ValueError("Specify index or some parameter to select for.")
+        if index is None and name is None and len(kwargs) == 0:
+            raise ValueError("Specify index/name or some parameter to select for.")
         if index is not None:
             return self.datasets[index]
+        if name is not None:
+            if self.names is None:
+                raise ValueError("No names specified for members of this series.")
+            if name not in self.names:
+                raise ValueError("Name %s not found in this series." % name)
+            return self.datasets[self.names.index(name)]
         if len(kwargs) > 0 and self.metadata is None:
             if self.lazy:
                 raise ValueError(
