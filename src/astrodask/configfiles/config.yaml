@@ -7,7 +7,8 @@ cache_path: ~/cachedir
 testdata_path: /fastdata/public/testdata-astrodask  # should be replaced by 'datafolders' logic further below eventually
 nthreads: 8
 
-datafolders: ["/fastdata/public/testdata-astrodask", "/vera/ptmp/gc/byrohlc/astrodask-testdata", "/testdata"]
+datafolders: ["/fastdata/public/testdata-astrodask", "/vera/ptmp/gc/byrohlc/astrodask-testdata", "/testdata",
+              "/virgotng/universe/IllustrisTNG"]
 
 resources:
   mpcdf:
