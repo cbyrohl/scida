@@ -40,8 +40,10 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         common_coord_names = ["Coordinates", "Position", "GroupPos", "SubhaloPos"]
         self.hints["CoordinatesName"] = dict()
         for k, cntr in self.data.items():
+            found = False
             for ccn in common_coord_names:
                 if ccn in cntr.keys(allfields=True):
+                    found = True
                     log.debug("Found CoordinatesName '%s' for species '%s'" % (ccn, k))
                     self.hints["CoordinatesName"][k] = ccn
 
@@ -57,6 +59,8 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
                         dfltname, fnc, description="Coordinates alias"
                     )
                     break
+            if not found:
+                print(cntr.keys(allfields=True))
                 log.info("Did not find CoordinatesName for species '%s'" % k)
 
     def get_coords(self, parttype="PartType0"):
