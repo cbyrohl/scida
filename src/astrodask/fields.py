@@ -146,7 +146,7 @@ class FieldContainer(MutableMapping):
     #    # TODO: hacky; also know that we have not / can not write .items() right now
     #    # which will lead to unintended behaviour down the line
     #    return set(self.fields.keys()) | set(self.derivedfields.keys())
-    def keys(self, withrecipes=False, withinternal=False):
+    def keys(self, withrecipes=True, withinternal=False):
         fieldkeys = list(self.fields.keys())
         if not withinternal:
             for ikey in self.internals:

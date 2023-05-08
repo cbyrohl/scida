@@ -9,7 +9,10 @@ def test_fieldtypes(testdata_interface):
     snp = testdata_interface
     gas = snp.data["PartType0"]
     print("Field count:", len(gas.fields))
-    assert len(gas.fields) < 5, "not lazy loading fields (into recipes)"
+    fnames = list(gas.keys(withrecipes=False))
+    assert len(fnames) < 5, "not lazy loading fields (into recipes)"
+    fnames = list(gas.keys())
+    assert len(fnames) > 5, "not correctly considering recipes"
     assert "uid" not in gas.keys()
 
 
