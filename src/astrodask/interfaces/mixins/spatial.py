@@ -60,8 +60,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
                     )
                     break
             if not found:
-                print(cntr.keys(allfields=True))
-                log.info("Did not find CoordinatesName for species '%s'" % k)
+                log.debug("Did not find CoordinatesName for species '%s'" % k)
 
     def get_coords(self, parttype="PartType0"):
         return self.data[parttype][self.hints["CoordinatesName"][parttype]]
