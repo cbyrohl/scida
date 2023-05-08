@@ -144,7 +144,7 @@ class UnitMixin(Mixin):
         for ptype in sorted(self.data):
             self.units[ptype] = {}
             pfields = self.data[ptype]
-            for k in sorted(pfields.keys(allfields=True)):
+            for k in sorted(pfields.keys(withrecipes=True)):
                 # first we check whether we are explicitly given a unit by a unit file
                 if ptype in fields_with_units and k in fields_with_units[ptype]:
                     # we have two options: either the unit is given as a string, reflecting code units

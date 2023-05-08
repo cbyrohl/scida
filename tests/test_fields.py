@@ -5,6 +5,15 @@ from tests.testdata_properties import require_testdata
 
 
 @require_testdata("interface", only=["TNG50-4_snapshot"])
+def test_fieldtypes(testdata_interface):
+    snp = testdata_interface
+    gas = snp.data["PartType0"]
+    print("Field count:", len(gas.fields))
+    assert len(gas.fields) < 5, "not lazy loading fields (into recipes)"
+    assert "uid" not in gas.keys()
+
+
+@require_testdata("interface", only=["TNG50-4_snapshot"])
 def test_fields(testdata_interface):
     snp = testdata_interface
     gas_field_register = snp.data["PartType0"].register_field()

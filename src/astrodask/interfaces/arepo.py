@@ -75,7 +75,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             for k in self.catalog.data:
                 if k not in self.data:
                     self.data[k] = self.catalog.data[k]
-                self.catalog.data.derivedfields_kwargs["snap"] = self
+                self.catalog.data.fieldrecipes_kwargs["snap"] = self
             self.add_catalogIDs()
             # merge hints
             for h in self.catalog.hints:

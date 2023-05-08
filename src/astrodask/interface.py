@@ -83,7 +83,7 @@ class Dataset(metaclass=MixinMeta):
         candidates = check_config_for_dataset(self._metadata_raw)
         if len(candidates) > 0:
             dsname = candidates[0]
-            print("Dataset is identified as '%s'." % dsname)
+            log.debug("Dataset is identified as '%s'." % dsname)
             self.hints["dsname"] = dsname
 
     def _info_custom(self):

@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from astrodask.fields import DerivedField
+from astrodask.fields import DerivedFieldRecipe
 from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import rectangular_cutout_mask
 
@@ -42,7 +42,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         for k, cntr in self.data.items():
             found = False
             for ccn in common_coord_names:
-                if ccn in cntr.keys(allfields=True):
+                if ccn in cntr.keys(withrecipes=True):
                     found = True
                     log.debug("Found CoordinatesName '%s' for species '%s'" % (ccn, k))
                     self.hints["CoordinatesName"][k] = ccn
@@ -55,7 +55,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
                     def fnc(arrs, cname=ccn):
                         return arrs[cname]
 
-                    cntr.derivedfields[dfltname] = DerivedField(
+                    cntr.fieldrecipes[dfltname] = DerivedFieldRecipe(
                         dfltname, fnc, description="Coordinates alias"
                     )
                     break

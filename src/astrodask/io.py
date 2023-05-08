@@ -119,7 +119,6 @@ class ChunkedHDF5Loader(Loader):
         virtualcache=False,
         derivedfields_kwargs=None,
     ):
-
         cachefp = return_hdf5cachepath(self.path)
         if cachefp is not None and os.path.isfile(cachefp):
             if not overwrite:
@@ -231,7 +230,7 @@ def load_datadict_old(
     # Make each datadict entry a FieldContainer
     datanew = FieldContainerCollection(
         data.keys(),
-        derivedfields_kwargs=derivedfields_kwargs,
+        fieldrecipes_kwargs=derivedfields_kwargs,
     )
     for k in data:
         datanew.new_container(k)
@@ -299,7 +298,7 @@ def load_datadict_old(
 
     # Add a unique identifier for each element for each data type
     for p in data:
-        for k in data[p].keys(allfields=True):
+        for k in data[p].keys(withrecipes=True):
             v = data[p][k]
             nparts = v.shape[0]
             if len(v.chunks) == 1:
