@@ -2,7 +2,6 @@ import abc
 import hashlib
 import logging
 import os
-from collections.abc import MutableMapping
 from typing import Dict, List, Optional, Union
 
 import dask
@@ -11,9 +10,9 @@ import numpy as np
 import zarr
 
 import astrodask.io
-from astrodask.fields import FieldContainer, FieldContainerCollection
+from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import make_serializable
-from astrodask.misc import check_config_for_dataset, sprint
+from astrodask.misc import check_config_for_dataset, deepdictkeycopy, sprint
 from astrodask.registries import dataset_type_registry
 
 log = logging.getLogger(__name__)
@@ -59,7 +58,7 @@ class Dataset(metaclass=MixinMeta):
         # Let's find the data and metadata for the object at 'path'
         self.metadata = {}
         self._metadata_raw = {}
-        self.data = FieldContainerCollection()
+        self.data = FieldContainer()
 
         if not os.path.exists(self.path):
             raise Exception("Specified path '%s' does not exist." % self.path)
@@ -222,7 +221,7 @@ class Dataset(metaclass=MixinMeta):
         """
         return self.__hash__()
 
-    def return_data(self) -> FieldContainerCollection:
+    def return_data(self) -> FieldContainer:
         """
         Return the data container.
         Returns
@@ -346,25 +345,8 @@ class BaseSnapshot(Dataset):
         return False
 
     def register_field(self, parttype, name=None, description=""):
-        return self.data.register_field(parttype, name=name, description=description)
-
-
-def deepdictkeycopy(olddict, newdict) -> None:
-    """
-    Recursively walk nested dictionary, only creating empty dictionaries for entries that are dictionaries themselves.
-    Parameters
-    ----------
-    olddict
-    newdict
-
-    Returns
-    -------
-
-    """
-    for k, v in olddict.items():
-        if isinstance(v, MutableMapping):
-            newdict[k] = {}
-            deepdictkeycopy(v, newdict[k])
+        res = self.data.register_field(parttype, name=name, description=description)
+        return res
 
 
 class Selector(object):

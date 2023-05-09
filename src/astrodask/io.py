@@ -10,9 +10,9 @@ import h5py
 import numpy as np
 import zarr
 
-from astrodask.fields import FieldContainerCollection
+from astrodask.fields import FieldContainer
 from astrodask.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
-from astrodask.misc import return_hdf5cachepath
+from astrodask.misc import get_container_from_path, return_hdf5cachepath
 
 log = logging.getLogger(__name__)
 
@@ -199,7 +199,12 @@ def load_datadict_old(
     lazy=True,  # if true, call da.from_array delayed
     filetype="hdf5",
 ):
+    """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
     # TODO: Refactor and rename
+    inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
+    if type(file) == h5py._hl.files.File:
+        inline_array = False
+
     data = {}
     tree = {}
     if filetype == "hdf5":
@@ -208,97 +213,95 @@ def load_datadict_old(
         walk_zarrfile(location, tree)
     else:
         raise ValueError("Unknown filetype ''" % filetype)
-    """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
-    inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
-    if type(file) == h5py._hl.files.File:
-        inline_array = False
-    if groups_load is None:
-        toload = True
-        groups_with_datasets = sorted(
-            set([d[0].split("/")[1] for d in tree["datasets"]])
-        )
+
+    # hosting all data
+    rootcontainer = FieldContainer(fieldrecipes_kwargs=derivedfields_kwargs)
+
+    datagroups = []  # names of groups with datasets
+    # othergroups = []  # names of groups without datasets
+    # datasets = []  # list of datasets (relative path from root)
+    # each dataset entry is a tuple of (relpath, shape, dtype)
+    # attributes = {}  # dictionary of attributes
+    # key holds the relpath to the group and the value a dictionary of the attribute data
+
+    grps = tree["groups"]
+    dts = tree["datasets"]
+    for grp in grps:
+        for dt in dts:
+            dn = dt[0]
+            if dn.startswith(grp):
+                datagroups.append(grp)
+                break
+
     # groups
-    for group in tree["groups"]:
-        # TODO: Do not hardcode dataset/field groups
-        if groups_load is not None:
-            toload = any([group.startswith(gname) for gname in groups_load])
-        else:
-            toload = any([group == "/" + g for g in groups_with_datasets])
-        if toload:
-            data[group.split("/")[1]] = {}
+    if groups_load is not None:
+        datagroups = sorted([grp for grp in datagroups if grp in groups_load])
 
     # Make each datadict entry a FieldContainer
-    datanew = FieldContainerCollection(
-        data.keys(),
-        fieldrecipes_kwargs=derivedfields_kwargs,
-    )
-    for k in data:
-        datanew.new_container(k)
+    for group in datagroups:
+        get_container_from_path(group, rootcontainer, create_missing=True)
 
     # datasets
-
     for i, dataset in enumerate(tree["datasets"]):
-        if groups_load is not None:
-            toload = any([dataset[0].startswith(gname) for gname in groups_load])
-        else:
-            toload = any(
-                [dataset[0].startswith("/" + g + "/") for g in groups_with_datasets]
-            )
-        if toload:
-            # TODO: Still dont support more nested groups
-            splt = dataset[0].rstrip("/").split("/")
-            group = splt[1]
-            fieldname = splt[-1]
-            name = "Dataset" + str(token) + dataset[0].replace("/", "_")
-            if "__dask_tokenize__" in file:  # check if the file contains the dask name.
-                name = file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
-            if lazy and i > 0:  # need one non-lazy entry though later on...
-                hds = file[dataset[0]]
+        fpath = "/".join(dataset[0].split("/")[:-1])
+        toload = fpath in datagroups
+        if not toload:
+            continue
+        container = get_container_from_path(fpath, rootcontainer)
+        # TODO: still change for nesting
+        splt = dataset[0].rstrip("/").split("/")
+        group = splt[1]
+        fieldname = splt[-1]
+        name = "Dataset" + str(token) + dataset[0].replace("/", "_")
+        if "__dask_tokenize__" in file:  # check if the file contains the dask name.
+            name = file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
+        if lazy and i > 0:  # need one non-lazy entry though later on...
+            hds = file[dataset[0]]
 
-                def field(
-                    arrs,
-                    snap=None,
-                    h5path="",
-                    chunksize="",
-                    name="",
-                    inline_array=False,
-                    file=None,
-                    **kwargs
-                ):
-                    hds = file[h5path]
-                    arr = da.from_array(
-                        hds,
-                        chunks=chunksize,
-                        name=name,
-                        inline_array=inline_array,
-                    )
-                    return arr
-
-                fnc = partial(
-                    field,
-                    h5path=dataset[0],
-                    chunksize=chunksize,
-                    name=name,
-                    inline_array=inline_array,
-                    file=file,
-                )
-                datanew[group].register_field(
-                    name=fieldname, description=fieldname + ": lazy field from disk"
-                )(fnc)
-            else:
-                hds = file[dataset[0]]
-                ds = da.from_array(
+            def field(
+                arrs,
+                snap=None,
+                h5path="",
+                chunksize="",
+                name="",
+                inline_array=False,
+                file=None,
+                **kwargs
+            ):
+                hds = file[h5path]
+                arr = da.from_array(
                     hds,
                     chunks=chunksize,
                     name=name,
                     inline_array=inline_array,
                 )
-                datanew[group][fieldname] = ds
-    data = datanew
+                return arr
+
+            fnc = partial(
+                field,
+                h5path=dataset[0],
+                chunksize=chunksize,
+                name=name,
+                inline_array=inline_array,
+                file=file,
+            )
+            container.register_field(
+                name=fieldname, description=fieldname + ": lazy field from disk"
+            )(fnc)
+        else:
+            hds = file[dataset[0]]
+            ds = da.from_array(
+                hds,
+                chunks=chunksize,
+                name=name,
+                inline_array=inline_array,
+            )
+            container[fieldname] = ds
+    data = rootcontainer
 
     # Add a unique identifier for each element for each data type
     for p in data:
-        for k in data[p].keys(withrecipes=True):
+        for k in data[p].keys(withgroups=False, withrecipes=True):
             v = data[p][k]
             nparts = v.shape[0]
             if len(v.chunks) == 1:

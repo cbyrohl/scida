@@ -1,12 +1,14 @@
 import dask.array as da
 import pytest
 
-from tests.testdata_properties import require_testdata
+from tests.testdata_properties import require_testdata, require_testdata_path
 
 
-@require_testdata("interface", only=["TNG50-4_snapshot"])
-def test_fieldtypes(testdata_interface):
-    snp = testdata_interface
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_fieldtypes(testdatapath):
+    from astrodask import load
+
+    snp = load(testdatapath)
     gas = snp.data["PartType0"]
     print("Field count:", len(gas.fields))
     fnames = list(gas.keys(withrecipes=False))
@@ -19,28 +21,29 @@ def test_fieldtypes(testdata_interface):
 @require_testdata("interface", only=["TNG50-4_snapshot"])
 def test_fields(testdata_interface):
     snp = testdata_interface
+    print(snp.data)
     gas_field_register = snp.data["PartType0"].register_field()
 
     @gas_field_register
-    def testfield(data, **kwargs):
+    def tfield(data, **kwargs):
         return da.zeros(1)
 
     @gas_field_register
-    def testfield2(data, **kwargs):
-        return data["testfield"] + 1
+    def tfield2(data, **kwargs):
+        return data["tfield"] + 1
 
-    @snp.register_field("PartType0", name="testfield3")
-    def testfield_explicitname(data, **kwargs):
-        return data["testfield"] + 2
+    @snp.register_field("PartType0", name="tfield3")
+    def tfield_explicitname(data, **kwargs):
+        return data["tfield"] + 2
 
     # first-order field
-    val0 = snp.data["PartType0"]["testfield"].compute()
+    val0 = snp.data["PartType0"]["tfield"].compute()
     assert val0 == 0
     # second-order field
-    val1 = snp.data["PartType0"]["testfield2"].compute()
+    val1 = snp.data["PartType0"]["tfield2"].compute()
     assert val1 == 1
     # second-order field with custom name
-    val2 = snp.data["PartType0"]["testfield3"].compute()
+    val2 = snp.data["PartType0"]["tfield3"].compute()
     assert val2 == 2
 
     # test that we are passed the snapshot instance
@@ -60,13 +63,14 @@ def test_fields(testdata_interface):
 
     # test FieldContainer get()
     part0 = snp.data["PartType0"]
-    assert part0.get("testfield", allow_derived=True).compute() == 0
+    assert part0.get("tfield", allow_derived=True).compute() == 0
     with pytest.raises(KeyError):
-        part0.get("testfield", allow_derived=False)
+        part0.get("tfield", allow_derived=False)
 
     # test "all"
     @snp.register_field("all")
-    def testfield_all(data, **kwargs):
+    def tfield_all(data, **kwargs):
         return True
 
-    assert all([snp.data[k]["testfield_all"] for k in snp.data.keys()])
+    print(snp.data["PartType1"]["tfield_all"])
+    assert all([snp.data[k]["tfield_all"] for k in snp.data.keys()])

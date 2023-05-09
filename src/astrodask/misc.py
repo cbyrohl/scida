@@ -1,12 +1,30 @@
 import io
 import os
+from collections.abc import MutableMapping
 from typing import Optional
 
 import dask.array as da
 import numpy as np
 
 from astrodask.config import get_config
+from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import hash_path
+
+
+def get_container_from_path(
+    element: str, container: FieldContainer = None, create_missing: bool = False
+) -> FieldContainer:
+    keys = element.split("/")
+    rv = container
+    for key in keys:
+        if key == "":
+            continue
+        if key not in rv.containers:
+            if not create_missing:
+                raise ValueError("Container '%s' not found in '%s'" % (key, rv))
+            rv.new_container(key)
+        rv = rv.containers[key]
+    return rv
 
 
 def return_hdf5cachepath(path_original) -> str:
@@ -138,3 +156,21 @@ def check_config_for_dataset(metadata, unique=True):
     if unique and len(candidates) > 1:
         raise ValueError("Multiple dataset candidates (set unique=False?):", candidates)
     return candidates
+
+
+def deepdictkeycopy(olddict, newdict) -> None:
+    """
+    Recursively walk nested dictionary, only creating empty dictionaries for entries that are dictionaries themselves.
+    Parameters
+    ----------
+    olddict
+    newdict
+
+    Returns
+    -------
+
+    """
+    for k, v in olddict.items():
+        if isinstance(v, MutableMapping):
+            newdict[k] = {}
+            deepdictkeycopy(v, newdict[k])

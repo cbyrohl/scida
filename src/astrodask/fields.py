@@ -1,7 +1,7 @@
 import inspect
 from collections.abc import MutableMapping
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 import dask.array as da
 import dask.dataframe as dd
@@ -40,80 +40,80 @@ class DerivedFieldRecipe(FieldRecipe):
         )
 
 
-class FieldContainerCollection(MutableMapping):
-    """A mutable collection of FieldContainers."""
-
-    def __init__(self, types=None, fieldrecipes_kwargs=None):
-        if fieldrecipes_kwargs is None:
-            fieldrecipes_kwargs = {}
-        if types is None:
-            types = []
-        self.store = {
-            k: FieldContainer(fieldrecipes_kwargs=fieldrecipes_kwargs) for k in types
-        }
-        self.fieldrecipes_kwargs = fieldrecipes_kwargs
-
-    def __getitem__(self, key):
-        return self.store[key]
-
-    def __setitem__(self, key, value):
-        self.store[key] = value
-
-    def __delitem__(self, key):
-        del self.store[key]
-
-    def __iter__(self):
-        return iter(self.store)
-
-    def __len__(self):
-        return len(self.store)
-
-    def keys(self):
-        return self.store.keys()
-
-    def new_container(self, key, **kwargs):
-        self[key] = FieldContainer(
-            **kwargs, fieldrecipes_kwargs=self.fieldrecipes_kwargs
-        )
-
-    def merge(self, collection, overwrite=True):
-        assert isinstance(collection, FieldContainerCollection)
-        for k in collection.store:
-            if k not in self.store:
-                self.store[k] = FieldContainer(
-                    fieldrecipes_kwargs=self.fieldrecipes_kwargs
-                )
-            if overwrite:
-                c1 = self.store[k]
-                c2 = collection.store[k]
-            else:
-                c1 = collection.store[k]
-                c2 = self.store[k]
-            c1.fields.update(**c2.fields)
-            c1.fieldrecipes.update(**c2.fieldrecipes)
-
-    def register_field(self, parttype, name=None, description=""):
-        if parttype == "all":
-            parttypes = self.store.keys()
-        elif isinstance(parttype, list):
-            parttypes = parttype
-        else:
-            return self.store[parttype].register_field(
-                name=name, description=description
-            )
-
-        # we only construct field upon first call to it (default)
-        def decorator(func, name=name, description=description):
-            if name is None:
-                name = func.__name__
-            for p in parttypes:
-                drvfields = self.store[p].fieldrecipes
-                drvfields[name] = DerivedFieldRecipe(
-                    name, func=func, description=description
-                )
-            return func
-
-        return decorator
+# class FieldContainerCollection(MutableMapping):
+#    """A mutable collection of FieldContainers. Can also hold other FieldContainerCollections."""
+#
+#    def __init__(self, types=None, fieldrecipes_kwargs=None):
+#        if fieldrecipes_kwargs is None:
+#            fieldrecipes_kwargs = {}
+#        if types is None:
+#            types = []
+#        self.store = {
+#            k: FieldContainer(fieldrecipes_kwargs=fieldrecipes_kwargs) for k in types
+#        }
+#        self.fieldrecipes_kwargs = fieldrecipes_kwargs
+#
+#    def __getitem__(self, key):
+#        return self.store[key]
+#
+#    def __setitem__(self, key, value):
+#        self.store[key] = value
+#
+#    def __delitem__(self, key):
+#        del self.store[key]
+#
+#    def __iter__(self):
+#        return iter(self.store)
+#
+#    def __len__(self):
+#        return len(self.store)
+#
+#    def keys(self):
+#        return self.store.keys()
+#
+#    def new_container(self, key, **kwargs):
+#        self[key] = FieldContainer(
+#            **kwargs, fieldrecipes_kwargs=self.fieldrecipes_kwargs
+#        )
+#
+#    def merge(self, collection, overwrite=True):
+#        assert isinstance(collection, FieldContainerCollection)
+#        for k in collection.store:
+#            if k not in self.store:
+#                self.store[k] = FieldContainer(
+#                    fieldrecipes_kwargs=self.fieldrecipes_kwargs
+#                )
+#            if overwrite:
+#                c1 = self.store[k]
+#                c2 = collection.store[k]
+#            else:
+#                c1 = collection.store[k]
+#                c2 = self.store[k]
+#            c1.fields.update(**c2.fields)
+#            c1.fieldrecipes.update(**c2.fieldrecipes)
+#
+#    def register_field(self, parttype, name=None, description=""):
+#        if parttype == "all":
+#            parttypes = self.store.keys()
+#        elif isinstance(parttype, list):
+#            parttypes = parttype
+#        else:
+#            return self.store[parttype].register_field(
+#                name=name, description=description
+#            )
+#
+#        # we only construct field upon first call to it (default)
+#        def decorator(func, name=name, description=description):
+#            if name is None:
+#                name = func.__name__
+#            for p in parttypes:
+#                drvfields = self.store[p].fieldrecipes
+#                drvfields[name] = DerivedFieldRecipe(
+#                    name, func=func, description=description
+#                )
+#            return func
+#
+#        return decorator
 
 
 class FieldContainer(MutableMapping):
@@ -121,13 +121,20 @@ class FieldContainer(MutableMapping):
     if needed."""
 
     def __init__(self, *args, fieldrecipes_kwargs=None, **kwargs):
-        self.fields: Dict[da.Array] = {}
+        self.fields: Dict[str, da.Array] = {}
         self.fields.update(*args, **kwargs)
         self.fieldrecipes = {}
         self.fieldrecipes_kwargs = (
             fieldrecipes_kwargs if fieldrecipes_kwargs is not None else {}
         )
-        self.internals = ["uid"]  # names of internal fields
+        self.containers: Dict[
+            str, FieldContainer
+        ] = dict()  # other containers as subgroups
+        self.internals = ["uid"]  # names of internal fields/groups
+
+    def new_container(self, key, **kwargs):
+        fkws = self.fieldrecipes_kwargs
+        self.containers[key] = FieldContainer(**kwargs, fieldrecipes_kwargs=fkws)
 
     @property
     def fieldcount(self):
@@ -146,7 +153,7 @@ class FieldContainer(MutableMapping):
     #    # TODO: hacky; also know that we have not / can not write .items() right now
     #    # which will lead to unintended behaviour down the line
     #    return set(self.fields.keys()) | set(self.derivedfields.keys())
-    def keys(self, withrecipes=True, withinternal=False):
+    def keys(self, withgroups=True, withrecipes=True, withinternal=False):
         fieldkeys = list(self.fields.keys())
         if not withinternal:
             for ikey in self.internals:
@@ -154,27 +161,56 @@ class FieldContainer(MutableMapping):
                     fieldkeys.remove(ikey)
         if withrecipes:
             recipekeys = self.fieldrecipes.keys()
-            return list(set(fieldkeys) | set(recipekeys))
+            fieldkeys = list(set(fieldkeys) | set(recipekeys))
+        if withgroups:
+            groupkeys = self.containers.keys()
+            return list(set(fieldkeys) | set(groupkeys))
         return fieldkeys
 
-    def register_field(self, name=None, description="", units=None):
+    def register_field(
+        self,
+        containernames=None,
+        name: Optional[str] = None,
+        description="",
+        units=None,
+    ):
         # we only construct field upon first call to it (default)
+        # if to_containers, we register to the respective children containers
+        containers = []
+        if isinstance(containernames, list):
+            containers = [self.containers[c] for c in containernames]
+        elif containernames == "all":
+            containers = self.containers.values()
+        elif containernames is None:
+            containers = [self]
+        elif isinstance(containernames, str):  # just a single container as a string?
+            containers.append(self.containers[containernames])
+        else:
+            raise ValueError("Unknown type.")
+
         def decorator(func, name=name, description=description, units=units):
             if name is None:
                 name = func.__name__
-            drvfields = self.fieldrecipes
-            drvfields[name] = DerivedFieldRecipe(
-                name, func, description=description, units=units
-            )
+            for container in containers:
+                drvfields = container.fieldrecipes
+                drvfields[name] = DerivedFieldRecipe(
+                    name, func, description=description, units=units
+                )
             return func
 
         return decorator
 
     def __setitem__(self, key, value):
-        self.fields[key] = value
+        if isinstance(value, FieldContainer):
+            self.containers[key] = value
+        else:
+            self.fields[key] = value
 
     def __getitem__(self, key):
         return self._getitem(key)
+
+    def __iter__(self):
+        return iter(self.keys())
 
     @property
     def dataframe(self):
@@ -217,6 +253,8 @@ class FieldContainer(MutableMapping):
         return ddf
 
     def _getitem(self, key, force_derived=False, update_dict=True):
+        if key in self.containers:
+            return self.containers[key]
         if key in self.fields and not force_derived:
             return self.fields[key]
         else:
@@ -254,11 +292,8 @@ class FieldContainer(MutableMapping):
             del self.fieldrecipes[key]
         del self.fields[key]
 
-    def __iter__(self):
-        return iter(self.fields)
-
     def __len__(self):
-        return len(self.fields)
+        return len(self.keys())
 
     def get(self, key, value=None, allow_derived=True, force_derived=False):
         if key in self.fieldrecipes and not allow_derived:

@@ -50,13 +50,15 @@ def test_tng_units(testdatapath):
             else:
                 val1 = val1.compute()
                 mag1 = val1
-                print("WARNING (TODO): Field has no units.")
+                print("WARNING (TODO): Field '%s' has no units." % k)
             u2 = units[pk2][k]
             mag2 = ds_nounits.data[pk1][k][0].compute()
             if isinstance(u2, astropy.units.Quantity):
                 mag2 = mag2 * u2.cgs.value
-            # print(mag1, mag2)
-            assert np.allclose(mag1, mag2, rtol=1e-4), "%.4f == %.4f" % (mag1, mag2)
+            if not np.allclose(mag1, mag2, rtol=1e-4):
+                print(pk1, k)
+                print(mag1, mag2)
+                raise ValueError("Entries do not match.")
     pass
 
 
