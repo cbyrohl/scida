@@ -1,6 +1,7 @@
 import abc
 import logging
 import os
+import pathlib
 import tempfile
 from functools import partial
 from os.path import join
@@ -243,8 +244,9 @@ def load_datadict_old(
 
     # datasets
     for i, dataset in enumerate(tree["datasets"]):
+        # fpath is the path to the group containing given field
         fpath = "/".join(dataset[0].split("/")[:-1])
-        toload = fpath in datagroups
+        toload = fpath == "" or fpath in datagroups
         if not toload:
             continue
         container = get_container_from_path(fpath, rootcontainer)
@@ -299,10 +301,57 @@ def load_datadict_old(
             container[fieldname] = ds
     data = rootcontainer
 
-    # Add a unique identifier for each element for each data type
-    for p in data:
-        for k in data[p].keys(withgroups=False, withrecipes=True):
-            v = data[p][k]
+    def walk_container(
+        cntr, path="", handler_field=None, handler_group=None, withrecipes=False
+    ):
+        keykwargs = dict(withgroups=True, withrecipes=withrecipes)
+        for ck in cntr.keys(**keykwargs):
+            # we do not want to instantiate entry from recipe by calling cntr[ck] here
+            entry = cntr[ck]
+            newpath = path + "/" + ck
+            if isinstance(entry, FieldContainer):
+                if handler_group is not None:
+                    handler_group(entry, newpath)
+                walk_container(
+                    entry,
+                    newpath,
+                    handler_field,
+                    handler_group,
+                    withrecipes=withrecipes,
+                )
+            else:
+                if handler_field is not None:
+                    handler_field(entry, newpath)
+
+    # instantiate at least one field
+
+    def instantiate_one_field(container: FieldContainer, path: str):
+        keys = container.keys(withgroups=False, withrecipes=False)
+        if len(keys) > 0:
+            return
+        keys = container.keys(withgroups=False, withrecipes=True)
+        if len(keys) == 0:
+            return
+            # raise ValueError("Data container is empty, this is unexpected.")
+        for k in keys:
+            p = pathlib.Path(path) / k
+            res = [k for k in tree["datasets"] if k[0] == str(p)]
+            if len(res) == 0:
+                continue  # no dataset info
+            # tree_entry = res[0]
+            # calling will instantiate.
+            container.__getitem__(k)
+            break
+
+    walk_container(data, handler_group=instantiate_one_field)
+
+    # create uids fields for all containers
+    def create_uids(container: FieldContainer, path: str):
+        nparts = -1
+        chunks = None
+        keys = container.keys(withgroups=False, withrecipes=False)
+        for k in keys:
+            v = container[k]
             nparts = v.shape[0]
             if len(v.chunks) == 1:
                 # make same shape as other 1D arrays.
@@ -311,8 +360,14 @@ def load_datadict_old(
             else:
                 # alternatively, attempt to use chunks from multi-dim array until found something better.
                 chunks = (v.chunks[0],)
+        if nparts > -1:
+            container["uid"] = da.arange(nparts, chunks=chunks)
+        else:
+            print("no uid created for %s" % container.name)
 
-        data[p]["uid"] = da.arange(nparts, chunks=chunks)
+    walk_container(data, handler_group=create_uids)
+
+    # walk_container(data, handler_field=lambda x, y: print(x, y))
 
     # attrs
     metadata = tree["attrs"]

@@ -121,6 +121,7 @@ class FieldContainer(MutableMapping):
     if needed."""
 
     def __init__(self, *args, fieldrecipes_kwargs=None, **kwargs):
+        self.name = kwargs.pop("name", None)
         self.fields: Dict[str, da.Array] = {}
         self.fields.update(*args, **kwargs)
         self.fieldrecipes = {}
@@ -134,7 +135,9 @@ class FieldContainer(MutableMapping):
 
     def new_container(self, key, **kwargs):
         fkws = self.fieldrecipes_kwargs
-        self.containers[key] = FieldContainer(**kwargs, fieldrecipes_kwargs=fkws)
+        self.containers[key] = FieldContainer(
+            **kwargs, fieldrecipes_kwargs=fkws, name=key
+        )
 
     @property
     def fieldcount(self):
@@ -280,6 +283,8 @@ class FieldContainer(MutableMapping):
                             if k not in inspect.getfullargspec(func).args
                         }
                     )
+                # finally, instatiate field
+                # print("Instantiated field '%s'" % key)
                 field = func(self, **kwargs)
                 if update_dict:
                     self.fields[key] = field
