@@ -12,6 +12,10 @@ version:
 localdocs:
 	@poetry run mkdocs build
 
+servedocs: export JUPYTER_EXECUTE=false
+servedocs:
+	@poetry run mkdocs serve
+
 publicdocs:
 	@poetry run mkdocs build
 	@rsync -arv site/* hetzner:/home/cbyrohl/public_content/astrodask

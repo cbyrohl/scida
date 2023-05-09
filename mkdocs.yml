@@ -5,11 +5,11 @@ theme:
 
 nav:
   - Readme: 'index.md'
-  - 'Tutorial':
-    - 'Getting Started': notebooks/gettingstarted.ipynb
-    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
-    - 'Series': notebooks/series.ipynb
-    - 'Interactive Visualization': notebooks/static/visualization.ipynb
+  - 'Tutorial': tutorial.md
+    #    - 'Getting Started': notebooks/gettingstarted.ipynb
+    #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
+    #    - 'Series': notebooks/series.ipynb
+    #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
   - api_docs.md
@@ -17,6 +17,10 @@ nav:
 markdown_extensions:
   - pymdownx.snippets:
       check_paths: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - toc
 
 plugins:
   - search:
@@ -27,7 +31,7 @@ plugins:
         height: 12.172vw
         width: 12.172vw
   - mkdocs-jupyter:
-      execute: true
+      execute: !ENV [JUPYTER_EXECUTE, true]
       execute_ignore: "notebooks/static/*.ipynb"  # waiting for list support (https://github.com/danielfrg/mkdocs-jupyter/issues/119)
       kernel_name: astrodask
   - mkdocstrings:
