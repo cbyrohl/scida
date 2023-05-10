@@ -51,6 +51,7 @@ scalene = "^1.5.19"
 memray = "^1.6.0"
 mkdocs-video = "^1.4.0"
 jupyter-contrib-nbextensions = "^0.7.0"
+typer = "^0.9.0"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
