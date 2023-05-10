@@ -7,7 +7,7 @@ theme:
     - navigation.sections
 
 nav:
-  - Readme: 'index.md'
+  - 'Readme': 'index.md'
   - 'Tutorial': tutorial.md
     #    - 'Getting Started': notebooks/gettingstarted.ipynb
     #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
@@ -15,6 +15,7 @@ nav:
     #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
   - 'Misc':
     - 'Derived Fields': derived_fields.md
+    - 'Supported Datasets': supported_data.md
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
   - api_docs.md
