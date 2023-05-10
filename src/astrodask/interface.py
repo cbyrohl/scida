@@ -12,6 +12,7 @@ import zarr
 import astrodask.io
 from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import make_serializable
+from astrodask.interfaces.mixins import UnitMixin
 from astrodask.misc import check_config_for_dataset, deepdictkeycopy, sprint
 from astrodask.registries import dataset_type_registry
 
@@ -79,7 +80,7 @@ class Dataset(metaclass=MixinMeta):
         self._cached = False
 
         # any identifying metadata?
-        candidates = check_config_for_dataset(self._metadata_raw)
+        candidates = check_config_for_dataset(self._metadata_raw, path=self.path)
         if len(candidates) > 0:
             dsname = candidates[0]
             log.debug("Dataset is identified as '%s'." % dsname)
@@ -347,6 +348,11 @@ class BaseSnapshot(Dataset):
     def register_field(self, parttype, name=None, description=""):
         res = self.data.register_field(parttype, name=name, description=description)
         return res
+
+
+class DatasetWithUnitMixin(UnitMixin, Dataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class Selector(object):
