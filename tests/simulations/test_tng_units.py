@@ -45,11 +45,21 @@ def test_tng_units(testdatapath):
             # print("%s/%s" % (pk1, k))
             val1 = v[0].astype(np.float64)
             if isinstance(val1, pint.Quantity):
+                mag1 = val1.magnitude
+                if np.any(np.isnan(mag1)):
+                    print(
+                        "Skipping validation of '%s' due to underlying Nan entry." % k
+                    )
+                    continue
                 val1 = val1.to_base_units().compute()
                 mag1 = val1.magnitude
             else:
                 val1 = val1.compute()
                 mag1 = val1
+                if np.any(np.isnan(mag1)):
+                    print(
+                        "Skipping validation of '%s' due to underlying Nan entry." % k
+                    )
                 print("WARNING (TODO): Field '%s' has no units." % k)
             u2 = units[pk2][k]
             mag2 = ds_nounits.data[pk1][k][0].compute()
@@ -57,7 +67,10 @@ def test_tng_units(testdatapath):
                 mag2 = mag2 * u2.cgs.value
             if not np.allclose(mag1, mag2, rtol=1e-4):
                 print(pk1, k)
-                print(mag1, mag2)
+                print("conversion factor from TNG docs:")
+                print("in cgs: ", u2.cgs)
+                print("mag1, mag2:", mag1, mag2)
+                print("ratio:", mag1 / mag2)
                 raise ValueError("Entries do not match.")
     pass
 
@@ -138,6 +151,7 @@ def get_units_from_unittuples(unittuples, codeunitdict):
     cudict["UnitMass"] = codeunitdict["UnitMass_in_g"] * u.g
     cudict["UnitVelocity"] = codeunitdict["UnitVelocity_in_cm_per_s"] * u.cm / u.s
     # Pressure: M/L/T^2 = M/L^3 * V^2
+    # P = M / L / T^2
     cudict["UnitPressure"] = (
         cudict["UnitMass"] / cudict["UnitLength"] ** 3 * cudict["UnitVelocity"] ** 2
     )
@@ -207,7 +221,7 @@ def get_unittuples_from_TNGdocs_particles():
     uts["InternalEnergy"] = [("km", 2), ("s", -2)]
     uts["InternalEnergyOld"] = [("km", 2), ("s", -2)]
     uts["Machnumber"] = []
-    uts["MagneticField"] = [("h",), ("a", -2), ("UnitPressure", -0.5)]
+    uts["MagneticField"] = [("h",), ("a", -2), ("UnitPressure", 0.5)]
     uts["MagneticFieldDivergence"] = [
         ("h", 3),
         ("a", -2),

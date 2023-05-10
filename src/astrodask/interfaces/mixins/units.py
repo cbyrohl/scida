@@ -109,6 +109,8 @@ class UnitMixin(Mixin):
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
+        # set true if we require units from either metadata or unitfie
+        self.require_unitsspecs = kwargs.pop("require_unitspecs", True)
 
         ureg = UnitRegistry()  # before unit
         self.ureg = self.unitregistry = ureg
@@ -140,16 +142,21 @@ class UnitMixin(Mixin):
         self.ureg.default_system = "cgs"
 
         # update fields with units
-        fields_with_units = unithints.get("fields", {})
+        fwu = unithints.get("fields", {})
         for ptype in sorted(self.data):
             self.units[ptype] = {}
             pfields = self.data[ptype]
             for k in sorted(pfields.keys(withrecipes=True)):
+                h5path = "/" + ptype + "/" + k
                 # first we check whether we are explicitly given a unit by a unit file
-                if ptype in fields_with_units and k in fields_with_units[ptype]:
+                funit = fwu.get(ptype, {}).get(k, "NA")
+                if funit == "NA":
+                    funit = fwu.get("_all", {}).get(
+                        k, "NA"
+                    )  # check whether defined for all particles
+                if funit != "NA":
                     # we have two options: either the unit is given as a string, reflecting code units
                     # or as a dictionary with either or both keys 'cgsunits' and 'codeunits' who hold the unit strings
-                    funit = fields_with_units[ptype][k]
                     if isinstance(funit, dict):
                         if units + "units" in funit:
                             unit = ureg(funit[units + "units"])
@@ -163,10 +170,9 @@ class UnitMixin(Mixin):
                         if units == "cgs" and isinstance(pfields[k], pint.Quantity):
                             pfields[k] = pfields[k].to_base_units()
                         continue
-                # if not, we try to extract the unit from the metadata
-                h5path = "/" + ptype + "/" + k
-                if h5path in self._metadata_raw.keys():
-                    # any hints available?
+                elif h5path in self._metadata_raw.keys():
+                    # if not, we try to extract the unit from the metadata
+                    # check if any hints available
                     uh = unithints.get(ptype, {}).get(k, {})
                     attrs = dict(self._metadata_raw[h5path])
                     attrs.update(**uh)
@@ -187,6 +193,12 @@ class UnitMixin(Mixin):
                     # TODO: This will instatiate all dask fields, need to user register_field
                     # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
                     pfields[k] = unit * pfields[k]
+                else:
+                    if self.require_unitsspecs:
+                        raise ValueError(
+                            "Cannot determine units from neither unit file nor metadata for '%s'."
+                            % h5path
+                        )
 
     def _info_custom(self):
         rep = ""
