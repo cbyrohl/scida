@@ -7,7 +7,22 @@ import yaml
 _conf = dict()
 
 
-def get_config(reload: bool = False) -> dict:
+def get_config(reload: bool = False, update_global=True) -> dict:
+    """
+    Load the configuration from the default path.
+    Parameters
+    ----------
+    reload: bool
+        Reload the configuration, even if it has already been loaded.
+    update_global: bool
+        Update the global configuration dictionary.
+
+    Returns
+    -------
+    dict
+        The configuration dictionary.
+
+    """
     global _conf
     prefix = "ASTRODASK_"
     envconf = {
@@ -37,8 +52,22 @@ def get_config(reload: bool = False) -> dict:
         )
 
     config.update(**envconf)
-    _conf = config
+    if update_global:
+        _conf = config
     return config
+
+
+def get_simulationconfig():
+    conf_user = get_config()
+    conf_sims = get_config_fromfile("simulations.yaml")
+
+    def mergefunc(a, b):
+        if b is None:
+            return a
+        return b  # just overwrite by latter entry
+
+    merge_dicts_recursively(conf_sims, conf_user, mergefunc=mergefunc)
+    return conf_sims
 
 
 def copy_defaultconfig(overwrite=False) -> None:
@@ -110,7 +139,10 @@ def get_config_fromfile(resource: str) -> Dict:
 
 
 def merge_dicts_recursively(
-    dict_a: Dict, dict_b: Dict, path: Optional[List] = None
+    dict_a: Dict,
+    dict_b: Dict,
+    path: Optional[List] = None,
+    mergefunc: Optional[callable] = None,
 ) -> Dict:
     """
     Merge two dictionaries recursively.
@@ -122,6 +154,8 @@ def merge_dicts_recursively(
         The second dictionary.
     path
         The path to the current node.
+    mergefunc: callable
+        The function to use for merging. If None, collisions will raise an exception.
 
     Returns
     -------
@@ -132,11 +166,16 @@ def merge_dicts_recursively(
     for key in dict_b:
         if key in dict_a:
             if isinstance(dict_a[key], dict) and isinstance(dict_b[key], dict):
-                merge_dicts_recursively(dict_a[key], dict_b[key], path + [str(key)])
+                merge_dicts_recursively(
+                    dict_a[key], dict_b[key], path + [str(key)], mergefunc=mergefunc
+                )
             elif dict_a[key] == dict_b[key]:
                 pass  # same leaf value
             else:
-                raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
+                if mergefunc is not None:
+                    dict_a[key] = mergefunc(dict_a[key], dict_b[key])
+                else:
+                    raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
         else:
             dict_a[key] = dict_b[key]
     return dict_a

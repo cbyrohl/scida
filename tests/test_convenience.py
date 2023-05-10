@@ -85,9 +85,10 @@ def test_load_units_manualpath(testdatapath):
     assert "UnitMixin" in type(obj).__name__
 
 
-@require_testdata("interface", only=["TNG50-4_snapshot"])
+@require_testdata("interface", only=["TNG50-4_snapshot", "Illustris-3_snapshot"])
 def test_guess_nameddataset(testdata_interface):
     snp = testdata_interface
     metadata = snp._metadata_raw
-    candidates = check_config_for_dataset(metadata)
+    candidates = check_config_for_dataset(metadata, path=snp.path)
+    assert len(candidates) == 1
     print("cds", candidates)

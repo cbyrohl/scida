@@ -16,8 +16,8 @@ def test_load_cgs(testdatapath):
     dens = gas["Density"]
     sfr = gas["StarFormationRate"]
     u = ds.ureg
-    assert coords.units == u.cm / u.h
-    assert dens.units == u.g / u.h / (u.cm / u.h) ** 3
+    assert coords.units == u.cm
+    assert dens.units == u.g / u.cm**3
     assert sfr.units == u.g / u.s
 
 

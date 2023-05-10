@@ -5,7 +5,7 @@ import numpy as np
 import pint
 from pint import UnitRegistry
 
-from astrodask.config import get_config, get_config_fromfile
+from astrodask.config import get_config_fromfile, get_simulationconfig
 from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
 
@@ -72,8 +72,11 @@ def extract_units_from_attrs(
     # TODO: Missing h scaling!
     ukeys = ["length", "mass", "velocity", "time", "h"]
     if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
+        if mode != "cgs":
+            raise ValueError("Only cgs supported here.")
         for k in ukeys:
             if mode == "code" and k == "h":
+                # TODO: double check this...
                 continue  # h scaling absorbed into code units
             aname = k + "_scaling"
             unit *= udict[k] ** attrs.get(aname, 0.0)
@@ -120,7 +123,7 @@ class UnitMixin(Mixin):
         unithints = {}
         unitfile = ""
         if "dsname" in self.hints:
-            c = get_config()
+            c = get_simulationconfig()
             dsprops = c["data"][self.hints["dsname"]]
             unitfile = dsprops.get("unitfile", "")
         unitfile = kwargs.pop("unitfile", unitfile)
@@ -143,8 +146,11 @@ class UnitMixin(Mixin):
         # update fields with units
         fwu = unithints.get("fields", {})
         for ptype in sorted(self.data):
+            require_unitspecs = self.require_unitsspecs
             self.units[ptype] = {}
             pfields = self.data[ptype]
+            if fwu.get(ptype, "") == "no_units":
+                continue  # no units for any field in this group
             for k in sorted(pfields.keys(withrecipes=True)):
                 unit = None
                 h5path = "/" + ptype + "/" + k
@@ -167,9 +173,11 @@ class UnitMixin(Mixin):
                     else:
                         unit = ureg(funit)
                     if units == "cgs":
-                        unit = unit.to_base_units()
+                        if units == "cgs" and isinstance(pfields[k], pint.Quantity):
+                            unit = unit.to_base_units()
                 unit_metadata = None
                 if h5path in self._metadata_raw.keys():
+                    mode_metadata = unithints.get("metadata_unitsystem", units)
                     # if not, we try to extract the unit from the metadata
                     # check if any hints available
                     uh = unithints.get(ptype, {}).get(k, {})
@@ -178,7 +186,10 @@ class UnitMixin(Mixin):
                     require = unit is None
                     try:
                         unit_metadata = extract_units_from_attrs(
-                            attrs, require=require, mode=units, ureg=self.unitregistry
+                            attrs,
+                            require=require,
+                            mode=mode_metadata,
+                            ureg=self.unitregistry,
                         )
                     except ValueError as e:
                         if str(e) != "Could not find units.":
@@ -188,7 +199,6 @@ class UnitMixin(Mixin):
                             "Could not find units for '%s/%s'" % (ptype, k)
                         )
 
-                # print("bla", h5path, unit, unit_metadata)
                 if unit is not None and unit_metadata is not None:
                     # check whether both metadata and unit file agree
                     val_cgs_uf = unit.to_base_units().magnitude
@@ -197,6 +207,10 @@ class UnitMixin(Mixin):
                         val_cgs_uf, val_cgs_md, rtol=1e-3
                     ):
                         print("(units were checked against each other in cgs units.)")
+                        print(
+                            "cgs-factor comparison: %.5e != %.5e"
+                            % (val_cgs_uf, val_cgs_md)
+                        )
                         raise ValueError(
                             "Unit mismatch for '%s': '%s' (unit file) vs. %s (metadata)"
                             % (h5path, unit, unit_metadata)
@@ -205,7 +219,7 @@ class UnitMixin(Mixin):
                 if unit is None:
                     unit = unit_metadata
 
-                if self.require_unitsspecs and unit is None:
+                if require_unitspecs and unit is None:
                     raise ValueError(
                         "Cannot determine units from neither unit file nor metadata for '%s'."
                         % h5path
