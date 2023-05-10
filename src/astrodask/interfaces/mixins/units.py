@@ -38,34 +38,30 @@ def extract_units_from_attrs(
     assert ureg is not None, "Always require passing registry now."
     udict = {}
     if mode == "cgs":
-        udict["length"] = ureg("cm")
-        udict["mass"] = ureg("g")
-        udict["velocity"] = ureg("cm/s")
-        udict["time"] = ureg("s")
+        udict = dict(
+            length=ureg("cm"), mass=ureg("g"), velocity=ureg("cm/s"), time=ureg("s")
+        )
     elif mode == "code":
-        udict["length"] = ureg("code_length")
-        udict["mass"] = ureg("code_mass")
-        udict["velocity"] = ureg("code_velocity")
-        udict["time"] = ureg("code_time")
+        udict = {k: ureg("code_" + k) for k in ["length", "mass", "velocity", "time"]}
     else:
         raise KeyError("Unknown unit mode '%s'." % mode)
     if "h" in ureg:
         udict["h"] = ureg("h")
-    cgsfactor = ureg.Quantity(
-        1.0
-    )  # nothing to do if mode == "code" as we take values as they are
-    if mode == "cgs":
+    # nothing to do if mode == "code" as we take values as they are
+    cgsfactor = ureg.Quantity(1.0)
+    # for non-codeunits, we need to be provided some conversion factor
+    if mode != "code":
         # the common mode is to expect some hints how to convert to cgs
         # get the conversion factor
         cgskey = [k for k in attrs if "cgs" in k.lower()]
-        if "cgsunits" in cgskey:
-            cgskey.remove(
-                "cgsunits"
-            )  # these are the units not the normalization factor
+        if mode + "units" in cgskey:
+            # these are the units not the normalization factor
+            cgskey.remove(mode + "units")
         assert len(cgskey) == 1
         cgskey = cgskey[0]
         cgsfactor = attrs[cgskey]
     # get dimensions
+    resunit = None  # this is the variable we will return
     unit = cgsfactor
     if isinstance(unit, np.ndarray):
         assert len(unit) == 1
@@ -81,19 +77,22 @@ def extract_units_from_attrs(
                 continue  # h scaling absorbed into code units
             aname = k + "_scaling"
             unit *= udict[k] ** attrs.get(aname, 0.0)
+        resunit = unit
     elif "Conversion factor" in attrs.keys():  # like SWIFT
         ustr = str(attrs["Conversion factor"])
         ustr = ustr.split("[")[-1].split("]")[0]
         if ustr.strip() == "-":  # no units, done
             return unit
         unit *= ureg(ustr)
+        resunit = unit
     elif "cgsunits" in attrs.keys():  # like EAGLE
         if attrs["cgsunits"] is not None:  # otherwise, this field has no units
             unitstr = attrs["cgsunits"]
             unit *= ureg(unitstr)
+        resunit = unit
     elif require:
         raise ValueError("Could not find units.")
-    return unit
+    return resunit
 
 
 def update_unitregistry(filepath: str, ureg: UnitRegistry):
@@ -147,38 +146,39 @@ class UnitMixin(Mixin):
             self.units[ptype] = {}
             pfields = self.data[ptype]
             for k in sorted(pfields.keys(withrecipes=True)):
+                unit = None
                 h5path = "/" + ptype + "/" + k
                 # first we check whether we are explicitly given a unit by a unit file
-                funit = fwu.get(ptype, {}).get(k, "NA")
-                if funit == "NA":
+                override = False  # whether to override the metadata units
+                funit = fwu.get(ptype, {}).get(k, "N/A")
+                if funit == "N/A":
                     funit = fwu.get("_all", {}).get(
-                        k, "NA"
+                        k, "N/A"
                     )  # check whether defined for all particles
-                if funit != "NA":
+                if funit != "N/A":
                     # we have two options: either the unit is given as a string, reflecting code units
                     # or as a dictionary with either or both keys 'cgsunits' and 'codeunits' who hold the unit strings
                     if isinstance(funit, dict):
                         if units + "units" in funit:
                             unit = ureg(funit[units + "units"])
-                            pfields[k] = unit * pfields[k]
-                            if units == "cgs" and isinstance(pfields[k], pint.Quantity):
-                                pfields[k] = pfields[k].to_base_units()
-                            continue
+                        elif "units" in funit:
+                            unit = ureg(funit["units"])
+                        override = funit.get("override", False)
                     else:
                         unit = ureg(funit)
-                        pfields[k] = unit * pfields[k]
-                        if units == "cgs" and isinstance(pfields[k], pint.Quantity):
-                            pfields[k] = pfields[k].to_base_units()
-                        continue
-                elif h5path in self._metadata_raw.keys():
+                    if units == "cgs":
+                        unit = unit.to_base_units()
+                unit_metadata = None
+                if h5path in self._metadata_raw.keys():
                     # if not, we try to extract the unit from the metadata
                     # check if any hints available
                     uh = unithints.get(ptype, {}).get(k, {})
                     attrs = dict(self._metadata_raw[h5path])
                     attrs.update(**uh)
+                    require = unit is None
                     try:
-                        unit = extract_units_from_attrs(
-                            attrs, require=True, mode=units, ureg=self.unitregistry
+                        unit_metadata = extract_units_from_attrs(
+                            attrs, require=require, mode=units, ureg=self.unitregistry
                         )
                     except ValueError as e:
                         if str(e) != "Could not find units.":
@@ -187,18 +187,37 @@ class UnitMixin(Mixin):
                         raise ValueError(
                             "Could not find units for '%s/%s'" % (ptype, k)
                         )
-                    self.units[ptype][k] = unit
 
+                # print("bla", h5path, unit, unit_metadata)
+                if unit is not None and unit_metadata is not None:
+                    # check whether both metadata and unit file agree
+                    val_cgs_uf = unit.to_base_units().magnitude
+                    val_cgs_md = unit_metadata.to_base_units().magnitude
+                    if not override and not np.isclose(
+                        val_cgs_uf, val_cgs_md, rtol=1e-3
+                    ):
+                        print("(units were checked against each other in cgs units.)")
+                        raise ValueError(
+                            "Unit mismatch for '%s': '%s' (unit file) vs. %s (metadata)"
+                            % (h5path, unit, unit_metadata)
+                        )
+
+                if unit is None:
+                    unit = unit_metadata
+
+                if self.require_unitsspecs and unit is None:
+                    raise ValueError(
+                        "Cannot determine units from neither unit file nor metadata for '%s'."
+                        % h5path
+                    )
+                elif unit is not None:
+                    self.units[ptype][k] = unit
                     # redefine dask arrays with units
                     # TODO: This will instatiate all dask fields, need to user register_field
                     # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
                     pfields[k] = unit * pfields[k]
-                else:
-                    if self.require_unitsspecs:
-                        raise ValueError(
-                            "Cannot determine units from neither unit file nor metadata for '%s'."
-                            % h5path
-                        )
+                    if units == "cgs" and isinstance(pfields[k], pint.Quantity):
+                        pfields[k] = pfields[k].to_base_units()
 
     def _info_custom(self):
         rep = ""

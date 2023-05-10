@@ -14,8 +14,11 @@ fields:
     SubhaloID:
   # only do this for fields that (inconsistently lack hdf5 attributes)
   PartType0:
+    Coordinates: code_length
     StarFormationRate: Msun / yr
-    GFM_AGNRadiation: erg / s / cm ^ 2 * 4 * pi
+    GFM_AGNRadiation:
+      units: erg / s / cm ^ 2 * 4 * pi
+      override: true  # set this to override potential disagreeing units from metadata
     EnergyDissipation: 1 / a * (1e10 Msun) / ckpc * (km / s) ^ 3
     GFM_MetalsTagged:
     Machnumber:
