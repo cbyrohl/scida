@@ -2,6 +2,9 @@ site_name: astrodask
 repo_url: https://gitlab.mpcdf.mpg.de/byrohlc/astrodask
 theme:
   name: material
+  features:
+    - content.code.annotate
+    - navigation.sections
 
 nav:
   - Readme: 'index.md'
@@ -10,6 +13,8 @@ nav:
     #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
     #    - 'Series': notebooks/series.ipynb
     #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
+  - 'Misc':
+    - 'Derived Fields': derived_fields.md
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
   - api_docs.md
