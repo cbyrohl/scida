@@ -1,7 +1,10 @@
 # some script allowing us to copy HDF5 test files, but truncating fields to length 1
+import os.path
+
 import h5py
 import typer
 
+from astrodask import load
 from astrodask.io import walk_hdf5file
 
 app = typer.Typer()
@@ -9,6 +12,10 @@ app = typer.Typer()
 
 @app.command()
 def create_hdf5_testfile(src: str, dst: str):
+    if os.path.isdir(src):
+        # we support multi-file hdf5 files via our load() function
+        ds = load(src)
+        src = ds.file.filename
     tree = {}
     walk_hdf5file(src, tree)
     grps = tree["groups"]
@@ -19,8 +26,6 @@ def create_hdf5_testfile(src: str, dst: str):
             if k == "/":
                 continue
             f.create_group(k)
-        for path, shape, dtype in datasets:
-            print(path, shape, dtype)
         with h5py.File(src, "r") as g:
             for path, shape, dtype in datasets:
                 shape_new = (1,)
