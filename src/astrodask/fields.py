@@ -120,17 +120,27 @@ class FieldContainer(MutableMapping):
     """A mutable collection of fields. Attempt to construct from derived fields recipes
     if needed."""
 
-    def __init__(self, *args, fieldrecipes_kwargs=None, **kwargs):
+    def __init__(
+        self, *args, fieldrecipes_kwargs=None, containers=None, aliases=None, **kwargs
+    ):
+        if aliases is None:
+            aliases = {}
+        if fieldrecipes_kwargs is None:
+            fieldrecipes_kwargs = {}
+        self.aliases = aliases
         self.name = kwargs.pop("name", None)
         self.fields: Dict[str, da.Array] = {}
         self.fields.update(*args, **kwargs)
         self.fieldrecipes = {}
-        self.fieldrecipes_kwargs = (
-            fieldrecipes_kwargs if fieldrecipes_kwargs is not None else {}
-        )
+        self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.containers: Dict[
             str, FieldContainer
         ] = dict()  # other containers as subgroups
+        if containers is not None:
+            for k in containers:
+                self.containers[k] = FieldContainer(
+                    fieldrecipes_kwargs=fieldrecipes_kwargs
+                )
         self.internals = ["uid"]  # names of internal fields/groups
 
     def new_container(self, key, **kwargs):
@@ -138,6 +148,24 @@ class FieldContainer(MutableMapping):
         self.containers[key] = FieldContainer(
             **kwargs, fieldrecipes_kwargs=fkws, name=key
         )
+
+    def merge(self, collection, overwrite=True):
+        if not isinstance(collection, FieldContainer):
+            raise TypeError("Can only merge FieldContainers.")
+        # TODO: support nested containers
+        for k in collection.containers:
+            if k not in self.containers:
+                self.containers[k] = FieldContainer(
+                    fieldrecipes_kwargs=self.fieldrecipes_kwargs
+                )
+            if overwrite:
+                c1 = self.containers[k]
+                c2 = collection.containers[k]
+            else:
+                c1 = collection.containers[k]
+                c2 = self.containers[k]
+            c1.fields.update(**c2.fields)
+            c1.fieldrecipes.update(**c2.fieldrecipes)
 
     @property
     def fieldcount(self):
@@ -255,7 +283,12 @@ class FieldContainer(MutableMapping):
         ddf = dd.concat(dfs, axis=1)
         return ddf
 
+    def add_alias(self, alias, name):
+        self.aliases[alias] = name
+
     def _getitem(self, key, force_derived=False, update_dict=True):
+        if key in self.aliases:
+            key = self.aliases[key]
         if key in self.containers:
             return self.containers[key]
         if key in self.fields and not force_derived:

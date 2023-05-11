@@ -65,3 +65,13 @@ def test_discover_groupcatalog2(testdatapath):
     path = p / "output" / "snapdir_099" / "snap_099.0.hdf5"
     ds = load(path)
     assert ds.catalog is not None
+
+
+@require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
+def test_aliases(testdatapath):
+    ds = load(testdatapath)
+    gas = ds.data["PartType0"]
+    with pytest.raises(KeyError):
+        print(gas["TestAlias"])
+    gas.add_alias("TestAlias", "Coordinates")
+    print(gas["TestAlias"])
