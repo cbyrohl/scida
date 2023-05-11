@@ -3,6 +3,7 @@ import time
 
 import numpy as np
 import psutil
+import pytest
 
 from astrodask.series import ArepoSimulation
 from tests.testdata_properties import require_testdata_path
@@ -19,7 +20,21 @@ def test_areposimulation_load(testdatapath):
     print(ds)
     assert len(bs) == 5
     assert np.isclose(redshift, ds.redshift, rtol=1e-2)
-    # assert testdatapath_areposimulation.file is not None
+
+    # some other keywords
+    ds1 = bs.get_dataset(t=1.0)
+    ds2 = bs.get_dataset(z=0.0)
+    assert ds1.__repr__() == ds2.__repr__()
+
+    ds1 = bs.get_dataset(index=1)
+    ds2 = bs.get_dataset(snap=1)
+    assert ds1.__repr__() == ds2.__repr__()
+
+    # cannot specify multiple aliases for "index"
+    with pytest.raises(ValueError):
+        bs.get_dataset(index=1, snap=1)
+    with pytest.raises(ValueError):
+        bs.get_dataset(snapshot=1, snap=1)
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])

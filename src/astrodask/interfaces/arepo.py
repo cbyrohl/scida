@@ -103,6 +103,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 else:
                     pass  # nothing to do; we do not overwrite with catalog props
 
+        # set metadata
+        self._set_metadata()
+
+    def _set_metadata(self):
+        """
+        Set metadata from header and config.
+        """
+        self.metadata["redshift"] = self.header["Redshift"]
+        self.metadata["time"] = self.header["Time"]
+        self.metadata["boxsize"] = self.header["BoxSize"]
+        self.metadata["z"] = self.metadata["redshift"]
+        self.metadata["t"] = self.metadata["time"]
+
     @classmethod
     def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
         """
