@@ -47,6 +47,8 @@ def extract_units_from_attrs(
         raise KeyError("Unknown unit mode '%s'." % mode)
     if "h" in ureg:
         udict["h"] = ureg("h")
+    if "a" in ureg:
+        udict["a"] = ureg("a")
     # nothing to do if mode == "code" as we take values as they are
     cgsfactor = ureg.Quantity(1.0)
     # for non-codeunits, we need to be provided some conversion factor
@@ -70,7 +72,7 @@ def extract_units_from_attrs(
         unit = ureg.Quantity(1.0)  # zero makes no sense.
     # TODO: Missing a scaling!
     # TODO: Missing h scaling!
-    ukeys = ["length", "mass", "velocity", "time", "h"]
+    ukeys = ["length", "mass", "velocity", "time", "h", "a"]
     if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
         if mode != "cgs":
             raise ValueError("Only cgs supported here.")
@@ -211,7 +213,7 @@ class UnitMixin(Mixin):
                     ):
                         print("(units were checked against each other in cgs units.)")
                         print(
-                            "cgs-factor comparison: %.5e != %.5e"
+                            "cgs-factor comparison: %.5e (unitfile) != %.5e (metadata)"
                             % (val_cgs_uf, val_cgs_md)
                         )
                         raise ValueError(
@@ -223,6 +225,7 @@ class UnitMixin(Mixin):
                     unit = unit_metadata
 
                 if require_unitspecs and unit is None:
+                    print(self.data[ptype][k])
                     raise ValueError(
                         "Cannot determine units from neither unit file nor metadata for '%s'."
                         % h5path
