@@ -11,7 +11,7 @@ This tool uses dask, allowing analysis to scale up from your personal computer t
 
 ## Requirements
 
-- TODO
+- Python >= 3.9
 
 
 
