@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
 import pytest
+import yaml
 
 from astrodask.config import get_config
 
@@ -45,72 +46,15 @@ def add_testdata_entry(name, types=None, marks=None, fn=None):
     testdatadict[name] = TestDataProperties(path, types, marks)
 
 
-add_testdata_entry(
-    "TNG50-4",
-    ["series", "areposimulation"],
-)
-add_testdata_entry(
-    "TNGvariation_simulation",
-    ["series", "areposimulation"],
-)
-add_testdata_entry(
-    "SWIFTcosmo_snapshot",
-    ["interface"],
-    fn="SWIFTcosmo_snapshot.hdf5",
-)
-add_testdata_entry(
-    "FIRE2_snapshot",
-    ["interface"],
-    fn="FIRE2_snapshot.hdf5",
-)
-add_testdata_entry("SIMBA50_snapshot", ["interface"], fn="SIMBA50_snapshot.hdf5")
-add_testdata_entry(
-    "SWIFTnoncosmo_snapshot",
-    ["interface"],
-    fn="SWIFTnoncosmo_snapshot.hdf5",
-)
-add_testdata_entry(
-    "TNG50-4_snapshot",
-    ["interface", "areposnapshot", "areposnapshot_withcatalog|A|0|2"],
-)
-add_testdata_entry(
-    "TNG50-3_snapshot",
-    ["interface", "areposnapshot", "areposnapshot_withcatalog|B|0|2"],
-)
-add_testdata_entry(
-    "SIMBA50converted_snapshot",
-    ["interface", "areposnapshot", "areposnapshot_withcatalog|C|0|2"],
-)
-add_testdata_entry(
-    "AURIGA66_snapshot",
-    ["interface", "areposnapshot", "areposnapshot_withcatalog|D|0|2"],
-)
-add_testdata_entry(
-    "Illustris-3_snapshot",
-    ["interface", "areposnapshot", "areposnapshot_withcatalog|E|0|2"],
-)
-add_testdata_entry("EAGLEsmall_snapshot", ["interface"], fn="EAGLEsmall.hdf5")
-add_testdata_entry("TNG50-4_group", ["interface", "areposnapshot_withcatalog|A|1|2"])
+# read testdata properties from yaml file
+with open(os.path.join(os.path.dirname(__file__), "testdata.yaml"), "r") as file:
+    testdata_properties = yaml.safe_load(file).get("testdata", {})
+    for name, properties in testdata_properties.items():
+        add_testdata_entry(name, **properties)
+
 # add_testdata_entry(
 #    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|C|1|2"]
 # )
-add_testdata_entry(
-    "TNG50-3_group",
-    [
-        "interface",
-        "illustrissnapshot",
-        "areposnapshot_withcatalog|B|1|2",
-        "illustrisgroup",
-    ],
-)
-add_testdata_entry(
-    "AURIGA66_group",
-    ["interface", "areposnapshot_withcatalog|D|1|2"],
-)
-add_testdata_entry(
-    "Illustris-3_group",
-    ["interface", "illustrissnapshot", "areposnapshot_withcatalog|E|1|2"],
-)
 
 
 testdataskip = testdataskip.split()

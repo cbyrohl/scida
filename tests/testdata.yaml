@@ -1,0 +1,74 @@
+testdata:
+  TNG50-4:
+    types:
+      - series
+      - areposimulation
+  TNGvariation_simulation:
+    types:
+      - series
+      - areposimulation
+  SWIFTcosmo_snapshot:
+    types:
+      - interface
+    fn: "SWIFTcosmo_snapshot.hdf5"
+  FIRE2_snapshot:
+    types:
+      - interface
+    fn: "FIRE2_snapshot.hdf5"
+  SIMBA50_snapshot:
+    types:
+      - interface
+    fn: "SIMBA50_snapshot.hdf5"
+  SWIFTnoncosmo_snapshot:
+    types:
+      - interface
+    fn: "SWIFTnoncosmo_snapshot.hdf5"
+  TNG50-4_snapshot:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|A|0|2
+  TNG50-3_snapshot:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|B|0|2
+  SIMBA50converted_snapshot:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|C|0|2
+  AURIGA66_snapshot:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|D|0|2
+  Illustris-3_snapshot:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|E|0|2
+  EAGLEsmall_snapshot:
+    types:
+      - interface
+    fn: "EAGLEsmall.hdf5"
+  TNG50-4_group:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|A|1|2
+  TNG50-3_group:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|B|1|2
+      - arepogroup
+  AURIGA66_group:
+    types:
+      - interface
+      - areposnapshot_withcatalog|D|1|2
+  Illustris-3_group:
+    types:
+      - interface
+      - illustrissnapshot
+      - areposnapshot_withcatalog|E|1|2
