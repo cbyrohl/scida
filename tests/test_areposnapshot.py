@@ -1,3 +1,5 @@
+import pathlib
+
 import numpy as np
 import pytest
 
@@ -47,3 +49,19 @@ def test_scalefactor_in_units(testdatapath):
     pos_cgs = pos.to_base_units().magnitude
     pos_nounits_cgs = a * ds.ureg("kpc").to("cm").magnitude * pos_nounits / h
     assert pos_cgs == pytest.approx(pos_nounits_cgs)
+
+
+@require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
+def test_discover_groupcatalog(testdatapath):
+    ds = load(testdatapath)
+    assert ds.catalog is not None
+    print(ds.catalog)
+
+
+@require_testdata_path("series", only=["TNG50-4"])
+def test_discover_groupcatalog2(testdatapath):
+    # same but with actual paths as in TNG
+    p = pathlib.Path(testdatapath)
+    path = p / "output" / "snapdir_099" / "snap_099.0.hdf5"
+    ds = load(path)
+    assert ds.catalog is not None

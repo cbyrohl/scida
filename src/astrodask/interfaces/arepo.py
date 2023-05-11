@@ -54,6 +54,7 @@ class ArepoSelector(Selector):
 
 class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:
+        self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
         self.config = {}
         self.parameters = {}
@@ -64,13 +65,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
 
         self.catalog = catalog
-        if catalog is not None:
+        if self.catalog is None and not (self.iscatalog):
+            self.discover_catalog()
+            # try to discover group catalog in parent directories.
+        if self.catalog is not None:
             virtualcache = False  # copy catalog for better performance
             catalog_kwargs = kwargs.get("catalog_kwargs", {})
             catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
             fileprefix = catalog_kwargs.get("fileprefix", "")
             self.catalog = ArepoSnapshot(
-                catalog, virtualcache=virtualcache, fileprefix=fileprefix
+                self.catalog,
+                virtualcache=virtualcache,
+                fileprefix=fileprefix,
+                iscatalog=True,
             )
             z_catalog = self.catalog.header["Redshift"]
             z_snap = self.header["Redshift"]
@@ -166,6 +173,29 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
 
         """
         return super().return_data()
+
+    def discover_catalog(self):
+        """
+        Discover the group catalog given the current path
+        Returns
+        -------
+
+        """
+        # order of candidates matters. For Illustris "groups" must precede "fof_subhalo_tab"
+        candidates = [
+            self.path.replace("snapshot", "group"),
+            self.path.replace("snapshot", "groups"),
+            self.path.replace("snapdir", "groups").replace("snap", "groups"),
+            self.path.replace("snapdir", "groups").replace("snap", "fof_subhalo_tab"),
+        ]
+        for candidate in candidates:
+            if not os.path.exists(candidate):
+                continue
+            if candidate == self.path:
+                continue
+            self.catalog = candidate
+            break
+        print(self.path)
 
     def register_field(self, parttype: str, name: str = None, construct: bool = True):
         """
