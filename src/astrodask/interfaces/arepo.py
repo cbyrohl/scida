@@ -72,6 +72,13 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             self.catalog = ArepoSnapshot(
                 catalog, virtualcache=virtualcache, fileprefix=fileprefix
             )
+            z_catalog = self.catalog.header["Redshift"]
+            z_snap = self.header["Redshift"]
+            if not np.isclose(z_catalog, z_snap):
+                raise ValueError(
+                    "Redshift mismatch between snapshot and catalog: "
+                    f"{z_snap:.2f} vs {z_catalog:.2f}"
+                )
             for k in self.catalog.data:
                 if k not in self.data:
                     self.data[k] = self.catalog.data[k]
@@ -477,7 +484,7 @@ def wrap_func_scalar(
     block_id=None,
     func_output_shape=(1,),
     func_output_dtype="float64",
-    func_output_default=0
+    func_output_default=0,
 ):
     lengths = halolengths_in_chunks[block_id[0]]
 
@@ -920,7 +927,7 @@ def map_halo_operation(
         drop_axis=drop_axis,
         func_output_shape=shape,
         func_output_dtype=dtype,
-        func_output_default=default
+        func_output_default=default,
     )
 
     return calc
