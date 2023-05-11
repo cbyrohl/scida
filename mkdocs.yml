@@ -16,6 +16,7 @@ nav:
   - 'Misc':
     - 'Derived Fields': derived_fields.md
     - 'Supported Datasets': supported_data.md
+    - 'Halo and galaxy catalogs': halocatalogs.md
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
   - api_docs.md
