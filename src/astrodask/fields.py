@@ -232,6 +232,8 @@ class FieldContainer(MutableMapping):
         return decorator
 
     def __setitem__(self, key, value):
+        if key in self.aliases:
+            key = self.aliases[key]
         if isinstance(value, FieldContainer):
             self.containers[key] = value
         else:

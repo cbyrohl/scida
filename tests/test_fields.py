@@ -1,7 +1,20 @@
 import dask.array as da
 import pytest
 
+from astrodask.interface import FieldContainer
 from tests.testdata_properties import require_testdata, require_testdata_path
+
+
+def test_fieldcontainer_aliasing():
+    fc = FieldContainer()
+    assert fc.fields == {}
+    fc.add_alias("test", "test2")
+    with pytest.raises(KeyError):
+        print(fc["test"])  # "test2" not defined yet
+    fc["test"] = 1
+    assert (
+        "test2" in fc.fields
+    )  # if we write to the alias, the original entry should be set
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
