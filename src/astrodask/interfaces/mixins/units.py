@@ -156,7 +156,10 @@ class UnitMixin(Mixin):
                 h5path = "/" + ptype + "/" + k
                 # first we check whether we are explicitly given a unit by a unit file
                 override = False  # whether to override the metadata units
-                funit = fwu.get(ptype, {}).get(k, "N/A")
+                gfwu = fwu.get(ptype, {})
+                if gfwu is None:
+                    gfwu = {}  # marginal case where no fields are given
+                funit = gfwu.get(k, "N/A")
                 if funit == "N/A":
                     funit = fwu.get("_all", {}).get(
                         k, "N/A"
