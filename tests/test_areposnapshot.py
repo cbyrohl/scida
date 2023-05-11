@@ -74,4 +74,6 @@ def test_aliases(testdatapath):
     with pytest.raises(KeyError):
         print(gas["TestAlias"])
     gas.add_alias("TestAlias", "Coordinates")
-    print(gas["TestAlias"])
+    assert gas["TestAlias"] is not None
+    # lets check the SpatialMixin alias as well
+    assert ds.data["Group"]["Coordinates"] is not None

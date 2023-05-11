@@ -2,7 +2,6 @@ import logging
 
 import numpy as np
 
-from astrodask.fields import DerivedFieldRecipe
 from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import rectangular_cutout_mask
 
@@ -47,18 +46,11 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
                     log.debug("Found CoordinatesName '%s' for species '%s'" % (ccn, k))
                     self.hints["CoordinatesName"][k] = ccn
 
-                    # register field with field containers as well
                     dfltname = "Coordinates"
                     if ccn == dfltname:
                         break  # nothing to do
 
-                    def fnc(arrs, cname=ccn):
-                        return arrs[cname]
-
-                    cntr.fieldrecipes[dfltname] = DerivedFieldRecipe(
-                        dfltname, fnc, description="Coordinates alias"
-                    )
-                    break
+                    self.data[k].add_alias("Coordinates", ccn)
             if not found:
                 log.debug("Did not find CoordinatesName for species '%s'" % k)
 
