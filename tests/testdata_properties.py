@@ -108,11 +108,39 @@ def init_param_from_testdata(
     return param
 
 
-def get_testdata_params_ids(datatype, only: Optional[List[str]] = None):
+def get_testdata_params_ids(
+    datatype,
+    only: Optional[List[str]] = None,
+    exclude: Optional[List[str]] = None,
+    exclude_substring: bool = False,
+):
+    """
+    Get testdata parameters and ids for a given datatype.
+    Parameters
+    ----------
+    datatype: str
+    only: Optional[List[str]]
+        Only use these testdata entries (by name)
+    exclude: Optional[List[str]]
+        Exclude these testdata entries (by name)
+    exclude_substring: bool
+        If True, exclude if any of the substrings is in the name (only if exclude is not None)
+
+    Returns
+    -------
+
+    """
     params, ids = [], []
     for k, td in testdatadict.items():
         if only is not None and k not in only:
             continue  # not interested in this dataset
+        if exclude is not None:
+            if exclude_substring:  # exclude if any of the substrings is in the name
+                if any([e in k for e in exclude]):
+                    continue
+            else:
+                if k in exclude:
+                    continue
         for tp in td.types:
             tsplit = tp.split("|")
             tname = tsplit[0]
@@ -159,12 +187,33 @@ def get_ids(datatype, **kwargs):
     return ids
 
 
-def require_testdata(name, scope="function", only=None, specific=True, nmax=None):
+def require_testdata(
+    name, scope="function", only=None, specific=True, nmax=None, **kwargs
+):
+    """
+
+    Parameters
+    ----------
+    name: str
+        name of the testdata type
+    scope: str
+        pytest scope
+    only: list of str
+        only use these testdata entries
+    specific: bool
+        if True, add the name of the testdata type to the fixture name
+    nmax: int
+        only use the first 'nmax' entries
+
+    Returns
+    -------
+
+    """
     fixturename = "testdata"
     if specific:
         fixturename += "_" + name
-    params = get_params(name, only=only)
-    ids = get_ids(name, only=only)
+    params = get_params(name, only=only, **kwargs)
+    ids = get_ids(name, only=only, **kwargs)
     if isinstance(nmax, int):
         params = params[:nmax]
         ids = ids[:nmax]

@@ -87,3 +87,7 @@ def test_fields(testdata_interface):
 
     print(snp.data["PartType1"]["tfield_all"])
     assert all([snp.data[k]["tfield_all"] for k in snp.data.keys()])
+
+
+def test_resolve_field_dependencies():
+    pass

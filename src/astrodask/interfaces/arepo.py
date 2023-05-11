@@ -79,13 +79,14 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 fileprefix=fileprefix,
                 iscatalog=True,
             )
-            z_catalog = self.catalog.header["Redshift"]
-            z_snap = self.header["Redshift"]
-            if not np.isclose(z_catalog, z_snap):
-                raise ValueError(
-                    "Redshift mismatch between snapshot and catalog: "
-                    f"{z_snap:.2f} vs {z_catalog:.2f}"
-                )
+            if "Redshift" in self.catalog.header and "Redshift" in self.header:
+                z_catalog = self.catalog.header["Redshift"]
+                z_snap = self.header["Redshift"]
+                if not np.isclose(z_catalog, z_snap):
+                    raise ValueError(
+                        "Redshift mismatch between snapshot and catalog: "
+                        f"{z_snap:.2f} vs {z_catalog:.2f}"
+                    )
             for k in self.catalog.data:
                 if k not in self.data:
                     self.data[k] = self.catalog.data[k]
@@ -110,11 +111,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         """
         Set metadata from header and config.
         """
-        self.metadata["redshift"] = self.header["Redshift"]
-        self.metadata["time"] = self.header["Time"]
-        self.metadata["boxsize"] = self.header["BoxSize"]
-        self.metadata["z"] = self.metadata["redshift"]
-        self.metadata["t"] = self.metadata["time"]
+        if self.header is not None:
+            if "Redshift" in self.header:
+                self.metadata["redshift"] = self.header["Redshift"]
+                self.metadata["z"] = self.metadata["redshift"]
+            if "BoxSize" in self.header:
+                self.metadata["boxsize"] = self.header["BoxSize"]
+            if "Time" in self.header:
+                self.metadata["time"] = self.header["Time"]
+                self.metadata["t"] = self.metadata["time"]
 
     @classmethod
     def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
@@ -400,6 +405,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
 
 
 class CosmologicalArepoSnapshot(CosmologyMixin, ArepoSnapshot):
+    _mixins = [CosmologyMixin]
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

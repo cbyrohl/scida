@@ -5,6 +5,7 @@ import pathlib
 import tempfile
 from functools import partial
 from os.path import join
+from typing import Optional
 
 import dask.array as da
 import h5py
@@ -92,6 +93,12 @@ class ZarrLoader(Loader):
         )
         return datadict
 
+    def load_metadata(self, **kwargs):
+        """Take a quick glance at the metadata."""
+        tree = {}
+        walk_zarrfile(self.path, tree)
+        return tree["attrs"]
+
 
 class ChunkedHDF5Loader(Loader):
     def __init__(self, path):
@@ -142,11 +149,30 @@ class ChunkedHDF5Loader(Loader):
         )
         return datadict
 
-    def get_chunkedfiles(self, fileprefix) -> list:
+    def get_chunkedfiles(self, fileprefix: Optional[str] = "") -> list:
+        """
+        Get all files in directory with given prefix.
+        Parameters
+        ----------
+        fileprefix: Optional[str]
+            Prefix of files to be loaded. If None, we take the first prefix.
+
+        Returns
+        -------
+
+        """
+
         files = [join(self.path, f) for f in os.listdir(self.path)]
         files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
-        files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
-        prfxs = [f.split(".")[0] for f in files]
+        if fileprefix is not None:
+            files = np.array(
+                [f for f in files if f.split("/")[-1].startswith(fileprefix)]
+            )
+        prfxs = sorted([f.split(".")[0] for f in files])
+        if fileprefix is None:
+            prfx = prfxs[0]
+            prfxs = [prfx]
+            files = np.array([f for f in files if f.startswith(prfx)])
         if len(set(prfxs)) > 1:
             print("Available prefixes:", set(prfxs))
             raise ValueError(
@@ -386,6 +412,12 @@ def determine_loader(path):
         # we are directly given a target file
         loader = HDF5Loader(path)
     return loader
+
+
+def load_metadata(path, **kwargs):
+    loader = determine_loader(path)
+    metadata = loader.load_metadata(**kwargs)
+    return metadata
 
 
 def load(path, **kwargs):

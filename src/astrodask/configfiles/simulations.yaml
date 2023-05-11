@@ -1,14 +1,17 @@
 # some YAML aliases
 defs:
   tng_params: &tng_params
-    dataset_type: ArepoSimulation
+    dataset_type:
+      series: ArepoSimulation
+      dataset: ArepoSnapshot
     unitfile: units/illustris.yaml
   tng_props: &tng_props
     code: arepo
     suite: TNG
     tags: ["simulation"]
   illustris_params: &illustris_params
-    dataset_type: ArepoSimulation
+    dataset_type:
+      dataset: IllustrisSnapshot
     unitfile: units/illustris.yaml
 
 data:
