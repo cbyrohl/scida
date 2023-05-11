@@ -77,7 +77,7 @@ def test_tng_units(testdatapath):
 
 @pytest.mark.skipif(
     version.parse(pint.__version__) <= version.parse("0.20.1"),
-    reason="pint bug, hopefully fixed in next release, see https://github.com/hgrecco/pint/issues/1765",
+    reason="pint bug, fixed in development, see https://github.com/hgrecco/pint/pull/1722",
 )
 def test_dask_pint1():
     ureg = pint.UnitRegistry()

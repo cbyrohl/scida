@@ -6,7 +6,7 @@ authors = ["Chris Byrohl"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.9"
 numpy = "^1.18"
 dask = {extras = ["array", "dataframe", "distributed"], version = "^2023"}
 distributed = "^2023"
@@ -17,7 +17,7 @@ numba = "^0.56"
 pyyaml = ">=5.3.1"
 jupyter = "^1.0.0"
 tqdm = "^4.64.1"
-pint = "^0.20.1"
+pint = {git = "https://github.com/hgrecco/pint.git", rev = "8426b391ff88dbfc7421ceda415ff2d7bcbcda37"}
 requests = "^2.29.0"
 
 
