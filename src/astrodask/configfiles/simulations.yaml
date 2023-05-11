@@ -19,17 +19,17 @@ data:
         - TNG50-1
       identifiers:
           Parameters:
-            InitCondFile: /draco/ptmp/dnelson/InitialConditions/L35n2160TNG/output/ICs
+            InitCondFile: /zhome/academic/HLRS/lha/zahapill/ics/ics_illustrisTNGboxes/L35n2160TNG/output/ICs
   TNG50-2:
       <<: *tng_params
       identifiers:
           Parameters:
-            InitCondFile: /draco/ptmp/dnelson/InitialConditions/L35n1080TNG/output/ICs
+            InitCondFile: /hydra/ptmp/apillepi/sims.ics/L35n1080TNG/output/ICs
   TNG50-3:
       <<: *tng_params
       identifiers:
           Parameters:
-            InitCondFile: /draco/ptmp/dnelson/InitialConditions/L35n540TNG/output/ICs
+            InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics/ics_illustrisTNGboxes/L35n540TNG/output/ICs
   TNG50-4:
       <<: *tng_params
       identifiers:
