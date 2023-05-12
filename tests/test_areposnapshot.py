@@ -90,3 +90,13 @@ def test_aliases_bydefault(testdatapath):
     assert d["PartType3"] == d["tracers"]
     assert d["PartType4"] == d["stars"]
     assert d["PartType5"] == d["bh"]
+
+
+@require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
+def test_additionalfields(testdatapath):
+    ds = load(testdatapath)
+    gas = ds.data["PartType0"]
+    assert "Temperature" in gas
+    assert gas["Temperature"] is not None
+    assert gas["Temperature"].compute() is not None
+    # TODO: Test how newly defined fields play with units

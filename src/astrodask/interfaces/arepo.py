@@ -12,6 +12,7 @@ from dask import delayed
 from numba import jit, njit
 from numpy.typing import NDArray
 
+from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import (
     computedecorator,
     get_args,
@@ -119,6 +120,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
 
         # set metadata
         self._set_metadata()
+
+        # add some default fields
+        self.data.merge(fielddefs)
 
     def _set_metadata(self):
         """
@@ -994,3 +998,37 @@ def map_halo_operation(
     )
 
     return calc
+
+
+groupnames = [
+    "PartType0",
+    "PartType1",
+    "PartType3",
+    "PartType4",
+    "PartType5",
+    "Group",
+    "Subhalo",
+]
+fielddefs = FieldContainer(containers=groupnames)
+
+
+@fielddefs.register_field("PartType0")
+def Temperature(arrs, **kwargs):
+    """Compute gas temperature given (ElectronAbundance,InternalEnergy) in [K]."""
+    xh = 0.76
+    gamma = 5.0 / 3.0
+
+    m_p = 1.672622e-24  # proton mass [g]
+    k_B = 1.380650e-16  # boltzmann constant [erg/K]
+
+    UnitEnergy_over_UnitMass = (
+        1e10  # standard unit system (TODO: can obtain from snapshot)
+    )
+
+    xe = arrs["ElectronAbundance"]
+    u_internal = arrs["InternalEnergy"]
+
+    mu = 4 / (1 + 3 * xh + 4 * xh * xe) * m_p
+    temp = (gamma - 1.0) * u_internal / k_B * UnitEnergy_over_UnitMass * mu
+
+    return temp
