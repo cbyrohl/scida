@@ -244,6 +244,7 @@ def require_testdata_path(
     scope: str = "function",
     specific: bool = False,
     only: Optional[List[str]] = None,
+    **kwargs,
 ):
     fixturename = "testdatapath"
     if specific:

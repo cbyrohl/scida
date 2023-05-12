@@ -260,7 +260,8 @@ def load(
             )
 
         msg = "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
-        log.debug(msg % (dstype, oldcls))
+        if dstype is not None:
+            log.debug(msg % (dstype, oldcls))
 
     # indicators for cosmological mixin
     z = metadata_raw.get("/Header", {}).get("Redshift", None)

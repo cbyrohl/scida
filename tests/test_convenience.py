@@ -73,7 +73,7 @@ def test_load_areposim(testdatapath):
     assert obj is not None
 
 
-@require_testdata_path("interface")
+@require_testdata_path("interface", exclude=["gaia"], exclude_substring=True)
 def test_load_units_cgs(testdatapath):
     obj = load(testdatapath, units="cgs")
     assert "UnitMixin" in type(obj).__name__

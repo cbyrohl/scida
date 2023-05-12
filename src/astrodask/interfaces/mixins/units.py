@@ -13,7 +13,7 @@ from astrodask.misc import sprint
 log = logging.getLogger(__name__)
 
 
-def str_to_unit(unitstr: str, ureg: pint.UnitRegistry) -> pint.Unit:
+def str_to_unit(unitstr: Optional[str], ureg: pint.UnitRegistry) -> pint.Unit:
     """
     Convert a string to a unit.
     Parameters
@@ -28,7 +28,8 @@ def str_to_unit(unitstr: str, ureg: pint.UnitRegistry) -> pint.Unit:
     pint.Unit
         The unit.
     """
-    unitstr = unitstr.replace("dex", "decade")
+    if unitstr is not None:
+        unitstr = unitstr.replace("dex", "decade")
     return ureg(unitstr)
 
 
@@ -87,7 +88,6 @@ def extract_units_from_attrs(
         cgskey = cgskey[0]
         cgsfactor = attrs[cgskey]
     # get dimensions
-    resunit = None  # this is the variable we will return
     unit = cgsfactor
     if isinstance(unit, np.ndarray):
         assert len(unit) == 1
@@ -131,14 +131,20 @@ def extract_units_from_attrs(
                 unitstr = desc.split("(")[1].split(")")[0]
             except IndexError:
                 pass
-        unitstr = unitstr.strip("'")
-        if unitstr is not None and unitstr != desc:
-            print(unitstr)
-            unit *= str_to_unit(unitstr, ureg)
+        if unitstr is not None and unitstr != desc and unitstr != "None":
+            unitstr = unitstr.strip("'")
+            # parsing from the description is usually messy and not guaranteed to work. We thus allow failure here.
+            try:
+                unit *= str_to_unit(unitstr, ureg)
+            except pint.errors.UndefinedUnitError:
+                log.info(
+                    "Cannot parse unit string '%s' from metadata description. Skipping."
+                    % unitstr
+                )
             return unit
     if require:
         raise ValueError("Could not find units.")
-    return resunit
+    return str_to_unit("", ureg)
 
 
 def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry):
@@ -227,12 +233,12 @@ class UnitMixin(Mixin):
                     # or as a dictionary with either or both keys 'cgsunits' and 'codeunits' who hold the unit strings
                     if isinstance(funit, dict):
                         if units + "units" in funit:
-                            unit = ureg(funit[units + "units"])
+                            unit = str_to_unit(funit[units + "units"], ureg)
                         elif "units" in funit:
-                            unit = ureg(funit["units"])
+                            unit = str_to_unit(funit["units"], ureg)
                         override = funit.get("override", False)
                     else:
-                        unit = ureg(funit)
+                        unit = str_to_unit(funit, ureg)
                     if units == "cgs" and isinstance(unit, pint.Quantity):
                         unit = unit.to_base_units()
                 unit_metadata = None
@@ -245,11 +251,11 @@ class UnitMixin(Mixin):
                     uh = uh.get(k, {})
                     attrs = dict(self._metadata_raw[path])
                     attrs.update(**uh)
-                    require = unit is None
+                    # require = unit is None
                     try:
                         unit_metadata = extract_units_from_attrs(
                             attrs,
-                            require=require,
+                            require=False,
                             mode=mode_metadata,
                             ureg=self.unitregistry,
                         )

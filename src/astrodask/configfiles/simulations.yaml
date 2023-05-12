@@ -77,3 +77,7 @@ data:
         Header:
           RunLabel: "\"Eagle"
       unitfile: units/eagle.yaml
+
+  gaia-dr3:
+      identifiers:
+        name_contains: "gaia"
