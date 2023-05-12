@@ -77,3 +77,16 @@ def test_aliases(testdatapath):
     assert gas["TestAlias"] is not None
     # lets check the SpatialMixin alias as well
     assert ds.data["Group"]["Coordinates"] is not None
+
+
+@require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
+def test_aliases_bydefault(testdatapath):
+    ds = load(testdatapath)
+    d = ds.data
+    assert d["PartType0"] == d["gas"]
+    assert d["PartType1"] == d["dm"]
+    if "PartType2" in d:
+        assert d["PartType2"] == d["lowres"]
+    assert d["PartType3"] == d["tracers"]
+    assert d["PartType4"] == d["stars"]
+    assert d["PartType5"] == d["bh"]

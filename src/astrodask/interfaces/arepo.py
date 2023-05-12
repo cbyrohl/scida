@@ -104,6 +104,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 else:
                     pass  # nothing to do; we do not overwrite with catalog props
 
+        # add aliases
+        aliases = dict(
+            PartType0=["gas", "baryons"],
+            PartType1=["dm", "dark matter"],
+            PartType2=["lowres", "lowres dm"],
+            PartType3=["tracer", "tracers"],
+            PartType4=["stars"],
+            PartType5=["bh", "black holes"],
+        )
+        for k, lst in aliases.items():
+            for v in lst:
+                self.data.add_alias(v, k)
+
         # set metadata
         self._set_metadata()
 
