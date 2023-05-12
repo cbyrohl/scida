@@ -106,7 +106,7 @@ class ChunkedHDF5Loader(Loader):
         self.tempfile = ""
         self.location = ""
 
-    def load_metadata(self, fileprefix=""):
+    def load_metadata(self, fileprefix="", **kwargs):
         """Take a quick glance at the metadata."""
         cachefp = return_hdf5cachepath(self.path)
         if cachefp is not None and os.path.isfile(cachefp):

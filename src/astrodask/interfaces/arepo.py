@@ -21,6 +21,7 @@ from astrodask.helpers_misc import (
 )
 from astrodask.interface import BaseSnapshot, Selector
 from astrodask.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin
+from astrodask.io import load_metadata
 
 log = logging.getLogger(__name__)
 
@@ -66,44 +67,54 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
 
         self.catalog = catalog
-        if self.catalog is None and not (self.iscatalog):
-            self.discover_catalog()
-            # try to discover group catalog in parent directories.
-        if self.catalog is not None:
-            virtualcache = False  # copy catalog for better performance
-            catalog_kwargs = kwargs.get("catalog_kwargs", {})
-            catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
-            fileprefix = catalog_kwargs.get("fileprefix", "")
-            self.catalog = ArepoSnapshot(
-                self.catalog,
-                virtualcache=virtualcache,
-                fileprefix=fileprefix,
-                iscatalog=True,
-            )
-            if "Redshift" in self.catalog.header and "Redshift" in self.header:
-                z_catalog = self.catalog.header["Redshift"]
-                z_snap = self.header["Redshift"]
-                if not np.isclose(z_catalog, z_snap):
-                    raise ValueError(
-                        "Redshift mismatch between snapshot and catalog: "
-                        f"{z_snap:.2f} vs {z_catalog:.2f}"
-                    )
-            for k in self.catalog.data:
-                if k not in self.data:
-                    self.data[k] = self.catalog.data[k]
-                self.catalog.data.fieldrecipes_kwargs["snap"] = self
-            self.add_catalogIDs()
-            # merge hints
-            for h in self.catalog.hints:
-                if h not in self.hints:
-                    self.hints[h] = self.catalog.hints[h]
-                elif isinstance(self.hints[h], dict):
-                    # merge dicts
-                    for k in self.catalog.hints[h]:
-                        if k not in self.hints[h]:
-                            self.hints[h][k] = self.catalog.hints[h][k]
-                else:
-                    pass  # nothing to do; we do not overwrite with catalog props
+        if not self.iscatalog:
+            if self.catalog is None:
+                self.discover_catalog()
+                # try to discover group catalog in parent directories.
+            if self.catalog is not None:
+                virtualcache = False  # copy catalog for better performance
+                catalog_kwargs = kwargs.get("catalog_kwargs", {})
+                catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
+                fileprefix = catalog_kwargs.get("fileprefix", "")
+                self.catalog = ArepoSnapshot(
+                    self.catalog,
+                    virtualcache=virtualcache,
+                    fileprefix=fileprefix,
+                    iscatalog=True,
+                )
+                if "Redshift" in self.catalog.header and "Redshift" in self.header:
+                    z_catalog = self.catalog.header["Redshift"]
+                    z_snap = self.header["Redshift"]
+                    if not np.isclose(z_catalog, z_snap):
+                        raise ValueError(
+                            "Redshift mismatch between snapshot and catalog: "
+                            f"{z_snap:.2f} vs {z_catalog:.2f}"
+                        )
+                for k in self.catalog.data:
+                    if k not in self.data:
+                        self.data[k] = self.catalog.data[k]
+                    self.catalog.data.fieldrecipes_kwargs["snap"] = self
+                print(
+                    self.path,
+                    self.catalog.data.keys(),
+                    self.catalog.data["Group"].keys(),
+                )
+                if (
+                    len(self.catalog.data["Group"].keys()) > 0
+                ):  # starting snapshots often dont have groups
+                    self.add_catalogIDs()
+
+                # merge hints from snap and catalog
+                for h in self.catalog.hints:
+                    if h not in self.hints:
+                        self.hints[h] = self.catalog.hints[h]
+                    elif isinstance(self.hints[h], dict):
+                        # merge dicts
+                        for k in self.catalog.hints[h]:
+                            if k not in self.hints[h]:
+                                self.hints[h][k] = self.catalog.hints[h][k]
+                    else:
+                        pass  # nothing to do; we do not overwrite with catalog props
 
         # add aliases
         aliases = dict(
@@ -115,6 +126,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             PartType5=["bh", "black holes"],
         )
         for k, lst in aliases.items():
+            if k not in self.data:
+                continue
             for v in lst:
                 self.data.add_alias(v, k)
 
@@ -154,16 +167,26 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         bool
         """
         path = str(path)
+        possibly_valid = False
         if path.endswith(".hdf5") or path.endswith(".zarr"):
-            return True
+            possibly_valid = True
         if os.path.isdir(path):
             files = os.listdir(path)
             cls._get_fileprefix(path, **kwargs)
             sufxs = [f.split(".")[-1] for f in files]
             if len(set(sufxs)) > 1:
-                return False
+                possibly_valid = False
             if sufxs[0] in ["hdf5", "zarr"]:
-                return True
+                possibly_valid = True
+        if possibly_valid:
+            metadata_raw = load_metadata(path, **kwargs)
+            # need some silly combination of attributes to be sure
+            if all([k in metadata_raw for k in ["Config", "Header", "Parameters"]]):
+                if (
+                    "NumPart_ThisFile" in metadata_raw["Header"]
+                    and "NumPart_Total" in metadata_raw["Header"]
+                ):
+                    return True
         return False
 
     @classmethod
@@ -300,6 +323,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             if not (key.startswith("PartType")):
                 continue
             num = int(key[-1])
+            if "uid" not in self.data[key]:
+                continue  # can happen for empty containers
             gidx = self.data[key]["uid"]
             hidx = compute_haloindex(gidx, halocelloffsets[:, num])
             self.data[key]["GroupID"] = hidx
@@ -321,6 +346,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             if not (key.startswith("PartType")):
                 continue
             num = int(key[-1])
+            if "uid" not in self.data[key]:
+                continue  # can happen for empty containers
             gidx = self.data[key]["uid"]
             dlyd = delayed(get_shcounts_shcells)(
                 subhalogrnr, halocelloffsets[:, num].shape[0]

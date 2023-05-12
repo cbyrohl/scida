@@ -100,3 +100,10 @@ def test_additionalfields(testdatapath):
     assert gas["Temperature"] is not None
     assert gas["Temperature"].compute() is not None
     # TODO: Test how newly defined fields play with units
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot_z127"])
+def test_emptycatalog(testdatapath):
+    ds = load(testdatapath)
+    print(ds)
+    pass

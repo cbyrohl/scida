@@ -216,6 +216,9 @@ def load(
     path = os.path.realpath(path)
     cls = _determine_type(path, **kwargs)[1][0]
 
+    msg = "Dataset is identified as '%s' via _determine_type." % cls
+    log.debug(msg)
+
     # determine additional mixins not set by class
     mixins = []
     if unitfile:
@@ -255,10 +258,9 @@ def load(
             raise ValueError(
                 "Unknown type of dataset config variable. content: '%s'" % dstype
             )
-        log.debug(
-            "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
-            % (dstype, oldcls)
-        )
+
+        msg = "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
+        log.debug(msg % (dstype, oldcls))
 
     # indicators for cosmological mixin
     z = metadata_raw.get("/Header", {}).get("Redshift", None)

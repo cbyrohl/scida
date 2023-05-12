@@ -51,20 +51,33 @@ with open(os.path.join(os.path.dirname(__file__), "testdata.yaml"), "r") as file
     testdata_properties = yaml.safe_load(file).get("testdata", {})
     for name, properties in testdata_properties.items():
         add_testdata_entry(name, **properties)
-
-# add_testdata_entry(
-#    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|C|1|2"]
-# )
+        print(name, properties)
 
 
 testdataskip = testdataskip.split()
 testdata_local = []
-if datapath is not None:
-    testdata_local_fns = [f for f in os.listdir(datapath) if f not in testdataskip]
-    path_to_name_dict = {
-        v.path.split(datapath)[-1].split("/")[-1]: k for k, v in testdatadict.items()
-    }
-    testdata_local = [path_to_name_dict.get(k, k) for k in testdata_local_fns]
+for k, v in testdatadict.items():
+    print(k, v)
+    if os.path.exists(v.path) and k not in testdataskip:
+        testdata_local.append(k)
+        print("exists")
+    # if not os.path.exists(testdatadict_entry.path):
+    #    if silent_unavailable:
+    #        testdatadict_entry.marks.append(skip_unavail)
+    #    else:
+    #        raise ValueError("Testdata '%s' not available." % testdatadict_entry.path)
+
+# if datapath is not None:
+#    testdata_local_fns = [f for f in os.listdir(datapath) if f not in testdataskip]
+#    path_to_name_dict = {
+#        v.path.split(datapath)[-1].split("/")[-1]: k for k, v in testdatadict.items()
+#    }
+#    testdata_local = [path_to_name_dict.get(k, k) for k in testdata_local_fns]
+
+
+# add_testdata_entry(
+#    "SIMBA50converted_group", ["interface", "areposnapshot_withcatalog|C|1|2"]
+# )
 
 
 def parse_typestring(typestr):

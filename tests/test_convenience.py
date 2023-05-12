@@ -92,3 +92,9 @@ def test_guess_nameddataset(testdata_interface):
     candidates = check_config_for_dataset(metadata, path=snp.path)
     assert len(candidates) == 1
     print("cds", candidates)
+
+
+@require_testdata_path("interface", only=["gaia-dr3_minimal"])
+def test_gaia_hdf5(testdatapath):
+    ds = load(testdatapath)
+    print(ds)

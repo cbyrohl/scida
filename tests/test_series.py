@@ -53,16 +53,26 @@ def test_areposimulation_asynccaching(cachedir, testdatapath):
     print(m0 / (1024.0**2))
     print(bs)
 
-    # assert type(bs.datasets[0]).__name__ == "Delay"
+
+@require_testdata_path("areposimulation", only=["TNG50-4"])
+def test_areposimulation_lazy(cachedir, testdatapath):
+    tstart = time.process_time()
+    bs = ArepoSimulation(testdatapath, lazy=True)
+    dt0 = time.process_time() - tstart
+    assert type(bs.datasets[0]).__name__ == "Delay"
+    assert dt0 < 1.0  # should be fast
+    print("?", bs.metadata)
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
-def test_areposimulation_lazy(cachedir, testdatapath):
+def test_areposimulation_lazy2(cachedir, testdatapath):
+    # first load of simulation in lazy mode
     tstart = time.process_time()
     bs1 = ArepoSimulation(testdatapath, lazy=True)
     dt0 = time.process_time() - tstart
     assert type(bs1.datasets[0]).__name__ == "Delay"
 
+    # second load of simulation in lazy mode
     tstart = time.process_time()
     bs2 = ArepoSimulation(testdatapath, lazy=False)
     dt1 = time.process_time() - tstart
@@ -70,7 +80,7 @@ def test_areposimulation_lazy(cachedir, testdatapath):
     assert 10 * dt0 < dt1
 
     assert type(bs1.datasets[2]).__name__ == "Delay"
-    bs1.datasets[2].data
+    assert bs1.datasets[2].data is not None
     assert type(bs1.datasets[2]).__name__ != "Delay"
 
     assert type(bs1.datasets[1]).__name__ == "Delay"
