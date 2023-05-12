@@ -97,4 +97,11 @@ def test_guess_nameddataset(testdata_interface):
 @require_testdata_path("interface", only=["gaia-dr3_minimal"])
 def test_gaia_hdf5(testdatapath):
     ds = load(testdatapath)
-    print(ds)
+    assert ds is not None
+
+
+@require_testdata_path("interface", only=["gaia-dr3_minimal"])
+def test_gaia_hdf5_withunits(testdatapath):
+    ds = load(testdatapath, units=True)
+    assert ds is not None
+    print(ds.data["ra"].units)

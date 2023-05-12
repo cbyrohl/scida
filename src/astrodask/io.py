@@ -12,7 +12,7 @@ import h5py
 import numpy as np
 import zarr
 
-from astrodask.fields import FieldContainer
+from astrodask.fields import FieldContainer, walk_container
 from astrodask.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from astrodask.misc import get_container_from_path, return_hdf5cachepath
 
@@ -326,28 +326,6 @@ def load_datadict_old(
             )
             container[fieldname] = ds
     data = rootcontainer
-
-    def walk_container(
-        cntr, path="", handler_field=None, handler_group=None, withrecipes=False
-    ):
-        keykwargs = dict(withgroups=True, withrecipes=withrecipes)
-        for ck in cntr.keys(**keykwargs):
-            # we do not want to instantiate entry from recipe by calling cntr[ck] here
-            entry = cntr[ck]
-            newpath = path + "/" + ck
-            if isinstance(entry, FieldContainer):
-                if handler_group is not None:
-                    handler_group(entry, newpath)
-                walk_container(
-                    entry,
-                    newpath,
-                    handler_field,
-                    handler_group,
-                    withrecipes=withrecipes,
-                )
-            else:
-                if handler_field is not None:
-                    handler_field(entry, newpath)
 
     # instantiate at least one field
 

@@ -3,7 +3,6 @@ units:
   # h: 0.6774 hubble factor, needs to be set by snapshot
   # a: 1.0 # scale factor, needs to be set by snapshot
   ckpc: a * kpc
-  Msun: 1.98847e33 * g
   code_length: ckpc / h
   code_velocity: km / s
   code_mass: 1e10 * Msun / h

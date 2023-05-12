@@ -1,0 +1,3 @@
+units:
+  Msun: 1.98847e33 * g
+  electron: 1.0  # appearing within rates

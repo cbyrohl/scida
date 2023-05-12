@@ -345,3 +345,26 @@ class FieldContainer(MutableMapping):
                 )
             except KeyError:
                 return value
+
+
+def walk_container(
+    cntr, path="", handler_field=None, handler_group=None, withrecipes=False
+):
+    keykwargs = dict(withgroups=True, withrecipes=withrecipes)
+    for ck in cntr.keys(**keykwargs):
+        # we do not want to instantiate entry from recipe by calling cntr[ck] here
+        entry = cntr[ck]
+        newpath = path + "/" + ck
+        if isinstance(entry, FieldContainer):
+            if handler_group is not None:
+                handler_group(entry, newpath)
+            walk_container(
+                entry,
+                newpath,
+                handler_field,
+                handler_group,
+                withrecipes=withrecipes,
+            )
+        else:
+            if handler_field is not None:
+                handler_field(entry, newpath, parent=cntr)
