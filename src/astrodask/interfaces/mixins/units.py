@@ -5,7 +5,7 @@ import numpy as np
 import pint
 from pint import UnitRegistry
 
-from astrodask.config import get_config_fromfile, get_simulationconfig
+from astrodask.config import get_config, get_config_fromfile, get_simulationconfig
 from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
 
@@ -113,8 +113,6 @@ class UnitMixin(Mixin):
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
-        # set true if we require units from either metadata or unitfie
-        self.require_unitsspecs = kwargs.pop("require_unitspecs", True)
 
         ureg = UnitRegistry()  # before unit
         self.ureg = self.unitregistry = ureg
@@ -124,9 +122,13 @@ class UnitMixin(Mixin):
         # get unit hints
         unithints = {}
         unitfile = ""
+        userconf = get_config()
+        missing_units = userconf.get("missing_units", "warn")
+        assert missing_units in ["warn", "raise", "ignore"]
         if "dsname" in self.hints:
             c = get_simulationconfig()
             dsprops = c["data"][self.hints["dsname"]]
+            missing_units = dsprops.get("missing_units", missing_units)
             unitfile = dsprops.get("unitfile", "")
         unitfile = kwargs.pop("unitfile", unitfile)
         if unitfile != "":
@@ -148,7 +150,6 @@ class UnitMixin(Mixin):
         # update fields with units
         fwu = unithints.get("fields", {})
         for ptype in sorted(self.data):
-            require_unitspecs = self.require_unitsspecs
             self.units[ptype] = {}
             pfields = self.data[ptype]
             if fwu.get(ptype, "") == "no_units":
@@ -224,20 +225,25 @@ class UnitMixin(Mixin):
                 if unit is None:
                     unit = unit_metadata
 
-                if require_unitspecs and unit is None:
-                    print(self.data[ptype][k])
-                    raise ValueError(
+                # if we still don't have a unit, we raise/warn as needed
+                if unit is None:
+                    unit = ureg("")
+                    msg = (
                         "Cannot determine units from neither unit file nor metadata for '%s'."
                         % h5path
                     )
-                elif unit is not None:
-                    self.units[ptype][k] = unit
-                    # redefine dask arrays with units
-                    # TODO: This will instatiate all dask fields, need to user register_field
-                    # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
-                    pfields[k] = unit * pfields[k]
-                    if units == "cgs" and isinstance(pfields[k], pint.Quantity):
-                        pfields[k] = pfields[k].to_base_units()
+                    if missing_units == "raise":
+                        raise ValueError(msg)
+                    elif missing_units == "warn":
+                        log.warning(msg)
+
+                self.units[ptype][k] = unit
+                # redefine dask arrays with units
+                # TODO: This will instatiate all dask fields, need to user register_field
+                # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
+                pfields[k] = unit * pfields[k]
+                if units == "cgs" and isinstance(pfields[k], pint.Quantity):
+                    pfields[k] = pfields[k].to_base_units()
 
     def _info_custom(self):
         rep = ""
