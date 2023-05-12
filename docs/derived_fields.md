@@ -62,7 +62,7 @@ It can be useful to write (a) dedicated field definition file(s). First, initial
 ``` py
 from astrodask.fields import FieldContainer
 groupnames = ["PartType0", "Subhalo"]  # (1)!
-data = FieldContainer(containers=groupnames)
+fielddefs = FieldContainer(containers=groupnames)
 
 @fielddefs.register_field("PartType0") # (2)!
 def Volume(arrs, **kwargs):
