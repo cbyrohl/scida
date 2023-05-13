@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from astrodask.config import get_config
@@ -14,6 +16,11 @@ scope_snapshot = "function"
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: mark test as slow to run")
     config.addinivalue_line("markers", "big: mark test as big")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_logging():
+    logging.root.setLevel(logging.DEBUG)
 
 
 @pytest.fixture(scope="function")

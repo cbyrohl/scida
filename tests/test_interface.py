@@ -72,7 +72,7 @@ def test_snapshot_loadsaved(testdata_interface):
 #            assert u.shape == snp_zarr.data[k][l].shape
 
 
-@require_testdata("areposnapshot")
+@require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
 def test_areposnapshot_load(testdata_areposnapshot):
     snp = testdata_areposnapshot
     expected_types = {"PartType" + str(i) for i in range(6)}
@@ -88,7 +88,9 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
     assert "Subhalo" in grp.data.keys()
 
 
-@require_testdata("areposnapshot_withcatalog")
+@require_testdata(
+    "areposnapshot_withcatalog", exclude=["minimal"], exclude_substring=True
+)
 def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
     snap = testdata_areposnapshot_withcatalog
 

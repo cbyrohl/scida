@@ -16,6 +16,7 @@ nav:
   - 'Misc':
     - 'Derived Fields': derived_fields.md
     - 'Supported Datasets': supported_data.md
+    - 'Halo and galaxy catalogs': halocatalogs.md
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
   - api_docs.md
@@ -27,6 +28,11 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
   - toc
+  - tables
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
 
 plugins:
   - search:

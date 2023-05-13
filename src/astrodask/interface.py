@@ -80,11 +80,12 @@ class Dataset(metaclass=MixinMeta):
         self._cached = False
 
         # any identifying metadata?
-        candidates = check_config_for_dataset(self._metadata_raw, path=self.path)
-        if len(candidates) > 0:
-            dsname = candidates[0]
-            log.debug("Dataset is identified as '%s'." % dsname)
-            self.hints["dsname"] = dsname
+        if "dsname" not in self.hints:
+            candidates = check_config_for_dataset(self._metadata_raw, path=self.path)
+            if len(candidates) > 0:
+                dsname = candidates[0]
+                log.debug("Dataset is identified as '%s'." % dsname)
+                self.hints["dsname"] = dsname
 
     def _info_custom(self):
         """

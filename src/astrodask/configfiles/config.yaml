@@ -10,6 +10,8 @@ nthreads: 8
 datafolders: ["/fastdata/public/testdata-astrodask", "/vera/ptmp/gc/byrohlc/astrodask-testdata", "/testdata",
               "/virgotng/universe/IllustrisTNG"]
 
+missing_units: "warn"  # "warn", "raise", "ignore"
+
 resources:
   mpcdf:
     TNG50:

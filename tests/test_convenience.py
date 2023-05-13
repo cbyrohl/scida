@@ -73,7 +73,7 @@ def test_load_areposim(testdatapath):
     assert obj is not None
 
 
-@require_testdata_path("interface")
+@require_testdata_path("interface", exclude=["gaia"], exclude_substring=True)
 def test_load_units_cgs(testdatapath):
     obj = load(testdatapath, units="cgs")
     assert "UnitMixin" in type(obj).__name__
@@ -92,3 +92,16 @@ def test_guess_nameddataset(testdata_interface):
     candidates = check_config_for_dataset(metadata, path=snp.path)
     assert len(candidates) == 1
     print("cds", candidates)
+
+
+@require_testdata_path("interface", only=["gaia-dr3_minimal"])
+def test_gaia_hdf5(testdatapath):
+    ds = load(testdatapath)
+    assert ds is not None
+
+
+@require_testdata_path("interface", only=["gaia-dr3_minimal"])
+def test_gaia_hdf5_withunits(testdatapath):
+    ds = load(testdatapath, units=True)
+    assert ds is not None
+    print(ds.data["ra"].units)

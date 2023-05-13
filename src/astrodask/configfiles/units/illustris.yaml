@@ -1,9 +1,8 @@
 metadata_unitsystem: cgs
 units:
-  h: 0.6774
-  a: 1.0 # scale factor, needs to be set by snapshot
-  ckpc: kpc / a
-  Msun: 1.98847e33 * g
+  # h: 0.6774 hubble factor, needs to be set by snapshot
+  # a: 1.0 # scale factor, needs to be set by snapshot
+  ckpc: a * kpc
   code_length: ckpc / h
   code_velocity: km / s
   code_mass: 1e10 * Msun / h
@@ -11,30 +10,74 @@ units:
   code_pressure: (code_mass / code_length) / code_time^2
 fields:
   _all:
+    Coordinates: code_length
     GroupID:
     SubhaloID:
+    ParticleIDs:
+    Masses: code_mass
+    NumTracers:
+    Potential: (km / s)^2 / a
+    SubfindDensity: code_mass / code_length^3
+    SubfindHsml: code_length
+    SubfindVelDisp: km / s
+    Velocities: km * a^(1/2) / s
+    TimeStep:
   Offsets: "no_units" # "no_units" indicates that no field has units in this group
   # only do this for fields that have wrong or no metadata
   PartType0:
     Coordinates: code_length
+    Density: code_mass / code_length^3
+    ElectronAbundance:
     StarFormationRate: Msun / yr
+    EnergyDissipation: 1 / a * (1e10 Msun) / ckpc * (km / s) ^ 3
     GFM_AGNRadiation:
       units: erg / s / cm ^ 2 * 4 * pi
       override: true  # set this to override potential disagreeing units from metadata
-    EnergyDissipation: 1 / a * (1e10 Msun) / ckpc * (km / s) ^ 3
+    GFM_CoolingRate: erg * cm^3 / s
+    GFM_Metallicity:
+    GFM_Metals:
     GFM_MetalsTagged:
+    GFM_WindDMVelDisp: km / s
+    InternalEnergy: (km / s)^2
+    InternalEnergyOld: (km / s)^2
     Machnumber:
     MagneticField: (h / a^2) * (code_pressure)^(1/2)
     MagneticFieldDivergence: (h^3 / a^2) * code_mass^(1/2) * (km/s) * (ckpc)^(-5/2)
+    NeutralHydrogenAbundance:
+    SmoothingLength: code_length
+    TimebinHydro:
+    Volume: code_length^3
+  PartType1:
   PartType3:
     ParentID:
     TracerID:
+    FluidQuantities: # there are multiple units in the same array; cannot do
   PartType4:
+    GFM_InitialMass: code_mass
+    GFM_Metallicity:
+    GFM_Metals:
     GFM_MetalsTagged:
+    GFM_StellarFormationTime: # expressed as signed scale factor
+    GFM_StellarPhotometrics:  # not supported mag for now
     StellarHsml:
   PartType5:
     BH_BPressure: (h^4 / a^4) * (1e10 Msun) * (km / s)^2 / ckpc^3
+    BH_CumEgyInjection_QM: code_mass * code_length^2 / (code_time / h)^2
+    BH_CumMassGrowth_QM: code_mass
+    BH_Density: code_mass / code_length^3
+    BH_Hsml: code_length
     BH_HostHaloMass: code_mass
+    BH_Mass: code_mass
+    BH_Mass_bubbles: code_mass
+    BH_Mass_ini: code_mass
+    BH_Mdot: code_mass / (code_time / h)
+    BH_Pressure:  # TODO: metadata cgs factor seems wrong. double check
+      units: code_mass / code_length / (code_time / h)^2
+      override: true
+
+    BH_Progs:
+    BH_U: (km / s)^2
+    HostHaloMass: code_mass
   # no metadata attributes in group catalogs, thus have to add all manually
   Group:
     GroupBHMass: code_mass

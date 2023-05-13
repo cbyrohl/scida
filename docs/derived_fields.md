@@ -53,3 +53,45 @@ ds['stars']['VelMag']
 ```
 
 Practically working with these fields, there is no difference between derived and on-disk fields.
+
+
+## Adding multiple fields
+
+It can be useful to write (a) dedicated field definition file(s). First, initialize a FieldContainer
+
+``` py
+from astrodask.fields import FieldContainer
+groupnames = ["PartType0", "Subhalo"]  # (1)!
+fielddefs = FieldContainer(containers=groupnames)
+
+@fielddefs.register_field("PartType0") # (2)!
+def Volume(arrs, **kwargs):
+    return arrs["Masses"]/arrs["Density"]
+
+@fielddefs.register_field("all") # (3)!
+def GroupDistance(arrs, snap=None):
+    dist3 = arrs["GroupDistance3D"]
+    dist = da.sqrt((dist3**2).sum(axis=1))
+    dist = da.where(arrs["GroupID"]==-1, np.nan, dist) # set unbound gas to nan
+    return dist
+```
+
+1. We define a list of field containers that we want to add particles to.
+2. Specify the container we want to have the field added to.
+3. Using the "all" identifier, we can also attempt to add this field to all containers we have specified.
+
+Finally, we just need to import the *fielddefs* object (if we have defined it in another file) and merge them with a dataset that we loaded:
+
+``` py
+ds = load("snapshot")
+ds.data.merge(fielddefs)
+```
+
+In above example, we now have the following fields available:
+
+``` py
+gas = ds.data["PartType0"]
+print(gas["Volume"])
+print(gas["GroupDistance"])
+print(gas["Subhalo"])
+```

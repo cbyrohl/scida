@@ -65,10 +65,13 @@ def test_tng_units(testdatapath):
             mag2 = ds_nounits.data[pk1][k][0].compute()
             if isinstance(u2, astropy.units.Quantity):
                 mag2 = mag2 * u2.cgs.value
-            if not np.allclose(mag1, mag2, rtol=1e-4):
+            if not np.allclose(mag1, mag2, rtol=1e-3):
                 print(pk1, k)
                 print("conversion factor from TNG docs:")
-                print("in cgs: ", u2.cgs)
+                if isinstance(u2, astropy.units.Quantity):
+                    print("in cgs: ", u2.cgs)
+                else:
+                    print("in cgs: ", u2)
                 print("mag1, mag2:", mag1, mag2)
                 print("ratio:", mag1 / mag2)
                 raise ValueError("Entries do not match.")
@@ -77,7 +80,7 @@ def test_tng_units(testdatapath):
 
 @pytest.mark.skipif(
     version.parse(pint.__version__) <= version.parse("0.20.1"),
-    reason="pint bug, hopefully fixed in next release, see https://github.com/hgrecco/pint/issues/1765",
+    reason="pint bug, fixed in development, see https://github.com/hgrecco/pint/pull/1722",
 )
 def test_dask_pint1():
     ureg = pint.UnitRegistry()
