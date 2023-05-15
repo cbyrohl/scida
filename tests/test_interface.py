@@ -97,7 +97,7 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
 
 
 @require_testdata(
-    "areposnapshot_withcatalog", exclude=["minimal"], exclude_substring=True
+    "areposnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
 )
 def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
     snap = testdata_areposnapshot_withcatalog
@@ -211,7 +211,9 @@ def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatal
     assert snp.file is not None
 
 
-@require_testdata("areposnapshot_withcatalog")
+@require_testdata(
+    "areposnapshot_withcatalog", exclude=["minimal"], exclude_substring=True
+)
 def test_areposnapshot_map_hquantity(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
     snp.add_groupquantity_to_particles("GroupSFR")

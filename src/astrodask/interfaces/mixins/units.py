@@ -216,6 +216,8 @@ class UnitMixin(Mixin):
             k = basepath.split("/")
             for p in basepath.split("/"):
                 gfwu = fwu.get(p, {})
+            if gfwu == "no_units":
+                return  # no units for this container
             if gfwu is None:
                 gfwu = {}  # marginal case where no fields are given
             for k in sorted(container.keys(withgroups=False)):
