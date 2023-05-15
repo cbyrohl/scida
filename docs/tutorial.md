@@ -10,5 +10,3 @@
 [Click me](notebooks/static/largedatasets.ipynb)
 ### Series
 [Click me](notebooks/series.ipynb)
-### Visualization
-[Click me](notebooks/static/visualization.ipynb)

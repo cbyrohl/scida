@@ -13,9 +13,10 @@ nav:
     #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
     #    - 'Series': notebooks/series.ipynb
     #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
-  - 'Misc':
-    - 'Derived Fields': derived_fields.md
+  - 'Features':
     - 'Supported Datasets': supported_data.md
+    - 'Visualization': visualization.md
+    - 'Derived Fields': derived_fields.md
     - 'Halo and galaxy catalogs': halocatalogs.md
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
