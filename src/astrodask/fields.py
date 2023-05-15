@@ -184,15 +184,19 @@ class FieldContainer(MutableMapping):
     #    # TODO: hacky; also know that we have not / can not write .items() right now
     #    # which will lead to unintended behaviour down the line
     #    return set(self.fields.keys()) | set(self.derivedfields.keys())
-    def keys(self, withgroups=True, withrecipes=True, withinternal=False):
-        fieldkeys = list(self.fields.keys())
-        if not withinternal:
-            for ikey in self.internals:
-                if ikey in fieldkeys:
-                    fieldkeys.remove(ikey)
-        if withrecipes:
-            recipekeys = self.fieldrecipes.keys()
-            fieldkeys = list(set(fieldkeys) | set(recipekeys))
+    def keys(
+        self, withgroups=True, withrecipes=True, withinternal=False, withfields=True
+    ):
+        fieldkeys = []
+        if withfields:
+            fieldkeys = list(self.fields.keys())
+            if not withinternal:
+                for ikey in self.internals:
+                    if ikey in fieldkeys:
+                        fieldkeys.remove(ikey)
+            if withrecipes:
+                recipekeys = self.fieldrecipes.keys()
+                fieldkeys = list(set(fieldkeys) | set(recipekeys))
         if withgroups:
             groupkeys = self.containers.keys()
             return list(set(fieldkeys) | set(groupkeys))
