@@ -2,12 +2,15 @@
 
 The following table shows supported datasets.
 
-| Name        | Support              |
-| ----------- | -------------------- |
-| [TNG](https://www.tng-project.org/)       | :material-check-all:     |
-| [Illustris](https://www.illustris-project.org/)       | :material-check-all: |
+| Name                                            | Support                           | Description                                 |
+|-------------------------------------------------|-----------------------------------|---------------------------------------------|
+| [TNG](https://www.tng-project.org/)             | :material-check-all:              | Cosmological galaxy formation *simulations* |
+| [Illustris](https://www.illustris-project.org/) | :material-check-all:              | Cosmological galaxy formation *simulations* |
+| [Gaia](https://www.cosmos.esa.int/web/gaia/dr3) | :material-database-check-outline: | *Observations* of a billion nearby stars    |
+
 
 A :material-check-all: checkmark indicates support out-of-the-box, a :material-check: checkmark indicates support by creating a suitable configuration file.
+A :material-database-check-outline: checkmark indicates support for converted HDF5 versions of the original data.
 
 
 # File-format requirements
