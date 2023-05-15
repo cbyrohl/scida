@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 import pathlib
 from collections import Counter
@@ -14,6 +15,8 @@ from astrodask.config import get_config, get_simulationconfig
 from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import hash_path
 from astrodask.registries import dataseries_type_registry, dataset_type_registry
+
+log = logging.getLogger(__name__)
 
 
 def get_container_from_path(
@@ -211,8 +214,11 @@ def _determine_type(
         reg.update(**dataseries_type_registry)
 
     for k, dtype in reg.items():
-        if dtype.validate_path(path, **kwargs):
-            available_dtypes.append(k)
+        try:
+            if dtype.validate_path(path, **kwargs):
+                available_dtypes.append(k)
+        except ValueError:
+            log.debug("Exception raised during validate_path of tested type '%s'." % k)
     if len(available_dtypes) == 0:
         raise ValueError("Unknown data type.")
     if len(available_dtypes) > 1:

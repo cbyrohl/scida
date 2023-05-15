@@ -89,5 +89,13 @@ def test_fields(testdata_interface):
     assert all([snp.data[k]["tfield_all"] for k in snp.data.keys()])
 
 
+@require_testdata("interface", only=["TNG50-4_snapshot"])
+def test_repr(testdata_interface):
+    ds = testdata_interface
+    print(ds)
+    print(ds.data)
+
+
 def test_resolve_field_dependencies():
+    # TODO
     pass

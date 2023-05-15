@@ -3,8 +3,10 @@ import logging
 import pytest
 
 from astrodask.config import get_config
-from astrodask.interface import BaseSnapshot
-from astrodask.interfaces.arepo import ArepoSnapshot  # ArepoSnapshotWithUnits
+from astrodask.interfaces.arepo import (  # ArepoSnapshotWithUnits
+    ArepoSnapshot,
+    BaseSnapshot,
+)
 from astrodask.interfaces.illustris import IllustrisSnapshot
 from astrodask.series import DatasetSeries
 

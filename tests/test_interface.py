@@ -4,7 +4,7 @@ import dask.array as da
 import numpy as np
 
 from astrodask.convenience import load
-from astrodask.interface import BaseSnapshot
+from astrodask.interfaces.arepo import BaseSnapshot
 from astrodask.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
@@ -79,6 +79,14 @@ def test_areposnapshot_load(testdata_areposnapshot):
     overlap = set(snp.data.keys()) & expected_types
     assert len(overlap) >= 5
     print("chunks", list(snp.file["_chunks"].attrs.keys()))
+
+
+@require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
+def test_interface_fieldaccess(testdata_areposnapshot):
+    # check that we can directly access fields from the interface
+    ds = testdata_areposnapshot
+    # should be same as ds.data["PartType0"]["Coordinates"]
+    assert ds["PartType0"]["Coordinates"] is not None
 
 
 @require_testdata("illustrisgroup")

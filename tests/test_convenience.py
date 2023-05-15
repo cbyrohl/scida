@@ -97,7 +97,7 @@ def test_guess_nameddataset(testdata_interface):
 @require_testdata_path("interface", only=["gaia-dr3_minimal"])
 def test_gaia_hdf5(testdatapath):
     ds = load(testdatapath)
-    assert ds is not None
+    assert ds.__class__ == Dataset  # using most abstract class in load()
 
 
 @require_testdata_path("interface", only=["gaia-dr3_minimal"])
