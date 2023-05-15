@@ -119,22 +119,23 @@ class BaseSnapshot(Dataset):
         """
         path = str(path)
         possibly_valid = False
-        if path.endswith(".hdf5") or path.endswith(".zarr"):
+        iszarr = path.rstrip("/").endswith(".zarr")
+        if path.endswith(".hdf5") or iszarr:
             possibly_valid = True
         if os.path.isdir(path):
             files = os.listdir(path)
             sufxs = [f.split(".")[-1] for f in files]
-            if len(set(sufxs)) > 1:
+            if not iszarr and len(set(sufxs)) > 1:
                 possibly_valid = False
-            if sufxs[0] in ["hdf5", "zarr"]:
+            if sufxs[0] == "hdf5":
                 possibly_valid = True
         if possibly_valid:
             metadata_raw = load_metadata(path, **kwargs)
             # need some silly combination of attributes to be sure
-            if all([k in metadata_raw for k in ["Config", "Header", "Parameters"]]):
+            if all([k in metadata_raw for k in ["/Config", "/Header", "/Parameters"]]):
                 if (
-                    "NumPart_ThisFile" in metadata_raw["Header"]
-                    and "NumPart_Total" in metadata_raw["Header"]
+                    "NumPart_ThisFile" in metadata_raw["/Header"]
+                    and "NumPart_Total" in metadata_raw["/Header"]
                 ):
                     return True
         return False

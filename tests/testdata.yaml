@@ -113,6 +113,12 @@ testdata:
           - areposnapshot_withcatalog|G|1|2
       fn: minimal_TNG50-1_group_z0.hdf5
 
+
+  tng_halocutout_zarr:
+    types:
+      - interface
+    fn: TNGhalo_cutout.zarr
+
   gaia-dr3_minimal:
     types:
       - interface

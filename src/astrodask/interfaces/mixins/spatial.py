@@ -55,7 +55,10 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
                 log.debug("Did not find CoordinatesName for species '%s'" % k)
 
     def get_coords(self, parttype="PartType0"):
-        return self.data[parttype][self.hints["CoordinatesName"][parttype]]
+        k = self.hints["CoordinatesName"].get(parttype, "")
+        if k in self.data[parttype]:
+            return self.data[parttype][k]
+        return None
 
     def rectangular_cutout_mask(self, center, width, parttype="PartType0"):
         coords = self.get_coords(parttype=parttype)

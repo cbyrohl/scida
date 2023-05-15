@@ -105,3 +105,11 @@ def test_gaia_hdf5_withunits(testdatapath):
     ds = load(testdatapath, units=True)
     assert ds is not None
     print(ds.data["ra"].units)
+
+
+# check that zarr cutouts from TNG have uids?
+@require_testdata_path("interface", only=["tng_halocutout_zarr"])
+def test_load_zarrcutout(testdatapath):
+    obj = load(testdatapath)
+    assert hasattr(obj, "header")
+    assert obj.data["Group"]["uid"][0] == 0
