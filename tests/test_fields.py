@@ -92,8 +92,7 @@ def test_fields(testdata_interface):
 @require_testdata("interface", only=["TNG50-4_snapshot"])
 def test_repr(testdata_interface):
     ds = testdata_interface
-    print(ds)
-    print(ds.data)
+    assert "FieldContainer[" in str(ds.data)
 
 
 def test_resolve_field_dependencies():
