@@ -19,6 +19,7 @@ nav:
     - 'Halo and galaxy catalogs': halocatalogs.md
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
+  - 'FAQ': faq.md
   - api_docs.md
 
 markdown_extensions:
