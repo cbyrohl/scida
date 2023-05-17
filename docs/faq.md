@@ -2,7 +2,7 @@
 ## Extending existing datasets
 > How do I add custom fields (that are not derived fields) to my existing dataset?
 
-*Please also see how to add [derived fields](derived-fields.md).*
+*Please also see how to add [derived fields](derived_fields.md).*
 
 After loading some dataset, you can add custom fields to a given container, here called *PartType0* by simply assigning a dask array under the desired key to it.
 
