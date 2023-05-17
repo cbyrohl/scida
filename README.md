@@ -7,16 +7,16 @@ This tool uses dask, allowing analysis to scale up from your personal computer t
 
 ## Features
 
-- TODO
+- Task-based data processing with dask arrays.
+- Unit support via pint
 
 ## Requirements
 
 - Python >= 3.9
 
 
-
 ## Documentation
-The public documentation is hosted [here](https://astrodask.cbyrohl.de/). (The latest build of the documentation can be found [here](https://byrohlc.pages.mpcdf.de/astrodask/).)
+The documentation can be found [here](https://cbyrohl.github.io/astrodask/)
 
 ## Install
 
