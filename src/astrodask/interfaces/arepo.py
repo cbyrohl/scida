@@ -185,11 +185,6 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                     if k not in self.data:
                         self.data[k] = self.catalog.data[k]
                     self.catalog.data.fieldrecipes_kwargs["snap"] = self
-                print(
-                    self.path,
-                    self.catalog.data.keys(),
-                    self.catalog.data["Group"].keys(),
-                )
                 if (
                     len(self.catalog.data["Group"].keys()) > 0
                 ):  # starting snapshots often dont have groups
@@ -273,7 +268,6 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 continue
             self.catalog = candidate
             break
-        print(self.path)
 
     def register_field(self, parttype: str, name: str = None, construct: bool = True):
         """

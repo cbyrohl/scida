@@ -159,7 +159,6 @@ def find_path(path, overwrite=False):
                 extractpath = savepath
             extractpath = pathlib.Path(extractpath)
 
-            print("ep", extractpath)
             # count folders in savepath
             nfolders = len([f for f in extractpath.glob("*") if f.is_dir()])
             nobjects = len([f for f in extractpath.glob("*") if f.is_dir()])
@@ -168,7 +167,6 @@ def find_path(path, overwrite=False):
                     extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
                 )
             path = extractpath
-            print(path)
         elif databackend == "testdata":
             path = get_testdata(dataname)
         else:
