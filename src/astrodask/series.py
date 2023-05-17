@@ -181,10 +181,29 @@ class DatasetSeries(object):
 
     @metadata.setter
     def metadata(self, dct):
+        class ComplexEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, np.int64):
+                    return int(obj)
+                if isinstance(obj, np.int32):
+                    return int(obj)
+                if isinstance(obj, bytes):
+                    return obj.decode("utf-8")
+                try:
+                    return json.JSONEncoder.default(self, obj)
+                except TypeError as e:
+                    print("obj failing json encoding:", obj)
+                    raise e
+
+        # def serialize_numpy(obj):
+        #    if isinstance(obj, np.int64): return int(obj)
+        #    if isinstance(obj, np.int32): return int(obj)
+        #    return json.JSONEncoder.default(self, obj)
         self._metadata = dct
         fp = self._metadatafile
+        # print(dct)
         if not os.path.exists(fp):
-            json.dump(dct, open(fp, "w"))
+            json.dump(dct, open(fp, "w"), cls=ComplexEncoder)
 
 
 class DirectoryCatalog(object):
