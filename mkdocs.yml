@@ -24,6 +24,9 @@ nav:
   - api_docs.md
 
 markdown_extensions:
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - pymdownx.snippets:
       check_paths: true
   - pymdownx.superfences:
@@ -40,6 +43,10 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.arithmatex:
+      generic: true
+  - md_in_html
+
 
 plugins:
   - search:
@@ -63,3 +70,12 @@ plugins:
             show_submodules: true
 watch:
   - src/astrodask
+
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+extra_css:
+  - stylesheets/gridview.css
