@@ -57,4 +57,5 @@ hd.dynspread(shaded, threshold=0.9, max_px=50).opts(bgcolor="black", xaxis=None,
 
 1. Visualization operations in holowview primarily run with dataframes, which we thus need to create using this wrapper for given fields.
 
-![type:video](./videos/datashader_tng50.webm)
+
+![type:video](./videos/datashader_tng50.webm){: style='width: 100%; height: 400px; align: center;'}
