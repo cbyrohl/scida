@@ -19,5 +19,3 @@ servedocs:
 
 publicdocs:
 	@poetry run mkdocs gh-deploy
-	#@poetry run mkdocs build
-	#@rsync -arv site/* hetzner:/home/cbyrohl/public_content/astrodask
