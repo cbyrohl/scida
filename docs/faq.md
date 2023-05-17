@@ -23,3 +23,15 @@ Alternatively, if you have another dataset loaded, you can assign fields from on
 ds2 = load('simname2')
 ds.data['PartType0']["NewDensity"] = ds2.data['PartType0']["Density"]
 ```
+
+## Misc
+> How does load() determine the right type of dataset/series to load?
+
+*load()* will step through all subclasses of *Series()* and *Dataset()* and call their *validate_path()* class method.
+A list of candidate classes that return *True* upon this call is assembled. If more than one candidate exists,
+the most specific candidate, i.e. the one furthest down the inheritance tree, is chosen.
+
+The candidate can be overwritten when a YAML configuration specifies "dataset_type/series" and/or "dataset_type/dataset" keys to the respective class name.
+
+In addition to this, different features, such as for datasets using Cartesian coordinates, are added
+as so-called [Mixins](https://en.wikipedia.org/wiki/Mixin) to the dataset class.
