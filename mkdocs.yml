@@ -1,5 +1,5 @@
 site_name: astrodask
-repo_url: https://gitlab.mpcdf.mpg.de/byrohlc/astrodask
+repo_url: https://github.com/cbyrohl/astrodask
 theme:
   name: material
   features:
