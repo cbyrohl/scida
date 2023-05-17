@@ -39,6 +39,8 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="../stylesheets/gridview.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -656,16 +658,18 @@ This is a cosmological galaxy formation simulation.
 Note that analysis is not limited to simulations, but also observational data.
 Check <a href="../supported_data/">Supported Datasets</a> for an incomplete list of supported datasets
 and requirements for support of new datasets.
-A shorter tutorial for an observational dataset can be found <a href="tutorial_observational.md">here</a>.</p>
+A shorter tutorial for an observational dataset can be found <a href="../tutorial_observational/">here</a>.</p>
 </div>
 <p>This package is designed to aid in the efficient analysis of large simulations,
 such as cosmological (hydrodynamical) simulations of large-scale structure.
 Datasets are expected to be spatially <a href="https://en.wikipedia.org/wiki/Unstructured_grid">unstructured</a>, e.g. tessellation or particle based.
 Much of the functionality can also be used to process observational datasets.</p>
-<p>It uses the <a href="https://dask.org/">dask</a> library to perform computations, which has several key advantages:
-* (i) very large datasets which cannot normally fit into memory can be analyzed,
-* (ii) calculations can be automatically distributed onto parallel 'workers', across one or more nodes, to speed them up.
-* (iii) we can create abstract graphs ("recipes", such as for derived quantities) and only evaluate on actual demand.</p>
+<p>It uses the <a href="https://dask.org/">dask</a> library to perform computations, which has several key advantages:</p>
+<ol>
+<li>very large datasets which cannot normally fit into memory can be analyzed, </li>
+<li>calculations can be automatically distributed onto parallel 'workers', across one or more nodes, to speed them up,</li>
+<li>we can create abstract graphs ("recipes", such as for derived quantities) and only evaluate on actual demand.</li>
+</ol>
 <h2 id="loading-an-individual-dataset">Loading an individual dataset</h2>
 <p>The first step is to choose an existing snapshot of a simulation.
 To start, we will intentionally select the output of TNG50-4 at redshift 0,
@@ -673,7 +677,7 @@ which is the lowest resolution version of <a href="https://www.tng-project.org/"
 a suite for galaxy formation simulations in cosmological volumes.
 Choosing TNG50-4 means that the data size in the snapshot is small and easy to work with.
 We demonstrate how to work with larger data sets at a later stage.</p>
-<p>First, we load the dataaset using the convenience function <code>load()</code> that will determine the appropriate dataset class for us:</p>
+<p>First, we load the dataset using the convenience function <code>load()</code> that will determine the appropriate dataset class for us:</p>
 <div class="highlight"><span class="filename">Loading a dataset</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astrodask</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#(1)!</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="c1">#(2)!</span>
@@ -694,7 +698,7 @@ We demonstrate how to work with larger data sets at a later stage.</p>
    The current default is <em>False</em>, which will change to <em>True</em> in the near future.</li>
 <li>Call to receive some information about the loaded dataset.</li>
 </ol>
-<p>The dataset is now loaded and we can inspect its contents, specifically its container and fields loaded.
+<p>The dataset is now loaded, and we can inspect its contents, specifically its container and fields loaded.
 We can access the data in the dataset by using the <code>data</code> attribute, which is a dictionary of containers and fields.</p>
 <p>From above output we see that the dataset contains seven containers, each of which contains a number of fields.
 For this snapshot, the containers are <em>PartType0</em>, <em>PartType1</em>, <em>PartType3</em>, <em>PartType4</em>, <em>PartType5</em>, <em>Group</em>, and <em>Subhalo</em>.
@@ -725,7 +729,7 @@ How these lazy arrays and their units work and are to be used will be explored i
 If you are unfamiliar with dask arrays, consider taking a look at this <a href="https://docs.dask.org/en/stable/array.html">3-minute introduction</a>.</p>
 <p>They are <strong>not</strong> numpy arrays, but they can be converted to them, and have most of their functionality.
 Within dask, an internal task graph is created that holds the recipes how to construct the array from the underlying data.</p>
-<p>In our case, in fact, the snapshot and its fields are split acrros multiple files on disk (as for most large datasets),
+<p>In our case, in fact, the snapshot and its fields are split across multiple files on disk (as for most large datasets),
 and virtually combined into a single dask array. The user does not need to worry about this as these operations take place in the background.</p>
 <p>For the TNG50-4 datasets, the first level of <code>ds.data</code> maps the different particle types (such as gas and dark matter),
 and the second level holds the different physical field arrays (such as density and ionization).</p>
@@ -773,6 +777,31 @@ but are merely the required instructions, encoded into tasks.</p>
 <span class="go">'8.3e15 Msun'</span>
 </code></pre></div>
 </details>
+<p>As an example of calculating something more complicated than just <code>sum()</code>, let's do the usual "poor man's projection" via a 2D histogram.</p>
+<p>To do so, we use <a href="https://docs.dask.org/en/latest/array.html">da.histogram2d()</a> of dask, 
+which is analogous to <a href="https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html">numpy.histogram2d()</a>,
+except that it operates on a dask array. 
+We discuss more advanced and interactive visualization methods <a href="../visualization/">here</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Coordinates"</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nbins</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bins1d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">],</span> <span class="n">nbins</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span><span class="p">,</span> <span class="n">xbins</span><span class="p">,</span> <span class="n">ybins</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">histogram2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="n">bins1d</span><span class="p">,</span><span class="n">bins1d</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im2d</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span> <span class="c1">#(1)!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im2d</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">LogNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x (ckpc/h)"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"y (ckpc/h)"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<ol>
+<li>The <em>compute()</em> on <code>im2d</code> results in a two-dimensional array which we can display.</li>
+</ol>
 <h2 id="advanced-topics">Advanced topics</h2>
 <h3 id="processing-large-datasets">Processing large datasets</h3>
 <p>TODO restructure</p>
@@ -857,6 +886,12 @@ but are merely the required instructions, encoded into tasks.</p>
     
     
       <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
     
