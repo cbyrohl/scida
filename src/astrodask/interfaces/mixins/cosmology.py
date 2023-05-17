@@ -14,12 +14,16 @@ class CosmologyMixin(Mixin):
         z = get_redshift_from_rawmetadata(metadata_raw)
         self.redshift = z
         self.metadata["redshift"] = self.redshift
-        if hasattr(self, "unitregistry"):
+        if hasattr(self, "ureg"):
+            ureg = self.ureg
+            backupval = ureg._on_redefinition
+            ureg._on_redefinition = "ignore"
             if c is not None:
-                self.unitregistry.define("h = %s" % str(c.h))
+                ureg.define("h = %s" % str(c.h))
             if z is not None:
                 a = 1.0 / (1.0 + z)
-                self.unitregistry.define("a = %s" % str(float(a)))
+                ureg.define("a = %s" % str(float(a)))
+            ureg._on_redefinition = backupval
 
     def _info_custom(self):
         rep = sprint("=== Cosmological Simulation ===")

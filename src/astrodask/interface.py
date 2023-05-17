@@ -12,6 +12,7 @@ import zarr
 import astrodask.io
 from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import make_serializable
+from astrodask.interfaces.mixins import UnitMixin
 from astrodask.misc import check_config_for_dataset, deepdictkeycopy, sprint
 from astrodask.registries import dataset_type_registry
 
@@ -33,7 +34,7 @@ class MixinMeta(type):
         return type.__call__(newcls, *args, **kwargs)
 
 
-class Dataset(metaclass=MixinMeta):
+class BaseDataset(metaclass=MixinMeta):
     def __init__(
         self,
         path,
@@ -79,11 +80,12 @@ class Dataset(metaclass=MixinMeta):
         self._cached = False
 
         # any identifying metadata?
-        candidates = check_config_for_dataset(self._metadata_raw)
-        if len(candidates) > 0:
-            dsname = candidates[0]
-            log.debug("Dataset is identified as '%s'." % dsname)
-            self.hints["dsname"] = dsname
+        if "dsname" not in self.hints:
+            candidates = check_config_for_dataset(self._metadata_raw, path=self.path)
+            if len(candidates) > 0:
+                dsname = candidates[0]
+                log.debug("Dataset is identified as '%s'." % dsname)
+                self.hints["dsname"] = dsname
 
     def _info_custom(self):
         """
@@ -212,6 +214,9 @@ class Dataset(metaclass=MixinMeta):
         )
         return hash_value
 
+    def __getitem__(self, item):
+        return self.data[item]
+
     def __dask_tokenize__(self) -> int:
         """
         Token for dask to be derived -- naively from the file location.
@@ -318,35 +323,27 @@ class Dataset(metaclass=MixinMeta):
         dask.compute(tasks)
 
 
-class BaseSnapshot(Dataset):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
-        self.boxsize = np.full(3, np.nan)
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
-
-        defaultattributes = ["config", "header", "parameters"]
-        for k in self._metadata_raw:
-            name = k.strip("/").lower()
-            if name in defaultattributes:
-                self.__dict__[name] = self._metadata_raw[k]
-
+class Dataset(BaseDataset):
     @classmethod
-    def validate_path(cls, path, *args, **kwargs) -> bool:
-        path = str(path)
-        if path.endswith(".hdf5") or path.endswith(".zarr"):
-            return True
-        if os.path.isdir(path):
-            files = os.listdir(path)
-            prfxs = [f.split(".")[0] for f in files]
-            sufxs = [f.split(".")[-1] for f in files]
-            if len(set(prfxs)) > 1 or len(set(sufxs)) > 1:
-                return False
-            if sufxs[0] in ["hdf5", "zarr"]:
-                return True
-        return False
+    def validate_path(cls, path, *args, **kwargs):
+        """
+        Validate whether the given path is a valid path for this dataset.
+        Parameters
+        ----------
+        path
+        args
+        kwargs
 
-    def register_field(self, parttype, name=None, description=""):
-        res = self.data.register_field(parttype, name=name, description=description)
-        return res
+        Returns
+        -------
+
+        """
+        return True
+
+
+class DatasetWithUnitMixin(UnitMixin, Dataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class Selector(object):

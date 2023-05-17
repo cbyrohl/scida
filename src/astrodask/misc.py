@@ -1,14 +1,22 @@
 import io
+import logging
 import os
+import pathlib
+from collections import Counter
 from collections.abc import MutableMapping
-from typing import Optional
+from functools import reduce
+from inspect import getmro
+from typing import List, Optional, Union
 
 import dask.array as da
 import numpy as np
 
-from astrodask.config import get_config
+from astrodask.config import get_config, get_simulationconfig
 from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import hash_path
+from astrodask.registries import dataseries_type_registry, dataset_type_registry
+
+log = logging.getLogger(__name__)
 
 
 def get_container_from_path(
@@ -121,9 +129,10 @@ def rectangular_cutout_mask(
     return mask
 
 
-def check_config_for_dataset(metadata, unique=True):
+def check_config_for_dataset(metadata, path: Optional[str] = None, unique=True):
     """Check whether the given dataset can be identified to be a certain simulation (type) by its metadata"""
-    c = get_config()
+    c = get_simulationconfig()
+
     candidates = []
     if "data" not in c:
         return candidates
@@ -133,7 +142,21 @@ def check_config_for_dataset(metadata, unique=True):
         possible_candidate = True
         if "identifiers" in vals:
             idtfrs = vals["identifiers"]
-            for grp, v in idtfrs.items():
+            # special key not specifying identifying metadata
+            specialkeys = ["name_contains"]
+            allkeys = idtfrs.keys()
+            keys = list([k for k in allkeys if k not in specialkeys])
+            if "name_contains" in idtfrs and path is not None:
+                p = pathlib.Path(path)
+                # we only check the last three path elements
+                dirnames = [p.name, p.parents[0].name, p.parents[1].name]
+                substring = idtfrs["name_contains"]
+                if not any([substring in d for d in dirnames]):
+                    possible_candidate = False
+            if len(allkeys) == 0:
+                possible_candidate = False
+            for grp in keys:
+                v = idtfrs[grp]
                 h5path = "/" + grp
                 if h5path not in metadata:
                     possible_candidate = False
@@ -174,3 +197,43 @@ def deepdictkeycopy(olddict, newdict) -> None:
         if isinstance(v, MutableMapping):
             newdict[k] = {}
             deepdictkeycopy(v, newdict[k])
+
+
+def _determine_type(
+    path: Union[str, os.PathLike],
+    test_datasets: bool = True,
+    test_dataseries: bool = True,
+    strict: bool = False,
+    **kwargs
+):
+    available_dtypes: List[str] = []
+    reg = dict()
+    if test_datasets:
+        reg.update(**dataset_type_registry)
+    if test_dataseries:
+        reg.update(**dataseries_type_registry)
+
+    for k, dtype in reg.items():
+        try:
+            if dtype.validate_path(path, **kwargs):
+                available_dtypes.append(k)
+        except ValueError:
+            log.debug("Exception raised during validate_path of tested type '%s'." % k)
+    if len(available_dtypes) == 0:
+        raise ValueError("Unknown data type.")
+    if len(available_dtypes) > 1:
+        # reduce candidates by looking at most specific ones.
+        inheritancecounters = [Counter(getmro(reg[k])) for k in available_dtypes]
+        # try to find candidate that shows up only once across all inheritance trees.
+        # => this will be the most specific candidate(s).
+        count = reduce(lambda x, y: x + y, inheritancecounters)
+        available_dtypes = [k for k in available_dtypes if count[reg[k]] == 1]
+        if len(available_dtypes) > 1:
+            # after looking for the most specific candidate(s), do we still have multiple?
+            if strict:
+                raise ValueError(
+                    "Ambiguous data type. Available types:", available_dtypes
+                )
+            else:
+                print("Note: Multiple dataset candidates: ", available_dtypes)
+    return available_dtypes, [reg[k] for k in available_dtypes]

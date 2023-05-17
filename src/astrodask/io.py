@@ -5,13 +5,14 @@ import pathlib
 import tempfile
 from functools import partial
 from os.path import join
+from typing import Optional
 
 import dask.array as da
 import h5py
 import numpy as np
 import zarr
 
-from astrodask.fields import FieldContainer
+from astrodask.fields import FieldContainer, walk_container
 from astrodask.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from astrodask.misc import get_container_from_path, return_hdf5cachepath
 
@@ -92,6 +93,12 @@ class ZarrLoader(Loader):
         )
         return datadict
 
+    def load_metadata(self, **kwargs):
+        """Take a quick glance at the metadata."""
+        tree = {}
+        walk_zarrfile(self.path, tree)
+        return tree["attrs"]
+
 
 class ChunkedHDF5Loader(Loader):
     def __init__(self, path):
@@ -99,7 +106,7 @@ class ChunkedHDF5Loader(Loader):
         self.tempfile = ""
         self.location = ""
 
-    def load_metadata(self, fileprefix=""):
+    def load_metadata(self, fileprefix="", **kwargs):
         """Take a quick glance at the metadata."""
         cachefp = return_hdf5cachepath(self.path)
         if cachefp is not None and os.path.isfile(cachefp):
@@ -142,11 +149,30 @@ class ChunkedHDF5Loader(Loader):
         )
         return datadict
 
-    def get_chunkedfiles(self, fileprefix) -> list:
+    def get_chunkedfiles(self, fileprefix: Optional[str] = "") -> list:
+        """
+        Get all files in directory with given prefix.
+        Parameters
+        ----------
+        fileprefix: Optional[str]
+            Prefix of files to be loaded. If None, we take the first prefix.
+
+        Returns
+        -------
+
+        """
+
         files = [join(self.path, f) for f in os.listdir(self.path)]
         files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
-        files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
-        prfxs = [f.split(".")[0] for f in files]
+        if fileprefix is not None:
+            files = np.array(
+                [f for f in files if f.split("/")[-1].startswith(fileprefix)]
+            )
+        prfxs = sorted([f.split(".")[0] for f in files])
+        if fileprefix is None:
+            prfx = prfxs[0]
+            prfxs = [prfx]
+            files = np.array([f for f in files if f.startswith(prfx)])
         if len(set(prfxs)) > 1:
             print("Available prefixes:", set(prfxs))
             raise ValueError(
@@ -301,28 +327,6 @@ def load_datadict_old(
             container[fieldname] = ds
     data = rootcontainer
 
-    def walk_container(
-        cntr, path="", handler_field=None, handler_group=None, withrecipes=False
-    ):
-        keykwargs = dict(withgroups=True, withrecipes=withrecipes)
-        for ck in cntr.keys(**keykwargs):
-            # we do not want to instantiate entry from recipe by calling cntr[ck] here
-            entry = cntr[ck]
-            newpath = path + "/" + ck
-            if isinstance(entry, FieldContainer):
-                if handler_group is not None:
-                    handler_group(entry, newpath)
-                walk_container(
-                    entry,
-                    newpath,
-                    handler_field,
-                    handler_group,
-                    withrecipes=withrecipes,
-                )
-            else:
-                if handler_field is not None:
-                    handler_field(entry, newpath)
-
     # instantiate at least one field
 
     def instantiate_one_field(container: FieldContainer, path: str):
@@ -386,6 +390,12 @@ def determine_loader(path):
         # we are directly given a target file
         loader = HDF5Loader(path)
     return loader
+
+
+def load_metadata(path, **kwargs):
+    loader = determine_loader(path)
+    metadata = loader.load_metadata(**kwargs)
+    return metadata
 
 
 def load(path, **kwargs):

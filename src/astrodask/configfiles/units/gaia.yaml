@@ -1,0 +1,31 @@
+metadata_unitsystem: code
+units:
+  electron: 1.0  # appearing within rates
+fields:
+  b: deg
+  dec: deg
+  dec_error: mas
+  distance_gspphot: pc
+  distance_gspphot_lower: pc
+  distance_gspphot_upper: pc
+  l: deg
+  mh_gspphot: dex
+  mh_gspphot_lower: dex
+  mh_gspphot_upper: dex
+  parallax: mas
+  parallax_error: mas
+  phot_bp_mean_flux_error: 1 / s
+  phot_bp_mean_mag: mag
+  phot_g_mean_flux_error: 1 / s
+  phot_g_mean_mag: mag
+  phot_rp_mean_flux_error: 1 / s
+  phot_rp_mean_mag: mag
+  pmdec: mas / yr
+  pmdec_error: mas / yr
+  pmra: mas / yr
+  pmra_error: mas / yr
+  ra: deg
+  ra_error: mas
+  radial_velocity: km / s
+  radial_velocity_error: km / s
+  source_id:

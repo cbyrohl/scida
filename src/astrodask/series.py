@@ -116,6 +116,17 @@ class DatasetSeries(object):
         """Get dataset by some metadata property. In the base class, we go by list index."""
         if index is None and name is None and len(kwargs) == 0:
             raise ValueError("Specify index/name or some parameter to select for.")
+        # aliases for index:
+        aliases = ["snap", "snapshot"]
+        aliases_given = [k for k in aliases if k in kwargs]
+        if index is not None:
+            aliases_given += [index]
+        if len(aliases_given) > 1:
+            raise ValueError("Multiple aliases for index specified.")
+        for a in aliases_given:
+            if kwargs.get(a) is not None:
+                index = kwargs.pop(a)
+
         if index is not None:
             return self.datasets[index]
         if name is not None:

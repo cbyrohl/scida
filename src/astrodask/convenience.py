@@ -1,21 +1,25 @@
 import copy
 import hashlib
+import logging
 import os
 import pathlib
 import shutil
 import sys
 import tarfile
 import time
-from collections import Counter
-from functools import reduce
-from inspect import getmro
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import requests
 
-from astrodask.config import get_config
-from astrodask.interfaces.mixins import UnitMixin
+from astrodask.config import get_config, get_simulationconfig
+from astrodask.interface import Dataset
+from astrodask.interfaces.mixins import CosmologyMixin, UnitMixin
+from astrodask.io import load_metadata
+from astrodask.misc import _determine_type, check_config_for_dataset
 from astrodask.registries import dataseries_type_registry, dataset_type_registry
+from astrodask.series import DatasetSeries
+
+log = logging.getLogger(__name__)
 
 
 def download_and_extract(
@@ -99,43 +103,6 @@ def get_testdata(name: str) -> str:
     return res[name]
 
 
-def _determine_type(
-    path: Union[str, os.PathLike],
-    test_datasets: bool = True,
-    test_dataseries: bool = True,
-    strict: bool = False,
-    **kwargs
-):
-    available_dtypes: List[str] = []
-    reg = dict()
-    if test_datasets:
-        reg.update(**dataset_type_registry)
-    if test_dataseries:
-        reg.update(**dataseries_type_registry)
-
-    for k, dtype in reg.items():
-        if dtype.validate_path(path, **kwargs):
-            available_dtypes.append(k)
-    if len(available_dtypes) == 0:
-        raise ValueError("Unknown data type.")
-    if len(available_dtypes) > 1:
-        # reduce candidates by looking at most specific ones.
-        inheritancecounters = [Counter(getmro(reg[k])) for k in available_dtypes]
-        # try to find candidate that shows up only once across all inheritance trees.
-        # => this will be the most specific candidate(s).
-        count = reduce(lambda x, y: x + y, inheritancecounters)
-        available_dtypes = [k for k in available_dtypes if count[reg[k]] == 1]
-        if len(available_dtypes) > 1:
-            # after looking for the most specific candidate(s), do we still have multiple?
-            if strict:
-                raise ValueError(
-                    "Ambiguous data type. Available types:", available_dtypes
-                )
-            else:
-                print("Note: Multiple dataset candidates: ", available_dtypes)
-    return available_dtypes, [reg[k] for k in available_dtypes]
-
-
 def find_path(path, overwrite=False):
     """
     Find path to dataset.
@@ -192,7 +159,6 @@ def find_path(path, overwrite=False):
                 extractpath = savepath
             extractpath = pathlib.Path(extractpath)
 
-            print("ep", extractpath)
             # count folders in savepath
             nfolders = len([f for f in extractpath.glob("*") if f.is_dir()])
             nobjects = len([f for f in extractpath.glob("*") if f.is_dir()])
@@ -201,7 +167,6 @@ def find_path(path, overwrite=False):
                     extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
                 )
             path = extractpath
-            print(path)
         elif databackend == "testdata":
             path = get_testdata(dataname)
         else:
@@ -249,6 +214,9 @@ def load(
     path = os.path.realpath(path)
     cls = _determine_type(path, **kwargs)[1][0]
 
+    msg = "Dataset is identified as '%s' via _determine_type." % cls
+    log.debug(msg)
+
     # determine additional mixins not set by class
     mixins = []
     if unitfile:
@@ -261,6 +229,50 @@ def load(
         kwargs["units"] = units
 
     kwargs["overwritecache"] = overwrite
+
+    # any identifying metadata?
+    metadata_raw = dict()
+    if issubclass(cls, Dataset):
+        metadata_raw = load_metadata(path, fileprefix=None)
+    candidates = check_config_for_dataset(metadata_raw, path=path)
+    assert len(candidates) <= 1
+    if len(candidates) == 1:
+        simconf = get_simulationconfig()
+        dstype = simconf.get("data", {}).get(candidates[0]).get("dataset_type", None)
+        oldcls = cls
+        if isinstance(dstype, dict):
+            # series or dataset based on past candidate
+            if issubclass(cls, DatasetSeries):
+                cls = reg[dstype["series"]]
+            elif issubclass(cls, Dataset):
+                cls = reg[dstype["dataset"]]
+            else:
+                raise ValueError("Unknown type of dataset '%s'." % cls.__name__)
+        elif isinstance(dstype, str):
+            cls = dataset_type_registry[dstype]
+        elif dstype is None:
+            pass  # simply no dataset_type specified
+        else:
+            raise ValueError(
+                "Unknown type of dataset config variable. content: '%s'" % dstype
+            )
+
+        msg = "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
+        if dstype is not None:
+            log.debug(msg % (dstype, oldcls))
+
+    # indicators for cosmological mixin
+    z = metadata_raw.get("/Header", {}).get("Redshift", None)
+    if z is not None:
+        mixins.append(CosmologyMixin)
+
+    log.debug("Adding mixins '%s' to dataset." % mixins)
+    if hasattr(cls, "_mixins"):
+        cls_mixins = cls._mixins
+        for m in cls_mixins:
+            # remove duplicates
+            if m in mixins:
+                mixins.remove(m)
 
     instance = cls(path, mixins=mixins, **kwargs)
     return instance

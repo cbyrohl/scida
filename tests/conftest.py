@@ -1,8 +1,12 @@
+import logging
+
 import pytest
 
 from astrodask.config import get_config
-from astrodask.interface import BaseSnapshot
-from astrodask.interfaces.arepo import ArepoSnapshot  # ArepoSnapshotWithUnits
+from astrodask.interfaces.arepo import (  # ArepoSnapshotWithUnits
+    ArepoSnapshot,
+    BaseSnapshot,
+)
 from astrodask.interfaces.illustris import IllustrisSnapshot
 from astrodask.series import DatasetSeries
 
@@ -14,6 +18,11 @@ scope_snapshot = "function"
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: mark test as slow to run")
     config.addinivalue_line("markers", "big: mark test as big")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_logging():
+    logging.root.setLevel(logging.DEBUG)
 
 
 @pytest.fixture(scope="function")

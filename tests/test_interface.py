@@ -4,7 +4,7 @@ import dask.array as da
 import numpy as np
 
 from astrodask.convenience import load
-from astrodask.interface import BaseSnapshot
+from astrodask.interfaces.arepo import BaseSnapshot
 from astrodask.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
@@ -72,13 +72,21 @@ def test_snapshot_loadsaved(testdata_interface):
 #            assert u.shape == snp_zarr.data[k][l].shape
 
 
-@require_testdata("areposnapshot")
+@require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
 def test_areposnapshot_load(testdata_areposnapshot):
     snp = testdata_areposnapshot
     expected_types = {"PartType" + str(i) for i in range(6)}
     overlap = set(snp.data.keys()) & expected_types
     assert len(overlap) >= 5
     print("chunks", list(snp.file["_chunks"].attrs.keys()))
+
+
+@require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
+def test_interface_fieldaccess(testdata_areposnapshot):
+    # check that we can directly access fields from the interface
+    ds = testdata_areposnapshot
+    # should be same as ds.data["PartType0"]["Coordinates"]
+    assert ds["PartType0"]["Coordinates"] is not None
 
 
 @require_testdata("illustrisgroup")
@@ -88,7 +96,9 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
     assert "Subhalo" in grp.data.keys()
 
 
-@require_testdata("areposnapshot_withcatalog")
+@require_testdata(
+    "areposnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
+)
 def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
     snap = testdata_areposnapshot_withcatalog
 
@@ -201,7 +211,9 @@ def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatal
     assert snp.file is not None
 
 
-@require_testdata("areposnapshot_withcatalog")
+@require_testdata(
+    "areposnapshot_withcatalog", exclude=["minimal"], exclude_substring=True
+)
 def test_areposnapshot_map_hquantity(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
     snp.add_groupquantity_to_particles("GroupSFR")

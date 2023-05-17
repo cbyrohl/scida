@@ -73,7 +73,7 @@ def test_load_areposim(testdatapath):
     assert obj is not None
 
 
-@require_testdata_path("interface")
+@require_testdata_path("interface", exclude=["gaia"], exclude_substring=True)
 def test_load_units_cgs(testdatapath):
     obj = load(testdatapath, units="cgs")
     assert "UnitMixin" in type(obj).__name__
@@ -85,9 +85,31 @@ def test_load_units_manualpath(testdatapath):
     assert "UnitMixin" in type(obj).__name__
 
 
-@require_testdata("interface", only=["TNG50-4_snapshot"])
+@require_testdata("interface", only=["TNG50-4_snapshot", "Illustris-3_snapshot"])
 def test_guess_nameddataset(testdata_interface):
     snp = testdata_interface
     metadata = snp._metadata_raw
-    candidates = check_config_for_dataset(metadata)
+    candidates = check_config_for_dataset(metadata, path=snp.path)
+    assert len(candidates) == 1
     print("cds", candidates)
+
+
+@require_testdata_path("interface", only=["gaia-dr3_minimal"])
+def test_gaia_hdf5(testdatapath):
+    ds = load(testdatapath)
+    assert ds.__class__ == Dataset  # using most abstract class in load()
+
+
+@require_testdata_path("interface", only=["gaia-dr3_minimal"])
+def test_gaia_hdf5_withunits(testdatapath):
+    ds = load(testdatapath, units=True)
+    assert ds is not None
+    print(ds.data["ra"].units)
+
+
+# check that zarr cutouts from TNG have uids?
+@require_testdata_path("interface", only=["tng_halocutout_zarr"])
+def test_load_zarrcutout(testdatapath):
+    obj = load(testdatapath)
+    assert hasattr(obj, "header")
+    assert obj.data["Group"]["uid"][0] == 0

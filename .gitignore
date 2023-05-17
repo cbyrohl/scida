@@ -157,8 +157,11 @@ cython_debug/
 
 # PyCharm
 ## User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+.idea
+
+# exclude data files
+*.zarr
+*.hdf5
+
+# misc
+pre-commit

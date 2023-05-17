@@ -7,25 +7,39 @@ theme:
     - navigation.sections
 
 nav:
-  - Readme: 'index.md'
+  - 'Readme': 'index.md'
   - 'Tutorial': tutorial.md
     #    - 'Getting Started': notebooks/gettingstarted.ipynb
     #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
     #    - 'Series': notebooks/series.ipynb
     #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
-  - 'Misc':
+  - 'Features':
+    - 'Supported Datasets': supported_data.md
+    - 'Visualization': visualization.md
     - 'Derived Fields': derived_fields.md
+    - 'Halo and galaxy catalogs': halocatalogs.md
   - 'Cookbook':
     - 'Units': notebooks/cookbook/units.ipynb
+  - 'FAQ': faq.md
   - api_docs.md
 
 markdown_extensions:
   - pymdownx.snippets:
       check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - admonition
   - pymdownx.details
   - pymdownx.superfences
   - toc
+  - tables
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
 
 plugins:
   - search:
