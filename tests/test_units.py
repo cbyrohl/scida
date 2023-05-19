@@ -50,6 +50,8 @@ def test_update_unitregistry():
     # update fields with units
     ureg = UnitRegistry()
     update_unitregistry("units/general.yaml", ureg)
+    ureg.define("h0 = 0.6774")
+    ureg.define("code_length = 1.0 * kpc / h0")
     assert np.isclose((1.0 * ureg.Msun).to(ureg.g).magnitude, 1.98847e33)
     assert np.isclose(
         (1.0 * ureg.code_length).to(ureg.kpc).magnitude, 1.0 / 0.6774
