@@ -159,9 +159,9 @@ We can request a calculation of the actual operation(s) by applying the `.comput
 '56507.4921875 code_mass'
 ```
 
-??? note "Converting units"
+??? tip "Converting units"
 
-    We can easily convert the units of the result by using the `.to()` method of the task or its computed result:
+    We can easily convert the code units to something physically meaningful by using the `.to()` method of the task or its computed result:
 
     ```pycon title="Converting units"
     >>> totmass.to("Msun")
