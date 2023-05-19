@@ -143,13 +143,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://gitlab.mpcdf.mpg.de/byrohlc/astrodask" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/cbyrohl/astrodask" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    Gitlab
+    GitHub
   </div>
 </a>
       </div>
@@ -188,13 +188,13 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://gitlab.mpcdf.mpg.de/byrohlc/astrodask" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/cbyrohl/astrodask" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    Gitlab
+    GitHub
   </div>
 </a>
     </div>
@@ -647,6 +647,11 @@
                 
                   
 
+  <a href="https://github.com/cbyrohl/astrodask/edit/master/docs/tutorial.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
 
   <h1>Tutorial</h1>
 
@@ -666,7 +671,7 @@ Datasets are expected to be spatially <a href="https://en.wikipedia.org/wiki/Uns
 Much of the functionality can also be used to process observational datasets.</p>
 <p>It uses the <a href="https://dask.org/">dask</a> library to perform computations, which has several key advantages:</p>
 <ol>
-<li>very large datasets which cannot normally fit into memory can be analyzed, </li>
+<li>very large datasets which cannot normally fit into memory can be analyzed,</li>
 <li>calculations can be automatically distributed onto parallel 'workers', across one or more nodes, to speed them up,</li>
 <li>we can create abstract graphs ("recipes", such as for derived quantities) and only evaluate on actual demand.</li>
 </ol>
@@ -778,9 +783,9 @@ but are merely the required instructions, encoded into tasks.</p>
 </code></pre></div>
 </details>
 <p>As an example of calculating something more complicated than just <code>sum()</code>, let's do the usual "poor man's projection" via a 2D histogram.</p>
-<p>To do so, we use <a href="https://docs.dask.org/en/latest/array.html">da.histogram2d()</a> of dask, 
+<p>To do so, we use <a href="https://docs.dask.org/en/latest/array.html">da.histogram2d()</a> of dask,
 which is analogous to <a href="https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html">numpy.histogram2d()</a>,
-except that it operates on a dask array. 
+except that it operates on a dask array.
 We discuss more advanced and interactive visualization methods <a href="../visualization/">here</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -802,6 +807,7 @@ We discuss more advanced and interactive visualization methods <a href="../visua
 <ol>
 <li>The <em>compute()</em> on <code>im2d</code> results in a two-dimensional array which we can display.</li>
 </ol>
+<p><img alt="Image title" src="../images/simple_hist2d.png"></p>
 <h2 id="advanced-topics">Advanced topics</h2>
 <h3 id="processing-large-datasets">Processing large datasets</h3>
 <p>TODO restructure</p>
