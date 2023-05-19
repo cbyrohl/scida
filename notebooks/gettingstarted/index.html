@@ -1681,12 +1681,12 @@ cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3
 ==========================
 === data ===
 + PartType4 (fields: 21, entries: 605779)
-+ PartType5 (fields: 27, entries: 3486)
-+ PartType3 (fields: 5, entries: 19683000)
-+ PartType0 (fields: 30, entries: 18540104)
-+ PartType1 (fields: 11, entries: 19683000)
-+ Subhalo (fields: 52, entries: 22869)
 + Group (fields: 27, entries: 25257)
++ PartType0 (fields: 30, entries: 18540104)
++ PartType3 (fields: 5, entries: 19683000)
++ PartType5 (fields: 27, entries: 3486)
++ Subhalo (fields: 52, entries: 22869)
++ PartType1 (fields: 11, entries: 19683000)
 ============
 
 </pre>
@@ -1907,25 +1907,25 @@ some ds.parameters entry: ('AGB_MassTransferOn', 1)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Particle species: PartType4
-Three of its fields: ['SubfindVelDisp', 'Coordinates', 'SubhaloID']
-
-Particle species: PartType5
-Three of its fields: ['SubfindVelDisp', 'Coordinates', 'SubhaloID']
-
-Particle species: PartType3
-Three of its fields: ['SubhaloID', 'ParentID', 'TracerID']
-
-Particle species: PartType0
-Three of its fields: ['GFM_WindHostHaloMass', 'SubfindVelDisp', 'Coordinates']
-
-Particle species: PartType1
-Three of its fields: ['SubfindDMDensity', 'SubfindVelDisp', 'Coordinates']
-
-Particle species: Subhalo
-Three of its fields: ['SubhaloCM', 'SubhaloStarMetalFractions', 'SubhaloBfldHalo']
+Three of its fields: ['GFM_Metallicity', 'ParticleIDs', 'StellarHsml']
 
 Particle species: Group
-Three of its fields: ['GroupLen', 'GroupSFR', 'GroupOffsetsType']
+Three of its fields: ['Group_R_TopHat200', 'GroupGasMetallicity', 'GroupWindMass']
+
+Particle species: PartType0
+Three of its fields: ['GFM_Metallicity', 'MagneticFieldDivergence', 'ParticleIDs']
+
+Particle species: PartType3
+Three of its fields: ['GroupID', 'ParentID', 'TracerID']
+
+Particle species: PartType5
+Three of its fields: ['ParticleIDs', 'BH_MdotBondi', 'BH_Density']
+
+Particle species: Subhalo
+Three of its fields: ['SubhaloStarMetalFractionsMaxRad', 'SubhaloGasMetalFractionsSfrWeighted', 'SubhaloGasMetallicitySfrWeighted']
+
+Particle species: PartType1
+Three of its fields: ['SubfindHsml', 'Coordinates', 'SubfindDMDensity']
 
 </pre>
 </div>

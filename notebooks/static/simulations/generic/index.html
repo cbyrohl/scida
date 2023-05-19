@@ -1546,8 +1546,8 @@ import dask</div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1579,6 +1579,32 @@ client = Client(cluster)</div>
     </div>
 
 </div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>/home/cbyrohl/.cache/pypoetry/virtualenvs/astrodask-lK1Pqy4R-py3.9/lib/python3.9/site-packages/distributed/node.py:182: UserWarning: Port 8843 is already in use.
+Perhaps you already have a cluster running?
+Hosting the HTTP server on port 44891 instead
+  warnings.warn(
+</pre>
+</div>
+</div>
+
+</div>
+
 </div>
 
 </div>
@@ -1632,7 +1658,7 @@ client = Client(cluster)</div>
     <div style="width: 24px; height: 24px; background-color: #e1e1e1; border: 3px solid #9D9D9D; border-radius: 5px; position: absolute;"> </div>
     <div style="margin-left: 48px;">
         <h3 style="margin-bottom: 0px;">Client</h3>
-        <p style="color: #9D9D9D; margin-bottom: 0px;">Client-b8b3bc0c-f612-11ed-a1cf-a08069c313c9</p>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">Client-606d4daf-f61c-11ed-8870-a08069c313c9</p>
         <table style="width: 100%; text-align: left;">
 
         <tr>
@@ -1645,7 +1671,7 @@ client = Client(cluster)</div>
         
             <tr>
                 <td style="text-align: left;">
-                    <strong>Dashboard: </strong> <a href="http://127.0.0.1:8843/status" target="_blank">http://127.0.0.1:8843/status</a>
+                    <strong>Dashboard: </strong> <a href="http://127.0.0.1:44891/status" target="_blank">http://127.0.0.1:44891/status</a>
                 </td>
                 <td style="text-align: left;"></td>
             </tr>
@@ -1663,11 +1689,11 @@ client = Client(cluster)</div>
     </div>
     <div style="margin-left: 48px;">
         <h3 style="margin-bottom: 0px; margin-top: 0px;">LocalCluster</h3>
-        <p style="color: #9D9D9D; margin-bottom: 0px;">919f3512</p>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">31d673ac</p>
         <table style="width: 100%; text-align: left;">
             <tr>
                 <td style="text-align: left;">
-                    <strong>Dashboard:</strong> <a href="http://127.0.0.1:8843/status" target="_blank">http://127.0.0.1:8843/status</a>
+                    <strong>Dashboard:</strong> <a href="http://127.0.0.1:44891/status" target="_blank">http://127.0.0.1:44891/status</a>
                 </td>
                 <td style="text-align: left;">
                     <strong>Workers:</strong> 16
@@ -1700,11 +1726,11 @@ client = Client(cluster)</div>
         <div style="width: 24px; height: 24px; background-color: #FFF7E5; border: 3px solid #FF6132; border-radius: 5px; position: absolute;"> </div>
         <div style="margin-left: 48px;">
             <h3 style="margin-bottom: 0px;">Scheduler</h3>
-            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-5a215539-dddc-4a2c-abae-c18a82c94951</p>
+            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-71cca4c9-ccb6-4979-9fa3-fd552cc69663</p>
             <table style="width: 100%; text-align: left;">
                 <tr>
                     <td style="text-align: left;">
-                        <strong>Comm:</strong> tcp://127.0.0.1:44883
+                        <strong>Comm:</strong> tcp://127.0.0.1:41947
                     </td>
                     <td style="text-align: left;">
                         <strong>Workers:</strong> 16
@@ -1712,7 +1738,7 @@ client = Client(cluster)</div>
                 </tr>
                 <tr>
                     <td style="text-align: left;">
-                        <strong>Dashboard:</strong> <a href="http://127.0.0.1:8843/status" target="_blank">http://127.0.0.1:8843/status</a>
+                        <strong>Dashboard:</strong> <a href="http://127.0.0.1:44891/status" target="_blank">http://127.0.0.1:44891/status</a>
                     </td>
                     <td style="text-align: left;">
                         <strong>Total threads:</strong> 16
@@ -1746,7 +1772,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:40805
+                            <strong>Comm: </strong> tcp://127.0.0.1:42177
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -1754,7 +1780,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:34903/status" target="_blank">http://127.0.0.1:34903/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:44001/status" target="_blank">http://127.0.0.1:44001/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -1762,13 +1788,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:45831
+                            <strong>Nanny: </strong> tcp://127.0.0.1:34843
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-b8mokgxe
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-8x7nehl7
                         </td>
                     </tr>
 
@@ -1791,7 +1817,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:45883
+                            <strong>Comm: </strong> tcp://127.0.0.1:38063
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -1799,7 +1825,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:41277/status" target="_blank">http://127.0.0.1:41277/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:45287/status" target="_blank">http://127.0.0.1:45287/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -1807,13 +1833,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:35503
+                            <strong>Nanny: </strong> tcp://127.0.0.1:40537
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-qjc9s2x8
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-nnv65td2
                         </td>
                     </tr>
 
@@ -1836,7 +1862,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:40891
+                            <strong>Comm: </strong> tcp://127.0.0.1:40179
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -1844,7 +1870,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:46141/status" target="_blank">http://127.0.0.1:46141/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:33667/status" target="_blank">http://127.0.0.1:33667/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -1852,13 +1878,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:42409
+                            <strong>Nanny: </strong> tcp://127.0.0.1:36597
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-q283p_ez
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-iiaq45tq
                         </td>
                     </tr>
 
@@ -1881,7 +1907,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:35055
+                            <strong>Comm: </strong> tcp://127.0.0.1:36445
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -1889,7 +1915,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:34531/status" target="_blank">http://127.0.0.1:34531/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:33931/status" target="_blank">http://127.0.0.1:33931/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -1897,13 +1923,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:37415
+                            <strong>Nanny: </strong> tcp://127.0.0.1:44933
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-t9qg0nfa
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-50w62k03
                         </td>
                     </tr>
 
@@ -1926,7 +1952,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:44465
+                            <strong>Comm: </strong> tcp://127.0.0.1:40159
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -1934,7 +1960,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:45713/status" target="_blank">http://127.0.0.1:45713/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:34127/status" target="_blank">http://127.0.0.1:34127/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -1942,13 +1968,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:42125
+                            <strong>Nanny: </strong> tcp://127.0.0.1:40505
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-o22y07x0
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-3xpnupp8
                         </td>
                     </tr>
 
@@ -1971,7 +1997,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:46155
+                            <strong>Comm: </strong> tcp://127.0.0.1:43883
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -1979,7 +2005,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:45793/status" target="_blank">http://127.0.0.1:45793/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:39623/status" target="_blank">http://127.0.0.1:39623/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -1987,13 +2013,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:43317
+                            <strong>Nanny: </strong> tcp://127.0.0.1:40039
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-56yeaq1a
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-32nruq9i
                         </td>
                     </tr>
 
@@ -2016,7 +2042,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:33497
+                            <strong>Comm: </strong> tcp://127.0.0.1:33319
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2024,7 +2050,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:41261/status" target="_blank">http://127.0.0.1:41261/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:35699/status" target="_blank">http://127.0.0.1:35699/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2032,13 +2058,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:38301
+                            <strong>Nanny: </strong> tcp://127.0.0.1:42113
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-jl_22yfc
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-cu12m04u
                         </td>
                     </tr>
 
@@ -2061,7 +2087,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:33113
+                            <strong>Comm: </strong> tcp://127.0.0.1:46181
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2069,7 +2095,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:38029/status" target="_blank">http://127.0.0.1:38029/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:40761/status" target="_blank">http://127.0.0.1:40761/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2077,13 +2103,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:40767
+                            <strong>Nanny: </strong> tcp://127.0.0.1:41257
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-3l8zdvrr
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-cev2kk47
                         </td>
                     </tr>
 
@@ -2106,7 +2132,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:33001
+                            <strong>Comm: </strong> tcp://127.0.0.1:36565
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2114,7 +2140,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:44415/status" target="_blank">http://127.0.0.1:44415/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:34511/status" target="_blank">http://127.0.0.1:34511/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2122,13 +2148,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:42581
+                            <strong>Nanny: </strong> tcp://127.0.0.1:37785
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-5vmfqk11
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-89v1ix6q
                         </td>
                     </tr>
 
@@ -2151,7 +2177,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:45417
+                            <strong>Comm: </strong> tcp://127.0.0.1:34595
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2159,7 +2185,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:42565/status" target="_blank">http://127.0.0.1:42565/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:35035/status" target="_blank">http://127.0.0.1:35035/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2167,13 +2193,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:40391
+                            <strong>Nanny: </strong> tcp://127.0.0.1:40131
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-8mn4jlc_
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-fplf16yw
                         </td>
                     </tr>
 
@@ -2196,7 +2222,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:46163
+                            <strong>Comm: </strong> tcp://127.0.0.1:44139
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2204,7 +2230,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:41155/status" target="_blank">http://127.0.0.1:41155/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:41885/status" target="_blank">http://127.0.0.1:41885/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2212,13 +2238,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:45721
+                            <strong>Nanny: </strong> tcp://127.0.0.1:39151
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-gmnky1yt
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-7ooscjym
                         </td>
                     </tr>
 
@@ -2241,7 +2267,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:36609
+                            <strong>Comm: </strong> tcp://127.0.0.1:44649
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2249,7 +2275,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:43137/status" target="_blank">http://127.0.0.1:43137/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:38341/status" target="_blank">http://127.0.0.1:38341/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2257,13 +2283,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:41857
+                            <strong>Nanny: </strong> tcp://127.0.0.1:42977
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-om3rm50g
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-td0y20p4
                         </td>
                     </tr>
 
@@ -2286,7 +2312,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:41667
+                            <strong>Comm: </strong> tcp://127.0.0.1:39225
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2294,7 +2320,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:38715/status" target="_blank">http://127.0.0.1:38715/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:45807/status" target="_blank">http://127.0.0.1:45807/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2302,13 +2328,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:45731
+                            <strong>Nanny: </strong> tcp://127.0.0.1:45617
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-udtyd9zv
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-8_bordo5
                         </td>
                     </tr>
 
@@ -2331,7 +2357,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:35937
+                            <strong>Comm: </strong> tcp://127.0.0.1:42739
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2339,7 +2365,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:35327/status" target="_blank">http://127.0.0.1:35327/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:36267/status" target="_blank">http://127.0.0.1:36267/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2347,13 +2373,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:38507
+                            <strong>Nanny: </strong> tcp://127.0.0.1:44189
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-w088ixde
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-o3st23ca
                         </td>
                     </tr>
 
@@ -2376,7 +2402,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:33513
+                            <strong>Comm: </strong> tcp://127.0.0.1:33453
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2384,7 +2410,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:42691/status" target="_blank">http://127.0.0.1:42691/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:33365/status" target="_blank">http://127.0.0.1:33365/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2392,13 +2418,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:32803
+                            <strong>Nanny: </strong> tcp://127.0.0.1:46821
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-20m2yhjr
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-czmk7nte
                         </td>
                     </tr>
 
@@ -2421,7 +2447,7 @@ client = Client(cluster)</div>
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:43829
+                            <strong>Comm: </strong> tcp://127.0.0.1:43351
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 1
@@ -2429,7 +2455,7 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:44915/status" target="_blank">http://127.0.0.1:44915/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:42939/status" target="_blank">http://127.0.0.1:42939/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 1.94 GiB
@@ -2437,13 +2463,13 @@ client = Client(cluster)</div>
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:34323
+                            <strong>Nanny: </strong> tcp://127.0.0.1:36583
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-bxjov1rk
+                            <strong>Local directory: </strong> /tmp/dask-worker-space/worker-sc2ga7md
                         </td>
                     </tr>
 
@@ -2536,7 +2562,7 @@ client = Client(cluster)</div>
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&lt;dask.config.set at 0x7f5faa5d8df0&gt;</pre>
+<pre>&lt;dask.config.set at 0x7f415feb04f0&gt;</pre>
 </div>
 
 </div>
