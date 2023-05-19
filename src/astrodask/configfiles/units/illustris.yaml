@@ -6,7 +6,7 @@ units:
   code_length: ckpc / h
   code_velocity: km / s
   code_mass: 1e10 * Msun / h
-  code_time: 0.978 * Gyr
+  code_time: 0.978 * Gyr  # TODO: recheck. Needed without h for some consistency with TNG, but AREPO docs say /h?
   code_pressure: (code_mass / code_length) / code_time^2
 fields:
   _all:

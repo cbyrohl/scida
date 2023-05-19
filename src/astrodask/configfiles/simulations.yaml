@@ -81,3 +81,10 @@ data:
   gaia-dr3:
       identifiers:
         name_contains: "gaia"
+
+
+  FIRE2:
+    unitfile: units/gizmo.yaml
+    identifiers:
+      Header:
+        ReadMe: "This snapshot is part of the Feedback in Realistic Environments (FIRE) project -- Use, modification, or distribution only permitted with approval of the PI and the FIRE team -- No warranty, use at your own risk -- compactify_hdf5 (c) RF 2018"

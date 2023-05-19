@@ -249,7 +249,7 @@ def load(
             else:
                 raise ValueError("Unknown type of dataset '%s'." % cls.__name__)
         elif isinstance(dstype, str):
-            cls = dataset_type_registry[dstype]
+            cls = reg[dstype]
         elif dstype is None:
             pass  # simply no dataset_type specified
         else:

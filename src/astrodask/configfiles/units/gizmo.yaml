@@ -1,0 +1,43 @@
+metadata_unitsystem: cgs
+units:
+  # h: 0.7 hubble factor, needs to be set by snapshot
+  # a: 1.0 # scale factor, needs to be set by snapshot
+  ckpc: a * kpc
+  # for GIZMO, one can change the code unit defaults; TODO: get from params.txt
+  code_mass: 1e10 * Msun / h
+  code_length: ckpc / h
+  code_velocity: km / s
+  code_time: 0.978 * Gyr / h
+  code_energy: (code_velocity)^2
+  code_density: code_mass / code_length^3
+  code_magnetic: gauss
+  code_divdamp: code_magnetic * code_velocity
+fields:
+  _all:
+    Coordinates: code_length
+    Velocities: code_velocity
+    ParticleIDs:
+    ParticleChildIDsNumber:
+    ParticleIDGenerationNumber:
+    Masses: code_mass
+    Potential: (km / s)^2  # TODO: not in GIZMO manual, taken from https://bitbucket.org/awetzel/gizmo_analysis/src/master/gizmo_io.py
+  PartType0:
+    InternalEnergy: code_energy
+    Density: code_density
+    SmoothingLength: code_length
+    ElectronAbundance:
+    NeutralHydrogenAbundance:
+    StarFormationRate: Msun / yr
+    Metallicity:
+    ArtificialViscosity:
+    MagneticField: code_magnetic
+    MagneticFieldDivergence: code_divdamp
+    PhotonEnergy: code_energy
+    StellarFormationTime:
+  PartType4:
+    Metallicity:
+    StellarFormationTime:
+  PartType5:
+    BH_Mass: code_mass
+    BH_Mdot: code_mass / code_time
+    BH_Mass_AlphaDisk: code_mass

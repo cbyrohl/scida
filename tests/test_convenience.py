@@ -74,6 +74,12 @@ def test_load_areposim(testdatapath):
 
 
 @require_testdata_path("interface", exclude=["gaia"], exclude_substring=True)
+def test_load_units_codeunits(testdatapath):
+    obj = load(testdatapath, units="code")
+    assert "UnitMixin" in type(obj).__name__
+
+
+@require_testdata_path("interface", exclude=["gaia"], exclude_substring=True)
 def test_load_units_cgs(testdatapath):
     obj = load(testdatapath, units="cgs")
     assert "UnitMixin" in type(obj).__name__
