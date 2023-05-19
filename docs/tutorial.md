@@ -15,9 +15,10 @@ Datasets are expected to be spatially [unstructured](https://en.wikipedia.org/wi
 Much of the functionality can also be used to process observational datasets.
 
 It uses the [dask](https://dask.org/) library to perform computations, which has several key advantages:
-* (i) very large datasets which cannot normally fit into memory can be analyzed,
-* (ii) calculations can be automatically distributed onto parallel 'workers', across one or more nodes, to speed them up.
-* (iii) we can create abstract graphs ("recipes", such as for derived quantities) and only evaluate on actual demand.
+
+1. very large datasets which cannot normally fit into memory can be analyzed,
+2. calculations can be automatically distributed onto parallel 'workers', across one or more nodes, to speed them up,
+3. we can create abstract graphs ("recipes", such as for derived quantities) and only evaluate on actual demand.
 
 ## Loading an individual dataset
 
@@ -28,7 +29,7 @@ a suite for galaxy formation simulations in cosmological volumes.
 Choosing TNG50-4 means that the data size in the snapshot is small and easy to work with.
 We demonstrate how to work with larger data sets at a later stage.
 
-First, we load the dataaset using the convenience function `load()` that will determine the appropriate dataset class for us:
+First, we load the dataset using the convenience function `load()` that will determine the appropriate dataset class for us:
 
 
 ```pycon title="Loading a dataset"
@@ -52,7 +53,7 @@ First, we load the dataaset using the convenience function `load()` that will de
    The current default is *False*, which will change to *True* in the near future.
 2. Call to receive some information about the loaded dataset.
 
-The dataset is now loaded and we can inspect its contents, specifically its container and fields loaded.
+The dataset is now loaded, and we can inspect its contents, specifically its container and fields loaded.
 We can access the data in the dataset by using the `data` attribute, which is a dictionary of containers and fields.
 
 From above output we see that the dataset contains seven containers, each of which contains a number of fields.
@@ -94,7 +95,7 @@ If you are unfamiliar with dask arrays, consider taking a look at this [3-minute
 They are **not** numpy arrays, but they can be converted to them, and have most of their functionality.
 Within dask, an internal task graph is created that holds the recipes how to construct the array from the underlying data.
 
-In our case, in fact, the snapshot and its fields are split acrros multiple files on disk (as for most large datasets),
+In our case, in fact, the snapshot and its fields are split across multiple files on disk (as for most large datasets),
 and virtually combined into a single dask array. The user does not need to worry about this as these operations take place in the background.
 
 For the TNG50-4 datasets, the first level of `ds.data` maps the different particle types (such as gas and dark matter),
@@ -166,6 +167,36 @@ We can request a calculation of the actual operation(s) by applying the `.comput
     >>> totmass.to("Msun")
     '8.3e15 Msun'
     ```
+As an example of calculating something more complicated than just `sum()`, let's do the usual "poor man's projection" via a 2D histogram.
+
+To do so, we use [da.histogram2d()](https://docs.dask.org/en/latest/array.html) of dask,
+which is analogous to [numpy.histogram2d()](https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html),
+except that it operates on a dask array.
+We discuss more advanced and interactive visualization methods [here](visualization.md).
+
+```pycon
+>>> import dask.array as da
+>>> import numpy as np
+>>> coords = ds.data["PartType0"]["Coordinates"]
+>>> x = coords[:,0]
+>>> y = coords[:,1]
+>>> nbins = 256
+>>> bins1d = np.linspace(0, ds.header["BoxSize"], nbins+1)
+>>> hist, xbins, ybins = da.histogram2d(x,y,bins=[bins1d,bins1d])
+>>> im2d = result[0].compute() #(1)!
+>>> import matplotlib.pyplot as plt
+>>> from matplotlib.colors import LogNorm
+>>> fig = plt.figure(figsize=(6, 6))
+>>> plt.imshow(im2d.T, norm=LogNorm(), extent=[0, ds.header["BoxSize"], 0, ds.header["BoxSize"]])
+>>> plt.xlabel("x (ckpc/h)")
+>>> plt.ylabel("y (ckpc/h)")
+>>> plt.show()
+```
+
+1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
+
+![Image title](images/simple_hist2d.png)
+
 
 
 ## Advanced topics
