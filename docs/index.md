@@ -15,7 +15,7 @@ astrodask is an out-of-the-box analysis tool for large astrophysical datasets, p
         </div>
       </div>
     </div>
-    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./TODO';">
+    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./userguide';">
       <div class="card__image-container">
         <img
           src="images/book-solid.svg"
@@ -45,7 +45,7 @@ astrodask is an out-of-the-box analysis tool for large astrophysical datasets, p
         </div>
       </div>
     </div>
-    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./TODO';">
+    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./developer';">
       <div class="card__image-container">
         <img
           src="images/terminal-solid.svg"
