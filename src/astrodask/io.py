@@ -1,7 +1,6 @@
 import abc
 import logging
 import os
-import pathlib
 import tempfile
 from functools import partial
 from os.path import join
@@ -42,18 +41,14 @@ class HDF5Loader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        derivedfields_kwargs=None,
+        **kwargs
     ):
         self.location = self.path
         tree = {}
         walk_hdf5file(self.location, tree=tree)
         file = h5py.File(self.location, "r")
         datadict = load_datadict_old(
-            self.path,
-            file,
-            token=token,
-            chunksize=chunksize,
-            derivedfields_kwargs=derivedfields_kwargs,
+            self.path, file, token=token, chunksize=chunksize, **kwargs
         )
         self.file = file
         return datadict
@@ -77,7 +72,7 @@ class ZarrLoader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        derivedfields_kwargs=None,
+        **kwargs
     ):
         self.location = self.path
         tree = {}
@@ -88,8 +83,8 @@ class ZarrLoader(Loader):
             self.file,
             token=token,
             chunksize=chunksize,
-            derivedfields_kwargs=derivedfields_kwargs,
             filetype="zarr",
+            **kwargs
         )
         return datadict
 
@@ -125,27 +120,21 @@ class ChunkedHDF5Loader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        derivedfields_kwargs=None,
+        **kwargs
     ):
         cachefp = return_hdf5cachepath(self.path)
         if cachefp is not None and os.path.isfile(cachefp):
             if not overwrite:
                 # we are done; just use cached version
                 datadict = self.load_cachefile(
-                    cachefp,
-                    token=token,
-                    chunksize=chunksize,
-                    derivedfields_kwargs=derivedfields_kwargs,
+                    cachefp, token=token, chunksize=chunksize, **kwargs
                 )
                 return datadict
 
         self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
 
         datadict = self.load_cachefile(
-            self.location,
-            token=token,
-            chunksize=chunksize,
-            derivedfields_kwargs=derivedfields_kwargs,
+            self.location, token=token, chunksize=chunksize, **kwargs
         )
         return datadict
 
@@ -202,16 +191,10 @@ class ChunkedHDF5Loader(Loader):
             os.remove(cachefp)  # remove failed attempt at merging file
             raise ex
 
-    def load_cachefile(
-        self, location, token="", chunksize="auto", derivedfields_kwargs=None
-    ):
+    def load_cachefile(self, location, token="", chunksize="auto", **kwargs):
         self.file = h5py.File(location, "r")
         datadict = load_datadict_old(
-            location,
-            self.file,
-            token=token,
-            chunksize=chunksize,
-            derivedfields_kwargs=derivedfields_kwargs,
+            location, self.file, token=token, chunksize=chunksize, **kwargs
         )
         return datadict
 
@@ -225,6 +208,7 @@ def load_datadict_old(
     derivedfields_kwargs=None,
     lazy=True,  # if true, call da.from_array delayed
     filetype="hdf5",
+    withunits=False,
 ):
     """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
     # TODO: Refactor and rename
@@ -242,7 +226,9 @@ def load_datadict_old(
         raise ValueError("Unknown filetype ''" % filetype)
 
     # hosting all data
-    rootcontainer = FieldContainer(fieldrecipes_kwargs=derivedfields_kwargs)
+    rootcontainer = FieldContainer(
+        fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits
+    )
 
     datagroups = []  # names of groups with datasets
     # othergroups = []  # names of groups without datasets
@@ -327,45 +313,19 @@ def load_datadict_old(
             container[fieldname] = ds
     data = rootcontainer
 
-    # instantiate at least one field
-
-    def instantiate_one_field(container: FieldContainer, path: str):
-        keys = container.keys(withgroups=False, withrecipes=False)
-        if len(keys) > 0:
-            return
-        keys = container.keys(withgroups=False, withrecipes=True)
-        if len(keys) == 0:
-            return
-            # raise ValueError("Data container is empty, this is unexpected.")
-        for k in keys:
-            p = pathlib.Path(path) / k
-            res = [k for k in tree["datasets"] if k[0] == str(p)]
-            if len(res) == 0:
-                continue  # no dataset info
-            # tree_entry = res[0]
-            # calling will instantiate.
-            container.__getitem__(k)
-            break
-
-    walk_container(data, handler_group=instantiate_one_field)
+    dtsdict = {k[0]: k[1:] for k in tree["datasets"]}
 
     # create uids fields for all containers
     def create_uids(container: FieldContainer, path: str):
         nparts = -1
-        chunks = None
-        keys = container.keys(withgroups=False, withrecipes=False)
+        keys = container.keys(withgroups=False, withrecipes=True)
         for k in keys:
-            v = container[k]
-            nparts = v.shape[0]
-            if len(v.chunks) == 1:
-                # make same shape as other 1D arrays.
-                chunks = v.chunks
-                break
-            else:
-                # alternatively, attempt to use chunks from multi-dim array until found something better.
-                chunks = (v.chunks[0],)
+            dpath = path + "/" + k
+            shape = dtsdict[dpath][0]
+            nparts = shape[0]
         if nparts > -1:
-            container["uid"] = da.arange(nparts, chunks=chunks)
+            # TODO: as we do not load any fields any more we do not have a reference for the dask chunking.
+            container["uid"] = da.arange(nparts)
         else:
             print("no uid created for %s" % container.name)
 

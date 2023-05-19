@@ -45,7 +45,13 @@ class FieldContainer(MutableMapping):
     if needed."""
 
     def __init__(
-        self, *args, fieldrecipes_kwargs=None, containers=None, aliases=None, **kwargs
+        self,
+        *args,
+        fieldrecipes_kwargs=None,
+        containers=None,
+        aliases=None,
+        withunits=False,
+        **kwargs
     ):
         if aliases is None:
             aliases = {}
@@ -57,21 +63,14 @@ class FieldContainer(MutableMapping):
         self.fields.update(*args, **kwargs)
         self.fieldrecipes = {}
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
+        self.withunits = withunits
         self.containers: Dict[
             str, FieldContainer
         ] = dict()  # other containers as subgroups
         if containers is not None:
             for k in containers:
-                self.containers[k] = FieldContainer(
-                    fieldrecipes_kwargs=fieldrecipes_kwargs
-                )
+                self.add_container(k)
         self.internals = ["uid"]  # names of internal fields/groups
-
-    def new_container(self, key, **kwargs):
-        fkws = self.fieldrecipes_kwargs
-        self.containers[key] = FieldContainer(
-            **kwargs, fieldrecipes_kwargs=fkws, name=key
-        )
 
     def merge(self, collection, overwrite=True):
         if not isinstance(collection, FieldContainer):
@@ -230,6 +229,13 @@ class FieldContainer(MutableMapping):
     def add_alias(self, alias, name):
         self.aliases[alias] = name
 
+    def add_container(self, key, **kwargs):
+        self.containers[key] = FieldContainer(
+            fieldrecipes_kwargs=self.fieldrecipes_kwargs,
+            withunits=self.withunits,
+            **kwargs
+        )
+
     def _getitem(self, key, force_derived=False, update_dict=True):
         if key in self.aliases:
             key = self.aliases[key]
@@ -240,6 +246,7 @@ class FieldContainer(MutableMapping):
         else:
             if key in self.fieldrecipes:
                 func = self.fieldrecipes[key].func
+                units = self.fieldrecipes[key].units
                 accept_kwargs = inspect.getfullargspec(func).varkw is not None
                 func_kwargs = get_kwargs(func)
                 dkwargs = self.fieldrecipes_kwargs
@@ -260,9 +267,10 @@ class FieldContainer(MutableMapping):
                             if k not in inspect.getfullargspec(func).args
                         }
                     )
-                # finally, instatiate field
-                # print("Instantiated field '%s'" % key)
+                # finally, instantiate field
                 field = func(self, **kwargs)
+                if self.withunits and units is not None:
+                    field = field * units
                 if update_dict:
                     self.fields[key] = field
                 return field

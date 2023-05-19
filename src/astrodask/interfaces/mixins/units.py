@@ -308,11 +308,16 @@ class UnitMixin(Mixin):
                     udict = udict[p]
                 udict[k] = unit
                 # redefine dask arrays with units
-                # TODO: This will instatiate all dask fields, need to user register_field
+                # we treat recipes separately so that they stay recipes
+                # this is important due to the following memory issue for now:
                 # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
-                container[k] = unit * container[k]
-                if units == "cgs" and isinstance(container[k], pint.Quantity):
-                    container[k] = container[k].to_base_units()
+                if k not in container.fields and k in container.fieldrecipes:
+                    container.fieldrecipes[k].units = unit
+                    # TODO: Add cgs conversion for recipes, see else-statement.
+                else:
+                    container[k] = unit * container[k]
+                    if units == "cgs" and isinstance(container[k], pint.Quantity):
+                        container[k] = container[k].to_base_units()
 
         # fwu = unithints.get("fields", {})
         # for ptype in sorted(self.data):

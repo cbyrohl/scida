@@ -40,7 +40,9 @@ def test_tng_units(testdatapath):
         #     continue
         for k in sorted(ds.data[pk1].keys()):
             if k in ["uid", "GroupID", "SubhaloID", "GroupOffsetsType"]:
-                continue  # defined in package, dont need to check
+                continue  # internally defined, do not need to check
+            if k not in units[pk2].keys():
+                continue  # not defined in TNG docs
             v = ds.data[pk1][k]
             # print("%s/%s" % (pk1, k))
             val1 = v[0].astype(np.float64)

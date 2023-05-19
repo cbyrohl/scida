@@ -69,7 +69,7 @@ def test_load_areposnap(testdatapath):
 
 @require_testdata_path("series", only=["TNGvariation_simulation"])
 def test_load_areposim(testdatapath):
-    obj = load(testdatapath)
+    obj = load(testdatapath, units="cgs")
     assert obj is not None
 
 

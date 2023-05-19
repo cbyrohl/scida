@@ -195,7 +195,7 @@ def find_path(path, overwrite=False):
 
 def load(
     path: str,
-    units: Union[bool, str] = False,
+    units: Union[bool, str] = True,
     unitfile: str = "",
     overwrite: bool = False,
     **kwargs

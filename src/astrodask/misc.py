@@ -30,7 +30,7 @@ def get_container_from_path(
         if key not in rv.containers:
             if not create_missing:
                 raise ValueError("Container '%s' not found in '%s'" % (key, rv))
-            rv.new_container(key)
+            rv.add_container(key, name=key)
         rv = rv.containers[key]
     return rv
 
@@ -223,11 +223,13 @@ def _determine_type(
         raise ValueError("Unknown data type.")
     if len(available_dtypes) > 1:
         # reduce candidates by looking at most specific ones.
-        inheritancecounters = [Counter(getmro(reg[k])) for k in available_dtypes]
+        inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
         # try to find candidate that shows up only once across all inheritance trees.
         # => this will be the most specific candidate(s).
         count = reduce(lambda x, y: x + y, inheritancecounters)
-        available_dtypes = [k for k in available_dtypes if count[reg[k]] == 1]
+        countdict = {k: count[reg[k]] for k in available_dtypes}
+        mincount = min(countdict.values())
+        available_dtypes = [k for k in available_dtypes if count[reg[k]] == mincount]
         if len(available_dtypes) > 1:
             # after looking for the most specific candidate(s), do we still have multiple?
             if strict:

@@ -172,6 +172,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                     virtualcache=virtualcache,
                     fileprefix=fileprefix,
                     iscatalog=True,
+                    units=self.withunits,
                 )
                 if "Redshift" in self.catalog.header and "Redshift" in self.header:
                     z_catalog = self.catalog.header["Redshift"]

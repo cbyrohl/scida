@@ -1,7 +1,11 @@
+import logging
+
 import numpy as np
 
 from astrodask.interfaces.mixins.base import Mixin
 from astrodask.misc import sprint
+
+log = logging.getLogger(__name__)
 
 
 class CosmologyMixin(Mixin):
@@ -58,8 +62,8 @@ def get_cosmology_from_rawmetadata(metadata_raw):
         print("Cannot infer cosmology.")
         return None
     elif ob0 is None:
-        print(
-            "Info: No Omega baryon given, we will assume a value of '0.0486' for the cosmology."
+        log.info(
+            "No Omega baryon given, we will assume a value of '0.0486' for the cosmology."
         )
         ob0 = 0.0486
     hubble0 = 100.0 * h * u.km / u.s / u.Mpc

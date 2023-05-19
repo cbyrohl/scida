@@ -55,11 +55,12 @@ class BaseDataset(metaclass=MixinMeta):
         self.chunksize = chunksize
         self.virtualcache = virtualcache
         self.overwritecache = overwritecache
+        self.withunits = kwargs.get("units", False)
 
         # Let's find the data and metadata for the object at 'path'
         self.metadata = {}
         self._metadata_raw = {}
-        self.data = FieldContainer()
+        self.data = FieldContainer(withunits=self.withunits)
 
         if not os.path.exists(self.path):
             raise Exception("Specified path '%s' does not exist." % self.path)
@@ -70,6 +71,7 @@ class BaseDataset(metaclass=MixinMeta):
             virtualcache=virtualcache,
             derivedfields_kwargs=dict(snap=self),
             token=self.__dask_tokenize__(),
+            withunits=self.withunits,
         )
 
         res = astrodask.io.load(path, **loadkwargs)
