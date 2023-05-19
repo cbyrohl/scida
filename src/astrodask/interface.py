@@ -342,6 +342,10 @@ class Dataset(BaseDataset):
         """
         return True
 
+    @classmethod
+    def _clean_metadata_from_raw(cls, rawmetadata):
+        return {}
+
 
 class DatasetWithUnitMixin(UnitMixin, Dataset):
     def __init__(self, *args, **kwargs):

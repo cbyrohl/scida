@@ -9,9 +9,9 @@ import numpy as np
 # tqdm.auto does not consistently give jupyter support to all users
 from tqdm import tqdm
 
-import astrodask.io
 from astrodask.convenience import _determine_type
 from astrodask.helpers_misc import hash_path
+from astrodask.io import load_metadata
 from astrodask.misc import map_interface_args, return_cachefile_path
 from astrodask.registries import dataseries_type_registry
 
@@ -23,6 +23,7 @@ def delay_init(cls):
             self._kwarg = kwarg
 
         def __getattr__(self, name):
+            """Replace the class with the actual class and initialize it if needed."""
             arg = self._arg
             kwarg = self._kwarg
             self.__class__ = cls
@@ -45,7 +46,7 @@ class DatasetSeries(object):
         *interface_args,
         datasetclass=None,
         overwrite_cache=False,
-        lazy=False,  # lazy will only initialize data sets on demand.
+        lazy=True,  # lazy will only initialize data sets on demand.
         async_caching=False,
         names=None,
         **interface_kwargs
@@ -56,7 +57,7 @@ class DatasetSeries(object):
         self.hash = hash_path("".join([str(p) for p in paths]))
         self._metadata = None
         self._metadatafile = return_cachefile_path(os.path.join(self.hash, "data.json"))
-        self.lazy = True
+        self.lazy = lazy
         for p in paths:
             if not (isinstance(p, Path)):
                 p = Path(p)
@@ -67,17 +68,20 @@ class DatasetSeries(object):
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
         self.datasets = [dec(datasetclass)(p, *a, **kw) for p, a, kw in gen]
 
-        if self.metadata is None and not lazy:
+        if self.metadata is None:
             print("Have not cached this data series. Can take a while.")
             dct = {}
-            for i, d in enumerate(tqdm(self.datasets)):
-                dct[i] = d.metadata
+            for i, (path, d) in enumerate(
+                tqdm(zip(self.paths, self.datasets), total=len(self.paths))
+            ):
+                rawmeta = load_metadata(path)
+                # class method does not initiate obj.
+                dct[i] = d._clean_metadata_from_raw(rawmeta)
             self.metadata = dct
         elif async_caching:
             # hacky and should not be here this explicitly, just a proof of concept
-            for p in paths:
-                loader = astrodask.io.determine_loader(p)
-                print(p, loader)
+            # for p in paths:
+            #     loader = astrodask.io.determine_loader(p)
             pass
 
     def __init_subclass__(cls, *args, **kwargs):
@@ -169,8 +173,10 @@ class DatasetSeries(object):
         for k in props_compare:
             idx = np.argmin(np.abs(np.array(candidates_props[k]) - kwargs[k]))
             idxlist.append(idx)
-        if len(set(idxlist)) != 1:
+        if len(set(idxlist)) > 1:
             raise ValueError("Ambiguous selection request")
+        elif len(idxlist) == 0:
+            raise ValueError("No candidate found.")
         index = candidates[idxlist[0]]
         # TODO: reintroduce tolerance check
         return self.get_dataset(index=index)
@@ -198,8 +204,13 @@ class DatasetSeries(object):
                     return int(obj)
                 if isinstance(obj, np.int32):
                     return int(obj)
+                if isinstance(obj, np.uint32):
+                    return int(obj)
                 if isinstance(obj, bytes):
                     return obj.decode("utf-8")
+                if isinstance(obj, np.ndarray):
+                    assert len(obj) < 1000  # dont want large obs here...
+                    return list(obj)
                 try:
                     return json.JSONEncoder.default(self, obj)
                 except TypeError as e:
@@ -235,7 +246,7 @@ class HomogeneousSeries(DatasetSeries):
 class ArepoSimulation(DatasetSeries):
     """A container for an arepo simulation."""
 
-    def __init__(self, path, lazy=False, async_caching=False, **interface_kwargs):
+    def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
         self.path = path
         self.name = os.path.basename(path)
         p = Path(path)

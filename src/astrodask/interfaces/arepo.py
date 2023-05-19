@@ -228,15 +228,26 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         """
         Set metadata from header and config.
         """
-        if self.header is not None:
-            if "Redshift" in self.header:
-                self.metadata["redshift"] = self.header["Redshift"]
-                self.metadata["z"] = self.metadata["redshift"]
-            if "BoxSize" in self.header:
-                self.metadata["boxsize"] = self.header["BoxSize"]
-            if "Time" in self.header:
-                self.metadata["time"] = self.header["Time"]
-                self.metadata["t"] = self.metadata["time"]
+        md = self._clean_metadata_from_raw(self._metadata_raw)
+        self.metadata = md
+
+    @classmethod
+    def _clean_metadata_from_raw(cls, rawmetadata):
+        """
+        Set metadata from raw metadata.
+        """
+        metadata = dict()
+        if "/Header" in rawmetadata:
+            header = rawmetadata["/Header"]
+            if "Redshift" in header:
+                metadata["redshift"] = header["Redshift"]
+                metadata["z"] = metadata["redshift"]
+            if "BoxSize" in header:
+                metadata["boxsize"] = header["BoxSize"]
+            if "Time" in header:
+                metadata["time"] = header["Time"]
+                metadata["t"] = metadata["time"]
+        return metadata
 
     @ArepoSelector()
     def return_data(self):
