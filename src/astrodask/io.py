@@ -163,7 +163,7 @@ class ChunkedHDF5Loader(Loader):
             prfxs = [prfx]
             files = np.array([f for f in files if f.startswith(prfx)])
         if len(set(prfxs)) > 1:
-            print("Available prefixes:", set(prfxs))
+            # print("Available prefixes:", set(prfxs))
             raise ValueError(
                 "More than one file prefix in directory, specify 'fileprefix'."
             )

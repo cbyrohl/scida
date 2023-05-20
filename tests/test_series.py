@@ -18,7 +18,7 @@ def test_areposimulation_load(testdatapath):
     ds = bs.get_dataset(redshift=redshift)
     print(ds)
     assert len(bs) == 5
-    assert np.isclose(redshift, ds.redshift, rtol=1e-2)
+    assert np.isclose(redshift, ds.header["Redshift"], rtol=1e-2)
 
     # some other keywords
     ds1 = bs.get_dataset(t=1.0)
@@ -53,7 +53,7 @@ def test_areposimulation_asynccaching(cachedir, testdatapath):
     print(bs)
 
 
-@require_testdata_path("areposimulation", only=["TNG50-4"])
+@require_testdata_path("areposimulation", only=["TNG50-4", "TNGvariation_simulation"])
 def test_areposimulation_lazy(cachedir, testdatapath):
     tstart = time.process_time()
     bs = ArepoSimulation(testdatapath, lazy=True)
@@ -110,7 +110,7 @@ def test_areposimulation_caching(cachedir, testdatapath):
     # simple check that cache match at first level
     md1 = bs1.metadata
     md2 = bs2.metadata
-    assert set(md1) == set(md2)
+    assert set(md1) == set(md2) != set()
 
     # cache vs no cache
     # TODO: Recheck. Now since we are always lazily evaluating and using metadata, this test does not make sense...

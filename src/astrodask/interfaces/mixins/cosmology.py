@@ -59,7 +59,7 @@ def get_cosmology_from_rawmetadata(metadata_raw):
 
     h, om0, ob0 = cparams["h"], cparams["om0"], cparams["ob0"]
     if None in [h, om0]:
-        print("Cannot infer cosmology.")
+        log.info("Cannot infer cosmology.")
         return None
     elif ob0 is None:
         log.info(

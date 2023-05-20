@@ -198,6 +198,7 @@ def load(
     units: Union[bool, str] = True,
     unitfile: str = "",
     overwrite: bool = False,
+    force_class: Optional[object] = None,
     **kwargs
 ):
     path = find_path(path, overwrite=overwrite)
@@ -260,6 +261,9 @@ def load(
         msg = "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
         if dstype is not None:
             log.debug(msg % (dstype, oldcls))
+
+    if force_class is not None:
+        cls = force_class
 
     # indicators for cosmological mixin
     z = metadata_raw.get("/Header", {}).get("Redshift", None)

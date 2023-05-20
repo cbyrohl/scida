@@ -39,7 +39,7 @@ def test_scalefactor_in_units(testdatapath):
     # check for velocities (only has "a" dependency)
     vel = ds.data["PartType0"]["Velocities"][0, 0].compute()
     vel_nounits = ds_nounits.data["PartType0"]["Velocities"][0, 0].compute()
-    vel_cgs = vel.to_base_units().magnitude
+    vel_cgs = vel.to("cm/s").magnitude
     vel_nounits_cgs = 1e5 * np.sqrt(a) * vel_nounits
     assert vel_cgs == pytest.approx(vel_nounits_cgs)
 

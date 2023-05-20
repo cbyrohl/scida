@@ -217,7 +217,7 @@ def _determine_type(
         try:
             if dtype.validate_path(path, **kwargs):
                 available_dtypes.append(k)
-        except ValueError:
+        except Exception:
             log.debug("Exception raised during validate_path of tested type '%s'." % k)
     if len(available_dtypes) == 0:
         raise ValueError("Unknown data type.")

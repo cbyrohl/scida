@@ -20,7 +20,7 @@ from astrodask.helpers_misc import (
     parse_humansize,
 )
 from astrodask.interface import Dataset, Selector
-from astrodask.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin
+from astrodask.interfaces.mixins import SpatialCartesian3DMixin
 from astrodask.io import load_metadata
 
 log = logging.getLogger(__name__)
@@ -86,7 +86,8 @@ class BaseSnapshot(Dataset):
         if os.path.isfile(path):
             return ""  # nothing to do, we have a single file, not a directory
         # order matters: groups will be taken before fof_subhalo, requires py>3.7 for dict order
-        prfxs_prfx_sim = dict.fromkeys(["groups", "fof_subhalo", "snap"])
+        prfxs = ["groups", "fof_subhalo", "snap"]
+        prfxs_prfx_sim = dict.fromkeys(prfxs)
         files = sorted(os.listdir(path))
         prfxs_lst = []
         for fn in files:
@@ -100,6 +101,8 @@ class BaseSnapshot(Dataset):
             log.debug("We have more than one prefix avail: %s" % prfxs)
         elif len(prfxs) == 0:
             return ""
+        if set(prfxs) == {"groups", "fof_subhalo_tab"}:
+            return "groups"  # "groups" over "fof_subhalo_tab"
         return prfxs[0]
 
     @classmethod
@@ -132,11 +135,21 @@ class BaseSnapshot(Dataset):
         if possibly_valid:
             metadata_raw = load_metadata(path, **kwargs)
             # need some silly combination of attributes to be sure
-            if all([k in metadata_raw for k in ["/Config", "/Header", "/Parameters"]]):
-                if (
-                    "NumPart_ThisFile" in metadata_raw["/Header"]
-                    and "NumPart_Total" in metadata_raw["/Header"]
-                ):
+            if all([k in metadata_raw for k in ["/Header"]]):
+                # identifying snapshot or group catalog
+                is_snap = all(
+                    [
+                        k in metadata_raw["/Header"]
+                        for k in ["NumPart_ThisFile", "NumPart_Total"]
+                    ]
+                )
+                is_grp = all(
+                    [
+                        k in metadata_raw["/Header"]
+                        for k in ["Ngroups_ThisFile", "Ngroups_Total"]
+                    ]
+                )
+                if is_grp or is_snap:
                     return True
         return False
 
@@ -146,6 +159,8 @@ class BaseSnapshot(Dataset):
 
 
 class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
+    _fileprefix_catalog = "groups"
+
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:
         self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
@@ -166,12 +181,12 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 virtualcache = False  # copy catalog for better performance
                 catalog_kwargs = kwargs.get("catalog_kwargs", {})
                 catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
-                fileprefix = catalog_kwargs.get("fileprefix", "")
-                self.catalog = ArepoSnapshot(
+                # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
+                prfx = self._get_fileprefix(self.catalog)
+                self.catalog = ArepoCatalog(
                     self.catalog,
                     virtualcache=virtualcache,
-                    fileprefix=fileprefix,
-                    iscatalog=True,
+                    fileprefix=prfx,
                     units=self.withunits,
                 )
                 if "Redshift" in self.catalog.header and "Redshift" in self.header:
@@ -474,11 +489,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         return gop
 
 
-class CosmologicalArepoSnapshot(CosmologyMixin, ArepoSnapshot):
-    _mixins = [CosmologyMixin]
-
+class ArepoCatalog(ArepoSnapshot):
     def __init__(self, *args, **kwargs):
+        kwargs["iscatalog"] = True
+        if "fileprefix" not in kwargs:
+            kwargs["fileprefix"] = "groups"
         super().__init__(*args, **kwargs)
+
+    @classmethod
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+        kwargs["fileprefix"] = "groups"
+        valid = super().validate_path(path, *args, **kwargs)
+        return valid
 
 
 class GroupAwareOperation:

@@ -56,7 +56,7 @@ def test_snapshot_loadsaved(testdata_interface):
     snp = testdata_interface
     pos = snp.data["Group"]["GroupPos"][0].compute()
     snp.save("test.zarr")
-    ds = load("test.zarr")
+    ds = load("test.zarr", units=False)
     pos2 = ds.data["Group"]["GroupPos"][0].compute()
     assert ds.boxsize[0] == snp.header["BoxSize"]
     assert np.all(np.equal(pos, pos2))

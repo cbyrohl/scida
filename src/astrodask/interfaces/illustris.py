@@ -1,9 +1,9 @@
 import os
 
-from astrodask.interfaces.arepo import CosmologicalArepoSnapshot
+from astrodask.interfaces.arepo import ArepoSnapshot
 
 
-class IllustrisSnapshot(CosmologicalArepoSnapshot):
+class IllustrisSnapshot(ArepoSnapshot):
     _fileprefix_catalog = "groups"
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs):
@@ -17,6 +17,7 @@ class IllustrisSnapshot(CosmologicalArepoSnapshot):
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
+        kwargs["fileprefix_catalog"] = cls._fileprefix_catalog
         valid = super().validate_path(path, *args, **kwargs)
         if not valid:
             return False
