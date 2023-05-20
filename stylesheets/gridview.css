@@ -18,7 +18,7 @@
 .cards {
   grid-column: 2 / span 12;
   display: grid;
-  grid-template-columns: repeat(12, minmax(auto, 60px));
+  grid-template-columns: repeat(12, minmax(0, 60px));
   grid-gap: 20px;
 }
 
@@ -35,11 +35,25 @@
   transform: translate(-2px, -7px);
 }
 
+.card__image-container2 {
+  width: 100%;
+  padding-top: 45%;
+  overflow: hidden;
+  position: relative;
+}
+
 .card__image-container {
   width: 100%;
   padding-top: 25%;
   overflow: hidden;
   position: relative;
+}
+
+.card__image-container2 img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 
@@ -52,7 +66,7 @@
 }
 
 .card__content {
-  padding: 0px;
+  padding: 30px;
 }
 
 .card__title {

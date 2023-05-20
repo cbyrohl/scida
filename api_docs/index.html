@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-8.5.10">
     
     
       
@@ -2346,7 +2346,7 @@ subconf_keys
 
 
 <h3 id="astrodask.config.merge_dicts_recursively" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">merge_dicts_recursively</span><span class="p">(</span><span class="n">dict_a</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">dict_b</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">mergefunc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span></code>
+<code class="highlight language-python"><span class="n">merge_dicts_recursively</span><span class="p">(</span><span class="n">dict_a</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">dict_b</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">mergefunc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span></code>
 
 </h3>
 
@@ -2415,7 +2415,7 @@ path
     <span class="n">dict_a</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">dict_b</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mergefunc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mergefunc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Merge two dictionaries recursively.</span>
@@ -3304,12 +3304,26 @@ if needed.</p>
 <span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
-<span class="normal">289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FieldContainer</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FieldContainer</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A mutable collection of fields. Attempt to construct from derived fields recipes</span>
 <span class="sd">    if needed."""</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">fieldrecipes_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">containers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">fieldrecipes_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">containers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">aliases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">withunits</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">aliases</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">aliases</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3321,21 +3335,14 @@ if needed.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes_kwargs</span> <span class="o">=</span> <span class="n">fieldrecipes_kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">withunits</span> <span class="o">=</span> <span class="n">withunits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">containers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
             <span class="nb">str</span><span class="p">,</span> <span class="n">FieldContainer</span>
         <span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># other containers as subgroups</span>
         <span class="k">if</span> <span class="n">containers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">FieldContainer</span><span class="p">(</span>
-                    <span class="n">fieldrecipes_kwargs</span><span class="o">=</span><span class="n">fieldrecipes_kwargs</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_container</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">internals</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"uid"</span><span class="p">]</span>  <span class="c1"># names of internal fields/groups</span>
-
-    <span class="k">def</span> <span class="nf">new_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">fkws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes_kwargs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">FieldContainer</span><span class="p">(</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">fieldrecipes_kwargs</span><span class="o">=</span><span class="n">fkws</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">key</span>
-        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">FieldContainer</span><span class="p">):</span>
@@ -3494,6 +3501,13 @@ if needed.</p>
     <span class="k">def</span> <span class="nf">add_alias</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alias</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 
+    <span class="k">def</span> <span class="nf">add_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">containers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">FieldContainer</span><span class="p">(</span>
+            <span class="n">fieldrecipes_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes_kwargs</span><span class="p">,</span>
+            <span class="n">withunits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">withunits</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_getitem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">force_derived</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">update_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -3504,6 +3518,7 @@ if needed.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes</span><span class="p">:</span>
                 <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">func</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
                 <span class="n">accept_kwargs</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span><span class="o">.</span><span class="n">varkw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="n">func_kwargs</span> <span class="o">=</span> <span class="n">get_kwargs</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
                 <span class="n">dkwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldrecipes_kwargs</span>
@@ -3524,9 +3539,10 @@ if needed.</p>
                             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
                         <span class="p">}</span>
                     <span class="p">)</span>
-                <span class="c1"># finally, instatiate field</span>
-                <span class="c1"># print("Instantiated field '%s'" % key)</span>
+                <span class="c1"># finally, instantiate field</span>
                 <span class="n">field</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">withunits</span> <span class="ow">and</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">field</span> <span class="o">=</span> <span class="n">field</span> <span class="o">*</span> <span class="n">units</span>
                 <span class="k">if</span> <span class="n">update_dict</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span>
                 <span class="k">return</span> <span class="n">field</span>
@@ -3585,7 +3601,8 @@ Returns</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/fields.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">175</span>
+<span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span>
 <span class="normal">179</span>
@@ -3596,8 +3613,7 @@ Returns</p>
 <span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a string representation of the object.</span>
 <span class="sd">    Returns</span>
@@ -4569,7 +4585,9 @@ groupwise_shape: Require shapes to be the same within a group</p>
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BaseDataset</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">MixinMeta</span><span class="p">):</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BaseDataset</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">MixinMeta</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">,</span>
@@ -4590,11 +4608,12 @@ groupwise_shape: Require shapes to be the same within a group</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunksize</span> <span class="o">=</span> <span class="n">chunksize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">virtualcache</span> <span class="o">=</span> <span class="n">virtualcache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">overwritecache</span> <span class="o">=</span> <span class="n">overwritecache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">withunits</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Let's find the data and metadata for the object at 'path'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_raw</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">FieldContainer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">FieldContainer</span><span class="p">(</span><span class="n">withunits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">withunits</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Specified path '</span><span class="si">%s</span><span class="s2">' does not exist."</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -4605,6 +4624,7 @@ groupwise_shape: Require shapes to be the same within a group</p>
             <span class="n">virtualcache</span><span class="o">=</span><span class="n">virtualcache</span><span class="p">,</span>
             <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">snap</span><span class="o">=</span><span class="bp">self</span><span class="p">),</span>
             <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__dask_tokenize__</span><span class="p">(),</span>
+            <span class="n">withunits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">withunits</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">res</span> <span class="o">=</span> <span class="n">astrodask</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">loadkwargs</span><span class="p">)</span>
@@ -4890,14 +4910,14 @@ Returns</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
 <span class="normal">223</span>
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
-<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">__dask_tokenize__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">__dask_tokenize__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Token for dask to be derived -- naively from the file location.</span>
 <span class="sd">    Returns</span>
@@ -4929,9 +4949,7 @@ Returns</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">204</span>
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
@@ -4942,7 +4960,9 @@ Returns</p>
 <span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
-<span class="normal">215</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Hash for Dataset instance to be derived from the file location.</span>
 
@@ -4981,9 +5001,7 @@ Returns</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
 <span class="normal">152</span>
@@ -4994,7 +5012,9 @@ Returns</p>
 <span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
-<span class="normal">160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a string representation of the object.</span>
 <span class="sd">    Returns</span>
@@ -5037,9 +5057,7 @@ Parameters</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
@@ -5072,7 +5090,9 @@ Parameters</p>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
-<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listfields</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listfields</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Print information about the dataset.</span>
 <span class="sd">    Parameters</span>
@@ -5132,14 +5152,14 @@ Returns</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span>
-<span class="normal">236</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">return_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldContainer</span><span class="p">:</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">return_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldContainer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return the data container.</span>
 <span class="sd">    Returns</span>
@@ -5186,9 +5206,7 @@ cast_uints
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">240</span>
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
@@ -5271,7 +5289,9 @@ cast_uints
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">fname</span><span class="p">,</span>
     <span class="n">fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">Array</span><span class="p">]]]]</span> <span class="o">=</span> <span class="s2">"all"</span><span class="p">,</span>
@@ -5371,8 +5391,8 @@ cast_uints
 <code class="highlight language-python"><span class="n">validate_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
       <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
 
 </h4>
@@ -5390,9 +5410,7 @@ kwargs</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
@@ -5405,7 +5423,9 @@ kwargs</p>
 <span class="normal">197</span>
 <span class="normal">198</span>
 <span class="normal">199</span>
-<span class="normal">200</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
 <span class="k">def</span> <span class="nf">validate_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
@@ -5454,9 +5474,7 @@ kwargs</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
 <span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
@@ -5469,7 +5487,13 @@ kwargs</p>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">BaseDataset</span><span class="p">):</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">BaseDataset</span><span class="p">):</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">validate_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
@@ -5485,6 +5509,10 @@ kwargs</p>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_clean_metadata_from_raw</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">rawmetadata</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -5526,9 +5554,7 @@ kwargs</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
@@ -5540,7 +5566,9 @@ kwargs</p>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">validate_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Validate whether the given path is a valid path for this dataset.</span>
@@ -5590,13 +5618,7 @@ kwargs</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/interface.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">355</span>
 <span class="normal">356</span>
 <span class="normal">357</span>
 <span class="normal">358</span>
@@ -5625,7 +5647,13 @@ kwargs</p>
 <span class="normal">381</span>
 <span class="normal">382</span>
 <span class="normal">383</span>
-<span class="normal">384</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Selector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Selector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Base Class for data selection decorator factory"""</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -5735,7 +5763,12 @@ kwargs</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/io.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
@@ -5831,24 +5864,7 @@ kwargs</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ChunkedHDF5Loader</span><span class="p">(</span><span class="n">Loader</span><span class="p">):</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ChunkedHDF5Loader</span><span class="p">(</span><span class="n">Loader</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tempfile</span> <span class="o">=</span> <span class="s2">""</span>
@@ -5873,27 +5889,21 @@ kwargs</p>
         <span class="n">token</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
         <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
         <span class="n">virtualcache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
         <span class="n">cachefp</span> <span class="o">=</span> <span class="n">return_hdf5cachepath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cachefp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cachefp</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
                 <span class="c1"># we are done; just use cached version</span>
                 <span class="n">datadict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_cachefile</span><span class="p">(</span>
-                    <span class="n">cachefp</span><span class="p">,</span>
-                    <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
-                    <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span>
-                    <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="n">derivedfields_kwargs</span><span class="p">,</span>
+                    <span class="n">cachefp</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="n">datadict</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">create_cachefile</span><span class="p">(</span><span class="n">fileprefix</span><span class="o">=</span><span class="n">fileprefix</span><span class="p">,</span> <span class="n">virtualcache</span><span class="o">=</span><span class="n">virtualcache</span><span class="p">)</span>
 
         <span class="n">datadict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_cachefile</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">,</span>
-            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
-            <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span>
-            <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="n">derivedfields_kwargs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">datadict</span>
 
@@ -5950,16 +5960,10 @@ kwargs</p>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cachefp</span><span class="p">)</span>  <span class="c1"># remove failed attempt at merging file</span>
             <span class="k">raise</span> <span class="n">ex</span>
 
-    <span class="k">def</span> <span class="nf">load_cachefile</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_cachefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
         <span class="n">datadict</span> <span class="o">=</span> <span class="n">load_datadict_old</span><span class="p">(</span>
-            <span class="n">location</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
-            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
-            <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span>
-            <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="n">derivedfields_kwargs</span><span class="p">,</span>
+            <span class="n">location</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">datadict</span>
 </code></pre></div></td></tr></table></div>
@@ -6000,7 +6004,18 @@ Parameters</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/io.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
@@ -6021,18 +6036,7 @@ Parameters</p>
 <span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_chunkedfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileprefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_chunkedfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileprefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get all files in directory with given prefix.</span>
 <span class="sd">    Parameters</span>
@@ -6087,17 +6091,17 @@ Parameters</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/io.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileprefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileprefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Take a quick glance at the metadata."""</span>
     <span class="n">cachefp</span> <span class="o">=</span> <span class="n">return_hdf5cachepath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cachefp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cachefp</span><span class="p">):</span>
@@ -6141,7 +6145,8 @@ Parameters</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/io.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">32</span>
+<span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
@@ -6168,12 +6173,7 @@ Parameters</p>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HDF5Loader</span><span class="p">(</span><span class="n">Loader</span><span class="p">):</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HDF5Loader</span><span class="p">(</span><span class="n">Loader</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">""</span>
@@ -6185,18 +6185,14 @@ Parameters</p>
         <span class="n">token</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
         <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
         <span class="n">virtualcache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
         <span class="n">tree</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">walk_hdf5file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">)</span>
         <span class="n">file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
         <span class="n">datadict</span> <span class="o">=</span> <span class="n">load_datadict_old</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
-            <span class="n">file</span><span class="p">,</span>
-            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
-            <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span>
-            <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="n">derivedfields_kwargs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file</span>
         <span class="k">return</span> <span class="n">datadict</span>
@@ -6237,11 +6233,11 @@ Parameters</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/io.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Take a quick glance at the metadata."""</span>
     <span class="n">tree</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">walk_hdf5file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
@@ -6279,39 +6275,39 @@ Parameters</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/io.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ZarrLoader</span><span class="p">(</span><span class="n">Loader</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ZarrLoader</span><span class="p">(</span><span class="n">Loader</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">""</span>
@@ -6323,7 +6319,7 @@ Parameters</p>
         <span class="n">token</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
         <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
         <span class="n">virtualcache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
         <span class="n">tree</span> <span class="o">=</span> <span class="p">{}</span>
@@ -6334,8 +6330,8 @@ Parameters</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
             <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
             <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">,</span>
-            <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="n">derivedfields_kwargs</span><span class="p">,</span>
             <span class="n">filetype</span><span class="o">=</span><span class="s2">"zarr"</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">datadict</span>
 
@@ -6375,11 +6371,11 @@ Parameters</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/io.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Take a quick glance at the metadata."""</span>
     <span class="n">tree</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">walk_zarrfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
@@ -6404,7 +6400,7 @@ Parameters</p>
 
 
 <h3 id="astrodask.io.load_datadict_old" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">load_datadict_old</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">groups_load</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">token</span> <span class="o">=</span> <span class="s1">''</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">derivedfields_kwargs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lazy</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">filetype</span> <span class="o">=</span> <span class="s1">'hdf5'</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">load_datadict_old</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">groups_load</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">token</span> <span class="o">=</span> <span class="s1">''</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">derivedfields_kwargs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lazy</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">filetype</span> <span class="o">=</span> <span class="s1">'hdf5'</span><span class="p">,</span> <span class="n">withunits</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span></code>
 
 </h3>
 
@@ -6415,7 +6411,24 @@ Parameters</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/io.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
@@ -6534,47 +6547,7 @@ Parameters</p>
 <span class="normal">335</span>
 <span class="normal">336</span>
 <span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_datadict_old</span><span class="p">(</span>
+<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_datadict_old</span><span class="p">(</span>
     <span class="n">location</span><span class="p">,</span>
     <span class="n">file</span><span class="p">,</span>
     <span class="n">groups_load</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -6583,6 +6556,7 @@ Parameters</p>
     <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># if true, call da.from_array delayed</span>
     <span class="n">filetype</span><span class="o">=</span><span class="s2">"hdf5"</span><span class="p">,</span>
+    <span class="n">withunits</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""</span>
     <span class="c1"># TODO: Refactor and rename</span>
@@ -6600,7 +6574,9 @@ Parameters</p>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Unknown filetype ''"</span> <span class="o">%</span> <span class="n">filetype</span><span class="p">)</span>
 
     <span class="c1"># hosting all data</span>
-    <span class="n">rootcontainer</span> <span class="o">=</span> <span class="n">FieldContainer</span><span class="p">(</span><span class="n">fieldrecipes_kwargs</span><span class="o">=</span><span class="n">derivedfields_kwargs</span><span class="p">)</span>
+    <span class="n">rootcontainer</span> <span class="o">=</span> <span class="n">FieldContainer</span><span class="p">(</span>
+        <span class="n">fieldrecipes_kwargs</span><span class="o">=</span><span class="n">derivedfields_kwargs</span><span class="p">,</span> <span class="n">withunits</span><span class="o">=</span><span class="n">withunits</span>
+    <span class="p">)</span>
 
     <span class="n">datagroups</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># names of groups with datasets</span>
     <span class="c1"># othergroups = []  # names of groups without datasets</span>
@@ -6685,45 +6661,19 @@ Parameters</p>
             <span class="n">container</span><span class="p">[</span><span class="n">fieldname</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">rootcontainer</span>
 
-    <span class="c1"># instantiate at least one field</span>
-
-    <span class="k">def</span> <span class="nf">instantiate_one_field</span><span class="p">(</span><span class="n">container</span><span class="p">:</span> <span class="n">FieldContainer</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">withgroups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">withrecipes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">withgroups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">withrecipes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span>
-            <span class="c1"># raise ValueError("Data container is empty, this is unexpected.")</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">/</span> <span class="n">k</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">[</span><span class="s2">"datasets"</span><span class="p">]</span> <span class="k">if</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">continue</span>  <span class="c1"># no dataset info</span>
-            <span class="c1"># tree_entry = res[0]</span>
-            <span class="c1"># calling will instantiate.</span>
-            <span class="n">container</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-            <span class="k">break</span>
-
-    <span class="n">walk_container</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">handler_group</span><span class="o">=</span><span class="n">instantiate_one_field</span><span class="p">)</span>
+    <span class="n">dtsdict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">[</span><span class="s2">"datasets"</span><span class="p">]}</span>
 
     <span class="c1"># create uids fields for all containers</span>
     <span class="k">def</span> <span class="nf">create_uids</span><span class="p">(</span><span class="n">container</span><span class="p">:</span> <span class="n">FieldContainer</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">nparts</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="n">chunks</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">withgroups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">withrecipes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">withgroups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">withrecipes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-            <span class="n">nparts</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">chunks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="c1"># make same shape as other 1D arrays.</span>
-                <span class="n">chunks</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">chunks</span>
-                <span class="k">break</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># alternatively, attempt to use chunks from multi-dim array until found something better.</span>
-                <span class="n">chunks</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
+            <span class="n">dpath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">"/"</span> <span class="o">+</span> <span class="n">k</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">dtsdict</span><span class="p">[</span><span class="n">dpath</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">nparts</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">nparts</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">container</span><span class="p">[</span><span class="s2">"uid"</span><span class="p">]</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nparts</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)</span>
+            <span class="c1"># TODO: as we do not load any fields any more we do not have a reference for the dask chunking.</span>
+            <span class="n">container</span><span class="p">[</span><span class="s2">"uid"</span><span class="p">]</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nparts</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">"no uid created for </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="n">container</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -7177,18 +7127,7 @@ newdict</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/series.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -7224,10 +7163,21 @@ newdict</p>
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ArepoSimulation</span><span class="p">(</span><span class="n">DatasetSeries</span><span class="p">):</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ArepoSimulation</span><span class="p">(</span><span class="n">DatasetSeries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A container for an arepo simulation."""</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">async_caching</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">async_caching</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -7316,8 +7266,7 @@ newdict</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/series.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 39</span>
-<span class="normal"> 40</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 40</span>
 <span class="normal"> 41</span>
 <span class="normal"> 42</span>
 <span class="normal"> 43</span>
@@ -7494,7 +7443,18 @@ newdict</p>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
-<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DatasetSeries</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DatasetSeries</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A container for collection of interface instances"""</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -7503,7 +7463,7 @@ newdict</p>
         <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span>
         <span class="n">datasetclass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">lazy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># lazy will only initialize data sets on demand.</span>
+        <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># lazy will only initialize data sets on demand.</span>
         <span class="n">async_caching</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">interface_kwargs</span>
@@ -7514,7 +7474,7 @@ newdict</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">hash</span> <span class="o">=</span> <span class="n">hash_path</span><span class="p">(</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadatafile</span> <span class="o">=</span> <span class="n">return_cachefile_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span> <span class="s2">"data.json"</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="n">lazy</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -7525,17 +7485,20 @@ newdict</p>
         <span class="n">gen</span> <span class="o">=</span> <span class="n">map_interface_args</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">dec</span><span class="p">(</span><span class="n">datasetclass</span><span class="p">)(</span><span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">gen</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lazy</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">"Have not cached this data series. Can take a while."</span><span class="p">)</span>
             <span class="n">dct</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">)):</span>
-                <span class="n">dct</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">))</span>
+            <span class="p">):</span>
+                <span class="n">rawmeta</span> <span class="o">=</span> <span class="n">load_metadata</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="c1"># class method does not initiate obj.</span>
+                <span class="n">dct</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">_clean_metadata_from_raw</span><span class="p">(</span><span class="n">rawmeta</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">dct</span>
         <span class="k">elif</span> <span class="n">async_caching</span><span class="p">:</span>
             <span class="c1"># hacky and should not be here this explicitly, just a proof of concept</span>
-            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-                <span class="n">loader</span> <span class="o">=</span> <span class="n">astrodask</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">determine_loader</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">loader</span><span class="p">)</span>
+            <span class="c1"># for p in paths:</span>
+            <span class="c1">#     loader = astrodask.io.determine_loader(p)</span>
             <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -7627,8 +7590,10 @@ newdict</p>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">props_compare</span><span class="p">:</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">candidates_props</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">-</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
             <span class="n">idxlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">idxlist</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">idxlist</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Ambiguous selection request"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxlist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No candidate found."</span><span class="p">)</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="n">idxlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="c1"># TODO: reintroduce tolerance check</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
@@ -7656,8 +7621,13 @@ newdict</p>
                     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
                     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1000</span>  <span class="c1"># dont want large obs here...</span>
+                    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -7704,11 +7674,7 @@ newdict</p>
 
       <details class="quote">
         <summary>Source code in <code>src/astrodask/series.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
@@ -7771,7 +7737,13 @@ newdict</p>
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
-<span class="normal">176</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7834,8 +7806,10 @@ newdict</p>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">props_compare</span><span class="p">:</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">candidates_props</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">-</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
         <span class="n">idxlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">idxlist</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">idxlist</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Ambiguous selection request"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxlist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No candidate found."</span><span class="p">)</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="n">idxlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
     <span class="c1"># TODO: reintroduce tolerance check</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
@@ -7874,11 +7848,11 @@ newdict</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/series.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DirectoryCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DirectoryCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A catalog consisting of interface instances contained in a directory."""</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
@@ -7927,12 +7901,12 @@ newdict</p>
 
         <details class="quote">
           <summary>Source code in <code>src/astrodask/series.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HomogeneousSeries</span><span class="p">(</span><span class="n">DatasetSeries</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HomogeneousSeries</span><span class="p">(</span><span class="n">DatasetSeries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Series consisting of same-type data sets."""</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">):</span>
