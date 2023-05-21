@@ -151,7 +151,11 @@ class ChunkedHDF5Loader(Loader):
 
         """
 
-        files = [join(self.path, f) for f in os.listdir(self.path)]
+        fns = [f for f in os.listdir(self.path)]
+        files = [join(self.path, f) for f in fns]
+        files = [
+            f for i, f in enumerate(files) if not fns[i].startswith(".")
+        ]  # ignore hidden files
         files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
         if fileprefix is not None:
             files = np.array(
@@ -164,9 +168,11 @@ class ChunkedHDF5Loader(Loader):
             files = np.array([f for f in files if f.startswith(prfx)])
         if len(set(prfxs)) > 1:
             # print("Available prefixes:", set(prfxs))
-            raise ValueError(
-                "More than one file prefix in directory, specify 'fileprefix'."
+            msg = (
+                "More than one file prefix in directory '%s', specify 'fileprefix'."
+                % self.path
             )
+            raise ValueError(msg)
         nmbrs = [int(f.split(".")[-2]) for f in files]
         sortidx = np.argsort(nmbrs)
         files = files[sortidx]
