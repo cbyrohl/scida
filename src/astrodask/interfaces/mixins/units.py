@@ -63,6 +63,7 @@ def extract_units_from_attrs(
     udict["velocity"] = str_to_unit("cm/s", ureg)
     udict["time"] = str_to_unit("s", ureg)
     if mode == "mks":
+        raise NotImplementedError("TBD.")
         udict["length"] = str_to_unit("m", ureg)
         udict["mass"] = str_to_unit("kg", ureg)
         udict["velocity"] = str_to_unit("m/s", ureg)
@@ -72,7 +73,7 @@ def extract_units_from_attrs(
             cstr = "code_" + k
             if cstr in ureg:
                 udict[k] = str_to_unit(cstr, ureg)
-    else:
+    if mode not in ["code", "mks", "cgs"]:
         raise KeyError("Unknown unit mode '%s'." % mode)
     if "h" in ureg:
         udict["h"] = str_to_unit("h", ureg)
