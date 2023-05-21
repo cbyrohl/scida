@@ -53,7 +53,20 @@ data:
         - TNG300-1
       identifiers:
           Parameters:
-            InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics_201602/ics_illustrisTNGboxes/L205n2500TNG/output/ICs
+            InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics/ics_illustrisTNGboxes/L205n2500TNG/output/ICs
+  TNG300-2:
+      <<: *tng_params
+      identifiers:
+          Parameters:
+            InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics/ics_illustrisTNGboxes/L205n1250TNG/output/ICs
+  TNG300-3:
+      <<: *tng_params
+      identifiers:
+          Parameters:
+            InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics/ics_illustrisTNGboxes/L205n625TNG/output/ICs
+
+
+
 
   # Illustris does not have config or header attributes for identification in hdf5 files
   Illustris:
