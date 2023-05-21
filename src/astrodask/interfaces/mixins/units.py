@@ -104,7 +104,7 @@ def extract_units_from_attrs(
     ukeys = ["length", "mass", "velocity", "time", "h", "a"]
     if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
         if mode != "cgs":
-            raise ValueError("Only cgs supported here.")
+            log.debug("Only have cgs conversion instead of code units.")
         for k in ukeys:
             if mode == "code" and k == "h":
                 # TODO: double check this...
