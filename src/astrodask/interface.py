@@ -19,18 +19,23 @@ from astrodask.registries import dataset_type_registry
 log = logging.getLogger(__name__)
 
 
+def create_MixinDataset(cls, mixins):
+    newcls = cls
+    # print("mixins", mixins, cls)
+    if isinstance(mixins, list) and len(mixins) > 0:
+        name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
+        # adjust entry point if __init__ available in some mixin
+        nms = dict(cls.__dict__)
+        # need to make sure first mixin init is called over cls init
+        nms["__init__"] = mixins[0].__init__
+        newcls = type(name, (*mixins, cls), nms)
+    return newcls
+
+
 class MixinMeta(type):
     def __call__(cls, *args, **kwargs):
-        newcls = cls
         mixins = kwargs.pop("mixins", None)
-        # print("mixins", mixins, cls)
-        if isinstance(mixins, list) and len(mixins) > 0:
-            name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
-            # adjust entry point if __init__ available in some mixin
-            nms = dict(cls.__dict__)
-            # need to make sure first mixin init is called over cls init
-            nms["__init__"] = mixins[0].__init__
-            newcls = type(name, (*mixins, cls), nms)
+        newcls = create_MixinDataset(cls, mixins)
         return type.__call__(newcls, *args, **kwargs)
 
 

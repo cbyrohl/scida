@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from astrodask.convenience import _determine_type
 from astrodask.helpers_misc import hash_path
+from astrodask.interface import create_MixinDataset
 from astrodask.io import load_metadata
 from astrodask.misc import map_interface_args, return_cachefile_path
 from astrodask.registries import dataseries_type_registry
@@ -53,7 +54,6 @@ class DatasetSeries(object):
     ):
         self.paths = paths
         self.names = names
-        self._dataset_cls = datasetclass
         self.hash = hash_path("".join([str(p) for p in paths]))
         self._metadata = None
         self._metadatafile = return_cachefile_path(os.path.join(self.hash, "data.json"))
@@ -64,6 +64,11 @@ class DatasetSeries(object):
             if not (p.exists()):
                 raise ValueError("Specified path '%s' does not exist." % p)
         dec = delay_init  # lazy loading
+
+        # Catch Mixins and create type:
+        mixins = interface_kwargs.pop("mixins", [])
+        datasetclass = create_MixinDataset(datasetclass, mixins)
+        self._dataset_cls = datasetclass
 
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
         self.datasets = [dec(datasetclass)(p, *a, **kw) for p, a, kw in gen]
