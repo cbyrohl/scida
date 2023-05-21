@@ -25,6 +25,7 @@ fields:
   Offsets: "no_units" # "no_units" indicates that no field has units in this group
   # only do this for fields that have wrong or no metadata
   PartType0:
+    CenterOfMass: code_length
     Coordinates: code_length
     Density: code_mass / code_length^3
     ElectronAbundance:
@@ -38,22 +39,28 @@ fields:
     GFM_Metals:
     GFM_MetalsTagged:
     GFM_WindDMVelDisp: km / s
+    GFM_WindHostHaloMass: code_mass
     InternalEnergy: (km / s)^2
     InternalEnergyOld: (km / s)^2
     Machnumber:
     MagneticField: (h / a^2) * (code_pressure)^(1/2)
     MagneticFieldDivergence: (h^3 / a^2) * code_mass^(1/2) * (km/s) * (ckpc)^(-5/2)
     NeutralHydrogenAbundance:
+    # TODO: Pressure?
     SmoothingLength: code_length
+    SubfindDMDensity: code_mass / code_length^3
     Temperature: K
     TimebinHydro:
     Volume: code_length^3
   PartType1:
+    SubfindDMDensity: code_mass / code_length^3
   PartType3:
     ParentID:
     TracerID:
     FluidQuantities: # there are multiple units in the same array; cannot do
   PartType4:
+    BirthPos: code_length
+    BirthVel: a^(1/2) * km / s
     GFM_InitialMass: code_mass
     GFM_Metallicity:
     GFM_Metals:
@@ -61,10 +68,13 @@ fields:
     GFM_StellarFormationTime: # expressed as signed scale factor
     GFM_StellarPhotometrics:  # not supported mag for now
     StellarHsml:
+    SubfindDMDensity: code_mass / code_length^3
   PartType5:
     BH_BPressure: (h^4 / a^4) * (1e10 Msun) * (km / s)^2 / ckpc^3
     BH_CumEgyInjection_QM: code_mass * code_length^2 / (code_time / h)^2
+    BH_CumEgyInjection_RM: code_mass * code_length^2 / (code_time / h)^2
     BH_CumMassGrowth_QM: code_mass
+    BH_CumMassGrowth_RM: code_mass
     BH_Density: code_mass / code_length^3
     BH_Hsml: code_length
     BH_HostHaloMass: code_mass
@@ -72,13 +82,17 @@ fields:
     BH_Mass_bubbles: code_mass
     BH_Mass_ini: code_mass
     BH_Mdot: code_mass / (code_time / h)
+    BH_MdotBondi: code_mass / (code_time / h)
+    BH_MdotEddington: code_mass / (code_time / h)
     BH_Pressure:  # TODO: metadata cgs factor seems wrong. double check
       units: code_mass / code_length / (code_time / h)^2
       override: true
-
     BH_Progs:
     BH_U: (km / s)^2
     HostHaloMass: code_mass
+    SubfindDMDensity: code_mass / code_length^3
+    SubfindDensity: code_mass / code_length^3
+
   # no metadata attributes in group catalogs, thus have to add all manually
   Group:
     GroupBHMass: code_mass
