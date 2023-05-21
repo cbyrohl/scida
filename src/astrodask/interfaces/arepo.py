@@ -106,7 +106,9 @@ class BaseSnapshot(Dataset):
         return prfxs[0]
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, expect_grp=False, **kwargs
+    ) -> bool:
         """
         Check if path is valid for this interface.
         Parameters
@@ -149,7 +151,9 @@ class BaseSnapshot(Dataset):
                         for k in ["Ngroups_ThisFile", "Ngroups_Total"]
                     ]
                 )
-                if is_grp or is_snap:
+                if is_grp:
+                    return True
+                if is_snap and not expect_grp:
                     return True
         return False
 
@@ -499,7 +503,7 @@ class ArepoCatalog(ArepoSnapshot):
     @classmethod
     def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
         kwargs["fileprefix"] = "groups"
-        valid = super().validate_path(path, *args, **kwargs)
+        valid = super().validate_path(path, *args, expect_grp=True, **kwargs)
         return valid
 
 
