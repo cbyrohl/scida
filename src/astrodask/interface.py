@@ -123,7 +123,8 @@ class BaseDataset(metaclass=MixinMeta):
         if self._info_custom() is not None:
             rep += self._info_custom()
         rep += sprint("=== data ===")
-        for k, v in self.data.items():
+        for k in sorted(self.data.keys()):
+            v = self.data[k]
             if isinstance(v, FieldContainer):
                 length = v.fieldlength
                 count = v.fieldcount
