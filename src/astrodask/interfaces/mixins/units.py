@@ -76,7 +76,10 @@ def extract_units_from_attrs(
         udict["a"] = str_to_unit("a", ureg)
     # nothing to do if mode == "code" as we take values as they are
     cgsfactor = ureg.Quantity(1.0)
-    # for non-codeunits, we need to be provided some conversion factor
+    # for non-codeunits, we need to be provided some conversion factor or explicit units
+    has_convfactor = False
+    has_expl_units = False
+    cgskey = None
     if mode != "code":
         # the common mode is to expect some hints how to convert to cgs
         # get the conversion factor
@@ -84,9 +87,11 @@ def extract_units_from_attrs(
         if mode + "units" in cgskey:
             # these are the units not the normalization factor
             cgskey.remove(mode + "units")
-        assert len(cgskey) == 1
-        cgskey = cgskey[0]
-        cgsfactor = attrs[cgskey]
+        assert len(cgskey) <= 1
+        has_convfactor = len(cgskey) > 0
+        if has_convfactor:
+            cgskey = cgskey[0]
+            cgsfactor = attrs[cgskey]
     # get dimensions
     unit = cgsfactor
     if isinstance(unit, np.ndarray):
@@ -94,8 +99,8 @@ def extract_units_from_attrs(
         unit = unit[0]
     if unit == 0.0:
         unit = ureg.Quantity(1.0)  # zero makes no sense.
-    # TODO: Missing a scaling!
-    # TODO: Missing h scaling!
+    # TODO: Missing a scaling?
+    # TODO: Missing h scaling?
     ukeys = ["length", "mass", "velocity", "time", "h", "a"]
     if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
         if mode != "cgs":
@@ -136,12 +141,16 @@ def extract_units_from_attrs(
             # parsing from the description is usually messy and not guaranteed to work. We thus allow failure here.
             try:
                 unit *= str_to_unit(unitstr, ureg)
+                has_expl_units = True
             except pint.errors.UndefinedUnitError:
                 log.info(
                     "Cannot parse unit string '%s' from metadata description. Skipping."
                     % unitstr
                 )
             return unit
+    if not has_expl_units and not has_convfactor:
+        if require:
+            raise ValueError("Could not find explicit units nor cgs-factor.")
     if require:
         raise ValueError("Could not find units.")
     return str_to_unit("", ureg)

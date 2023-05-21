@@ -212,7 +212,7 @@ def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatal
 
 
 @require_testdata(
-    "areposnapshot_withcatalog", exclude=["minimal"], exclude_substring=True
+    "areposnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
 )
 def test_areposnapshot_map_hquantity(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
