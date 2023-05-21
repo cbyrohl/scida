@@ -58,12 +58,16 @@ def extract_units_from_attrs(
     """
     assert ureg is not None, "Always require passing registry now."
     udict = {}
-    if mode == "cgs":
-        udict["length"] = str_to_unit("cm", ureg)
-        udict["mass"] = str_to_unit("g", ureg)
-        udict["velocity"] = str_to_unit("cm/s", ureg)
+    udict["length"] = str_to_unit("cm", ureg)
+    udict["mass"] = str_to_unit("g", ureg)
+    udict["velocity"] = str_to_unit("cm/s", ureg)
+    udict["time"] = str_to_unit("s", ureg)
+    if mode == "mks":
+        udict["length"] = str_to_unit("m", ureg)
+        udict["mass"] = str_to_unit("kg", ureg)
+        udict["velocity"] = str_to_unit("m/s", ureg)
         udict["time"] = str_to_unit("s", ureg)
-    elif mode == "code":
+    if mode == "code":
         for k in ["length", "mass", "velocity", "time"]:
             cstr = "code_" + k
             if cstr in ureg:
