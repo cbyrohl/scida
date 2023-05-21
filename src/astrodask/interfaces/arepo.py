@@ -12,6 +12,7 @@ from dask import delayed
 from numba import jit, njit
 from numpy.typing import NDArray
 
+from astrodask.discovertypes import _determine_mixins
 from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import (
     computedecorator,
@@ -19,8 +20,8 @@ from astrodask.helpers_misc import (
     get_kwargs,
     parse_humansize,
 )
-from astrodask.interface import Dataset, Selector
-from astrodask.interfaces.mixins import SpatialCartesian3DMixin
+from astrodask.interface import Dataset, Selector, create_MixinDataset
+from astrodask.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
 from astrodask.io import load_metadata
 
 log = logging.getLogger(__name__)
@@ -187,11 +188,24 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
                 # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
                 prfx = self._get_fileprefix(self.catalog)
-                self.catalog = ArepoCatalog(
+
+                # explicitly need to create unitaware class for catalog as needed
+                cls = ArepoCatalog
+                withunits = kwargs.get("units", False)
+                mixins = []
+                if withunits:
+                    mixins += [UnitMixin]
+
+                other_mixins = _determine_mixins(path=path)
+                mixins += other_mixins
+                cls = create_MixinDataset(cls, mixins)
+
+                self.catalog = cls(
                     self.catalog,
                     virtualcache=virtualcache,
                     fileprefix=prfx,
                     units=self.withunits,
+                    ureg=self.ureg,
                 )
                 if "Redshift" in self.catalog.header and "Redshift" in self.header:
                     z_catalog = self.catalog.header["Redshift"]

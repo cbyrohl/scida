@@ -12,10 +12,11 @@ from typing import Optional, Union
 import requests
 
 from astrodask.config import get_config, get_simulationconfig
+from astrodask.discovertypes import _determine_mixins, _determine_type
 from astrodask.interface import Dataset
-from astrodask.interfaces.mixins import CosmologyMixin, UnitMixin
+from astrodask.interfaces.mixins import UnitMixin
 from astrodask.io import load_metadata
-from astrodask.misc import _determine_type, check_config_for_dataset
+from astrodask.misc import check_config_for_dataset
 from astrodask.registries import dataseries_type_registry, dataset_type_registry
 from astrodask.series import DatasetSeries
 
@@ -265,10 +266,13 @@ def load(
     if force_class is not None:
         cls = force_class
 
-    # indicators for cosmological mixin
-    z = metadata_raw.get("/Header", {}).get("Redshift", None)
-    if z is not None:
-        mixins.append(CosmologyMixin)
+    p = path
+    if metadata_raw is not None:
+        p = None  # if we have metadata, do not pass path (unnecessary IO)
+
+    # we append since unit mixin is added outside of this func right now
+    other_mixins = _determine_mixins(path=p, metadata_raw=metadata_raw)
+    mixins += other_mixins
 
     log.debug("Adding mixins '%s' to dataset." % mixins)
     if hasattr(cls, "_mixins"):

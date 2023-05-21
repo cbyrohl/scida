@@ -180,6 +180,7 @@ class UnitMixin(Mixin):
         self._metadata_raw = {}
 
         ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
+        ureg = kwargs.pop("ureg", ureg)
         self.ureg = self.unitregistry = ureg
 
         super().__init__(*args, **kwargs)

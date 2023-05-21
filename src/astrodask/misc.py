@@ -2,11 +2,8 @@ import io
 import logging
 import os
 import pathlib
-from collections import Counter
 from collections.abc import MutableMapping
-from functools import reduce
-from inspect import getmro
-from typing import List, Optional, Union
+from typing import Optional
 
 import dask.array as da
 import numpy as np
@@ -14,7 +11,6 @@ import numpy as np
 from astrodask.config import get_config, get_simulationconfig
 from astrodask.fields import FieldContainer
 from astrodask.helpers_misc import hash_path
-from astrodask.registries import dataseries_type_registry, dataset_type_registry
 
 log = logging.getLogger(__name__)
 
@@ -197,45 +193,3 @@ def deepdictkeycopy(olddict, newdict) -> None:
         if isinstance(v, MutableMapping):
             newdict[k] = {}
             deepdictkeycopy(v, newdict[k])
-
-
-def _determine_type(
-    path: Union[str, os.PathLike],
-    test_datasets: bool = True,
-    test_dataseries: bool = True,
-    strict: bool = False,
-    **kwargs
-):
-    available_dtypes: List[str] = []
-    reg = dict()
-    if test_datasets:
-        reg.update(**dataset_type_registry)
-    if test_dataseries:
-        reg.update(**dataseries_type_registry)
-
-    for k, dtype in reg.items():
-        try:
-            if dtype.validate_path(path, **kwargs):
-                available_dtypes.append(k)
-        except Exception:
-            log.debug("Exception raised during validate_path of tested type '%s'." % k)
-    if len(available_dtypes) == 0:
-        raise ValueError("Unknown data type.")
-    if len(available_dtypes) > 1:
-        # reduce candidates by looking at most specific ones.
-        inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
-        # try to find candidate that shows up only once across all inheritance trees.
-        # => this will be the most specific candidate(s).
-        count = reduce(lambda x, y: x + y, inheritancecounters)
-        countdict = {k: count[reg[k]] for k in available_dtypes}
-        mincount = min(countdict.values())
-        available_dtypes = [k for k in available_dtypes if count[reg[k]] == mincount]
-        if len(available_dtypes) > 1:
-            # after looking for the most specific candidate(s), do we still have multiple?
-            if strict:
-                raise ValueError(
-                    "Ambiguous data type. Available types:", available_dtypes
-                )
-            else:
-                print("Note: Multiple dataset candidates: ", available_dtypes)
-    return available_dtypes, [reg[k] for k in available_dtypes]
