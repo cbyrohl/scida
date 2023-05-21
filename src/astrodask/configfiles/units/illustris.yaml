@@ -45,6 +45,7 @@ fields:
     MagneticFieldDivergence: (h^3 / a^2) * code_mass^(1/2) * (km/s) * (ckpc)^(-5/2)
     NeutralHydrogenAbundance:
     SmoothingLength: code_length
+    Temperature: K
     TimebinHydro:
     Volume: code_length^3
   PartType1:
