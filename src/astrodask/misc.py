@@ -163,11 +163,21 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique=True):
                         possible_candidate = False
                         break
                     av = attrs[ikey]
+                    matchtype = None
+                    if isinstance(ival, dict):
+                        matchtype = ival.get("match", matchtype)  # default means equal
+                        ival = ival["content"]
+
                     if isinstance(av, bytes):
                         av = av.decode("UTF-8")
-                    if av != ival:
-                        possible_candidate = False
-                        break
+                    if matchtype is None:
+                        if av != ival:
+                            possible_candidate = False
+                            break
+                    elif matchtype == "substring":
+                        if ival not in av:
+                            possible_candidate = False
+                            break
         else:
             possible_candidate = False
         if possible_candidate:

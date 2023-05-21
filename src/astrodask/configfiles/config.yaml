@@ -8,7 +8,7 @@ testdata_path: /fastdata/public/testdata-astrodask  # should be replaced by 'dat
 nthreads: 8
 
 datafolders: ["/fastdata/public/testdata-astrodask", "/vera/ptmp/gc/byrohlc/astrodask-testdata", "/testdata",
-              "/virgotng/universe/IllustrisTNG"]
+              "/virgotng/universe/IllustrisTNG", "/virgotng/mpia/TNG-Cluster/"]
 
 missing_units: "warn"  # "warn", "raise", "ignore"
 

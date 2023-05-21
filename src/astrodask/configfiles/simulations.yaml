@@ -65,6 +65,14 @@ data:
           Parameters:
             InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics/ics_illustrisTNGboxes/L205n625TNG/output/ICs
 
+  TNG-Cluster:
+      <<: *tng_params
+      identifiers:
+        Parameters:
+          ResubmitCommand:
+            content: tngclust
+            match: substring
+
 
 
 
