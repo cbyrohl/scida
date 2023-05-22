@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 from collections.abc import MutableMapping
 from enum import Enum
@@ -51,7 +53,8 @@ class FieldContainer(MutableMapping):
         containers=None,
         aliases=None,
         withunits=False,
-        **kwargs
+        parent: Optional[FieldContainer] = None,
+        **kwargs,
     ):
         if aliases is None:
             aliases = {}
@@ -71,6 +74,7 @@ class FieldContainer(MutableMapping):
             for k in containers:
                 self.add_container(k)
         self.internals = ["uid"]  # names of internal fields/groups
+        self.parent = parent
 
     def merge(self, collection, overwrite=True):
         if not isinstance(collection, FieldContainer):
@@ -235,7 +239,8 @@ class FieldContainer(MutableMapping):
         self.containers[key] = FieldContainer(
             fieldrecipes_kwargs=self.fieldrecipes_kwargs,
             withunits=self.withunits,
-            **kwargs
+            parent=self,
+            **kwargs,
         )
 
     def _getitem(self, key, force_derived=False, update_dict=True):

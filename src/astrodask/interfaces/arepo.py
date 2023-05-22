@@ -190,6 +190,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 prfx = self._get_fileprefix(self.catalog)
 
                 # explicitly need to create unitaware class for catalog as needed
+                # TODO: should just be determined from mixins of parent?
                 cls = ArepoCatalog
                 withunits = kwargs.get("units", False)
                 mixins = []

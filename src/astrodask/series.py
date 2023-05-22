@@ -10,6 +10,7 @@ import numpy as np
 from tqdm import tqdm
 
 from astrodask.convenience import _determine_type
+from astrodask.discovertypes import _determine_mixins
 from astrodask.helpers_misc import hash_path
 from astrodask.interface import create_MixinDataset
 from astrodask.io import load_metadata
@@ -271,10 +272,15 @@ class ArepoSimulation(DatasetSeries):
         spaths = sorted([p for p in Path(outpath).glob(sprefix + "_*")])
 
         assert len(gpaths) == len(spaths)
-        dscls = _determine_type(spaths[0])[1][0]
+        p = spaths[0]
+        cls = _determine_type(p)[1][0]
+
+        mixins = _determine_mixins(path=p)
+        cls = create_MixinDataset(cls, mixins)
+
         super().__init__(
             spaths,
-            datasetclass=dscls,
+            datasetclass=cls,
             catalog=gpaths,
             lazy=lazy,
             async_caching=async_caching,

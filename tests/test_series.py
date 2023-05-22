@@ -59,6 +59,7 @@ def test_areposimulation_lazy(cachedir, testdatapath):
     bs = ArepoSimulation(testdatapath, lazy=True)
     dt0 = time.process_time() - tstart
     assert type(bs.datasets[0]).__name__ == "Delay"
+    print(dt0)
     assert dt0 < 1.0  # should be fast
 
 
@@ -125,3 +126,11 @@ def test_areposimulation_caching(cachedir, testdatapath):
     assert np.isclose(ds2.metadata["redshift"], redshift, rtol=1e-2)
 
     assert ds2.header is not None
+
+
+@require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
+def test_areposimulation_mixins(cachedir, testdatapath):
+    bs = ArepoSimulation(testdatapath)
+    ds = bs.get_dataset(0)
+    assert ds.header is not None  # need some call to instantiate Delay obj
+    assert "CosmologyMixin" in type(ds).__name__
