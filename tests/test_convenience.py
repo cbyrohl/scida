@@ -1,3 +1,9 @@
+import math
+import os
+from contextlib import contextmanager
+
+import h5py
+import pytest
 import yaml
 
 from astrodask.config import get_config
@@ -119,3 +125,68 @@ def test_load_zarrcutout(testdatapath):
     obj = load(testdatapath)
     assert hasattr(obj, "header")
     assert obj.data["Group"]["uid"][0] == 0
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_load_cachefail(cachedir, testdatapath):
+    """Test recovery from failure during cache creation."""
+
+    # fist define a context manager to raise a TimeoutException
+    # after a given number of seconds
+    import signal
+    import time
+
+    class TimeoutException(Exception):
+        pass
+
+    @contextmanager
+    def time_limit(seconds):
+        def signal_handler(signum, frame):
+            raise TimeoutException("Timed out.")
+
+        signal.signal(signal.SIGALRM, signal_handler)
+        signal.alarm(seconds)
+        try:
+            yield
+        finally:
+            signal.alarm(0)
+
+    # explicitly disable catalog discovery
+    loadkwargs = dict(catalog="none")
+
+    dt = 0.3
+    dt_int = int(math.ceil(dt))
+    with pytest.raises(Exception):  # otherwise we interrupted too late for this test...
+        # we cannot use "TimeoutException" as sometimes some other exception is raised during signalling...
+        with time_limit(dt_int):
+            # signal just accepts integer seconds... so we work around it with sleep before
+            time.sleep(dt_int - dt)
+
+            load(testdatapath, **loadkwargs)
+
+    # count total files by walking folders without counting those
+    nfiles = 0
+    for root, dirs, files in os.walk(cachedir):
+        nfiles += len(files)
+    assert (
+        nfiles == 0
+    )  # no cache file should be created on interrupt: a os.remove() was triggered.
+
+    # now let it finish
+    ds = load(testdatapath, **loadkwargs)
+
+    nfiles = 0
+    for root, dirs, files in os.walk(cachedir):
+        nfiles += len(files)
+    assert nfiles > 0  # some caching file should be present.
+
+    # let us explicitly manipulate the cache file to simulate a failure
+    fp = ds.file.filename
+    ds.file.close()
+
+    with h5py.File(fp, "r+") as f:
+        del f.attrs["_cachingcomplete"]
+
+    # attempt load!
+    with pytest.raises(ValueError):  # should fail and request explicit deletion
+        load(testdatapath, **loadkwargs)
