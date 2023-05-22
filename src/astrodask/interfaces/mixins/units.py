@@ -289,15 +289,16 @@ class UnitMixin(Mixin):
                     if not override and not np.isclose(
                         val_cgs_uf, val_cgs_md, rtol=1e-3
                     ):
-                        print("(units were checked against each other in cgs units.)")
-                        print(
-                            "cgs-factor comparison: %.5e (unitfile) != %.5e (metadata)"
-                            % (val_cgs_uf, val_cgs_md)
-                        )
-                        raise ValueError(
+                        # print("(units were checked against each other in cgs units.)")
+                        msg = (
                             "Unit mismatch for '%s': '%s' (unit file) vs. %s (metadata)"
                             % (path, unit, unit_metadata)
                         )
+                        msg += " [cgs-factors %.5e (unitfile) != %.5e (metadata)]" % (
+                            val_cgs_uf,
+                            val_cgs_md,
+                        )
+                        log.warning(msg)
 
                 if unit is None:
                     unit = unit_metadata
