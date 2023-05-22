@@ -200,12 +200,16 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
                 mixins += other_mixins
                 cls = create_MixinDataset(cls, mixins)
 
+                ureg = None
+                if hasattr(self, "ureg"):
+                    ureg = self.ureg
+
                 self.catalog = cls(
                     self.catalog,
                     virtualcache=virtualcache,
                     fileprefix=prfx,
                     units=self.withunits,
-                    ureg=self.ureg,
+                    ureg=ureg,
                 )
                 if "Redshift" in self.catalog.header and "Redshift" in self.header:
                     z_catalog = self.catalog.header["Redshift"]
