@@ -20,7 +20,7 @@ The documentation can be found [here](https://cbyrohl.github.io/astrodask/)
 
 ## Install
 
-You can install _astrodask_ via [pip] from [PyPI]:
+You can install _astrodask_ via [pip](TODO) from [PyPI](https://pypi.org/):
 
 ```console
 $ pip install astrodask
@@ -31,15 +31,9 @@ or do a git clone of this repository:
 ```
 git clone https://github.com/cbyrohl/astrodask
 cd astrodask
-pip install -e .
+pip install .
 ```
 
-It is recommended to start from a clean environment. Using the [anaconda](https://www.anaconda.com/products/individual), create an environment from the provided specifications in the cloned repository, e.g.
-
-```
-conda env create -n astrodask -f ./environment.yml
-pip install -e .
-```
 
 ## First Steps
 Start up a Jupyter notebook server and begin with the 'Getting Started' section of the documentation. You can also find the underlying notebook [here](docs/notebooks/gettingstarted.ipynb).
@@ -52,4 +46,4 @@ _astrodask_ is free and open source software.
 ## Issues
 
 If you encounter any problems,
-please [file an issue] along with a detailed description.
+please [file an issue](https://github.com/cbyrohl/astrodask/issues/new) along with a detailed description.
