@@ -194,11 +194,24 @@ class ChunkedHDF5Loader(Loader):
         try:
             create_mergedhdf5file(cachefp, files, virtual=virtualcache)
         except Exception as ex:
-            os.remove(cachefp)  # remove failed attempt at merging file
+            if os.path.exists(cachefp):
+                os.remove(cachefp)  # remove failed attempt at merging file
             raise ex
+
+        with h5py.File(cachefp, "r+") as hf:
+            hf.attrs["_cachingcomplete"] = True  # mark that caching complete
 
     def load_cachefile(self, location, token="", chunksize="auto", **kwargs):
         self.file = h5py.File(location, "r")
+        hf = self.file
+        cache_valid = False
+        if "_cachingcomplete" in hf.attrs:
+            cache_valid = hf.attrs["_cachingcomplete"]
+        if not cache_valid:
+            raise ValueError(
+                "Cache file '%s' is not valid. Delete file and try again." % location
+            )
+
         datadict = load_datadict_old(
             location, self.file, token=token, chunksize=chunksize, **kwargs
         )

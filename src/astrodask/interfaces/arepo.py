@@ -182,7 +182,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
             if self.catalog is None:
                 self.discover_catalog()
                 # try to discover group catalog in parent directories.
-            if self.catalog is not None:
+            if self.catalog == "none":
+                pass  # this string can be set to explicitly disable catalog
+            elif self.catalog is not None:
                 virtualcache = False  # copy catalog for better performance
                 catalog_kwargs = kwargs.get("catalog_kwargs", {})
                 catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
