@@ -62,7 +62,7 @@ def test_delay_obj(testdatapath):
     assert "Delay" in str(type(snp))
     print(snp)  # triggers __repr__
     assert "Delay" in str(type(snp))
-    snp.data
+    print(snp.data)  # triggers eval of lazy object
     assert "Delay" not in str(type(snp))
 
 
