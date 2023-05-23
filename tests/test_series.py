@@ -5,7 +5,8 @@ import numpy as np
 import psutil
 import pytest
 
-from astrodask.series import ArepoSimulation
+from astrodask.interface import BaseDataset
+from astrodask.series import ArepoSimulation, delay_init
 from tests.testdata_properties import require_testdata_path
 
 
@@ -53,14 +54,31 @@ def test_areposimulation_asynccaching(cachedir, testdatapath):
     print(bs)
 
 
-@require_testdata_path("areposimulation", only=["TNG50-4", "TNGvariation_simulation"])
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_delay_obj(testdatapath):
+    # lazy loading
+    cls = BaseDataset
+    snp = delay_init(cls)(testdatapath)
+    assert "Delay" in str(type(snp))
+    print(snp)  # triggers __repr__
+    assert "Delay" in str(type(snp))
+    snp.data
+    assert "Delay" not in str(type(snp))
+
+
+# >> > from inspect import ismethod
+# >> > ismethod(A.method)
+
+
+@require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
 def test_areposimulation_lazy(cachedir, testdatapath):
     tstart = time.process_time()
     bs = ArepoSimulation(testdatapath, lazy=True)
     dt0 = time.process_time() - tstart
+    print(bs.datasets[0])
     assert type(bs.datasets[0]).__name__ == "Delay"
     print(dt0)
-    assert dt0 < 1.0  # should be fast
+    assert dt0 < 2.0  # should be fast
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])

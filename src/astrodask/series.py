@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 from os.path import join
@@ -20,21 +21,37 @@ from astrodask.registries import dataseries_type_registry
 
 def delay_init(cls):
     class Delay(cls):
-        def __init__(self, *arg, **kwarg):
-            self._arg = arg
-            self._kwarg = kwarg
+        def __init__(self, *args, **kwargs):
+            self._args = args
+            self._kwargs = kwargs
 
-        def __getattr__(self, name):
+        def __getattribute__(self, name):
             """Replace the class with the actual class and initialize it if needed."""
-            arg = self._arg
-            kwarg = self._kwarg
+            # a few special calls do not trigger initialization:
+            if name in [
+                "__repr__",
+                "__str__",
+                "__dir__",
+                "__class__",
+                "_args",
+                "_kwargs",
+            ]:
+                return object.__getattribute__(self, name)
+            elif hasattr(cls, name) and inspect.ismethod(getattr(cls, name)):
+                # do not need to initialize for class methods
+                return getattr(cls, name)
+            arg = self._args
+            kwarg = self._kwargs
             self.__class__ = cls
-            del self._arg
-            del self._kwarg
+            del self._args
+            del self._kwargs
             self.__init__(*arg, **kwarg)
             if name == "evaluate_lazy":
                 return getattr(self, "__repr__")  # some dummy
             return getattr(self, name)
+
+        def __repr__(self):
+            return "<Lazy %s>" % cls.__name__
 
     return Delay
 
