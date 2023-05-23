@@ -45,7 +45,7 @@ def path_hdf5cachefile_exists(path) -> bool:
 
 
 def return_cachefile_path(fname: str) -> Optional[str]:
-    """If path cannot be generated, return False"""
+    """If path cannot be generated, return None"""
     config = get_config()
     if "cache_path" not in config:
         return None

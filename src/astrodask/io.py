@@ -18,6 +18,10 @@ from astrodask.misc import get_container_from_path, return_hdf5cachepath
 log = logging.getLogger(__name__)
 
 
+class InvalidCacheError(Exception):
+    pass
+
+
 class Loader(abc.ABC):
     def __init__(self, path):
         self.path = path
@@ -123,19 +127,33 @@ class ChunkedHDF5Loader(Loader):
         **kwargs
     ):
         cachefp = return_hdf5cachepath(self.path)
-        if cachefp is not None and os.path.isfile(cachefp):
-            if not overwrite:
-                # we are done; just use cached version
-                datadict = self.load_cachefile(
-                    cachefp, token=token, chunksize=chunksize, **kwargs
-                )
-                return datadict
+        # three cases we need to cache:
+        create = False
+        if cachefp is None:
+            # 1. no cachepath given
+            create = True
+        elif not os.path.isfile(cachefp):
+            # 2. no cachefile exists
+            create = True
+        elif overwrite:
+            # 3. cachefile exists, but overwrite=True
+            create = True
 
-        self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
+        if create:
+            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
 
-        datadict = self.load_cachefile(
-            self.location, token=token, chunksize=chunksize, **kwargs
-        )
+        try:
+            datadict = self.load_cachefile(
+                cachefp, token=token, chunksize=chunksize, **kwargs
+            )
+        except InvalidCacheError:
+            # if we get an error, we try to create a new cache file (once)
+            log.info("Invalid cache file, attempting to create new one.")
+            os.remove(cachefp)
+            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
+            datadict = self.load_cachefile(
+                cachefp, token=token, chunksize=chunksize, **kwargs
+            )
         return datadict
 
     def get_chunkedfiles(self, fileprefix: Optional[str] = "") -> list:
@@ -208,7 +226,7 @@ class ChunkedHDF5Loader(Loader):
         if "_cachingcomplete" in hf.attrs:
             cache_valid = hf.attrs["_cachingcomplete"]
         if not cache_valid:
-            raise ValueError(
+            raise InvalidCacheError(
                 "Cache file '%s' is not valid. Delete file and try again." % location
             )
 

@@ -128,7 +128,7 @@ def test_load_zarrcutout(testdatapath):
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_load_cachefail(cachedir, testdatapath):
+def test_load_cachefail(cachedir, testdatapath, caplog):
     """Test recovery from failure during cache creation."""
 
     # fist define a context manager to raise a TimeoutException
@@ -187,6 +187,6 @@ def test_load_cachefail(cachedir, testdatapath):
     with h5py.File(fp, "r+") as f:
         del f.attrs["_cachingcomplete"]
 
-    # attempt load!
-    with pytest.raises(ValueError):  # should fail and request explicit deletion
-        load(testdatapath, **loadkwargs)
+    # attempt load and recover.
+    load(testdatapath, **loadkwargs)
+    assert "Invalid cache file, attempting to create new one." in caplog.text
