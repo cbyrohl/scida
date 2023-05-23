@@ -406,6 +406,12 @@ class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
         subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"]
         subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"]
 
+        # remove "units" for numba funcs
+        if hasattr(subhalogrnr, "magnitude"):
+            subhalogrnr = subhalogrnr.magnitude
+        if hasattr(subhalocellcounts, "magnitude"):
+            subhalocellcounts = subhalocellcounts.magnitude
+
         for key in self.data:
             if not (key.startswith("PartType")):
                 continue

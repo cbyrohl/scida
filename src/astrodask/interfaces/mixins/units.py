@@ -354,3 +354,17 @@ class UnitMixin(Mixin):
         rep += sprint("=== Unit-aware Dataset ===")
         rep += sprint("==========================")
         return rep
+
+    # def save(self, *args, fields: Union[str, Dict[str, Union[List[str], Dict[str, da.Array]]]] = "all", **kwargs):
+    #    print("Wrapping save call with UnitMixin")
+    #    if fields == "all":
+    #        fields = dict()
+    #        newcontainer = FieldContainer()
+
+    #        def handler_field(entry, newpath, parent=None):
+    #            key = pathlib.Path(newpath).name
+    #            cntr = get_container_from_path(newpath, newcontainer, create_missing=True)
+    #            cntr[key] = parent[key].magnitude
+    #            print(entry, newpath, parent)
+    #        walk_container(self.data, handler_field=handler_field)
+    #    super().save(*args, fields=newcontainer, **kwargs)

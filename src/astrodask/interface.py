@@ -246,7 +246,9 @@ class BaseDataset(metaclass=MixinMeta):
     def save(
         self,
         fname,
-        fields: Union[str, Dict[str, Union[List[str], Dict[str, da.Array]]]] = "all",
+        fields: Union[
+            str, Dict[str, Union[List[str], Dict[str, da.Array]]], FieldContainer
+        ] = "all",
         overwrite: bool = True,
         zarr_kwargs: Optional[dict] = None,
         cast_uints: bool = False,
@@ -316,6 +318,9 @@ class BaseDataset(metaclass=MixinMeta):
                     arr = fields[p][k]
                 else:
                     arr = self.data[p][k]
+                if hasattr(arr, "magnitude"):  # if we have units, remove those here
+                    # TODO: save units in metadata!
+                    arr = arr.magnitude
                 if np.any(np.isnan(arr.shape)):
                     arr.compute_chunk_sizes()  # very inefficient (have to do it separately for every array)
                     arr = arr.rechunk(chunks="auto")
