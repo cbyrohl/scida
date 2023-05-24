@@ -28,6 +28,7 @@ def _determine_type(
     test_datasets: bool = True,
     test_dataseries: bool = True,
     strict: bool = False,
+    catch_exception: bool = True,
     **kwargs
 ):
     available_dtypes: List[str] = []
@@ -38,11 +39,20 @@ def _determine_type(
         reg.update(**dataseries_type_registry)
 
     for k, dtype in reg.items():
-        try:
-            if dtype.validate_path(path, **kwargs):
-                available_dtypes.append(k)
-        except Exception:
-            log.debug("Exception raised during validate_path of tested type '%s'." % k)
+        valid = False
+        if catch_exception:
+            try:
+                valid = dtype.validate_path(path, **kwargs)
+            except Exception as e:
+                log.debug(
+                    "Exception raised during validate_path of tested type '%s': %s"
+                    % (k, e)
+                )
+        else:
+            valid = dtype.validate_path(path, **kwargs)
+        if valid:
+            available_dtypes.append(k)
+
     if len(available_dtypes) == 0:
         raise ValueError("Unknown data type.")
     if len(available_dtypes) > 1:

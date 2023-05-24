@@ -163,6 +163,11 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.metadata = md
 
     @classmethod
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+        valid = super().validate_path(path, *args, **kwargs)
+        return valid
+
+    @classmethod
     def _clean_metadata_from_raw(cls, rawmetadata):
         """
         Set metadata from raw metadata.
@@ -420,7 +425,7 @@ class ArepoCatalog(ArepoSnapshot):
 
     @classmethod
     def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
-        kwargs["fileprefix"] = "groups"
+        kwargs["fileprefix"] = cls._get_fileprefix(path)
         valid = super().validate_path(path, *args, expect_grp=True, **kwargs)
         return valid
 

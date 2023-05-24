@@ -112,7 +112,10 @@ class ChunkedHDF5Loader(Loader):
             path = cachefp
         else:
             # get data from first file in list
-            path = self.get_chunkedfiles(fileprefix)[0]
+            paths = self.get_chunkedfiles(fileprefix)
+            if len(paths) == 0:
+                raise ValueError("No files for prefix '%s' found." % fileprefix)
+            path = paths[0]
         tree = {}
         walk_hdf5file(path, tree)
         return tree["attrs"]

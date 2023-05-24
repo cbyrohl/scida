@@ -11,7 +11,7 @@ defs:
     tags: ["simulation"]
   illustris_params: &illustris_params
     dataset_type:
-      dataset: IllustrisSnapshot
+      dataset: ArepoSnapshot
     unitfile: units/illustris.yaml
 
 data:
