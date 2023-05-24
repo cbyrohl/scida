@@ -12,6 +12,7 @@ from astrodask.config import get_config
 from astrodask.convenience import load
 from astrodask.interface import Dataset
 from astrodask.interfaces.arepo import ArepoSnapshot
+from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot, SwiftSnapshot
 from astrodask.misc import check_config_for_dataset
 from tests.testdata_properties import require_testdata, require_testdata_path
 
@@ -207,8 +208,13 @@ def test_load_check_interfacetype(testdatapath):
             )
         elif any(k in name for k in ["gaia"]):
             return Dataset
-        elif any(k in name for k in ["swift", "simba"]):
-            return ArepoSnapshot  # TODO: Change once abstract Gadget and/or specific Gizmo/Swift classes
+        elif any(k in name for k in ["swift"]):
+            return SwiftSnapshot
+        elif any(k in name for k in ["simba", "fire2"]):
+            # these are GizmoSnapshots. However, right now Gizmo has no identifying metadata,
+            # thus cannot infer solely from generic metadata
+            # [one can use config files to identify simulations and map to interface]
+            return GadgetStyleSnapshot
 
         raise ValueError("Have not specified intended type for %s" % name)
 

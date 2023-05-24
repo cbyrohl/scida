@@ -1,7 +1,6 @@
 import copy
 import logging
 import os
-import re
 import warnings
 from typing import Dict, List, Optional, Union
 
@@ -20,9 +19,9 @@ from astrodask.helpers_misc import (
     get_kwargs,
     parse_humansize,
 )
-from astrodask.interface import Dataset, Selector, create_MixinDataset
+from astrodask.interface import Selector, create_MixinDataset
+from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot
 from astrodask.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
-from astrodask.io import load_metadata
 
 log = logging.getLogger(__name__)
 
@@ -55,115 +54,7 @@ class ArepoSelector(Selector):
         snap.data = self.data
 
 
-class BaseSnapshot(Dataset):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
-        self.boxsize = np.full(3, np.nan)
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
-
-        defaultattributes = ["config", "header", "parameters"]
-        for k in self._metadata_raw:
-            name = k.strip("/").lower()
-            if name in defaultattributes:
-                self.__dict__[name] = self._metadata_raw[k]
-                if "BoxSize" in self.__dict__[name]:
-                    self.boxsize = self.__dict__[name]["BoxSize"]
-                elif "Boxsize" in self.__dict__[name]:
-                    self.boxsize = self.__dict__[name]["Boxsize"]
-
-    @classmethod
-    def _get_fileprefix(cls, path: Union[str, os.PathLike], **kwargs) -> str:
-        """
-        Get the fileprefix used to identify files belonging to given dataset.
-        Parameters
-        ----------
-        path: str, os.PathLike
-            path to check
-        kwargs
-
-        Returns
-        -------
-        str
-        """
-        if os.path.isfile(path):
-            return ""  # nothing to do, we have a single file, not a directory
-        # order matters: groups will be taken before fof_subhalo, requires py>3.7 for dict order
-        prfxs = ["groups", "fof_subhalo", "snap"]
-        prfxs_prfx_sim = dict.fromkeys(prfxs)
-        files = sorted(os.listdir(path))
-        prfxs_lst = []
-        for fn in files:
-            s = re.search(r"^(\w*)_(\d*)", fn)
-            if s is not None:
-                prfxs_lst.append(s.group(1))
-        prfxs_lst = [p for s in prfxs_prfx_sim for p in prfxs_lst if p.startswith(s)]
-        prfxs = dict.fromkeys(prfxs_lst)
-        prfxs = list(prfxs.keys())
-        if len(prfxs) > 1:
-            log.debug("We have more than one prefix avail: %s" % prfxs)
-        elif len(prfxs) == 0:
-            return ""
-        if set(prfxs) == {"groups", "fof_subhalo_tab"}:
-            return "groups"  # "groups" over "fof_subhalo_tab"
-        return prfxs[0]
-
-    @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, expect_grp=False, **kwargs
-    ) -> bool:
-        """
-        Check if path is valid for this interface.
-        Parameters
-        ----------
-        path: str, os.PathLike
-            path to check
-        args
-        kwargs
-
-        Returns
-        -------
-        bool
-        """
-        path = str(path)
-        possibly_valid = False
-        iszarr = path.rstrip("/").endswith(".zarr")
-        if path.endswith(".hdf5") or iszarr:
-            possibly_valid = True
-        if os.path.isdir(path):
-            files = os.listdir(path)
-            sufxs = [f.split(".")[-1] for f in files]
-            if not iszarr and len(set(sufxs)) > 1:
-                possibly_valid = False
-            if sufxs[0] == "hdf5":
-                possibly_valid = True
-        if possibly_valid:
-            metadata_raw = load_metadata(path, **kwargs)
-            # need some silly combination of attributes to be sure
-            if all([k in metadata_raw for k in ["/Header"]]):
-                # identifying snapshot or group catalog
-                is_snap = all(
-                    [
-                        k in metadata_raw["/Header"]
-                        for k in ["NumPart_ThisFile", "NumPart_Total"]
-                    ]
-                )
-                is_grp = all(
-                    [
-                        k in metadata_raw["/Header"]
-                        for k in ["Ngroups_ThisFile", "Ngroups_Total"]
-                    ]
-                )
-                if is_grp:
-                    return True
-                if is_snap and not expect_grp:
-                    return True
-        return False
-
-    def register_field(self, parttype, name=None, description=""):
-        res = self.data.register_field(parttype, name=name, description=description)
-        return res
-
-
-class ArepoSnapshot(SpatialCartesian3DMixin, BaseSnapshot):
+class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     _fileprefix_catalog = "groups"
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:

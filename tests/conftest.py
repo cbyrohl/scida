@@ -3,10 +3,8 @@ import logging
 import pytest
 
 from astrodask.config import get_config
-from astrodask.interfaces.arepo import (  # ArepoSnapshotWithUnits
-    ArepoSnapshot,
-    BaseSnapshot,
-)
+from astrodask.interfaces.arepo import ArepoSnapshot  # ArepoSnapshotWithUnits
+from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot
 from astrodask.interfaces.illustris import IllustrisSnapshot
 from astrodask.series import DatasetSeries
 
@@ -26,9 +24,9 @@ def set_logging():
 
 
 @pytest.fixture(scope="function")
-def testdata_interface(request) -> BaseSnapshot:
+def testdata_interface(request) -> GadgetStyleSnapshot:
     path = request.param
-    yield BaseSnapshot(path)
+    yield GadgetStyleSnapshot(path)
 
 
 @pytest.fixture(scope="function")

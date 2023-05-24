@@ -61,5 +61,5 @@ def _determine_type(
                     "Ambiguous data type. Available types:", available_dtypes
                 )
             else:
-                print("Note: Multiple dataset candidates: ", available_dtypes)
+                log.info("Note: Multiple dataset candidates: %s" % available_dtypes)
     return available_dtypes, [reg[k] for k in available_dtypes]

@@ -4,14 +4,14 @@ import dask.array as da
 import numpy as np
 
 from astrodask.convenience import load
-from astrodask.interfaces.arepo import BaseSnapshot
+from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot
 from astrodask.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_interface_load(testdatapath):
-    snp = BaseSnapshot(testdatapath)
+    snp = GadgetStyleSnapshot(testdatapath)
     assert snp.file is not None
 
 
@@ -20,7 +20,7 @@ def test_interface_loadmetadata(testdatapath):
     loader = ChunkedHDF5Loader(testdatapath)
     metadata1 = loader.load_metadata()
     assert len(metadata1.keys()) > 0
-    BaseSnapshot(testdatapath)  # load once, so this gets cached
+    GadgetStyleSnapshot(testdatapath)  # load once, so this gets cached
     metadata2 = loader.load_metadata()
     assert len(metadata2.keys()) > 0
     assert metadata2.get("/_chunks", None) is not None
@@ -29,10 +29,10 @@ def test_interface_loadmetadata(testdatapath):
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_snapshot_load_usecache(testdatapath):
     tstart = time.process_time()
-    snp = BaseSnapshot(testdatapath)
+    snp = GadgetStyleSnapshot(testdatapath)
     dt0 = time.process_time() - tstart
     tstart = time.process_time()
-    snp = BaseSnapshot(testdatapath)
+    snp = GadgetStyleSnapshot(testdatapath)
     dt1 = time.process_time() - tstart
     assert 4 * dt1 < dt0
     assert snp.file is not None
@@ -40,7 +40,7 @@ def test_snapshot_load_usecache(testdatapath):
 
 @require_testdata_path("interface", only=["TNG50-4_group"])
 def test_load_nonvirtual(testdatapath):
-    snp = BaseSnapshot(testdatapath, virtualcache=False)
+    snp = GadgetStyleSnapshot(testdatapath, virtualcache=False)
     assert snp.file is not None
 
 
