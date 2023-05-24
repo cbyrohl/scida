@@ -2,13 +2,15 @@
 
 ![buildstatus](https://github.com/cbyrohl/astrodask/actions/workflows/python-package-conda.yml/badge.svg)
 
-astrodask is an out-of-the-box analysis tool for large astrophysical datasets, particularly cosmological and galaxy formation simulations using particles or unstructured meshes.
+astrodask is an out-of-the-box analysis tool for large scientific datasets. It primarily supports the astrophysics community, focusing on cosmological and galaxy formation simulations using particles or unstructured meshes, as well as large observational datasets.
 This tool uses dask, allowing analysis to scale up from your personal computer to HPC resources and the cloud.
 
 ## Features
 
-- Task-based data processing with dask arrays.
-- Unit support via pint
+- Unified, high-level interface to load and analyze large datasets from a variety of sources.
+- Parallel, task-based data processing with dask arrays.
+- Physical unit support via pint.
+- Easily extensible architecture.
 
 ## Requirements
 
