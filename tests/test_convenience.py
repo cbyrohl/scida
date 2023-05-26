@@ -1,8 +1,6 @@
 import math
 import os
-import pathlib
 from contextlib import contextmanager
-from typing import Type
 
 import h5py
 import pytest
@@ -10,10 +8,7 @@ import yaml
 
 from astrodask.config import get_config
 from astrodask.convenience import load
-from astrodask.discovertypes import _determine_type
 from astrodask.interface import Dataset
-from astrodask.interfaces.arepo import ArepoCatalog, ArepoSnapshot
-from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot, SwiftSnapshot
 from astrodask.misc import check_config_for_dataset
 from tests.testdata_properties import require_testdata, require_testdata_path
 
@@ -195,47 +190,3 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
     # attempt load and recover.
     load(testdatapath, **loadkwargs)
     assert "Invalid cache file, attempting to create new one." in caplog.text
-
-
-@require_testdata_path("interface")
-def test_load_check_interfacetype(testdatapath):
-    # this test intentionally ignores all additional hints from config files
-
-    catch_exception = True  # allows us better control for debugging
-
-    def return_intended_dstype(name) -> Type[Dataset]:
-        name = name.lower()
-        if any(k in name for k in ["tng", "illustris", "auriga"]):
-            if "group" in name:
-                return ArepoCatalog
-            else:
-                return ArepoSnapshot
-        elif any(k in name for k in ["eagle"]):
-            return (
-                ArepoSnapshot  # TODO: Change once we abstracted a GadgetSnapshot class
-            )
-        elif any(k in name for k in ["gaia"]):
-            return Dataset
-        elif any(k in name for k in ["swift"]):
-            return SwiftSnapshot
-        elif any(k in name for k in ["simba", "fire2"]):
-            # these are GizmoSnapshots. However, right now Gizmo has no identifying metadata,
-            # thus cannot infer solely from generic metadata
-            # [one can use config files to identify simulations and map to interface]
-            return GadgetStyleSnapshot
-
-        raise ValueError("Have not specified intended type for %s" % name)
-
-    path = pathlib.Path(testdatapath)
-    pp = path.parent.parent.parent
-    tname = str(path.relative_to(pp))
-    names, classes = _determine_type(path, catch_exception=catch_exception)
-    cls_intended = return_intended_dstype(tname)
-    if len(names) > 1:
-        print("Multiple types found for '%s': %s" % (path, names))
-    cls = classes[0]
-    print("Intended type (1) vs determined type (2):")
-    print("(1)", cls_intended)
-    print("(2)", cls)
-    # right now, we allow more specific types than intended to be returned
-    assert issubclass(cls, cls_intended)

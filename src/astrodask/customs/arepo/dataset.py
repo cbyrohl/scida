@@ -5,11 +5,11 @@ import warnings
 from typing import Dict, List, Optional, Union
 
 import dask
-import dask.array as da
 import numpy as np
+from dask import array as da
 from dask import delayed
 from numba import jit, njit
-from numpy.typing import NDArray
+from numpy._typing import NDArray
 
 from astrodask.discovertypes import _determine_mixins
 from astrodask.fields import FieldContainer
@@ -571,27 +571,6 @@ def wrap_func_scalar(
         arrchunks = [arr[o : offsets[i + 1]] for arr in arrs]
         res.append(func(*arrchunks))
     return np.array(res)
-
-
-# class ArepoSnapshotWithUnits(ArepoSnapshot):
-#    def __init__(self, path, catalog=None):
-#        super().__init__(path, catalog=catalog)
-#        # unitdict = get_units_from_AREPOdocs(unitstr_arepo, self.header) # from AREPO public docs
-#        unitdict = get_units_from_TNGdocs(self.header)  # from TNG public docs
-#        for k in self.data:
-#            if k.startswith("PartType"):
-#                dct = unitdict["particles"]
-#            elif k == "Group":
-#                dct = unitdict["groups"]
-#            elif k == "Subhalo":
-#                dct = unitdict["subhalos"]
-#            else:
-#                dct = unitdict[k]
-#            for name in self.data[k]:
-#                if name in dct:
-#                    self.data[k][name] = self.data[k][name] * dct[name]
-#                else:
-#                    logging.info("No units for '%s'" % name)
 
 
 @njit

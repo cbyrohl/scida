@@ -2,8 +2,8 @@ import logging
 
 import pytest
 
+from astrodask import ArepoSnapshot
 from astrodask.config import get_config
-from astrodask.interfaces.arepo import ArepoSnapshot  # ArepoSnapshotWithUnits
 from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot
 from astrodask.series import DatasetSeries
 

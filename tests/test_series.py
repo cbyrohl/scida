@@ -5,8 +5,9 @@ import numpy as np
 import psutil
 import pytest
 
+from astrodask import ArepoSimulation
 from astrodask.interface import BaseDataset
-from astrodask.series import ArepoSimulation, delay_init
+from astrodask.series import delay_init
 from tests.testdata_properties import require_testdata_path
 
 
