@@ -1,6 +1,7 @@
 # some script allowing us to copy HDF5 test files, but truncating fields to length 1
 import os.path
 import pathlib
+import shutil
 
 import h5py
 import numpy as np
@@ -69,12 +70,24 @@ def minimize_series_hdf5(src: str, dst: str):
             pathlib.Path(os.path.join(dst, root[len(src) + 1 :], d)).mkdir(
                 exist_ok=True
             )
+
+        # hdf5 files
         hdf5files = [f for f in files if f.endswith(".hdf5")]
         for fn in hdf5files:
             srcfn = os.path.join(root, fn)
             dstfn = os.path.join(dst, srcfn[len(src) + 1 :])
             print(srcfn, "->", dstfn)
             create_hdf5_testfile(srcfn, dstfn)
+
+        # txt files
+        txtfiles = [f for f in files if f.endswith(".txt")]
+        for fn in txtfiles:
+            srcfn = os.path.join(root, fn)
+            dstfn = os.path.join(dst, srcfn[len(src) + 1 :])
+            print(srcfn, "->", dstfn)
+            # only copy files below 100kib
+            if os.path.getsize(srcfn) < 100 * 1024:
+                shutil.copyfile(srcfn, dstfn)
 
 
 if __name__ == "__main__":
