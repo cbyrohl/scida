@@ -39,6 +39,7 @@ def _determine_type(
     **kwargs
 ):
     available_dtypes: List[str] = []
+    dtypes_status: List[CandidateStatus] = []
     reg = dict()
     if test_datasets:
         reg.update(**dataset_type_registry)
@@ -46,13 +47,16 @@ def _determine_type(
         reg.update(**dataseries_type_registry)
 
     for k, dtype in reg.items():
-        valid = False
+        valid = CandidateStatus.NO
 
         def is_valid(val):  # map mix of old bool and new Candidate Status enum to bool
             if isinstance(val, bool):
-                return val
+                if val:
+                    return CandidateStatus.MAYBE
+                else:
+                    return CandidateStatus.NO
             else:
-                return val != CandidateStatus.NO
+                return val
 
         if catch_exception:
             try:
@@ -64,12 +68,22 @@ def _determine_type(
                 )
         else:
             valid = is_valid(dtype.validate_path(path, **kwargs))
-        if valid:
+        if valid != CandidateStatus.NO:
             available_dtypes.append(k)
+            dtypes_status.append(valid)  # will be YES or MAYBE
 
     if len(available_dtypes) == 0:
         raise ValueError("Unknown data type.")
     if len(available_dtypes) > 1:
+        good_matches = [
+            k
+            for k, v in zip(available_dtypes, dtypes_status)
+            if v == CandidateStatus.YES
+        ]
+        if len(good_matches) >= 1:
+            available_dtypes = (
+                good_matches  # discard all MAYBEs as we have better options
+            )
         # reduce candidates by looking at most specific ones.
         inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
         # try to find candidate that shows up only once across all inheritance trees.

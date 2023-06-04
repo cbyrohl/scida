@@ -117,6 +117,13 @@ testdata:
     types:
       - interface
     fn: "minimal_FIRE2_snapshot_z1.hdf5"
+  FIRE2_series_minimal:
+    types:
+      - series
+      - areposimulation
+    fn: "minimal_FIRE2_simulation"
+
+
 
 
 
