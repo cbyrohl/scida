@@ -5,6 +5,7 @@ from astrodask import ArepoSnapshot
 from astrodask.customs.arepo.dataset import ArepoCatalog
 from astrodask.customs.arepo.series import ArepoSimulation
 from astrodask.customs.gizmo.series import GizmoSimulation
+from astrodask.customs.rockstar.dataset import RockstarCatalog
 from astrodask.discovertypes import _determine_type
 from astrodask.interface import Dataset
 from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot, SwiftSnapshot
@@ -39,6 +40,8 @@ def return_intended_dstype(name) -> Type[Dataset]:
         # thus cannot infer solely from generic metadata
         # [one can use config files to identify simulations and map to interface]
         return GadgetStyleSnapshot
+    elif any(k in name for k in ["rockstar"]):
+        return RockstarCatalog
 
     raise ValueError("Have not specified intended type for %s" % name)
 

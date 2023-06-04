@@ -123,6 +123,18 @@ testdata:
       - areposimulation
     fn: "minimal_FIRE2_simulation"
 
+  rockstar_halo:
+    types:
+      - interface
+      - rockstar
+    fn: "rockstar_halo.hdf5"
+
+  rockstar_star:
+    types:
+      - interface
+      - rockstar
+    fn: "rockstar_star.hdf5"
+
 
 
 

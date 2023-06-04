@@ -58,10 +58,16 @@ class HDF5Loader(Loader):
         return datadict
 
     def load_metadata(self, **kwargs):
-        """Take a quick glance at the metadata."""
+        """Take a quick glance at the metadata, only attributes."""
         tree = {}
         walk_hdf5file(self.path, tree)
         return tree["attrs"]
+
+    def load_metadata_all(self, **kwargs):
+        """Take a quick glance at metadata."""
+        tree = {}
+        walk_hdf5file(self.path, tree)
+        return tree
 
 
 class ZarrLoader(Loader):
@@ -301,6 +307,7 @@ def load_datadict_old(
         toload = fpath == "" or fpath in datagroups
         if not toload:
             continue
+
         container = get_container_from_path(fpath, rootcontainer)
         # TODO: still change for nesting
         splt = dataset[0].rstrip("/").split("/")
@@ -309,8 +316,19 @@ def load_datadict_old(
         name = "Dataset" + str(token) + dataset[0].replace("/", "_")
         if "__dask_tokenize__" in file:  # check if the file contains the dask name.
             name = file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
-        if lazy and i > 0:  # need one non-lazy entry though later on...
+
+        # we do not support HDF5 vlen dtype
+        if filetype == "hdf5":
             hds = file[dataset[0]]
+            dt = hds.dtype
+            if h5py.check_vlen_dtype(dt):
+                log.warning(
+                    "HDF5 vlen dtypes not supported. Skip loading field '%s'"
+                    % fieldname
+                )
+                continue
+
+        if lazy and i > 0:  # need one non-lazy entry though later on...
 
             def field(
                 arrs,
@@ -393,8 +411,15 @@ def determine_loader(path):
 
 
 def load_metadata(path, **kwargs):
+    """only returns attributes"""
     loader = determine_loader(path)
     metadata = loader.load_metadata(**kwargs)
+    return metadata
+
+
+def load_metadata_all(path, **kwargs):
+    loader = determine_loader(path)
+    metadata = loader.load_metadata_all(**kwargs)
     return metadata
 
 
