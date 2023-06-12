@@ -14,7 +14,7 @@ app = typer.Typer()
 
 
 @app.command()
-def create_hdf5_testfile(src: str, dst: str):
+def create_hdf5_testfile(src: str, dst: str, length: int = 1):
     if os.path.isdir(src):
         # we support multi-file hdf5 files via our load() function
         ds = load(src)
@@ -31,7 +31,7 @@ def create_hdf5_testfile(src: str, dst: str):
             f.create_group(k)
         with h5py.File(src, "r") as g:
             for path, shape, dtype in datasets:
-                shape_new = (1,)
+                shape_new = (length,)
                 tmpdata = None
                 # vlen HDF5 dataset
                 dt = g[path].dtype
@@ -39,15 +39,29 @@ def create_hdf5_testfile(src: str, dst: str):
                 if h5py.check_vlen_dtype(dt):
                     # do not know how to treat, so skip for now
                     dtype = np.int32
-                    shape_new = (1,)
+                    shape_new = (length,)
                     tmpdata = np.array([0], dtype=dtype)
                 else:
                     if len(shape) > 1:
-                        shape_new = (1,) + shape[1:]
-                        tmpdata = g[path][0]
+                        shape_new = (length,) + shape[1:]
+                        tmpdata = g[path][:length]
+                        if length > 1:
+                            np.random.seed(42)
+                            idx = np.random.choice(
+                                g[path].shape[0], length, replace=False
+                            )
+                            idx = np.sort(idx)
+                            tmpdata = g[path][idx]
                     elif len(shape) == 1:
-                        shape_new = (1,)
+                        shape_new = (length,)
                         tmpdata = g[path][0]
+                        if length > 1:
+                            np.random.seed(42)
+                            idx = np.random.choice(
+                                g[path].shape[0], length, replace=False
+                            )
+                            idx = np.sort(idx)
+                            tmpdata = g[path][idx]
                     if len(shape) == 0:
                         # this is a scalar, no slicing
                         shape_new = ()
