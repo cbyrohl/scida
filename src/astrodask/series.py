@@ -112,6 +112,9 @@ class DatasetSeries(object):
     def __len__(self):
         return len(self.datasets)
 
+    def __getitem__(self, key):
+        return self.datasets[key]
+
     @classmethod
     def validate_path(cls, path, *args, **kwargs) -> CandidateStatus:
         # estimate whether we have a valid path for this dataseries
