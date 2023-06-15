@@ -1,5 +1,6 @@
 import hashlib
 import inspect
+import io
 import re
 import types
 
@@ -78,3 +79,12 @@ def parse_humansize(size):
         size = re.sub(r"([KMGT]?I*B)", r" \1", size)
     number, unit = [string.strip() for string in size.split()]
     return int(float(number) * units[unit])
+
+
+def sprint(*args, end="\n", **kwargs):
+    """print to string"""
+    output = io.StringIO()
+    print(*args, file=output, end=end, **kwargs)
+    contents = output.getvalue()
+    output.close()
+    return contents

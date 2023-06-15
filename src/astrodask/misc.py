@@ -1,4 +1,3 @@
-import io
 import logging
 import os
 import pathlib
@@ -59,15 +58,6 @@ def return_cachefile_path(fname: str) -> Optional[str]:
     if not os.path.exists(bp):
         os.mkdir(bp)
     return fp
-
-
-def sprint(*args, **kwargs):
-    """print to string"""
-    output = io.StringIO()
-    print(*args, file=output, **kwargs)
-    contents = output.getvalue()
-    output.close()
-    return contents
 
 
 def map_interface_args(paths, *args, **kwargs):

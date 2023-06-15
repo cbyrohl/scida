@@ -7,8 +7,8 @@ from pint import UnitRegistry
 
 from astrodask.config import get_config, get_config_fromfile, get_simulationconfig
 from astrodask.fields import FieldContainer, walk_container
+from astrodask.helpers_misc import sprint
 from astrodask.interfaces.mixins.base import Mixin
-from astrodask.misc import sprint
 
 log = logging.getLogger(__name__)
 

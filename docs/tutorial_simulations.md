@@ -36,22 +36,32 @@ First, we load the dataset using the convenience function `load()` that will det
 >>> from astrodask import load
 >>> ds = load("TNG50-4_snapshot", units=True) #(1)!
 >>> ds.info() #(2)!
+class: ArepoSnapshotWithUnitMixinAndCosmologyMixin
+source: /home/cbyrohl/data/testdata-astrodask/TNG50-4_snapshot
+=== Cosmological Simulation ===
+z = 0.00
+cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3.04, m_nu=None, Ob0=0.0486)
+===============================
 === Unit-aware Dataset ===
 ==========================
 === data ===
-+ PartType3 (fields: 5, entries: 19683000)
-+ PartType0 (fields: 30, entries: 18540104)
-+ PartType4 (fields: 21, entries: 605779)
-+ PartType5 (fields: 27, entries: 3486)
-+ PartType1 (fields: 11, entries: 19683000)
-+ Subhalo (fields: 52, entries: 22869)
-+ Group (fields: 27, entries: 25257)
++ root (containers: 7)
+++ Group (fields: 28, entries: 25257)
+++ PartType0 (fields: 30, entries: 18540104)
+++ PartType1 (fields: 11, entries: 19683000)
+++ PartType3 (fields: 5, entries: 19683000)
+++ PartType4 (fields: 21, entries: 605779)
+++ PartType5 (fields: 27, entries: 3486)
+++ Subhalo (fields: 54, entries: 22869)
 ============
 ```
 
 1. The `units=True` argument will attach code units to all fields. Alternative choices are *False* to go without units and *cgs* for cgs units.
    The current default is *False*, which will change to *True* in the near future.
 2. Call to receive some information about the loaded dataset.
+
+
+
 
 The dataset is now loaded, and we can inspect its contents, specifically its container and fields loaded.
 We can access the data in the dataset by using the `data` attribute, which is a dictionary of containers and fields.

@@ -11,9 +11,9 @@ import zarr
 
 import astrodask.io
 from astrodask.fields import FieldContainer
-from astrodask.helpers_misc import make_serializable
+from astrodask.helpers_misc import make_serializable, sprint
 from astrodask.interfaces.mixins import UnitMixin
-from astrodask.misc import check_config_for_dataset, deepdictkeycopy, sprint
+from astrodask.misc import check_config_for_dataset, deepdictkeycopy
 from astrodask.registries import dataset_type_registry
 
 log = logging.getLogger(__name__)
@@ -116,28 +116,30 @@ class BaseDataset(metaclass=MixinMeta):
 
         """
         rep = ""
-        rep += sprint(self.__class__.__name__)
+        rep += "class: " + sprint(self.__class__.__name__)
         props = self._repr_dict()
         for k, v in props.items():
             rep += sprint("%s: %s" % (k, v))
         if self._info_custom() is not None:
             rep += self._info_custom()
         rep += sprint("=== data ===")
-        for k in sorted(self.data.keys()):
-            v = self.data[k]
-            if isinstance(v, FieldContainer):
-                length = v.fieldlength
-                count = v.fieldcount
-                if length is not None:
-                    rep += sprint("+", k, "(fields: %i, entries: %i)" % (count, length))
-                else:
-                    rep += sprint("+", k)
-                if not listfields:
-                    continue
-                for k2, v2 in v.items():
-                    rep += sprint("--", k2)
-            else:
-                rep += sprint("--", k)
+        rep += self.data.info(name="root")
+        # for k in sorted(self.data.keys()):
+        #    v = self.data[k]
+        #    if isinstance(v, FieldContainer):
+        #        length = v.fieldlength
+        #        count = v.fieldcount
+        #        if length is not None:
+        #            rep += sprint("+", k, "(fields: %i, entries: %i)" % (count, length))
+        #        else:
+        #            rep += sprint("+", k)
+        #        if not listfields:
+        #            continue
+        #        for k2, v2 in v.items():
+        #            rep += sprint("--", k2)
+        #    else:
+        #        pass #rep += sprint("--", k)
+        #    self.data.info()
         rep += sprint("============")
         print(rep)
 
@@ -399,3 +401,7 @@ class Selector(object):
 
     def finalize(self, *args, **kwargs) -> None:
         args[0].data = self.data_backup
+
+
+def hello():
+    print("hello")

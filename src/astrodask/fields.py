@@ -8,7 +8,7 @@ from typing import Dict, Optional
 import dask.array as da
 import dask.dataframe as dd
 
-from .helpers_misc import get_kwargs
+from astrodask.helpers_misc import get_kwargs, sprint
 
 
 class FieldType(Enum):
@@ -76,6 +76,27 @@ class FieldContainer(MutableMapping):
         self.internals = ["uid"]  # names of internal fields/groups
         self.parent = parent
 
+    def info(self, level=0, name: Optional[str] = None) -> str:
+        rep = ""
+        length = self.fieldlength
+        count = self.fieldcount
+        if name is None:
+            name = self.name
+        ncontainers = len(self.containers)
+        statstrs = []
+        if length is not None and length > 0:
+            statstrs.append("fields: %i" % count)
+            statstrs.append("entries: %i" % length)
+        if ncontainers > 0:
+            statstrs.append("containers: %i" % ncontainers)
+        if len(statstrs) > 0:
+            statstr = ", ".join(statstrs)
+            rep += sprint((level + 1) * "+", name, "(%s)" % statstr)
+        for k in sorted(self.containers.keys()):
+            v = self.containers[k]
+            rep += v.info(level=level + 1)
+        return rep
+
     def merge(self, collection, overwrite=True):
         if not isinstance(collection, FieldContainer):
             raise TypeError("Can only merge FieldContainers.")
@@ -96,7 +117,10 @@ class FieldContainer(MutableMapping):
 
     @property
     def fieldcount(self):
-        return len(self.fields)
+        nrecipes = len(self.fieldrecipes)
+        nfields = len(self.fields)
+        ntot = nrecipes + nfields
+        return ntot
 
     @property
     def fieldlength(self):
