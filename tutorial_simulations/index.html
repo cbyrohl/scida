@@ -37,6 +37,8 @@
       
     
     
+      <link rel="stylesheet" href="../assets/_markdown_exec_ansi.css">
+    
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../stylesheets/gridview.css">
@@ -568,16 +570,23 @@ We demonstrate how to work with larger data sets at a later stage.</p>
 <div class="highlight"><span class="filename">Loading a dataset</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astrodask</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#(1)!</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="c1">#(2)!</span>
+<span class="go">class: ArepoSnapshotWithUnitMixinAndCosmologyMixin</span>
+<span class="go">source: /home/cbyrohl/data/testdata-astrodask/TNG50-4_snapshot</span>
+<span class="go">=== Cosmological Simulation ===</span>
+<span class="go">z = 0.00</span>
+<span class="go">cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3.04, m_nu=None, Ob0=0.0486)</span>
+<span class="go">===============================</span>
 <span class="go">=== Unit-aware Dataset ===</span>
 <span class="go">==========================</span>
 <span class="go">=== data ===</span>
-<span class="go">+ PartType3 (fields: 5, entries: 19683000)</span>
-<span class="go">+ PartType0 (fields: 30, entries: 18540104)</span>
-<span class="go">+ PartType4 (fields: 21, entries: 605779)</span>
-<span class="go">+ PartType5 (fields: 27, entries: 3486)</span>
-<span class="go">+ PartType1 (fields: 11, entries: 19683000)</span>
-<span class="go">+ Subhalo (fields: 52, entries: 22869)</span>
-<span class="go">+ Group (fields: 27, entries: 25257)</span>
+<span class="go">+ root (containers: 7)</span>
+<span class="go">++ Group (fields: 28, entries: 25257)</span>
+<span class="go">++ PartType0 (fields: 30, entries: 18540104)</span>
+<span class="go">++ PartType1 (fields: 11, entries: 19683000)</span>
+<span class="go">++ PartType3 (fields: 5, entries: 19683000)</span>
+<span class="go">++ PartType4 (fields: 21, entries: 605779)</span>
+<span class="go">++ PartType5 (fields: 27, entries: 3486)</span>
+<span class="go">++ Subhalo (fields: 54, entries: 22869)</span>
 <span class="go">============</span>
 </code></pre></div>
 <ol>

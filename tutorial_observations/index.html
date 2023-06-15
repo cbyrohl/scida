@@ -37,6 +37,8 @@
       
     
     
+      <link rel="stylesheet" href="../assets/_markdown_exec_ansi.css">
+    
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../stylesheets/gridview.css">
@@ -423,6 +425,68 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#loading-an-individual-dataset" class="md-nav__link">
+    Loading an individual dataset
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dask-arrays-and-units" class="md-nav__link">
+    Dask arrays and units
+  </a>
+  
+    <nav class="md-nav" aria-label="Dask arrays and units">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dask-arrays" class="md-nav__link">
+    Dask arrays
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#units" class="md-nav__link">
+    Units
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyzing-snapshot-data" class="md-nav__link">
+    Analyzing snapshot data
+  </a>
+  
+    <nav class="md-nav" aria-label="Analyzing snapshot data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#computing-a-simple-statistic-on-all-particles" class="md-nav__link">
+    Computing a simple statistic on (all) particles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -442,7 +506,99 @@
 
 
 <div><h1 id="tutorial-observational-data-set">Tutorial (observational data set)</h1>
-<p>TODO</p></div>
+<p>This package is designed to aid in the efficient analysis of large datasets, such as GAIA DR3.</p>
+<div class="admonition note">
+<p class="admonition-title">Tutorial dataset</p>
+<p>In the following, we will subset from the <a href="https://www.cosmos.esa.int/web/gaia/dr3">GAIA data release 3</a>. The reduced dataset contains 100000 randomly selected entries only.
+Check <a href="../supported_data/">Supported Datasets</a> for an incomplete list of supported datasets
+and requirements for support of new datasets.
+A tutorial for a cosmological simulation can be found <a href="../tutorial_simulations/">here</a>.</p>
+</div>
+<p>It uses the <a href="https://dask.org/">dask</a> library to perform computations, which has several key advantages:</p>
+<ol>
+<li>very large datasets which cannot normally fit into memory can be analyzed,</li>
+<li>calculations can be automatically distributed onto parallel 'workers', across one or more nodes, to speed them up,</li>
+<li>we can create abstract graphs ("recipes", such as for derived quantities) and only evaluate on actual demand.</li>
+</ol>
+<h2 id="loading-an-individual-dataset">Loading an individual dataset</h2>
+<p>Here, we choose the <a href="https://www.cosmos.esa.int/web/gaia/dr3">GAIA data release 3</a> as an example.
+The dataset is obtained in HDF5 format as used at ITA Heidelberg. We intentionally select a small subset of the data to work with.
+Choosing a subset means that the data size in the snapshot is small and easy to work with.
+We demonstrate how to work with larger data sets at a later stage.</p>
+<p>First, we load the dataset using the convenience function <code>load()</code> that will determine the appropriate dataset class for us:</p>
+<div class="highlight"><span class="filename">Loading a dataset</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">astrodask</span> <span class="kn">import</span> <span class="n">load</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#(1)!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="c1">#(2)!</span>
+<span class="go">class: DatasetWithUnitMixin</span>
+<span class="go">source: /home/cbyrohl/data/testdata-astrodask/gaia_dr3_subset100000.hdf5</span>
+<span class="go">=== Unit-aware Dataset ===</span>
+<span class="go">==========================</span>
+<span class="go">=== data ===</span>
+<span class="go">+ root (fields: 27, entries: 100000)</span>
+<span class="go">============</span>
+</code></pre></div>
+<ol>
+<li>The <code>units=True</code> argument will attach code units to all fields (default). Alternative choices are <em>False</em> to go without units and <em>cgs</em> for cgs units.
+   The current default is <em>False</em>, which will change to <em>True</em> in the near future.</li>
+<li>Call to receive some information about the loaded dataset.</li>
+</ol>
+<p>The dataset is now loaded, and we can inspect its contents, specifically its container and fields loaded.
+We can access the data in the dataset by using the <code>data</code> attribute, which is a dictionary of containers and fields.</p>
+<p>We have a total of 27 fields available, which are:</p>
+<div class="highlight"><span class="filename">Available fields</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">['pmdec',</span>
+<span class="go"> 'distance_gspphot',</span>
+<span class="go">...</span>
+<span class="go"> 'distance_gspphot_upper',</span>
+<span class="go"> 'pmra_error']</span>
+</code></pre></div>
+<p>Let's take a look at some field in this container:</p>
+<div class="highlight"><span class="filename">Inspecting a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">]</span>
+<span class="go">dask.array&lt;mul, shape=(100000,), dtype=float64, chunksize=(100000,), chunktype=numpy.ndarray&gt; &lt;Unit('degree')&gt;</span>
+</code></pre></div>
+<p>The field is a dask array, which is a lazy array that will only be evaluated when needed.
+How these lazy arrays and their units work and are to be used will be explored in the next section.</p>
+<h2 id="dask-arrays-and-units">Dask arrays and units</h2>
+<h3 id="dask-arrays">Dask arrays</h3>
+<p>Dask arrays are virtual entities that are only evaluated when needed.
+If you are unfamiliar with dask arrays, consider taking a look at this <a href="https://docs.dask.org/en/stable/array.html">3-minute introduction</a>.</p>
+<p>They are <strong>not</strong> numpy arrays, but they can be converted to them, and have most of their functionality.
+Within dask, an internal task graph is created that holds the recipes how to construct the array from the underlying data.</p>
+<p>In general, fields can be also be stored in flat or more nested structures, depending on the dataset.</p>
+<p>We can trigger the evaluation of the dask array by calling <code>compute()</code> on it:</p>
+<div class="highlight"><span class="filename">Evaluating a dask array</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="go">array([ 0.86655069,  1.15477218,  2.14207063, ..., -1.5291509 ,</span>
+<span class="go">       -1.30061261, -0.88984633]) &lt;Unit('degree')&gt;</span>
+</code></pre></div>
+<p><strong>However</strong>, directly evaluating dask arrays is <strong>strongly discouraged</strong> for large datasets, as it will load the entire dataset into memory.
+Instead, we will reduce the datasize by running desired analysis/reduction within dask before calling <em>compute()</em>,
+which we present in the next section.</p>
+<h3 id="units">Units</h3>
+<p>If passing <code>units=True</code> to <code>load()</code>, the dataset will be loaded with code units attached to all fields.
+These units are attached to each field / dask array. Units are provided via the pint package.
+See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information. Also check out the
+<a href="../notebooks/cookbook/units/">units cookbook</a> for more examples.</p>
+<p>In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
+These can be accessed via the <code>magnitude</code> and <code>units</code> attributes, respectively.</p>
+<div class="highlight"><span class="filename">Accessing the magnitude and units of a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
+<span class="go">(dask.array&lt;mul, shape=(100000,), dtype=float64, chunksize=(100000,), chunktype=numpy.ndarray&gt;,</span>
+<span class="go"> &lt;Unit('degree')&gt;)</span>
+</code></pre></div>
+<p>When defining derived fields from dask arrays, the correct units are automatically propagated to the new field,
+and dimensionality checks are performed. Importantly, the unit calculation is done immediately, thus allowing
+to directly see the resulting units and any dimensionality mismatches.</p>
+<h2 id="analyzing-snapshot-data">Analyzing snapshot data</h2>
+<h3 id="computing-a-simple-statistic-on-all-particles">Computing a simple statistic on (all) particles</h3>
+<p>The fields in our snapshot object behave similar to actual numpy arrays.</p>
+<p>As a first simple example, let's calculate the total mass of gas cells in the entire simulation. Just as in numpy we can write</p>
+<div class="highlight"><span class="filename">Calculating the total mass of gas cells</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">masses</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Masses"</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">task</span> <span class="o">=</span> <span class="n">masses</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">task</span>
+<span class="go">'dask.array&lt;sum-aggregate, shape=(), dtype=float32, chunksize=(), chunktype=numpy.ndarray&gt; code_mass'</span>
+</code></pre></div>
+<p>Note that all objects remain 'virtual': they are not calculated or loaded from disk,
+but are merely the required instructions, encoded into tasks.</p>
+<p>TODO: remainder</p></div>
 
 
 

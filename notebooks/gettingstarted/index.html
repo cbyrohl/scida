@@ -37,6 +37,8 @@
       
     
     
+      <link rel="stylesheet" href="../../assets/_markdown_exec_ansi.css">
+    
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../../stylesheets/gridview.css">
@@ -1677,7 +1679,7 @@ WARNING:pint.util:Redefining 'code_pressure' (&lt;class 'pint.delegates.txt_defp
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>ArepoSnapshotWithUnitMixinAndCosmologyMixin
+<pre>class: ArepoSnapshotWithUnitMixinAndCosmologyMixin
 source: /home/cbyrohl/data/testdata-astrodask/TNG50-4_snapshot
 === Cosmological Simulation ===
 z = 0.00
@@ -1686,13 +1688,14 @@ cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3
 === Unit-aware Dataset ===
 ==========================
 === data ===
-+ Group (fields: 4, entries: 25257)
-+ PartType0 (fields: 4, entries: 18540104)
-+ PartType1 (fields: 3, entries: 19683000)
-+ PartType3 (fields: 3, entries: 19683000)
-+ PartType4 (fields: 3, entries: 605779)
-+ PartType5 (fields: 3, entries: 3486)
-+ Subhalo (fields: 3, entries: 22869)
++ root (containers: 7)
+++ Group (fields: 28, entries: 25257)
+++ PartType0 (fields: 30, entries: 18540104)
+++ PartType1 (fields: 11, entries: 19683000)
+++ PartType3 (fields: 5, entries: 19683000)
+++ PartType4 (fields: 21, entries: 605779)
+++ PartType5 (fields: 27, entries: 3486)
+++ Subhalo (fields: 54, entries: 22869)
 ============
 
 </pre>
@@ -1912,26 +1915,26 @@ some ds.parameters entry: ('AGB_MassTransferOn', 1)
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Particle species: PartType4
-Three of its fields: ['GFM_Metallicity', 'GFM_StellarFormationTime', 'BirthVel']
-
-Particle species: PartType5
-Three of its fields: ['BH_Pressure', 'BH_MdotBondi', 'BH_MdotEddington']
-
-Particle species: PartType1
-Three of its fields: ['SubfindDMDensity', 'GroupID', 'ParticleIDs']
+<pre>Particle species: PartType0
+Three of its fields: ['EnergyDissipation', 'SubhaloID', 'MagneticFieldDivergence']
 
 Particle species: Subhalo
-Three of its fields: ['SubhaloSFRinHalfRad', 'SubhaloPos', 'SubhaloGasMetalFractionsMaxRad']
-
-Particle species: Group
-Three of its fields: ['Group_R_Crit200', 'GroupGasMetalFractions', 'GroupStarMetalFractions']
+Three of its fields: ['SubhaloFlag', 'SubhaloGasMetallicitySfrWeighted', 'SubhaloSFRinMaxRad']
 
 Particle species: PartType3
-Three of its fields: ['TracerID', 'SubhaloID', 'ParentID']
+Three of its fields: ['SubhaloID', 'GroupID', 'TracerID']
 
-Particle species: PartType0
-Three of its fields: ['GFM_Metallicity', 'Temperature', 'InternalEnergy']
+Particle species: PartType4
+Three of its fields: ['SubhaloID', 'Coordinates', 'GFM_MetalsTagged']
+
+Particle species: PartType5
+Three of its fields: ['SubhaloID', 'Coordinates', 'Velocities']
+
+Particle species: Group
+Three of its fields: ['GroupBHMdot', 'GroupOffsetsType', 'GroupStarMetalFractions']
+
+Particle species: PartType1
+Three of its fields: ['SubhaloID', 'Coordinates', 'SubfindVelDisp']
 
 </pre>
 </div>
