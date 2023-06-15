@@ -24,6 +24,7 @@ nav:
   - api_docs.md
 
 markdown_extensions:
+  - pymdownx.tabbed
   - def_list
   - pymdownx.tasklist:
       custom_checkbox: true
@@ -49,6 +50,7 @@ markdown_extensions:
 
 
 plugins:
+  - markdown-exec:
   - search:
   - mkdocs-video:
       css_style:
