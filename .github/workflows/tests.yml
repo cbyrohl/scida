@@ -88,9 +88,9 @@ jobs:
 
       - name: Run Nox
         run: |
-          echo "test data path: ${{ env.SCIDA_TESTDATA_PATH }}"
           export SCIDA_TESTDATA_PATH=${{ env.SCIDA_TESTDATA_PATH }}
-          echo "test data path (2): $SCIDA_TESTDATA_PATH"
+          echo "test data path: $SCIDA_TESTDATA_PATH"
+          echo "test data path content: ${ls $SCIDA_TESTDATA_PATH}"
           nox --python=${{ matrix.python }}
 
       - name: Upload coverage data
