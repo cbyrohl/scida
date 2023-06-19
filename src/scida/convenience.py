@@ -11,14 +11,14 @@ from typing import Optional, Union
 
 import requests
 
-from astrodask.config import get_config, get_simulationconfig
-from astrodask.discovertypes import _determine_mixins, _determine_type
-from astrodask.interface import Dataset
-from astrodask.interfaces.mixins import UnitMixin
-from astrodask.io import load_metadata
-from astrodask.misc import check_config_for_dataset
-from astrodask.registries import dataseries_type_registry, dataset_type_registry
-from astrodask.series import DatasetSeries
+from scida.config import get_config, get_simulationconfig
+from scida.discovertypes import _determine_mixins, _determine_type
+from scida.interface import Dataset
+from scida.interfaces.mixins import UnitMixin
+from scida.io import load_metadata
+from scida.misc import check_config_for_dataset
+from scida.registries import dataseries_type_registry, dataset_type_registry
+from scida.series import DatasetSeries
 
 log = logging.getLogger(__name__)
 

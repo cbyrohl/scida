@@ -3,7 +3,7 @@ import pathlib
 import numpy as np
 import pytest
 
-from astrodask import load
+from scida import load
 from tests.testdata_properties import require_testdata_path
 
 

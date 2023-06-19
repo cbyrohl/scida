@@ -11,9 +11,9 @@ import h5py
 import numpy as np
 import zarr
 
-from astrodask.fields import FieldContainer, walk_container
-from astrodask.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
-from astrodask.misc import get_container_from_path, return_hdf5cachepath
+from scida.fields import FieldContainer, walk_container
+from scida.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
+from scida.misc import get_container_from_path, return_hdf5cachepath
 
 log = logging.getLogger(__name__)
 

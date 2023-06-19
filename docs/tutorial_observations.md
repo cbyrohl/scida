@@ -26,11 +26,11 @@ First, we load the dataset using the convenience function `load()` that will det
 
 
 ```pycon title="Loading a dataset"
->>> from astrodask import load
+>>> from scida import load
 >>> ds = load("TNG50-4_snapshot", units=True) #(1)!
 >>> ds.info() #(2)!
 class: DatasetWithUnitMixin
-source: /home/cbyrohl/data/testdata-astrodask/gaia_dr3_subset100000.hdf5
+source: /home/cbyrohl/data/testdata-scida/gaia_dr3_subset100000.hdf5
 === Unit-aware Dataset ===
 ==========================
 === data ===

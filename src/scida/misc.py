@@ -7,9 +7,9 @@ from typing import Optional
 import dask.array as da
 import numpy as np
 
-from astrodask.config import get_config, get_simulationconfig
-from astrodask.fields import FieldContainer
-from astrodask.helpers_misc import hash_path
+from scida.config import get_config, get_simulationconfig
+from scida.fields import FieldContainer
+from scida.helpers_misc import hash_path
 
 log = logging.getLogger(__name__)
 

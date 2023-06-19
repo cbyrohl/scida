@@ -5,8 +5,8 @@ from typing import Union
 
 import numpy as np
 
-from astrodask.interface import Dataset
-from astrodask.io import load_metadata
+from scida.interface import Dataset
+from scida.io import load_metadata
 
 log = logging.getLogger(__name__)
 

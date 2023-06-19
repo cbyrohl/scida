@@ -2,10 +2,10 @@ import logging
 
 import pytest
 
-from astrodask import ArepoSnapshot
-from astrodask.config import get_config
-from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot
-from astrodask.series import DatasetSeries
+from scida import ArepoSnapshot
+from scida.config import get_config
+from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
+from scida.series import DatasetSeries
 
 flag_test_long = False  # Set to true to run time-taking tests.
 
@@ -57,7 +57,7 @@ def testdata_areposnapshot_withcatalog(request) -> ArepoSnapshot:
 @pytest.fixture(scope="function", autouse=True)
 def cachedir(monkeypatch, tmp_path_factory):
     path = tmp_path_factory.mktemp("cache")
-    monkeypatch.setenv("ASTRODASK_CACHE_PATH", str(path))
+    monkeypatch.setenv("SCIDA_CACHE_PATH", str(path))
     return path
 
 

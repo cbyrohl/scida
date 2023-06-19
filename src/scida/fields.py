@@ -8,7 +8,7 @@ from typing import Dict, Optional
 import dask.array as da
 import dask.dataframe as dd
 
-from astrodask.helpers_misc import get_kwargs, sprint
+from scida.helpers_misc import get_kwargs, sprint
 
 
 class FieldType(Enum):

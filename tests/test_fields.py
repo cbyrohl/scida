@@ -1,7 +1,7 @@
 import dask.array as da
 import pytest
 
-from astrodask.interface import FieldContainer
+from scida.interface import FieldContainer
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
@@ -19,7 +19,7 @@ def test_fieldcontainer_aliasing():
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_fieldtypes(testdatapath):
-    from astrodask import load
+    from scida import load
 
     snp = load(testdatapath)
     gas = snp.data["PartType0"]

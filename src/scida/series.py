@@ -9,12 +9,12 @@ import numpy as np
 # tqdm.auto does not consistently give jupyter support to all users
 from tqdm import tqdm
 
-from astrodask.discovertypes import CandidateStatus
-from astrodask.helpers_misc import hash_path
-from astrodask.interface import create_MixinDataset
-from astrodask.io import load_metadata
-from astrodask.misc import map_interface_args, return_cachefile_path
-from astrodask.registries import dataseries_type_registry
+from scida.discovertypes import CandidateStatus
+from scida.helpers_misc import hash_path
+from scida.interface import create_MixinDataset
+from scida.io import load_metadata
+from scida.misc import map_interface_args, return_cachefile_path
+from scida.registries import dataseries_type_registry
 
 
 def delay_init(cls):
@@ -102,7 +102,7 @@ class DatasetSeries(object):
         elif async_caching:
             # hacky and should not be here this explicitly, just a proof of concept
             # for p in paths:
-            #     loader = astrodask.io.determine_loader(p)
+            #     loader = scida.io.determine_loader(p)
             pass
 
     def __init_subclass__(cls, *args, **kwargs):

@@ -5,10 +5,10 @@ import numpy as np
 import pint
 from pint import UnitRegistry
 
-from astrodask.config import get_config, get_config_fromfile, get_simulationconfig
-from astrodask.fields import FieldContainer, walk_container
-from astrodask.helpers_misc import sprint
-from astrodask.interfaces.mixins.base import Mixin
+from scida.config import get_config, get_config_fromfile, get_simulationconfig
+from scida.fields import FieldContainer, walk_container
+from scida.helpers_misc import sprint
+from scida.interfaces.mixins.base import Mixin
 
 log = logging.getLogger(__name__)
 

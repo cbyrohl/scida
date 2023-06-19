@@ -26,7 +26,7 @@ pages:
   extends: .install-deps
   needs: []
   script:
-  - poetry run python -m ipykernel install --name astrodask
+  - poetry run python -m ipykernel install --name scida
   - poetry run mkdocs build
   - mv ./site ./public
   allow_failure: true

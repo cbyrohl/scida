@@ -7,8 +7,8 @@ import h5py
 import numpy as np
 import typer
 
-from astrodask import load
-from astrodask.io import walk_hdf5file
+from scida import load
+from scida.io import walk_hdf5file
 
 app = typer.Typer()
 

@@ -1,7 +1,7 @@
 import numpy as np
 from astropy.cosmology import FlatLambdaCDM
 
-from astrodask.convenience import load
+from scida.convenience import load
 from tests.testdata_properties import require_testdata_path
 
 # ureg = UnitRegistry()

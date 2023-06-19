@@ -2,8 +2,8 @@ import logging
 
 import numpy as np
 
-from astrodask.helpers_misc import sprint
-from astrodask.interfaces.mixins.base import Mixin
+from scida.helpers_misc import sprint
+from scida.interfaces.mixins.base import Mixin
 
 log = logging.getLogger(__name__)
 

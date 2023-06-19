@@ -1,6 +1,6 @@
 import pathlib
 
-from astrodask import load
+from scida import load
 from tests.testdata_properties import require_testdata_path
 
 

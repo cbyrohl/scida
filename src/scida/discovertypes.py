@@ -6,9 +6,9 @@ from functools import reduce
 from inspect import getmro
 from typing import List, Union
 
-from astrodask.interfaces.mixins import CosmologyMixin
-from astrodask.io import load_metadata
-from astrodask.registries import dataseries_type_registry, dataset_type_registry
+from scida.interfaces.mixins import CosmologyMixin
+from scida.io import load_metadata
+from scida.registries import dataseries_type_registry, dataset_type_registry
 
 log = logging.getLogger(__name__)
 

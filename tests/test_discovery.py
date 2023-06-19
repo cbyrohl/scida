@@ -1,15 +1,15 @@
 import pathlib
 from typing import Type
 
-from astrodask import ArepoSnapshot
-from astrodask.customs.arepo.dataset import ArepoCatalog
-from astrodask.customs.arepo.series import ArepoSimulation
-from astrodask.customs.gizmo.series import GizmoSimulation
-from astrodask.customs.rockstar.dataset import RockstarCatalog
-from astrodask.discovertypes import _determine_type
-from astrodask.interface import Dataset
-from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot, SwiftSnapshot
-from astrodask.series import DatasetSeries
+from scida import ArepoSnapshot
+from scida.customs.arepo.dataset import ArepoCatalog
+from scida.customs.arepo.series import ArepoSimulation
+from scida.customs.gizmo.series import GizmoSimulation
+from scida.customs.rockstar.dataset import RockstarCatalog
+from scida.discovertypes import _determine_type
+from scida.interface import Dataset
+from scida.interfaces.gadgetstyle import GadgetStyleSnapshot, SwiftSnapshot
+from scida.series import DatasetSeries
 from tests.testdata_properties import require_testdata_path
 
 

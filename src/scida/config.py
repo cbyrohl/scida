@@ -24,7 +24,7 @@ def get_config(reload: bool = False, update_global=True) -> dict:
 
     """
     global _conf
-    prefix = "ASTRODASK_"
+    prefix = "SCIDA_"
     envconf = {
         k.replace(prefix, "").lower(): v
         for k, v in os.environ.items()
@@ -33,7 +33,7 @@ def get_config(reload: bool = False, update_global=True) -> dict:
 
     # in any case, we make sure that there is some config in the default path.
     path_user = os.path.expanduser("~")
-    path_confdir = os.path.join(path_user, ".config/astrodask")
+    path_confdir = os.path.join(path_user, ".config/scida")
     path_conf = os.path.join(path_confdir, "config.yaml")
     if not os.path.exists(path_conf):
         copy_defaultconfig(overwrite=False)
@@ -84,13 +84,13 @@ def copy_defaultconfig(overwrite=False) -> None:
     """
 
     path_user = os.path.expanduser("~")
-    path_confdir = os.path.join(path_user, ".config/astrodask")
+    path_confdir = os.path.join(path_user, ".config/scida")
     if not os.path.exists(path_confdir):
         os.makedirs(path_confdir, exist_ok=True)
     path_conf = os.path.join(path_confdir, "config.yaml")
     if os.path.exists(path_conf) and not overwrite:
         raise ValueError("Configuration file already exists at '%s'" % path_conf)
-    with importlib.resources.path("astrodask.configfiles", "config.yaml") as fp:
+    with importlib.resources.path("scida.configfiles", "config.yaml") as fp:
         with open(fp, "r") as file:
             content = file.read()
             with open(path_conf, "w") as newfile:
@@ -118,16 +118,16 @@ def get_config_fromfile(resource: str) -> Dict:
         with open(path, "r") as file:
             conf = yaml.safe_load(file)
         return conf
-    bpath = os.path.expanduser("~/.config/astrodask")
+    bpath = os.path.expanduser("~/.config/scida")
     path = os.path.join(bpath, resource)
     # 2. non-absolute path?
-    # 2.1. check ~/.config/astrodask/units/
+    # 2.1. check ~/.config/scida/units/
     if os.path.isfile(path):
         with open(path, "r") as file:
             conf = yaml.safe_load(file)
         return conf
-    # 2.2 check astrodask package resource units/
-    resource_path = "astrodask.configfiles"
+    # 2.2 check scida package resource units/
+    resource_path = "scida.configfiles"
     resource_elements = resource.split("/")
     rname = resource_elements[-1]
     if len(resource_elements) > 1:

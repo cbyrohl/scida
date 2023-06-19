@@ -1,7 +1,7 @@
 import os
 
-from astrodask.discovertypes import CandidateStatus
-from astrodask.series import DatasetSeries
+from scida.discovertypes import CandidateStatus
+from scida.series import DatasetSeries
 
 
 class GizmoSimulation(DatasetSeries):

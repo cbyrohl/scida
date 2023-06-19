@@ -3,9 +3,9 @@ import time
 import dask.array as da
 import numpy as np
 
-from astrodask.convenience import load
-from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot
-from astrodask.io import ChunkedHDF5Loader
+from scida.convenience import load
+from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
+from scida.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 

@@ -9,7 +9,7 @@ After loading some dataset, you can add custom fields to a given container, here
 Please note that all fields within a container are expected to have the same shape in their first axis.
 
 ``` py
-from astrodask import load
+from scida import load
 import da.array as da
 ds = load('simname')
 array = da.zeros_like(ds.data["PartType0"]["Density"][:,0])

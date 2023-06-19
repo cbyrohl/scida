@@ -1,9 +1,9 @@
 # specify data path if we have local datasets available
-datapath_local = "/data/cbyrohl/astrodask-testdata"
+datapath_local = "/data/cbyrohl/scida-testdata"
 
 # datasets
-## 'small'
-## 'big'
+# 'small'
+# 'big'
 
 # We test on a snapshot from TNG50-4
 path = "/home/cbyrohl/TNGdata/TNG50-4/output/snapdir_030"

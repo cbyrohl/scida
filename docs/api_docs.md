@@ -1,3 +1,3 @@
 # API documentation
 
-:::astrodask
+:::scida

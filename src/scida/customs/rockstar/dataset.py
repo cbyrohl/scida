@@ -1,8 +1,8 @@
 import os
 from typing import Union
 
-from astrodask.interface import Dataset
-from astrodask.io import load_metadata_all
+from scida.interface import Dataset
+from scida.io import load_metadata_all
 
 
 class RockstarCatalog(Dataset):

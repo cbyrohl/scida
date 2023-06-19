@@ -2,9 +2,9 @@ import os
 from os.path import join
 from pathlib import Path
 
-from astrodask.discovertypes import _determine_mixins, _determine_type
-from astrodask.interface import create_MixinDataset
-from astrodask.series import DatasetSeries
+from scida.discovertypes import _determine_mixins, _determine_type
+from scida.interface import create_MixinDataset
+from scida.series import DatasetSeries
 
 
 class ArepoSimulation(DatasetSeries):

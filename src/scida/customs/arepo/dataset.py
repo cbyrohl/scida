@@ -11,17 +11,12 @@ from dask import delayed
 from numba import jit, njit
 from numpy._typing import NDArray
 
-from astrodask.discovertypes import _determine_mixins
-from astrodask.fields import FieldContainer
-from astrodask.helpers_misc import (
-    computedecorator,
-    get_args,
-    get_kwargs,
-    parse_humansize,
-)
-from astrodask.interface import Selector, create_MixinDataset
-from astrodask.interfaces.gadgetstyle import GadgetStyleSnapshot
-from astrodask.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
+from scida.discovertypes import _determine_mixins
+from scida.fields import FieldContainer
+from scida.helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
+from scida.interface import Selector, create_MixinDataset
+from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
+from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
 
 log = logging.getLogger(__name__)
 

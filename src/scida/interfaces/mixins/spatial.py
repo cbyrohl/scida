@@ -2,8 +2,8 @@ import logging
 
 import numpy as np
 
-from astrodask.interfaces.mixins.base import Mixin
-from astrodask.misc import rectangular_cutout_mask
+from scida.interfaces.mixins.base import Mixin
+from scida.misc import rectangular_cutout_mask
 
 log = logging.getLogger(__name__)
 

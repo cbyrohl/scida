@@ -2,7 +2,7 @@
 
 ## Installation
 
-astrodask can be installed via [PyPI](https://pypi.org/). astrodask requires a Python version between 3.9 and 3.11.
+scida can be installed via [PyPI](https://pypi.org/). scida requires a Python version between 3.9 and 3.11.
 
 !!! tip "Encapsulating packages"
     We recommend encapsulating your python environments. For example using [anaconda](https://www.anaconda.com/) or [virtualenv](https://virtualenv.pypa.io/en/latest/).
@@ -10,21 +10,21 @@ astrodask can be installed via [PyPI](https://pypi.org/). astrodask requires a P
     If you use anaconda, we recommend running
 
     ```
-    conda create -n astrodask python=3.9
+    conda create -n scida python=3.9
     ```
 
     Activate the environment as needed (as for the following installation) as
 
     ``` bash
-    conda activate astrodask
+    conda activate scida
     ```
 
-    If you are using jupyter/ipython, install and register the astrodask kernel via
+    If you are using jupyter/ipython, install and register the scida kernel via
 
 
     ``` bash
     conda install ipykernel
-    python -m ipykernel install --user --name astrodask --display-name "astrodask"
+    python -m ipykernel install --user --name scida --display-name "scida"
     ```
 
 
@@ -32,13 +32,13 @@ astrodask can be installed via [PyPI](https://pypi.org/). astrodask requires a P
 
     This will only start working upon public release. For now use
     ``` bash
-    python -m pip install 'astrodask @ git+https://github.com/cbyrohl/astrodask
+    python -m pip install 'scida @ git+https://github.com/cbyrohl/scida
     ```
     if you have been granted access to the code repository.
 
 
 ``` bash
-pip install astrodask
+pip install scida
 ```
 
 

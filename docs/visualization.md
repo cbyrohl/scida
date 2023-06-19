@@ -6,10 +6,11 @@ Generally, we reduce the data by either selecting a subset or reducing it prior 
 For example, we can select a subset of particles by applying a cut on a given field.
 
 ```python title="Selecting a subset of particles"
-from astrodask import load
+from scida import load
 import matplotlib.pyplot as plt
+
 ds = load("TNG50-1_snapshot")
-dens = ds.data["PartType0"]["Density"][:10000].compute() # (1)!
+dens = ds.data["PartType0"]["Density"][:10000].compute()  # (1)!
 temp = ds.data["PartType0"]["Temperature"][:10000].compute()
 plt.plot(dens, temp, "o", markersize=0.1)
 plt.show()
@@ -21,8 +22,9 @@ Instead of subselection, we sometimes want to visualize all of the data. We can 
 
 ```python title="2D histograms"
 import dask.array as da
-from astrodask import load
+from scida import load
 import matplotlib.pyplot as plt
+
 ds = load("TNG50-1_snapshot")
 dens = ds.data["PartType0"]["Density"]
 temp = ds.data["PartType0"]["Temperature"]
@@ -39,19 +41,18 @@ plt.show()
 
 We can do interactive visualization with holoviews. For example, we can create a scatter plot of the particle positions.
 
-
 ```python
 import holoviews as hv
 import holoviews.operation.datashader as hd
 import datashader as dshdr
-from astrodask import load
+from scida import load
 
 ds = load("TNG50-1_snapshot")
-ddf = ds.data["PartType0"].get_dataframe(["Coordinates0", "Coordinates1", "Masses"]) # (1)!
+ddf = ds.data["PartType0"].get_dataframe(["Coordinates0", "Coordinates1", "Masses"])  # (1)!
 
 hv.extension("bokeh")
 shaded = hd.datashade(hv.Points(ddf, ["Coordinates0", "Coordinates1"]), cmap="viridis", interpolation="linear",
-                     aggregator=dshdr.sum("Masses"), x_sampling=5, y_sampling=5)
+                      aggregator=dshdr.sum("Masses"), x_sampling=5, y_sampling=5)
 hd.dynspread(shaded, threshold=0.9, max_px=50).opts(bgcolor="black", xaxis=None, yaxis=None, width=500, height=500)
 ```
 

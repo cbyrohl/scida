@@ -1,6 +1,6 @@
 import pathlib
 
-from astrodask.io import load
+from scida.io import load
 
 from .helpers import write_gadget_testfile, write_hdf5flat_testfile
 

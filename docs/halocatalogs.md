@@ -6,7 +6,7 @@ Cosmological simulations are often post-processed with a substructure identifica
 Currently, we support the usual FOF/Subfind combination and format. Their presence will be automatically detected and the catalogs will be loaded into *ds.data* as shown below.
 
 ``` py
-from astrodask import load
+from scida import load
 ds = load("snapshot") # (1)!
 ```
 

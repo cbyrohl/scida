@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "astrodask"
+name = "scida"
 version = "0.1.5"
-description = "Convenience wrapper around astrophysical datasets to process with dask."
+description = "Convenience wrapper around large scientific datasets to process with dask."
 authors = ["Chris Byrohl"]
 readme = "README.md"
 
@@ -59,7 +59,7 @@ tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["astrodask", "tests"]
+source = ["scida", "tests"]
 
 [build-system]
 requires = ["poetry-core"]

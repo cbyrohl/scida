@@ -9,12 +9,12 @@ import dask.array as da
 import numpy as np
 import zarr
 
-import astrodask.io
-from astrodask.fields import FieldContainer
-from astrodask.helpers_misc import make_serializable, sprint
-from astrodask.interfaces.mixins import UnitMixin
-from astrodask.misc import check_config_for_dataset, deepdictkeycopy
-from astrodask.registries import dataset_type_registry
+import scida.io
+from scida.fields import FieldContainer
+from scida.helpers_misc import make_serializable, sprint
+from scida.interfaces.mixins import UnitMixin
+from scida.misc import check_config_for_dataset, deepdictkeycopy
+from scida.registries import dataset_type_registry
 
 log = logging.getLogger(__name__)
 
@@ -79,7 +79,7 @@ class BaseDataset(metaclass=MixinMeta):
             withunits=self.withunits,
         )
 
-        res = astrodask.io.load(path, **loadkwargs)
+        res = scida.io.load(path, **loadkwargs)
         self.data = res[0]
         self._metadata_raw = res[1]
         self.file = res[2]

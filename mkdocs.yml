@@ -1,4 +1,4 @@
-site_name: astrodask
+site_name: scida
 repo_url: https://github.com/cbyrohl/astrodask
 theme:
   name: material
@@ -61,7 +61,7 @@ plugins:
   - mkdocs-jupyter:
       execute: !ENV [JUPYTER_EXECUTE, true]
       execute_ignore: "notebooks/static/*.ipynb"  # waiting for list support (https://github.com/danielfrg/mkdocs-jupyter/issues/119)
-      kernel_name: astrodask
+      kernel_name: scida
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -71,7 +71,7 @@ plugins:
             show_source: true
             show_submodules: true
 watch:
-  - src/astrodask
+  - src/scida
 
 
 extra_javascript:

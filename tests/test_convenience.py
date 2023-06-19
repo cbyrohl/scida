@@ -6,10 +6,10 @@ import h5py
 import pytest
 import yaml
 
-from astrodask.config import get_config
-from astrodask.convenience import load
-from astrodask.interface import Dataset
-from astrodask.misc import check_config_for_dataset
+from scida.config import get_config
+from scida.convenience import load
+from scida.interface import Dataset
+from scida.misc import check_config_for_dataset
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 # eventually replaces 'testdata_path'
@@ -56,7 +56,7 @@ def test_load_resource(tmp_path, monkeypatch, testdatapath):
     config = dict(resources=dict(dummyresource=dict(dataset=dict(path=testdatapath))))
     with open(p, "w") as file:
         yaml.dump(config, file)
-    monkeypatch.setenv("ASTRODASK_CONFIG_PATH", str(p))
+    monkeypatch.setenv("SCIDA_CONFIG_PATH", str(p))
     get_config(reload=True)
     ds = load("dummyresource://dataset")
     assert isinstance(ds, Dataset)

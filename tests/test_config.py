@@ -1,4 +1,4 @@
-from astrodask.config import get_config, get_config_fromfiles
+from scida.config import get_config, get_config_fromfiles
 
 
 def test_load_defaultconf():

@@ -8,7 +8,7 @@ There are two ways to create new derived fields. For quick analysis, we can simp
 ## Defining new quantities with dask arrays
 
 ``` py
-from astrodask import load
+from scida import load
 ds = load("somedataset") # (1)!
 gas = ds.data['gas']
 kineticenergy = 0.5*gas['Masses']*gas['Velocities']**2
@@ -35,7 +35,7 @@ For this purpose, **field recipes** are available. An example of such recipe is 
 ``` py
 import dask.array as da
 
-from astrodask import load
+from scida import load
 ds = load("somedataset")
 
 @snap.register_field("stars")  # (1)!
@@ -60,7 +60,7 @@ Practically working with these fields, there is no difference between derived an
 It can be useful to write (a) dedicated field definition file(s). First, initialize a FieldContainer
 
 ``` py
-from astrodask.fields import FieldContainer
+from scida.fields import FieldContainer
 groupnames = ["PartType0", "Subhalo"]  # (1)!
 fielddefs = FieldContainer(containers=groupnames)
 

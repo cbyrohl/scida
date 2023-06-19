@@ -33,11 +33,11 @@ First, we load the dataset using the convenience function `load()` that will det
 
 
 ```pycon title="Loading a dataset"
->>> from astrodask import load
+>>> from scida import load
 >>> ds = load("TNG50-4_snapshot", units=True) #(1)!
 >>> ds.info() #(2)!
 class: ArepoSnapshotWithUnitMixinAndCosmologyMixin
-source: /home/cbyrohl/data/testdata-astrodask/TNG50-4_snapshot
+source: /home/cbyrohl/data/testdata-scida/TNG50-4_snapshot
 === Cosmological Simulation ===
 z = 0.00
 cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3.04, m_nu=None, Ob0=0.0486)
