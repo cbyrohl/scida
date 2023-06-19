@@ -41,3 +41,7 @@ _scida_ is free and open source software.
 
 If you encounter any problems,
 please [file an issue](https://github.com/cbyrohl/scida/issues/new) along with a detailed description.
+
+## Acknowledgements
+
+The project structure was adapted from [Wolt](https://github.com/woltapp/wolt-python-package-cookiecutter) and [Hypermodern Python](https://github.com/cjolowicz/cookiecutter-hypermodern-python) cookiecutter teamplates.
