@@ -10,7 +10,11 @@ repos:
       - id: check-docstring-first
       - id: check-json
       - id: check-yaml
-        exclude: ^(mkdocs.yml)
+        exclude: |
+            (?x)^(
+                mkdocs.yml|
+                .github/.*  # {% raw %} not recognized by check-yaml
+            )$
       - id: debug-statements
       - id: end-of-file-fixer
       - id: trailing-whitespace
