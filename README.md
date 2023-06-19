@@ -1,6 +1,5 @@
 # scida
 
-![buildstatus](https://github.com/cbyrohl/scida/actions/workflows/python-package-conda.yml/badge.svg)
 
 scida is an out-of-the-box analysis tool for large scientific datasets. It primarily supports the astrophysics community, focusing on cosmological and galaxy formation simulations using particles or unstructured meshes, as well as large observational datasets.
 This tool uses dask, allowing analysis to scale up from your personal computer to HPC resources and the cloud.
@@ -21,14 +20,7 @@ This tool uses dask, allowing analysis to scale up from your personal computer t
 The documentation can be found [here](https://cbyrohl.github.io/scida/)
 
 ## Install
-
-You can install _scida_ via [pip](TODO) from [PyPI](https://pypi.org/):
-
-```console
-$ pip install scida
-```
-
-or do a git clone of this repository:
+For now, do a  git clone of this repository:
 
 ```
 git clone https://github.com/cbyrohl/scida
