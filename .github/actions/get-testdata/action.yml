@@ -11,5 +11,5 @@ runs:
       run: |
          mkdir -p ${{ inputs.outputfolder }}
          cd ${{ inputs.outputfolder }}
-         wget https://heibox.uni-heidelberg.de/f/856c4ffbcc644530a27d/?dl=1
+         wget -O minimal_FIRE2_snapshot_z1.hdf5 https://heibox.uni-heidelberg.de/f/856c4ffbcc644530a27d/?dl=1
       shell: bash
