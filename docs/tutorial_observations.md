@@ -3,7 +3,7 @@
 This package is designed to aid in the efficient analysis of large datasets, such as GAIA DR3.
 
 !!! note "Tutorial dataset"
-    In the following, we will subset from the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3). The reduced dataset contains 100000 randomly selected entries only.
+    In the following, we will subset from the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3). The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded [here](https://heibox.uni-heidelberg.de/f/3b05069b1b524c0fa57e/?dl=1).
     Check [Supported Datasets](supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
     A tutorial for a cosmological simulation can be found [here](tutorial_simulations.md).
