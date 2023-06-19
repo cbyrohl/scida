@@ -193,7 +193,7 @@ We discuss more advanced and interactive visualization methods [here](visualizat
 >>> nbins = 256
 >>> bins1d = np.linspace(0, ds.header["BoxSize"], nbins+1)
 >>> hist, xbins, ybins = da.histogram2d(x,y,bins=[bins1d,bins1d])
->>> im2d = result[0].compute() #(1)!
+>>> im2d = hist.compute() #(1)!
 >>> import matplotlib.pyplot as plt
 >>> from matplotlib.colors import LogNorm
 >>> fig = plt.figure(figsize=(6, 6))
@@ -205,16 +205,4 @@ We discuss more advanced and interactive visualization methods [here](visualizat
 
 1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
 
-![Image title](images/simple_hist2d.png)
-
-
-
-## Advanced topics
-### Processing large datasets
-TODO restructure
-
-[Click me](notebooks/static/largedatasets.ipynb)
-### Series
-TODO restructure
-
-[Click me](notebooks/series.ipynb)
+![2D histogram example](images/simple_hist2d.png)

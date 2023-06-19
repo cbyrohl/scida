@@ -27,7 +27,7 @@ First, we load the dataset using the convenience function `load()` that will det
 
 ```pycon title="Loading a dataset"
 >>> from scida import load
->>> ds = load("TNG50-4_snapshot", units=True) #(1)!
+>>> ds = load("gaia_dr3_subset100000.hdf5", units=True) #(1)!
 >>> ds.info() #(2)!
 class: DatasetWithUnitMixin
 source: /home/cbyrohl/data/testdata-scida/gaia_dr3_subset100000.hdf5
@@ -91,7 +91,7 @@ which we present in the next section.
 
 ### Units
 
-If passing `units=True` to `load()`, the dataset will be loaded with code units attached to all fields.
+If passing `units=True` (default) to `load()`, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
 See the [pint documentation](https://pint.readthedocs.io/en/stable/) for more information. Also check out the
 [units cookbook](notebooks/cookbook/units.ipynb) for more examples.
@@ -115,16 +115,51 @@ to directly see the resulting units and any dimensionality mismatches.
 
 The fields in our snapshot object behave similar to actual numpy arrays.
 
-As a first simple example, let's calculate the total mass of gas cells in the entire simulation. Just as in numpy we can write
+As a first simple example, let's calculate the mean declination of the stars. Just as in numpy we can write
 
-```pycon title="Calculating the total mass of gas cells"
->>> masses = ds.data["PartType0"]["Masses"]
->>> task = masses.sum()
+```pycon title="Calculating the mean declination"
+>>> dec = ds.data["dec"]
+>>> task = dec.mean()
 >>> task
-'dask.array<sum-aggregate, shape=(), dtype=float32, chunksize=(), chunktype=numpy.ndarray> code_mass'
+dask.array<mean_agg-aggregate, shape=(), dtype=float64, chunksize=(), chunktype=numpy.ndarray> <Unit('degree')>
 ```
 
 Note that all objects remain 'virtual': they are not calculated or loaded from disk,
 but are merely the required instructions, encoded into tasks.
 
-TODO: remainder
+We can request a calculation of the actual operation(s) by applying the `.compute()` method to the task.
+
+```pycon
+>>> meandec = task.compute()
+>>> meandec
+-18.433358575323904 <Unit('degree')>
+```
+
+As an example of calculating something more complicated than just `sum()`, let's do the usual "poor man's projection" via a 2D histogram.
+
+To do so, we use [da.histogram2d()](https://docs.dask.org/en/latest/array.html) of dask,
+which is analogous to [numpy.histogram2d()](https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html),
+except that it operates on a dask array.
+We discuss more advanced and interactive visualization methods [here](visualization.md).
+
+```pycon
+>>> import dask.array as da
+>>> import numpy as np
+>>> x = ds.data["l"]
+>>> y = ds.data["b"]
+>>> nbins = (360, 180)
+>>> xbins = np.linspace(0.0, 360.0, nbins[0] + 1)
+>>> ybins = np.linspace(-90, 90.0, nbins[1] + 1)
+>>> hist, xbins, ybins = da.histogram2d(x, y, bins=[xbins, ybins])
+>>> im2d = hist.compute() #(1)!
+>>> import matplotlib.pyplot as plt
+>>> from matplotlib.colors import LogNorm
+>>> plt.imshow(im2d.T, norm=LogNorm(), extent=[0.0, 360.0, -90.0, 90.0])
+>>> plt.xlabel("l (deg)")
+>>> plt.ylabel("b (deg)")
+>>> plt.show()
+```
+
+1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
+
+![2D histogram example](images/simple_hist2d_obs.png)
