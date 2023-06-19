@@ -1,5 +1,5 @@
 site_name: scida
-repo_url: https://github.com/cbyrohl/astrodask
+repo_url: https://github.com/cbyrohl/scida
 theme:
   name: material
   features:
@@ -50,7 +50,7 @@ markdown_extensions:
 
 
 plugins:
-  - markdown-exec:
+  #- markdown-exec:
   - search:
   - mkdocs-video:
       css_style:

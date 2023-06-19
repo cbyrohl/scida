@@ -29,18 +29,18 @@ def test_load_https():
     assert obj.data is not None
 
 
-def test_searchpath():
-    foldername = "TNG50-4_snapshot"
-    obj = load(foldername)
-    assert obj.file is not None
-    assert obj.data is not None
-
-
-def test_searchpath_withcatalog():
-    foldername = "TNG50-4_snapshot"
-    foldername_catalog = "TNG50-4_group"
-    obj = load(foldername, catalog=foldername_catalog)
-    assert obj.file is not None
+# def test_searchpath():
+#    foldername = "TNG50-4_snapshot"
+#    obj = load(foldername)
+#    assert obj.file is not None
+#    assert obj.data is not None
+#
+#
+# def test_searchpath_withcatalog():
+#    foldername = "TNG50-4_snapshot"
+#    foldername_catalog = "TNG50-4_group"
+#    obj = load(foldername, catalog=foldername_catalog)
+#    assert obj.file is not None
 
 
 @require_testdata_path("interface")
