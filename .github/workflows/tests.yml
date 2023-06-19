@@ -77,6 +77,11 @@ jobs:
           restore-keys: |
             ${{ steps.pre-commit-cache.outputs.result }}-
 
+      - name: Download test data
+        uses: ./.github/actions/get-testdata
+        with:
+          outputfolder: $HOME/testdata
+
       - name: Run Nox
         run: |
           nox --python=${{ matrix.python }}

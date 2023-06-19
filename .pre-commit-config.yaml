@@ -12,8 +12,7 @@ repos:
       - id: check-yaml
         exclude: |
             (?x)^(
-                mkdocs.yml|
-                .github/.*  # {% raw %} not recognized by check-yaml
+                mkdocs.yml
             )$
       - id: debug-statements
       - id: end-of-file-fixer

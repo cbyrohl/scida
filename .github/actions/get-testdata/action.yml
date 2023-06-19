@@ -1,0 +1,17 @@
+name: 'get-testdata'
+description: 'download test data'
+inputs:
+  outputfolder:
+    description: 'folder to download to'
+    required: true
+defaults:
+  run:
+    shell: bash
+runs:
+  using: 'composite'
+  steps:
+    - name: "Fetch 'minimal_FIRE2_snapshot_z1.hdf5'"
+      run: |
+         mkdir -p ${{ outputfolder }}
+         cd ${{ outputfolder }}
+         wget https://heibox.uni-heidelberg.de/f/856c4ffbcc644530a27d/?dl=1
