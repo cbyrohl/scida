@@ -2,7 +2,7 @@
 
 !!! note "Tutorial dataset"
     In the following, we will use a small test dataset from the [TNG50](https://www.tng-project.org/) simulation.
-    This is a cosmological galaxy formation simulation.
+    This is a cosmological galaxy formation simulation. This dataset is still a gigabyte in size and can be downloaded [here](https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/).
     Note that analysis is not limited to simulations, but also observational data.
     Check [Supported Datasets](supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
