@@ -745,9 +745,9 @@
 <p>In the following, we will use a small test dataset from the <a href="https://www.tng-project.org/">TNG50</a> simulation.
 This is a cosmological galaxy formation simulation. This dataset is still a gigabyte in size and can be downloaded <a href="https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/">here</a>.
 Note that analysis is not limited to simulations, but also observational data.
-Check <a href="supported_data.md">Supported Datasets</a> for an incomplete list of supported datasets
+Check <a href="../../supported_data/">Supported Datasets</a> for an incomplete list of supported datasets
 and requirements for support of new datasets.
-A shorter tutorial for an observational dataset can be found <a href="tutorial_observations.md">here</a>.</p>
+A shorter tutorial for an observational dataset can be found <a href="../observations/">here</a>.</p>
 </div>
 <p>This package is designed to aid in the efficient analysis of large simulations,
 such as cosmological (hydrodynamical) simulations of large-scale structure.
@@ -841,7 +841,7 @@ which we present in the next section.</p>
 <p>If passing <code>units=True</code> to <code>load()</code>, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
 See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information. Also check out the
-<a href="notebooks/cookbook/units.ipynb">units cookbook</a> for more examples.</p>
+<a href="../../notebooks/cookbook/units/">units cookbook</a> for more examples.</p>
 <p>In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
 These can be accessed via the <code>magnitude</code> and <code>units</code> attributes, respectively.</p>
 <div class="highlight"><span class="filename">Accessing the magnitude and units of a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
@@ -877,7 +877,7 @@ but are merely the required instructions, encoded into tasks.</p>
 <p>To do so, we use <a href="https://docs.dask.org/en/latest/array.html">da.histogram2d()</a> of dask,
 which is analogous to <a href="https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html">numpy.histogram2d()</a>,
 except that it operates on a dask array.
-We discuss more advanced and interactive visualization methods <a href="visualization.md">here</a>.</p>
+We discuss more advanced and interactive visualization methods <a href="../../visualization/">here</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Coordinates"</span><span class="p">]</span>
