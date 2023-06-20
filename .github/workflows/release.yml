@@ -1,11 +1,11 @@
 # based on https://github.com/cjolowicz/cookiecutter-hypermodern-python, MIT License, Copyright © 2020 Claudio Jolowicz
+# based on https://github.com/woltapp/wolt-python-package-cookiecutter, MIT License, Copyright (c) 2021 Wolt Enterprises
 
 name: Release
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [ published ]
 
 jobs:
   release:
@@ -37,20 +37,20 @@ jobs:
         run: |
           echo "::set-output name=sha::$(git rev-parse --verify --quiet HEAD^)"
 
-      - name: Detect and tag new version
-        id: check-version
-        if: steps.check-parent-commit.outputs.sha
-        uses: salsify/action-detect-and-tag-new-version@v2.0.1
-        with:
-          version-command: |
-            bash -o pipefail -c "poetry version | awk '{ print \$2 }'"
+          #- name: Detect and tag new version
+          #  id: check-version
+          #  if: steps.check-parent-commit.outputs.sha
+          #  uses: salsify/action-detect-and-tag-new-version@v2.0.1
+          #  with:
+          #    version-command: |
+          #      bash -o pipefail -c "poetry version | awk '{ print \$2 }'"
 
-      - name: Bump version for developmental release
-        if: "! steps.check-version.outputs.tag"
-        run: |
-          poetry version patch &&
-          version=$(poetry version | awk '{ print $2 }') &&
-          poetry version $version.dev.$(date +%s)
+          #- name: Bump version for developmental release
+          #  if: "! steps.check-version.outputs.tag"
+          #  run: |
+          #    poetry version patch &&
+          #    version=$(poetry version | awk '{ print $2 }') &&
+          #    poetry version $version.dev.$(date +%s)
 
       - name: Build package
         run: |
