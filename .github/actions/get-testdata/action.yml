@@ -4,12 +4,18 @@ inputs:
   outputfolder:
     description: 'folder to download to'
     required: true
+  url:
+    description: 'url to download from'
+    required: true
+  filename:
+    description: 'filename to save as'
+    required: true
 runs:
   using: 'composite'
   steps:
-    - name: "Fetch 'minimal_FIRE2_snapshot_z1.hdf5'"
+    - name: "Fetch '${{ inputs.filename }}'"
       run: |
          mkdir -p ${{ inputs.outputfolder }}
          cd ${{ inputs.outputfolder }}
-         wget -O minimal_FIRE2_snapshot_z1.hdf5 https://heibox.uni-heidelberg.de/f/856c4ffbcc644530a27d/?dl=1
+         wget -O ${{ inputs.filename }} ${{ inputs.url }}
       shell: bash

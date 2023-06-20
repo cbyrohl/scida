@@ -1,0 +1,14 @@
+name: 'get-testdata'
+description: 'download test data'
+inputs:
+  outputfolder:
+    description: 'folder to download to'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filname: minimal_FIRE2_snapshot_z1.hdf5
+        url: https://heibox.uni-heidelberg.de/f/856c4ffbcc644530a27d/?dl=1

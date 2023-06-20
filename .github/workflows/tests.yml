@@ -78,7 +78,7 @@ jobs:
             ${{ steps.pre-commit-cache.outputs.result }}-
 
       - name: Download test data
-        uses: ./.github/actions/get-testdata
+        uses: ./.github/actions/get-testdata-all
         with:
           outputfolder: $HOME/testdata
 
