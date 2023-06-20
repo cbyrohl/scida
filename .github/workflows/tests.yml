@@ -1,3 +1,5 @@
+# based on https://github.com/cjolowicz/cookiecutter-hypermodern-python, MIT License, Copyright © 2020 Claudio Jolowicz
+
 name: Tests
 
 on:
