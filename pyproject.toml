@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scida"
-version = "0.1.5"
+version = "0.1.6"
 description = "Convenience wrapper around large scientific datasets to process with dask."
 authors = ["Chris Byrohl"]
 readme = "README.md"
