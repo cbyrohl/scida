@@ -4,9 +4,9 @@
     In the following, we will use a small test dataset from the [TNG50](https://www.tng-project.org/) simulation.
     This is a cosmological galaxy formation simulation. This dataset is still a gigabyte in size and can be downloaded [here](https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/).
     Note that analysis is not limited to simulations, but also observational data.
-    Check [Supported Datasets](supported_data.md) for an incomplete list of supported datasets
+    Check [Supported Datasets](../supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
-    A shorter tutorial for an observational dataset can be found [here](tutorial_observations.md).
+    A shorter tutorial for an observational dataset can be found [here](observations.md).
 
 
 This package is designed to aid in the efficient analysis of large simulations,
@@ -129,7 +129,7 @@ which we present in the next section.
 If passing `units=True` to `load()`, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
 See the [pint documentation](https://pint.readthedocs.io/en/stable/) for more information. Also check out the
-[units cookbook](notebooks/cookbook/units.ipynb) for more examples.
+[units cookbook](../notebooks/cookbook/units.ipynb) for more examples.
 
 In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
 These can be accessed via the `magnitude` and `units` attributes, respectively.
@@ -182,7 +182,7 @@ As an example of calculating something more complicated than just `sum()`, let's
 To do so, we use [da.histogram2d()](https://docs.dask.org/en/latest/array.html) of dask,
 which is analogous to [numpy.histogram2d()](https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html),
 except that it operates on a dask array.
-We discuss more advanced and interactive visualization methods [here](visualization.md).
+We discuss more advanced and interactive visualization methods [here](../visualization.md).
 
 ```pycon
 >>> import dask.array as da

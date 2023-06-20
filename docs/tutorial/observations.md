@@ -4,9 +4,9 @@ This package is designed to aid in the efficient analysis of large datasets, suc
 
 !!! note "Tutorial dataset"
     In the following, we will subset from the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3). The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded [here](https://heibox.uni-heidelberg.de/f/3b05069b1b524c0fa57e/?dl=1).
-    Check [Supported Datasets](supported_data.md) for an incomplete list of supported datasets
+    Check [Supported Datasets](../supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
-    A tutorial for a cosmological simulation can be found [here](tutorial_simulations.md).
+    A tutorial for a cosmological simulation can be found [here](simulations.md).
 
 
 It uses the [dask](https://dask.org/) library to perform computations, which has several key advantages:
@@ -94,7 +94,7 @@ which we present in the next section.
 If passing `units=True` (default) to `load()`, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
 See the [pint documentation](https://pint.readthedocs.io/en/stable/) for more information. Also check out the
-[units cookbook](notebooks/cookbook/units.ipynb) for more examples.
+[units cookbook](../notebooks/cookbook/units.ipynb) for more examples.
 
 In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
 These can be accessed via the `magnitude` and `units` attributes, respectively.
@@ -140,7 +140,7 @@ As an example of calculating something more complicated than just `sum()`, let's
 To do so, we use [da.histogram2d()](https://docs.dask.org/en/latest/array.html) of dask,
 which is analogous to [numpy.histogram2d()](https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html),
 except that it operates on a dask array.
-We discuss more advanced and interactive visualization methods [here](visualization.md).
+We discuss more advanced and interactive visualization methods [here](../visualization.md).
 
 ```pycon
 >>> import dask.array as da
