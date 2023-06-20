@@ -3399,17 +3399,19 @@ docs = ["furo", "olefile", "sphinx (>=2.4)", "sphinx-copybutton", "sphinx-inline
 tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout"]
 
 [[package]]
-name = "Pint"
-version = "0.22.dev22+g8426b39"
+name = "pint"
+version = "0.22"
 description = "Physical quantities module"
 category = "main"
 optional = false
 python-versions = ">=3.9"
-files = []
-develop = false
+files = [
+    {file = "Pint-0.22-py3-none-any.whl", hash = "sha256:6e2b3c5c2b4d9b516608bc860a417a39d66eb99c958f36540cf931d2c2e9f80f"},
+    {file = "Pint-0.22.tar.gz", hash = "sha256:2d139f6abbcf3016cad7d3cec05707fe908ac4f99cf59aedfd6ee667b7a64433"},
+]
 
 [package.dependencies]
-typing_extensions = "*"
+typing-extensions = "*"
 
 [package.extras]
 babel = ["babel (<=2.8)"]
@@ -3420,12 +3422,6 @@ pandas = ["pint-pandas (>=0.3)"]
 test = ["pytest", "pytest-cov", "pytest-mpl", "pytest-subtests"]
 uncertainties = ["uncertainties (>=3.1.6)"]
 xarray = ["xarray"]
-
-[package.source]
-type = "git"
-url = "https://github.com/hgrecco/pint.git"
-reference = "8426b391ff88dbfc7421ceda415ff2d7bcbcda37"
-resolved_reference = "8426b391ff88dbfc7421ceda415ff2d7bcbcda37"
 
 [[package]]
 name = "platformdirs"
@@ -4913,4 +4909,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "ba371903ff033eac15561a26bf3bb1e85ab3294d6432f6997417f26ca2d5ab20"
+content-hash = "257c2bccca0cff97726ff7b57a6ed47b4b6157cc145a07e965cc63ccec7fed28"

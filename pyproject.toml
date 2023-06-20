@@ -17,7 +17,7 @@ numba = "^0.56"
 pyyaml = ">=5.3.1"
 jupyter = "^1.0.0"
 tqdm = "^4.64.1"
-pint = {git = "https://github.com/hgrecco/pint.git", rev = "8426b391ff88dbfc7421ceda415ff2d7bcbcda37"}
+pint = "^0.22"
 requests = "^2.31.0"
 
 
