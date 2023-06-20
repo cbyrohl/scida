@@ -2,7 +2,7 @@ scida is an out-of-the-box analysis tool for large astrophysical datasets, parti
 
 
 <section class="cards">
-    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./getting_started';">
+    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./install';">
       <div class="card__image-container">
         <img src="images/person-running-solid.svg"/>
       </div>

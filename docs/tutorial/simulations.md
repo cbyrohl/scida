@@ -205,4 +205,4 @@ We discuss more advanced and interactive visualization methods [here](visualizat
 
 1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
 
-![2D histogram example](images/simple_hist2d.png)
+![2D histogram example](../images/simple_hist2d.png)

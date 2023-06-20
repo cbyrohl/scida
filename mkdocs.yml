@@ -5,10 +5,16 @@ theme:
   features:
     - content.code.annotate
     - navigation.sections
+    - navigation.indexes
 
 nav:
-  - 'Readme': 'index.md'
-  - 'Tutorial': tutorial.md
+  - 'Scida': index.md
+  - 'Getting Started':
+    - "Installation": install.md
+    - 'Tutorial':
+      - 'Tutorial': tutorial/index.md
+      - 'Simulations': tutorial/simulations.md
+      - 'Observations': tutorial/observations.md
     #    - 'Getting Started': notebooks/gettingstarted.ipynb
     #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
     #    - 'Series': notebooks/series.ipynb
