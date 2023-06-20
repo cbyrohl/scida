@@ -14,8 +14,5 @@ runs:
   using: 'composite'
   steps:
     - name: "Fetch '${{ inputs.filename }}'"
-      run: |
-         mkdir -p ${{ inputs.outputfolder }}
-         cd ${{ inputs.outputfolder }}
-         wget -O ${{ inputs.filename }} ${{ inputs.url }}
+      run: ./.github/actions/get-testdata/download.sh ${{ inputs.outputfolder }}  ${{ inputs.filename }} ${{ inputs.url }}
       shell: bash
