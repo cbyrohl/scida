@@ -179,8 +179,9 @@ class UnitMixin(Mixin):
         self.data = {}
         self._metadata_raw = {}
 
-        ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
-        ureg = kwargs.pop("ureg", ureg)
+        ureg = kwargs.pop("ureg", None)
+        if ureg is None:
+            ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
         self.ureg = self.unitregistry = ureg
 
         super().__init__(*args, **kwargs)

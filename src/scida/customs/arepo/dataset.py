@@ -296,7 +296,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 )
             return
 
-        subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"]
+        shnr_attr = "SubhaloGrNr"
+        if shnr_attr not in self.data["Subhalo"]:
+            shnr_attr = "SubhaloGroupNr"  # what MTNG does
+        if shnr_attr not in self.data["Subhalo"]:
+            raise ValueError(
+                f"Could not find 'SubhaloGrNr' or 'SubhaloGroupNr' in {self.catalog}"
+            )
+
+        subhalogrnr = self.data["Subhalo"][shnr_attr]
         subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"]
 
         # remove "units" for numba funcs
