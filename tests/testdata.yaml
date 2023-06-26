@@ -84,6 +84,17 @@ testdata:
       - areposnapshot
       - areposnapshot_withcatalog|Z|1|2
     fn: TNG50-4/output/groups_000
+  MTNGarepo_270hydro_snapshot_z2:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|M|0|2
+  MTNGarepo_270hydro_group_z2:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|M|1|2
+
   # minimal datasets extracted with testdata_extractor.py
   TNG50-1_snapshot_z3_minimal:
     types:
