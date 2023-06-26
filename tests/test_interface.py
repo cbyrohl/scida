@@ -5,7 +5,7 @@ import numpy as np
 
 from scida.convenience import load
 from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
-from scida.io import ChunkedHDF5Loader
+from scida.io._base import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
