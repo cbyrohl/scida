@@ -28,10 +28,21 @@ class MTNGArepoSnapshot(ArepoSnapshot):
             return
         # next, attempt to load mostbound snapshot. This is done by loading into sub-object.
         self.mostbound = None
-        tkwargs.update(fileprefix="snapshot-prevmostboundonly_")
-        self.mostbound = MTNGArepoSnapshot(
-            path, chunksize=chunksize, catalog=catalog, **tkwargs
-        )
+        tkwargs.update(fileprefix="snapshot-prevmostboundonly_", catalog="none")
+        self.mostbound = MTNGArepoSnapshot(path, chunksize=chunksize, **tkwargs)
+        # hacky: remove unused containers from mostbound snapshot
+        for k in [
+            "PartType0",
+            "PartType2",
+            "PartType3",
+            "PartType4",
+            "PartType5",
+            "Group",
+            "Subhalo",
+        ]:
+            if k in self.mostbound.data:
+                del self.mostbound.data[k]
+        self.merge_data(self.mostbound, suffix="_mostbound")
 
     @classmethod
     def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:

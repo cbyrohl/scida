@@ -311,7 +311,12 @@ class FieldContainer(MutableMapping):
     def __delitem__(self, key):
         if key in self.fieldrecipes:
             del self.fieldrecipes[key]
-        del self.fields[key]
+        if key in self.containers:
+            del self.containers[key]
+        elif key in self.fields:
+            del self.fields[key]
+        else:
+            raise KeyError("Unknown key '%s'" % key)
 
     def __len__(self):
         return len(self.keys())

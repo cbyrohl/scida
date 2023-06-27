@@ -71,63 +71,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             if self.catalog == "none":
                 pass  # this string can be set to explicitly disable catalog
             elif self.catalog is not None:
-                virtualcache = False  # copy catalog for better performance
-                catalog_kwargs = kwargs.get("catalog_kwargs", {})
-                catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
-                # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
-                prfx = self._get_fileprefix(self.catalog)
-
-                # explicitly need to create unitaware class for catalog as needed
-                # TODO: should just be determined from mixins of parent?
-                cls = ArepoCatalog
-                withunits = kwargs.get("units", False)
-                mixins = []
-                if withunits:
-                    mixins += [UnitMixin]
-
-                other_mixins = _determine_mixins(path=path)
-                mixins += other_mixins
-                cls = create_MixinDataset(cls, mixins)
-
-                ureg = None
-                if hasattr(self, "ureg"):
-                    ureg = self.ureg
-
-                self.catalog = cls(
-                    self.catalog,
-                    virtualcache=virtualcache,
-                    fileprefix=prfx,
-                    units=self.withunits,
-                    ureg=ureg,
-                )
-                if "Redshift" in self.catalog.header and "Redshift" in self.header:
-                    z_catalog = self.catalog.header["Redshift"]
-                    z_snap = self.header["Redshift"]
-                    if not np.isclose(z_catalog, z_snap):
-                        raise ValueError(
-                            "Redshift mismatch between snapshot and catalog: "
-                            f"{z_snap:.2f} vs {z_catalog:.2f}"
-                        )
-                for k in self.catalog.data:
-                    if k not in self.data:
-                        self.data[k] = self.catalog.data[k]
-                    self.catalog.data.fieldrecipes_kwargs["snap"] = self
-                if (
-                    len(self.catalog.data["Group"].keys()) > 0
-                ):  # starting snapshots often dont have groups
-                    self.add_catalogIDs()
-
-                # merge hints from snap and catalog
-                for h in self.catalog.hints:
-                    if h not in self.hints:
-                        self.hints[h] = self.catalog.hints[h]
-                    elif isinstance(self.hints[h], dict):
-                        # merge dicts
-                        for k in self.catalog.hints[h]:
-                            if k not in self.hints[h]:
-                                self.hints[h][k] = self.catalog.hints[h][k]
-                    else:
-                        pass  # nothing to do; we do not overwrite with catalog props
+                self.load_catalog(kwargs)
 
         # add aliases
         aliases = dict(
@@ -149,6 +93,76 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         # add some default fields
         self.data.merge(fielddefs)
+
+    def load_catalog(self, kwargs):
+        virtualcache = False  # copy catalog for better performance
+        catalog_kwargs = kwargs.get("catalog_kwargs", {})
+        catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
+        # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
+        prfx = self._get_fileprefix(self.catalog)
+
+        # explicitly need to create unitaware class for catalog as needed
+        # TODO: should just be determined from mixins of parent?
+        cls = ArepoCatalog
+        withunits = kwargs.get("units", False)
+        mixins = []
+        if withunits:
+            mixins += [UnitMixin]
+
+        other_mixins = _determine_mixins(path=self.path)
+        mixins += other_mixins
+        cls = create_MixinDataset(cls, mixins)
+
+        ureg = None
+        if hasattr(self, "ureg"):
+            ureg = self.ureg
+
+        self.catalog = cls(
+            self.catalog,
+            virtualcache=virtualcache,
+            fileprefix=prfx,
+            units=self.withunits,
+            ureg=ureg,
+        )
+        if "Redshift" in self.catalog.header and "Redshift" in self.header:
+            z_catalog = self.catalog.header["Redshift"]
+            z_snap = self.header["Redshift"]
+            if not np.isclose(z_catalog, z_snap):
+                raise ValueError(
+                    "Redshift mismatch between snapshot and catalog: "
+                    f"{z_snap:.2f} vs {z_catalog:.2f}"
+                )
+
+        # merge data
+        self.merge_data(self.catalog)
+
+        # starting snapshots often do not have groups
+        ngkeys = self.catalog.data["Group"].keys()
+        if len(ngkeys) > 0:
+            self.add_catalogIDs()
+
+        # merge hints from snap and catalog
+        self.merge_hints(self.catalog)
+
+    def merge_data(self, secondobj, suffix=""):
+        for k in secondobj.data:
+            key = k + suffix
+            if key not in self.data:
+                self.data[key] = secondobj.data[k]
+            secondobj.data.fieldrecipes_kwargs["snap"] = self
+
+    def merge_hints(self, secondobj):
+        # merge hints from snap and catalog
+        for h in secondobj.hints:
+            if h not in self.hints:
+                self.hints[h] = secondobj.hints[h]
+            elif isinstance(self.hints[h], dict):
+                # merge dicts
+                for k in secondobj.hints[h]:
+                    if k not in self.hints[h]:
+                        self.hints[h][k] = secondobj.hints[h][k]
+            else:
+                pass  # nothing to do; we do not overwrite with catalog props
 
     def _set_metadata(self):
         """

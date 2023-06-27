@@ -30,14 +30,18 @@ def get_container_from_path(
     return rv
 
 
-def return_hdf5cachepath(path_original) -> str:
-    fp = return_cachefile_path(os.path.join(hash_path(path_original), "data.hdf5"))
+def return_hdf5cachepath(path_original, fileprefix=None) -> str:
+    path = path_original
+    if fileprefix is not None:
+        path = os.path.join(path, fileprefix)
+    hsh = hash_path(path)
+    fp = return_cachefile_path(os.path.join(hsh, "data.hdf5"))
     return fp
 
 
-def path_hdf5cachefile_exists(path) -> bool:
+def path_hdf5cachefile_exists(path, **kwargs) -> bool:
     """Checks whether a cache file exists for given path."""
-    fp = return_hdf5cachepath(path)
+    fp = return_hdf5cachepath(path, **kwargs)
     if os.path.isfile(fp):
         return True
     return False
