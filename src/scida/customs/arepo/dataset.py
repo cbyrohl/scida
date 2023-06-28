@@ -9,7 +9,7 @@ import numpy as np
 from dask import array as da
 from dask import delayed
 from numba import jit, njit
-from numpy._typing import NDArray
+from numpy.typing import NDArray
 
 from scida.discovertypes import _determine_mixins
 from scida.fields import FieldContainer

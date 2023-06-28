@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-numpy = "^1.18"
+numpy = "^1.21"
 dask = {extras = ["array", "dataframe", "distributed"], version = "^2023"}
 distributed = "^2023"
 h5py = "^3.7.0"
