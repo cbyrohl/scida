@@ -327,8 +327,8 @@ class UnitMixin(Mixin):
                 # we treat recipes separately so that they stay recipes
                 # this is important due to the following memory issue for now:
                 # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
-                if k not in container.fields and k in container.fieldrecipes:
-                    container.fieldrecipes[k].units = unit
+                if k not in container._fields and k in container._fieldrecipes:
+                    container._fieldrecipes[k].units = unit
                     # TODO: Add cgs conversion for recipes, see else-statement.
                 else:
                     container[k] = unit * container[k]
