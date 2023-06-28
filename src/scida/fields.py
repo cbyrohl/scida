@@ -118,9 +118,9 @@ class FieldContainer(MutableMapping):
 
     @property
     def fieldcount(self):
-        nrecipes = len(self._fieldrecipes)
-        nfields = len(self._fields)
-        ntot = nrecipes + nfields
+        rcps = set(self._fieldrecipes)
+        flds = set([k for k in self._fields if k not in self.internals])
+        ntot = len(rcps | flds)
         return ntot
 
     @property
@@ -134,10 +134,6 @@ class FieldContainer(MutableMapping):
         else:
             return None
 
-    # def keys(self) -> set:
-    #    # TODO: hacky; also know that we have not / can not write .items() right now
-    #    # which will lead to unintended behaviour down the line
-    #    return set(self.fields.keys()) | set(self.derivedfields.keys())
     def keys(
         self, withgroups=True, withrecipes=True, withinternal=False, withfields=True
     ):
@@ -153,8 +149,14 @@ class FieldContainer(MutableMapping):
                 fieldkeys = list(set(fieldkeys) | set(recipekeys))
         if withgroups:
             groupkeys = self._containers.keys()
-            return list(set(fieldkeys) | set(groupkeys))
-        return fieldkeys
+            fieldkeys = list(set(fieldkeys) | set(groupkeys))
+        return sorted(fieldkeys)
+
+    def items(self):
+        return ((k, self._getitem(k, evaluate_recipe=False)) for k in self.keys())
+
+    def values(self):
+        return (self._getitem(k, evaluate_recipe=False) for k in self.keys())
 
     def register_field(
         self,
@@ -213,7 +215,7 @@ class FieldContainer(MutableMapping):
         txt = ""
         txt += "FieldContainer[containers=%s, fields=%s]" % (
             len(self._containers),
-            len(self._fields),
+            self.fieldcount,
         )
         return txt
 
@@ -268,7 +270,9 @@ class FieldContainer(MutableMapping):
             **kwargs,
         )
 
-    def _getitem(self, key, force_derived=False, update_dict=True):
+    def _getitem(
+        self, key, force_derived=False, update_dict=True, evaluate_recipe=True
+    ):
         if key in self.aliases:
             key = self.aliases[key]
         if key in self._containers:
@@ -277,6 +281,8 @@ class FieldContainer(MutableMapping):
             return self._fields[key]
         else:
             if key in self._fieldrecipes:
+                if not evaluate_recipe:
+                    return self._fieldrecipes[key]
                 func = self._fieldrecipes[key].func
                 units = self._fieldrecipes[key].units
                 accept_kwargs = inspect.getfullargspec(func).varkw is not None
