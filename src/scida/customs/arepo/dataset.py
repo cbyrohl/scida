@@ -8,8 +8,8 @@ import dask
 import numpy as np
 from dask import array as da
 from dask import delayed
-from numba import jit, njit
-from numpy._typing import NDArray
+from numba import jit
+from numpy.typing import NDArray
 
 from scida.discovertypes import _determine_mixins
 from scida.fields import FieldContainer
@@ -568,7 +568,7 @@ def wrap_func_scalar(
     return np.array(res)
 
 
-@njit
+@jit(nopython=True)
 def get_hidx(gidx_start, gidx_count, celloffsets):
     """Get halo index of a given cell
 
@@ -639,7 +639,7 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     )
 
 
-@jit
+@jit(nopython=True)
 def get_shidx(
     gidx_start: int,
     gidx_count: int,
@@ -739,7 +739,7 @@ def compute_subhaloindex(
     )
 
 
-@njit
+@jit(nopython=True)
 def get_shcounts_shcells(SubhaloGrNr, hlength):
     """Returns the number offset and count of subhalos per halo."""
     shcounts = np.zeros(hlength, dtype=np.int32)
