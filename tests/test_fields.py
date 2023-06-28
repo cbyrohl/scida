@@ -23,12 +23,26 @@ def test_fieldtypes(testdatapath):
 
     snp = load(testdatapath)
     gas = snp.data["PartType0"]
-    print("Field count:", len(gas._fields))
     fnames = list(gas.keys(withrecipes=False))
     assert len(fnames) < 5, "not lazy loading fields (into recipes)"
     fnames = list(gas.keys())
     assert len(fnames) > 5, "not correctly considering recipes"
-    assert "uid" not in gas.keys()
+    assert gas.fieldcount == len(fnames)
+    container_repr = str(gas)
+    print(container_repr)
+    shown_fieldcount = int(container_repr.split("fields=")[-1][:-1])
+    assert shown_fieldcount == gas.fieldcount
+
+    assert "uid" not in gas.keys()  # no need to show this to the user (?)
+
+    # making sure that items()/values() are not evaluating recipes...
+    assert any(["DerivedFieldRecipe" in str(type(k)) for k in gas.values()])
+
+    # should not change after evaluating a recipe
+    print(gas["Density"])  # evaluating recipe
+    container_repr = str(gas)
+    shown_fieldcount = int(container_repr.split("fields=")[-1][:-1])
+    assert shown_fieldcount == gas.fieldcount
 
 
 @require_testdata("interface", only=["TNG50-4_snapshot"])
