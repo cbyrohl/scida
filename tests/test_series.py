@@ -4,6 +4,7 @@ import time
 import numpy as np
 import psutil
 import pytest
+from IPython.core.formatters import HTMLFormatter
 
 from scida import ArepoSimulation
 from scida.interface import BaseDataset
@@ -61,14 +62,30 @@ def test_delay_obj(testdatapath):
     cls = BaseDataset
     snp = delay_init(cls)(testdatapath)
     assert "Delay" in str(type(snp))
+
+    # string representation should not trigger evaluation
     print(snp)  # triggers __repr__
     assert "Delay" in str(type(snp))
-    print(snp.data)  # triggers eval of lazy object
+
+    # ipython display should also not trigger evaluation
+    fmt = HTMLFormatter()
+    print(fmt(snp))
+    assert "Delay" in str(type(snp))
+
+    # accessing attributes should trigger evaluation
+    print(snp.data)
     assert "Delay" not in str(type(snp))
 
 
-# >> > from inspect import ismethod
-# >> > ismethod(A.method)
+@require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
+def test_areposimulation_lazy_message(cachedir, testdatapath):
+    tstart = time.process_time()
+    bs = ArepoSimulation(testdatapath, lazy=True)
+    dt0 = time.process_time() - tstart
+    print(bs.datasets[0])
+    assert type(bs.datasets[0]).__name__ == "Delay"
+    print(dt0)
+    assert dt0 < 2.0  # should be fast
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
