@@ -26,14 +26,17 @@ def delay_init(cls):
         def __getattribute__(self, name):
             """Replace the class with the actual class and initialize it if needed."""
             # a few special calls do not trigger initialization:
-            if name in [
+            specialattrs = [
                 "__repr__",
                 "__str__",
                 "__dir__",
                 "__class__",
                 "_args",
                 "_kwargs",
-            ]:
+                # https://github.com/jupyter/notebook/issues/2014
+                "_ipython_canary_method_should_not_exist_",
+            ]
+            if name in specialattrs or name.startswith("_repr"):
                 return object.__getattribute__(self, name)
             elif hasattr(cls, name) and inspect.ismethod(getattr(cls, name)):
                 # do not need to initialize for class methods
