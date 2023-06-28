@@ -1,3 +1,4 @@
+import contextlib
 import logging
 from typing import Optional
 
@@ -161,11 +162,15 @@ def extract_units_from_attrs(
     return str_to_unit("", ureg)
 
 
-def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry):
+def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry, warn_redef=False):
     ulist = []
     for k, v in udict.items():
         ulist.append("%s = %s" % (k, v))
-    ureg.load_definitions(ulist)
+    if warn_redef:
+        ureg.load_definitions(ulist)
+    else:
+        with ignore_warn_redef(ureg):
+            ureg.load_definitions(ulist)
 
 
 def update_unitregistry(filepath: str, ureg: UnitRegistry):
@@ -327,8 +332,8 @@ class UnitMixin(Mixin):
                 # we treat recipes separately so that they stay recipes
                 # this is important due to the following memory issue for now:
                 # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
-                if k not in container.fields and k in container.fieldrecipes:
-                    container.fieldrecipes[k].units = unit
+                if k not in container._fields and k in container._fieldrecipes:
+                    container._fieldrecipes[k].units = unit
                     # TODO: Add cgs conversion for recipes, see else-statement.
                 else:
                     container[k] = unit * container[k]
@@ -369,3 +374,13 @@ class UnitMixin(Mixin):
     #            print(entry, newpath, parent)
     #        walk_container(self.data, handler_field=handler_field)
     #    super().save(*args, fields=newcontainer, **kwargs)
+
+
+@contextlib.contextmanager
+def ignore_warn_redef(ureg):
+    backupval = ureg._on_redefinition
+    ureg._on_redefinition = "ignore"
+    try:
+        yield
+    finally:
+        ureg._on_redefinition = backupval

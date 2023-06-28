@@ -11,6 +11,7 @@ import h5py
 import numpy as np
 import zarr
 
+from scida.config import get_config
 from scida.fields import FieldContainer, walk_container
 from scida.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from scida.misc import get_container_from_path, return_hdf5cachepath
@@ -206,6 +207,10 @@ class ChunkedHDF5Loader(Loader):
         return files
 
     def create_cachefile(self, fileprefix="", virtualcache=False):
+        config = get_config()
+        print_msg = config.get("print_cachefile_creation", True)
+        if print_msg:
+            print("Creating cache file, this may take a while...")
         cachefp = return_hdf5cachepath(self.path)
         files = self.get_chunkedfiles(fileprefix)
 

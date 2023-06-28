@@ -4,6 +4,7 @@ import numpy as np
 
 from scida.helpers_misc import sprint
 from scida.interfaces.mixins.base import Mixin
+from scida.interfaces.mixins.units import ignore_warn_redef
 
 log = logging.getLogger(__name__)
 
@@ -20,14 +21,12 @@ class CosmologyMixin(Mixin):
         self.metadata["redshift"] = self.redshift
         if hasattr(self, "ureg"):
             ureg = self.ureg
-            backupval = ureg._on_redefinition
-            ureg._on_redefinition = "ignore"
-            if c is not None:
-                ureg.define("h = %s" % str(c.h))
-            if z is not None:
-                a = 1.0 / (1.0 + z)
-                ureg.define("a = %s" % str(float(a)))
-            ureg._on_redefinition = backupval
+            with ignore_warn_redef(ureg):
+                if c is not None:
+                    ureg.define("h = %s" % str(c.h))
+                if z is not None:
+                    a = 1.0 / (1.0 + z)
+                    ureg.define("a = %s" % str(float(a)))
 
     def _info_custom(self):
         rep = sprint("=== Cosmological Simulation ===")
