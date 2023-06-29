@@ -27,7 +27,7 @@ pip install scida
 ```
 
 ## First Steps
-After installin scida, follow the [tutorial](https://cbyrohl.github.io/scida/tutorial/).
+After installing scida, follow the [tutorial](https://cbyrohl.github.io/scida/tutorial/).
 
 ## License
 
