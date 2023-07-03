@@ -946,7 +946,7 @@ def map_halo_operation(
     )
 
     # TODO: Get rid of oindex; only here because have not adjusted code to map_halo_operation_get_chunkedges
-    totlength = offsets[-1]
+    totlength = int(offsets[-1])
     oindex = np.array(list(list_chunkedges[:, 0]) + [list_chunkedges[-1, -1]])
 
     new_axis = None

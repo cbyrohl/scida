@@ -153,10 +153,10 @@ class FieldContainer(MutableMapping):
         return sorted(fieldkeys)
 
     def items(self):
-        return ((k, self._getitem(k, evaluate_recipe=False)) for k in self.keys())
+        return ((k, self._getitem(k, evaluate_recipe=True)) for k in self.keys())
 
     def values(self):
-        return (self._getitem(k, evaluate_recipe=False) for k in self.keys())
+        return (self._getitem(k, evaluate_recipe=True) for k in self.keys())
 
     def register_field(
         self,

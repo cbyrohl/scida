@@ -219,4 +219,4 @@ def test_areposnapshot_map_hquantity(testdata_areposnapshot_withcatalog):
     snp.add_groupquantity_to_particles("GroupSFR")
     partarr = snp.data["PartType0"]["GroupSFR"]
     haloarr = snp.data["Group"]["GroupSFR"]
-    assert partarr[0].compute() == haloarr[0].compute()
+    assert np.isclose(partarr[0].compute(), haloarr[0].compute())

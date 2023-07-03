@@ -36,7 +36,8 @@ def test_fieldtypes(testdatapath):
     assert "uid" not in gas.keys()  # no need to show this to the user (?)
 
     # making sure that items()/values() are not evaluating recipes...
-    assert any(["DerivedFieldRecipe" in str(type(k)) for k in gas.values()])
+    # right now items()/values() are evaluating recipes
+    assert all(["DerivedFieldRecipe" not in str(type(k)) for k in gas.values()])
 
     # should not change after evaluating a recipe
     print(gas["Density"])  # evaluating recipe
