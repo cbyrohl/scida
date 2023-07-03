@@ -206,3 +206,8 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
 
 ![2D histogram example](../images/simple_hist2d.png)
+
+## Catalogs
+Many cosmological simulations have a catalog of halos, subhalos, galaxies, etc. 
+
+For AREPO/Gadget based simulations, we support use of this information. Find more find more information on how to use catalogs [here](../halocatalogs.md).
