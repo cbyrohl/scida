@@ -25,6 +25,7 @@ nav:
     - 'Units': units.md
     - 'Derived fields': derived_fields.md
     - 'Data series': series.md
+    - 'Large datasets': largedatasets.md
   # - 'Cookbook':
   #   - 'Units': notebooks/cookbook/units.ipynb
   - 'FAQ': faq.md
