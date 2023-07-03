@@ -20,10 +20,11 @@ nav:
     #    - 'Series': notebooks/series.ipynb
     #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
   - 'Features':
-    - 'Supported Datasets': supported_data.md
+    - 'Supported datasets': supported_data.md
     - 'Visualization': visualization.md
     - 'Units': units.md
-    - 'Derived Fields': derived_fields.md
+    - 'Derived fields': derived_fields.md
+    - 'Data series': series.md
   # - 'Cookbook':
   #   - 'Units': notebooks/cookbook/units.ipynb
   - 'FAQ': faq.md
