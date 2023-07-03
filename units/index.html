@@ -357,17 +357,23 @@
 
   
   
+    
+  
   
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
       
       
       
+        
+          
+        
+          
         
           
         
@@ -398,7 +404,7 @@
   
     <li class="md-nav__item">
       <a href="../supported_data/" class="md-nav__link">
-        Supported Datasets
+        Supported datasets
       </a>
     </li>
   
@@ -423,10 +429,72 @@
               
   
   
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Units
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Units
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#loading-data-with-units" class="md-nav__link">
+    Loading data with units
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-conversions" class="md-nav__link">
+    Unit conversions
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
   
     <li class="md-nav__item">
       <a href="../derived_fields/" class="md-nav__link">
-        Derived Fields
+        Derived fields
       </a>
     </li>
   
@@ -439,53 +507,13 @@
   
   
     <li class="md-nav__item">
-      <a href="../halocatalogs/" class="md-nav__link">
-        Halo and galaxy catalogs
+      <a href="../series/" class="md-nav__link">
+        Data series
       </a>
     </li>
   
 
             
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
-      
-      
-      
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_4">
-          Cookbook
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Cookbook" data-md-level="1">
-        <label class="md-nav__title" for="__nav_4">
-          <span class="md-nav__icon md-icon"></span>
-          Cookbook
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
           
             
               
@@ -493,8 +521,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../notebooks/cookbook/units/" class="md-nav__link">
-        Loading data with units
+      <a href="../largedatasets/" class="md-nav__link">
+        Large datasets
       </a>
     </li>
   
@@ -557,6 +585,28 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#loading-data-with-units" class="md-nav__link">
+    Loading data with units
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-conversions" class="md-nav__link">
+    Unit conversions
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -576,7 +626,54 @@
 
 
 <div><h1 id="units">Units</h1>
-<p>TODO</p></div>
+<h2 id="loading-data-with-units">Loading data with units</h2>
+<p>Loading data sets with </p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">)</span>
+</code></pre></div>
+<p>will automatically attach units to the data. This can be deactivated by passing "units=False" to the load function.
+By default, code units are used, alternatively, cgs conversions can be applied by passing "units='cgs'".</p>
+<p>Units are introduced via the <a href="https://pint.readthedocs.io/en/stable/">pint</a> package, see there for more details.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span>
+<span class="go">dask.array&lt;mul, shape=(18540104, 3), dtype=float64, chunksize=(5592405, 3), chunktype=numpy.ndarray&gt; &lt;Unit('code_length')&gt;</span>
+</code></pre></div>
+<p>We can access the underlying dask array and the units separately:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
+<span class="go">(dask.array&lt;mul, shape=(18540104, 3), dtype=float64, chunksize=(5592405, 3), chunktype=numpy.ndarray&gt;,</span>
+<span class="go"> &lt;Unit('code_length')&gt;)</span>
+</code></pre></div>
+<h2 id="unit-conversions">Unit conversions</h2>
+<p>We can change units for evaluation as desired:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span> <span class="o">=</span> <span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"cm"</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># here the default system is cgs, thus we get the same result from</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span><span class="o">.</span><span class="n">to_base_units</span><span class="p">()</span>
+<span class="go">dask.array&lt;mul, shape=(18540104, 3), dtype=float64, chunksize=(5592405, 3), chunktype=numpy.ndarray&gt; &lt;Unit('centimeter')&gt;</span>
+</code></pre></div>
+<h1 id="the-unit-registry">The unit registry</h1>
+<p>The unit registry keeps all units. There is no global registry, but each dataset has its own registry as attribute ureg.
+The use of a global registry (or lack thereof here) can lead to some confusion, please consult the pint documentation when in doubt.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ureg</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">ureg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the unit meter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ureg</span><span class="p">(</span><span class="s2">"m"</span><span class="p">)</span>
+<span class="go">1 &lt;Unit('meter')&gt;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="c1"># define an array with units meter (dask arrays analogously)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="n">ureg</span><span class="p">(</span><span class="s2">"m"</span><span class="p">)</span>
+<span class="go">array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) &lt;Unit('meter')&gt;</span>
+</code></pre></div>
+<h2 id="synthesize-new-dask-arrays-with-units">Synthesize new dask arrays with units</h2>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">energy_restframe</span> <span class="o">=</span> <span class="p">(</span><span class="n">gas</span><span class="p">[</span><span class="s2">"Masses"</span><span class="p">]</span><span class="o">*</span><span class="n">ureg</span><span class="p">(</span><span class="s2">"c"</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"erg"</span><span class="p">)</span>  <span class="c1"># E=mc^2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">energy_restframe</span>
+<span class="go">dask.array&lt;mul, shape=(18540104,), dtype=float64, chunksize=(18540104,), chunktype=numpy.ndarray&gt; &lt;Unit('erg')&gt;</span>
+</code></pre></div>
+<h2 id="custom-units">Custom units</h2>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ureg</span><span class="o">.</span><span class="n">define</span><span class="p">(</span><span class="s2">"halfmeter = 0.5 * m"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># first particle coordinates in halfmeters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"halfmeter"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="go">array([6.64064027e+23, 2.23858253e+24, 1.94176712e+24]) &lt;Unit('halfmeter')&gt;</span>
+</code></pre></div></div>
 
 
 
@@ -592,6 +689,42 @@
       </main>
       
         <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../visualization/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Visualization" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Visualization
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../derived_fields/" class="md-footer__link md-footer__link--next" aria-label="Next: Derived fields" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Derived fields
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
