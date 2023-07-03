@@ -18,7 +18,7 @@ This tool uses dask, allowing analysis to scale up from your personal computer t
 
 
 ## Documentation
-The documentation can be found [here](https://cbyrohl.github.io/scida/)
+The documentation can be found [here](https://cbyrohl.github.io/scida/).
 
 ## Install
 
@@ -27,7 +27,7 @@ pip install scida
 ```
 
 ## First Steps
-Start up a Jupyter notebook server and begin with the 'Getting Started' section of the documentation. You can also find the underlying notebook [here](docs/notebooks/gettingstarted.ipynb).
+After installing scida, follow the [tutorial](https://cbyrohl.github.io/scida/tutorial/).
 
 ## License
 

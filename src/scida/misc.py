@@ -22,11 +22,11 @@ def get_container_from_path(
     for key in keys:
         if key == "":
             continue
-        if key not in rv.containers:
+        if key not in rv._containers:
             if not create_missing:
                 raise ValueError("Container '%s' not found in '%s'" % (key, rv))
             rv.add_container(key, name=key)
-        rv = rv.containers[key]
+        rv = rv._containers[key]
     return rv
 
 
