@@ -22,10 +22,10 @@ nav:
   - 'Features':
     - 'Supported Datasets': supported_data.md
     - 'Visualization': visualization.md
+    - 'Units': units.md
     - 'Derived Fields': derived_fields.md
-    - 'Halo and galaxy catalogs': halocatalogs.md
-  - 'Cookbook':
-    - 'Units': notebooks/cookbook/units.ipynb
+  # - 'Cookbook':
+  #   - 'Units': notebooks/cookbook/units.ipynb
   - 'FAQ': faq.md
   - api_docs.md
 
