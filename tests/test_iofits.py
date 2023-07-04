@@ -1,14 +1,18 @@
-def test_fitsread():
-    path = "/fastdata/public/testdata-scida/specObj-dr16.fits"
+import dask.array as da
+from tests.testdata_properties import require_testdata_path
+from scida.io.fits import fitsrecords_to_daskarrays
+
+
+@require_testdata_path("fits", only=["SDSS_DR16_fits"])
+def test_fitsread(testdatapath):
+    path = testdatapath
 
     from astropy.io import fits
 
     ext = 1
     with fits.open(path, memmap=True, mode="denywrite") as hdulist:
         arr = hdulist[ext].data
-    print(arr.dtype)
-    print(arr.memmap)
-    print(arr[:10]["SURVEY"])
-    # print(arr["SURVEY"][:10])
-    assert arr is not None
-    # test = read(path, ext=1)
+    darrs = fitsrecords_to_daskarrays(arr)
+    assert len(darrs) > 0
+    for k, darr in darrs.items():
+        assert isinstance(darr, da.Array)
