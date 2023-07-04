@@ -117,6 +117,7 @@ testdata:
     types:
       - interface
     fn: "minimal_FIRE2_snapshot_z1.hdf5"
+
   FIRE2_series_minimal:
     types:
       - series
@@ -148,3 +149,8 @@ testdata:
     types:
       - interface
     fn: gaia_dr3_minimal.hdf5
+
+  SDSS_DR16_fits:
+    types:
+      - fits
+    fn: "specObj-dr16.fits"

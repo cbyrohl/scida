@@ -1,9 +1,13 @@
 import pathlib
 
+import pytest
+
 from scida import load
+from tests.conftest import flag_test_big
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.skipif(not (flag_test_big), reason="Not requesting tasks with large io")
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_save(testdatapath, tmp_path):
     p = str(pathlib.Path(tmp_path) / "test.zarr")
@@ -13,6 +17,7 @@ def test_save(testdatapath, tmp_path):
     assert ds is not None
 
 
+@pytest.mark.skipif(not (flag_test_big), reason="Not requesting tasks with large io")
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_save_withunits(testdatapath, tmp_path):
     p = str(pathlib.Path(tmp_path) / "test.zarr")
