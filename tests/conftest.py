@@ -8,7 +8,6 @@ from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
 from scida.series import DatasetSeries
 
 flag_test_long = False  # Set to true to run time-taking tests.
-flag_test_big = False  # Set to true to run memory-taking tests.
 
 scope_snapshot = "function"
 
