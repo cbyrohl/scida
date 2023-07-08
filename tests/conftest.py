@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from scida import ArepoSnapshot
+from scida import ArepoSnapshot, load
 from scida.config import get_config
 from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
 from scida.series import DatasetSeries
@@ -42,15 +42,15 @@ def testdata_areposnapshot(request) -> ArepoSnapshot:
 
 @pytest.fixture(scope="function")
 def testdata_areposnapshot_withcatalog(request) -> ArepoSnapshot:
-    tng50_snappath, tng50_grouppath = request.param[0], request.param[1]
-    try:
-        snp = ArepoSnapshot(tng50_snappath, catalog=tng50_grouppath)
-    except ValueError:
-        snp = ArepoSnapshot(
-            tng50_snappath,
-            catalog=tng50_grouppath,
-            catalog_kwargs=dict(fileprefix="group"),
-        )
+    snappath, grouppath = request.param[0], request.param[1]
+    snp = load(snappath, catalog=grouppath)
+    return snp
+
+
+@pytest.fixture(scope="function")
+def testdata_illustrissnapshot_withcatalog(request) -> ArepoSnapshot:
+    snappath, grouppath = request.param[0], request.param[1]
+    snp = load(snappath, catalog=grouppath)
     return snp
 
 

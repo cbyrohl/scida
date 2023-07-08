@@ -6,14 +6,21 @@ from typing import Dict, List, Optional, Union
 
 import dask
 import numpy as np
+import pint
 from dask import array as da
 from dask import delayed
 from numba import jit
 from numpy.typing import NDArray
 
-from scida.discovertypes import _determine_mixins
+from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
-from scida.helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
+from scida.helpers_misc import (
+    computedecorator,
+    get_args,
+    get_kwargs,
+    map_blocks,
+    parse_humansize,
+)
 from scida.interface import Selector, create_MixinDataset
 from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
 from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
@@ -71,63 +78,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             if self.catalog == "none":
                 pass  # this string can be set to explicitly disable catalog
             elif self.catalog is not None:
-                virtualcache = False  # copy catalog for better performance
-                catalog_kwargs = kwargs.get("catalog_kwargs", {})
-                catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
-                # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
-                prfx = self._get_fileprefix(self.catalog)
-
-                # explicitly need to create unitaware class for catalog as needed
-                # TODO: should just be determined from mixins of parent?
-                cls = ArepoCatalog
-                withunits = kwargs.get("units", False)
-                mixins = []
-                if withunits:
-                    mixins += [UnitMixin]
-
-                other_mixins = _determine_mixins(path=path)
-                mixins += other_mixins
-                cls = create_MixinDataset(cls, mixins)
-
-                ureg = None
-                if hasattr(self, "ureg"):
-                    ureg = self.ureg
-
-                self.catalog = cls(
-                    self.catalog,
-                    virtualcache=virtualcache,
-                    fileprefix=prfx,
-                    units=self.withunits,
-                    ureg=ureg,
-                )
-                if "Redshift" in self.catalog.header and "Redshift" in self.header:
-                    z_catalog = self.catalog.header["Redshift"]
-                    z_snap = self.header["Redshift"]
-                    if not np.isclose(z_catalog, z_snap):
-                        raise ValueError(
-                            "Redshift mismatch between snapshot and catalog: "
-                            f"{z_snap:.2f} vs {z_catalog:.2f}"
-                        )
-                for k in self.catalog.data:
-                    if k not in self.data:
-                        self.data[k] = self.catalog.data[k]
-                    self.catalog.data.fieldrecipes_kwargs["snap"] = self
-                if (
-                    len(self.catalog.data["Group"].keys()) > 0
-                ):  # starting snapshots often dont have groups
-                    self.add_catalogIDs()
-
-                # merge hints from snap and catalog
-                for h in self.catalog.hints:
-                    if h not in self.hints:
-                        self.hints[h] = self.catalog.hints[h]
-                    elif isinstance(self.hints[h], dict):
-                        # merge dicts
-                        for k in self.catalog.hints[h]:
-                            if k not in self.hints[h]:
-                                self.hints[h][k] = self.catalog.hints[h][k]
-                    else:
-                        pass  # nothing to do; we do not overwrite with catalog props
+                self.load_catalog(kwargs)
 
         # add aliases
         aliases = dict(
@@ -150,6 +101,76 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         # add some default fields
         self.data.merge(fielddefs)
 
+    def load_catalog(self, kwargs):
+        virtualcache = False  # copy catalog for better performance
+        catalog_kwargs = kwargs.get("catalog_kwargs", {})
+        catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
+        # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
+        prfx = self._get_fileprefix(self.catalog)
+
+        # explicitly need to create unitaware class for catalog as needed
+        # TODO: should just be determined from mixins of parent?
+        cls = ArepoCatalog
+        withunits = kwargs.get("units", False)
+        mixins = []
+        if withunits:
+            mixins += [UnitMixin]
+
+        other_mixins = _determine_mixins(path=self.path)
+        mixins += other_mixins
+        cls = create_MixinDataset(cls, mixins)
+
+        ureg = None
+        if hasattr(self, "ureg"):
+            ureg = self.ureg
+
+        self.catalog = cls(
+            self.catalog,
+            virtualcache=virtualcache,
+            fileprefix=prfx,
+            units=self.withunits,
+            ureg=ureg,
+        )
+        if "Redshift" in self.catalog.header and "Redshift" in self.header:
+            z_catalog = self.catalog.header["Redshift"]
+            z_snap = self.header["Redshift"]
+            if not np.isclose(z_catalog, z_snap):
+                raise ValueError(
+                    "Redshift mismatch between snapshot and catalog: "
+                    f"{z_snap:.2f} vs {z_catalog:.2f}"
+                )
+
+        # merge data
+        self.merge_data(self.catalog)
+
+        # starting snapshots often do not have groups
+        ngkeys = self.catalog.data["Group"].keys()
+        if len(ngkeys) > 0:
+            self.add_catalogIDs()
+
+        # merge hints from snap and catalog
+        self.merge_hints(self.catalog)
+
+    def merge_data(self, secondobj, suffix=""):
+        for k in secondobj.data:
+            key = k + suffix
+            if key not in self.data:
+                self.data[key] = secondobj.data[k]
+            secondobj.data.fieldrecipes_kwargs["snap"] = self
+
+    def merge_hints(self, secondobj):
+        # merge hints from snap and catalog
+        for h in secondobj.hints:
+            if h not in self.hints:
+                self.hints[h] = secondobj.hints[h]
+            elif isinstance(self.hints[h], dict):
+                # merge dicts
+                for k in secondobj.hints[h]:
+                    if k not in self.hints[h]:
+                        self.hints[h][k] = secondobj.hints[h][k]
+            else:
+                pass  # nothing to do; we do not overwrite with catalog props
+
     def _set_metadata(self):
         """
         Set metadata from header and config.
@@ -158,7 +179,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.metadata = md
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, **kwargs
+    ) -> CandidateStatus:
         valid = super().validate_path(path, *args, **kwargs)
         return valid
 
@@ -296,7 +319,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 )
             return
 
-        subhalogrnr = self.data["Subhalo"]["SubhaloGrNr"]
+        shnr_attr = "SubhaloGrNr"
+        if shnr_attr not in self.data["Subhalo"]:
+            shnr_attr = "SubhaloGroupNr"  # what MTNG does
+        if shnr_attr not in self.data["Subhalo"]:
+            raise ValueError(
+                f"Could not find 'SubhaloGrNr' or 'SubhaloGroupNr' in {self.catalog}"
+            )
+
+        subhalogrnr = self.data["Subhalo"][shnr_attr]
         subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"]
 
         # remove "units" for numba funcs
@@ -378,6 +409,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         if parttype not in self._grouplengths:
             partnum = int(parttype[-1])
             lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
+            if isinstance(lengths, pint.Quantity):
+                lengths = lengths.magnitude
             self._grouplengths[parttype] = lengths
         return self._grouplengths[parttype]
 
@@ -393,7 +426,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             else:
                 arrdict = dict(field=self.data[parttype][fields])
                 inputfields = [fields]
-        elif isinstance(fields, da.Array):
+        elif isinstance(fields, da.Array) or isinstance(fields, pint.Quantity):
             arrdict = dict(daskarr=fields)
             inputfields = [fields.name]
         elif isinstance(fields, list):
@@ -404,7 +437,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             arrdict.update(**fields)
             inputfields = list(arrdict.keys())
         else:
-            raise ValueError("Unknown input type.")
+            raise ValueError("Unknown input type '%s'." % type(fields))
         gop = GroupAwareOperation(
             self.get_grouplengths(parttype=parttype), arrdict, inputfields=inputfields
         )
@@ -630,13 +663,15 @@ def compute_haloindex(gidx, halocelloffsets, *args):
 
 def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     """Computes a halo quantity for each particle with dask."""
-    return da.map_blocks(
+    res = map_blocks(
         get_haloquantity_daskwrap,
         gidx,
         halocelloffsets,
         hvals,
         meta=np.array((), dtype=hvals.dtype),
+        output_units=hvals.units,
     )
+    return res
 
 
 @jit(nopython=True)
@@ -924,7 +959,7 @@ def map_halo_operation(
     )
 
     # TODO: Get rid of oindex; only here because have not adjusted code to map_halo_operation_get_chunkedges
-    totlength = offsets[-1]
+    totlength = int(offsets[-1])
     oindex = np.array(list(list_chunkedges[:, 0]) + [list_chunkedges[-1, -1]])
 
     new_axis = None

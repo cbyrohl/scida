@@ -5,6 +5,7 @@ from typing import Union
 
 import numpy as np
 
+from scida.discovertypes import CandidateStatus
 from scida.interface import Dataset
 from scida.io import load_metadata
 
@@ -67,7 +68,7 @@ class GadgetStyleSnapshot(Dataset):
     @classmethod
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, expect_grp=False, **kwargs
-    ) -> bool:
+    ) -> CandidateStatus:
         """
         Check if path is valid for this interface.
         Parameters
@@ -111,10 +112,10 @@ class GadgetStyleSnapshot(Dataset):
                     ]
                 )
                 if is_grp:
-                    return True
+                    return CandidateStatus.MAYBE
                 if is_snap and not expect_grp:
-                    return True
-        return False
+                    return CandidateStatus.MAYBE
+        return CandidateStatus.NO
 
     def register_field(self, parttype, name=None, description=""):
         res = self.data.register_field(parttype, name=name, description=description)

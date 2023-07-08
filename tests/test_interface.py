@@ -2,6 +2,7 @@ import time
 
 import dask.array as da
 import numpy as np
+import pint
 
 from scida.convenience import load
 from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
@@ -84,9 +85,8 @@ def test_areposnapshot_load(testdata_areposnapshot):
 @require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
 def test_interface_fieldaccess(testdata_areposnapshot):
     # check that we can directly access fields from the interface
-    ds = testdata_areposnapshot
     # should be same as ds.data["PartType0"]["Coordinates"]
-    assert ds["PartType0"]["Coordinates"] is not None
+    assert testdata_areposnapshot["PartType0"]["Coordinates"] is not None
 
 
 @require_testdata("illustrisgroup")
@@ -97,10 +97,10 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
 
 
 @require_testdata(
-    "areposnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
+    "illustrissnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
 )
-def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
-    snap = testdata_areposnapshot_withcatalog
+def test_areposnapshot_halooperation(testdata_illustrissnapshot_withcatalog):
+    snap = testdata_illustrissnapshot_withcatalog
 
     def calculate_count(GroupID, parttype="PartType0"):
         """Halo Count per halo. Has to be 1 exactly."""
@@ -154,6 +154,8 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     boundmass2 = da.sum(
         snp.data["PartType0"]["Masses"][: np.sum(snp.get_grouplengths())]
     ).compute()
+    if isinstance(boundmass2, pint.Quantity):
+        boundmass2 = boundmass2.magnitude
     assert np.isclose(boundmass, boundmass2)
     # Test chaining
     assert np.sum(g.half().sum().evaluate()) < np.sum(g.sum().evaluate())
@@ -186,9 +188,9 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     assert np.isclose(boundvol, boundvol2)
 
 
-@require_testdata("areposnapshot_withcatalog")
-def test_areposnapshot_load_withcatalog(testdata_areposnapshot_withcatalog):
-    snp = testdata_areposnapshot_withcatalog
+@require_testdata("illustrissnapshot_withcatalog")
+def test_areposnapshot_load_withcatalog(testdata_illustrissnapshot_withcatalog):
+    snp = testdata_illustrissnapshot_withcatalog
     parttypes = {
         "PartType0",
         "PartType1",
@@ -212,11 +214,11 @@ def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatal
 
 
 @require_testdata(
-    "areposnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
+    "illustrissnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
 )
-def test_areposnapshot_map_hquantity(testdata_areposnapshot_withcatalog):
-    snp = testdata_areposnapshot_withcatalog
+def test_areposnapshot_map_hquantity(testdata_illustrissnapshot_withcatalog):
+    snp = testdata_illustrissnapshot_withcatalog
     snp.add_groupquantity_to_particles("GroupSFR")
     partarr = snp.data["PartType0"]["GroupSFR"]
     haloarr = snp.data["Group"]["GroupSFR"]
-    assert partarr[0].compute() == haloarr[0].compute()
+    assert np.isclose(partarr[0].compute(), haloarr[0].compute())

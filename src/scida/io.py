@@ -114,7 +114,7 @@ class ChunkedHDF5Loader(Loader):
 
     def load_metadata(self, fileprefix="", **kwargs):
         """Take a quick glance at the metadata."""
-        cachefp = return_hdf5cachepath(self.path)
+        cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         if cachefp is not None and os.path.isfile(cachefp):
             path = cachefp
         else:
@@ -136,7 +136,7 @@ class ChunkedHDF5Loader(Loader):
         virtualcache=False,
         **kwargs
     ):
-        cachefp = return_hdf5cachepath(self.path)
+        cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         # three cases we need to cache:
         create = False
         if cachefp is None:
@@ -211,7 +211,7 @@ class ChunkedHDF5Loader(Loader):
         print_msg = config.get("print_cachefile_creation", True)
         if print_msg:
             print("Creating cache file, this may take a while...")
-        cachefp = return_hdf5cachepath(self.path)
+        cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         files = self.get_chunkedfiles(fileprefix)
 
         self.location = cachefp
