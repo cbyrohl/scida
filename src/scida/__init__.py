@@ -7,7 +7,7 @@ from scida.convenience import load
 from scida.customs.arepo.dataset import ArepoSnapshot
 from scida.customs.arepo.MTNG.dataset import MTNGArepoSnapshot
 from scida.customs.arepo.series import ArepoSimulation
-from scida.customs.gadget.gadgetstyle import GadgetStyleSnapshot, SwiftSnapshot
+from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot, SwiftSnapshot
 from scida.customs.gizmo.dataset import GizmoSnapshot
 from scida.customs.gizmo.series import GizmoSimulation
 

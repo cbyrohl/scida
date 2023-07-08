@@ -5,7 +5,7 @@ from scida import ArepoSnapshot, MTNGArepoSnapshot
 from scida.customs.arepo.dataset import ArepoCatalog
 from scida.customs.arepo.MTNG.dataset import MTNGArepoCatalog
 from scida.customs.arepo.series import ArepoSimulation
-from scida.customs.gadget.gadgetstyle import SwiftSnapshot
+from scida.customs.gadgetstyle.dataset import SwiftSnapshot
 from scida.customs.gizmo.dataset import GizmoSnapshot
 from scida.customs.gizmo.series import GizmoSimulation
 from scida.customs.rockstar.dataset import RockstarCatalog

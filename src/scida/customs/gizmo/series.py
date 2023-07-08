@@ -1,11 +1,21 @@
 import os
 
+from scida.customs.gadgetstyle.series import GadgetStyleSimulation
 from scida.discovertypes import CandidateStatus
-from scida.series import DatasetSeries
 
 
-class GizmoSimulation(DatasetSeries):
+class GizmoSimulation(GadgetStyleSimulation):
     """A series representing a gizmo simulation."""
+
+    def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
+        prefix_dict = dict(paths="snapdir")
+        super().__init__(
+            path,
+            prefix_dict=prefix_dict,
+            lazy=lazy,
+            async_caching=async_caching,
+            **interface_kwargs
+        )
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs) -> CandidateStatus:

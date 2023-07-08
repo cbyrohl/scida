@@ -4,7 +4,7 @@ import pytest
 
 from scida import ArepoSnapshot, load
 from scida.config import get_config
-from scida.customs.gadget.gadgetstyle import GadgetStyleSnapshot
+from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.series import DatasetSeries
 
 flag_test_long = False  # Set to true to run time-taking tests.

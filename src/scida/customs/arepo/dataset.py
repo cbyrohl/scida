@@ -12,7 +12,7 @@ from dask import delayed
 from numba import jit
 from numpy.typing import NDArray
 
-from scida.customs.gadget.gadgetstyle import GadgetStyleSnapshot
+from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
 from scida.helpers_misc import (
@@ -236,12 +236,13 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         -------
 
         """
+        p = str(self.path)
         # order of candidates matters. For Illustris "groups" must precede "fof_subhalo_tab"
         candidates = [
-            self.path.replace("snapshot", "group"),
-            self.path.replace("snapshot", "groups"),
-            self.path.replace("snapdir", "groups").replace("snap", "groups"),
-            self.path.replace("snapdir", "groups").replace("snap", "fof_subhalo_tab"),
+            p.replace("snapshot", "group"),
+            p.replace("snapshot", "groups"),
+            p.replace("snapdir", "groups").replace("snap", "groups"),
+            p.replace("snapdir", "groups").replace("snap", "fof_subhalo_tab"),
         ]
         for candidate in candidates:
             if not os.path.exists(candidate):
