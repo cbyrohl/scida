@@ -44,14 +44,13 @@ def testdata_areposnapshot(request) -> ArepoSnapshot:
 def testdata_areposnapshot_withcatalog(request) -> ArepoSnapshot:
     snappath, grouppath = request.param[0], request.param[1]
     snp = load(snappath, catalog=grouppath)
-    # try:
-    #    snp = ArepoSnapshot(snappath, catalog=grouppath)
-    # except ValueError:
-    #    snp = ArepoSnapshot(
-    #        snappath,
-    #        catalog=grouppath,
-    #        catalog_kwargs=dict(fileprefix="group"),
-    #    )
+    return snp
+
+
+@pytest.fixture(scope="function")
+def testdata_illustrissnapshot_withcatalog(request) -> ArepoSnapshot:
+    snappath, grouppath = request.param[0], request.param[1]
+    snp = load(snappath, catalog=grouppath)
     return snp
 
 

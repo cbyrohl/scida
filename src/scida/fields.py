@@ -104,9 +104,7 @@ class FieldContainer(MutableMapping):
         # TODO: support nested containers
         for k in collection._containers:
             if k not in self._containers:
-                self._containers[k] = FieldContainer(
-                    fieldrecipes_kwargs=self.fieldrecipes_kwargs
-                )
+                continue
             if overwrite:
                 c1 = self._containers[k]
                 c2 = collection._containers[k]

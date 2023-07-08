@@ -6,14 +6,21 @@ from typing import Dict, List, Optional, Union
 
 import dask
 import numpy as np
+import pint
 from dask import array as da
 from dask import delayed
 from numba import jit
 from numpy.typing import NDArray
 
-from scida.discovertypes import _determine_mixins
+from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
-from scida.helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
+from scida.helpers_misc import (
+    computedecorator,
+    get_args,
+    get_kwargs,
+    map_blocks,
+    parse_humansize,
+)
 from scida.interface import Selector, create_MixinDataset
 from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
 from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
@@ -172,7 +179,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.metadata = md
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, **kwargs
+    ) -> CandidateStatus:
         valid = super().validate_path(path, *args, **kwargs)
         return valid
 
@@ -400,6 +409,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         if parttype not in self._grouplengths:
             partnum = int(parttype[-1])
             lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
+            if isinstance(lengths, pint.Quantity):
+                lengths = lengths.magnitude
             self._grouplengths[parttype] = lengths
         return self._grouplengths[parttype]
 
@@ -415,7 +426,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             else:
                 arrdict = dict(field=self.data[parttype][fields])
                 inputfields = [fields]
-        elif isinstance(fields, da.Array):
+        elif isinstance(fields, da.Array) or isinstance(fields, pint.Quantity):
             arrdict = dict(daskarr=fields)
             inputfields = [fields.name]
         elif isinstance(fields, list):
@@ -426,7 +437,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             arrdict.update(**fields)
             inputfields = list(arrdict.keys())
         else:
-            raise ValueError("Unknown input type.")
+            raise ValueError("Unknown input type '%s'." % type(fields))
         gop = GroupAwareOperation(
             self.get_grouplengths(parttype=parttype), arrdict, inputfields=inputfields
         )
@@ -652,13 +663,15 @@ def compute_haloindex(gidx, halocelloffsets, *args):
 
 def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     """Computes a halo quantity for each particle with dask."""
-    return da.map_blocks(
+    res = map_blocks(
         get_haloquantity_daskwrap,
         gidx,
         halocelloffsets,
         hvals,
         meta=np.array((), dtype=hvals.dtype),
+        output_units=hvals.units,
     )
+    return res
 
 
 @jit(nopython=True)

@@ -50,7 +50,12 @@ class MTNGArepoSnapshot(ArepoSnapshot):
             fileprefix=cls._fileprefix, fileprefix_catalog=cls._fileprefix_catalog
         )
         tkwargs.update(**kwargs)
-        valid = super().validate_path(path, *args, **tkwargs)
+        try:
+            valid = super().validate_path(path, *args, **tkwargs)
+        except ValueError:
+            # might be a partial snapshot
+            tkwargs.update(fileprefix="snapshot-prevmostboundonly_")
+            valid = super().validate_path(path, *args, **tkwargs)
         if not valid:
             return False
         metadata_raw = load_metadata(path, **tkwargs)
