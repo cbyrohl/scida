@@ -308,6 +308,9 @@ def load_datadict_old(
     # datasets
     for i, dataset in enumerate(tree["datasets"]):
         # fpath is the path to the group containing given field
+        # ignore if scalar
+        if len(dataset[1]) == 0:
+            continue
         fpath = "/".join(dataset[0].split("/")[:-1])
         toload = fpath == "" or fpath in datagroups
         if not toload:
