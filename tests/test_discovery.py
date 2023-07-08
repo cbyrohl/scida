@@ -25,7 +25,9 @@ def return_intended_stype(name) -> Type[DatasetSeries]:
 
 def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
     name = name.lower()
-    if any(k in name for k in ["tng", "illustris", "auriga"]):
+    if any(k in name for k in ["mtnggadget4"]):
+        return None  # TODO: Gadget4 snapshot
+    elif any(k in name for k in ["tng", "illustris", "auriga"]):
         if "group" in name:
             return ArepoCatalog
         else:

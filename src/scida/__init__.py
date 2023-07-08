@@ -5,8 +5,10 @@ import sys
 # TODO: automatize implicitly
 from scida.convenience import load
 from scida.customs.arepo.dataset import ArepoSnapshot
+from scida.customs.arepo.MTNG.dataset import MTNGArepoSnapshot
 from scida.customs.arepo.series import ArepoSimulation
 from scida.customs.gadget.gadgetstyle import GadgetStyleSnapshot, SwiftSnapshot
 from scida.customs.gizmo.dataset import GizmoSnapshot
+from scida.customs.gizmo.series import GizmoSimulation
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)

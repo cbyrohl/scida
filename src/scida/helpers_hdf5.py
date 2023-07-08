@@ -9,13 +9,35 @@ import zarr
 log = logging.getLogger(__name__)
 
 
+def get_dtype(obj):
+    if isinstance(obj, h5py.Dataset):
+        try:
+            dtype = obj.dtype
+        except TypeError as e:
+            msg = "data type '<u6' not understood"
+            if msg == e.__str__():
+                # MTNG defines 6 byte unsigned integers, which are not supported by h5py
+                # could not figure out how to query type in h5py other than the reporting error.
+                # (any call to .dtype will try to resolve "<u6" to a numpy dtype, which fails)
+                # we just handle this as 64 bit unsigned integer
+                dtype = np.uint64
+            else:
+                raise e
+        return dtype
+    elif isinstance(obj, zarr.Array):
+        return obj.dtype
+    else:
+        return None
+
+
 def walk_group(obj, tree, get_attrs=False):
     if len(tree) == 0:
         tree.update(**dict(attrs={}, groups=[], datasets=[]))
     if get_attrs and len(obj.attrs) > 0:
         tree["attrs"][obj.name] = dict(obj.attrs)
     if isinstance(obj, (h5py.Dataset, zarr.Array)):
-        tree["datasets"].append([obj.name, obj.shape, obj.dtype])
+        dtype = get_dtype(obj)
+        tree["datasets"].append([obj.name, obj.shape, dtype])
     elif isinstance(obj, (h5py.Group, zarr.Group)):
         tree["groups"].append(obj.name)  # continue the walk
         for k, o in obj.items():

@@ -104,9 +104,7 @@ class FieldContainer(MutableMapping):
         # TODO: support nested containers
         for k in collection._containers:
             if k not in self._containers:
-                self._containers[k] = FieldContainer(
-                    fieldrecipes_kwargs=self.fieldrecipes_kwargs
-                )
+                continue
             if overwrite:
                 c1 = self._containers[k]
                 c2 = collection._containers[k]
@@ -153,10 +151,10 @@ class FieldContainer(MutableMapping):
         return sorted(fieldkeys)
 
     def items(self):
-        return ((k, self._getitem(k, evaluate_recipe=False)) for k in self.keys())
+        return ((k, self._getitem(k, evaluate_recipe=True)) for k in self.keys())
 
     def values(self):
-        return (self._getitem(k, evaluate_recipe=False) for k in self.keys())
+        return (self._getitem(k, evaluate_recipe=True) for k in self.keys())
 
     def register_field(
         self,
@@ -318,7 +316,12 @@ class FieldContainer(MutableMapping):
     def __delitem__(self, key):
         if key in self._fieldrecipes:
             del self._fieldrecipes[key]
-        del self._fields[key]
+        if key in self._containers:
+            del self._containers[key]
+        elif key in self._fields:
+            del self._fields[key]
+        else:
+            raise KeyError("Unknown key '%s'" % key)
 
     def __len__(self):
         return len(self.keys())

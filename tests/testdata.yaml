@@ -46,6 +46,8 @@ testdata:
   Illustris-3_snapshot:
     types:
       - interface
+      - illustrissnapshot
+      - illustrissnapshot_withcatalog|E|0|2
       - areposnapshot
       - areposnapshot_withcatalog|E|0|2
   EAGLEsmall_snapshot:
@@ -55,11 +57,13 @@ testdata:
   TNG50-4_group:
     types:
       - interface
+      - illustrissnapshot
       - areposnapshot
       - areposnapshot_withcatalog|A|1|2
   TNG50-3_group:
     types:
       - interface
+      - illustrissnapshot
       - areposnapshot
       - areposnapshot_withcatalog|B|1|2
       - arepogroup
@@ -71,19 +75,50 @@ testdata:
     types:
       - interface
       - illustrissnapshot
+      - illustrissnapshot_withcatalog|E|1|2
       - areposnapshot_withcatalog|E|1|2
   TNG50-4_snapshot_z127:
     types:
       - interface
+      - illustrissnapshot
+      - illustrissnapshot_withcatalog|Z|0|2
       - areposnapshot
       - areposnapshot_withcatalog|Z|0|2
     fn: TNG50-4/output/snapdir_000
   TNG50-4_group_z127:
     types:
       - interface
+      - illustrissnapshot
+      - illustrissnapshot_withcatalog|Z|1|2
       - areposnapshot
       - areposnapshot_withcatalog|Z|1|2
     fn: TNG50-4/output/groups_000
+  MTNGarepo_270hydro_snapshot_z2:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|M|0|2
+  MTNGarepo_270hydro_group_z2:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|M|1|2
+  MTNGarepo_270hydro_snapshot_z10:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|M10|0|2
+  MTNGarepo_270hydro_group_z10:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|M10|1|2
+  MTNG-arepo270hydro_simulation:
+    types:
+      - series
+      - areposimulation
+    fn: minimal_MTNG-arepo270hydro_simulation
+
   # minimal datasets extracted with testdata_extractor.py
   TNG50-1_snapshot_z3_minimal:
     types:

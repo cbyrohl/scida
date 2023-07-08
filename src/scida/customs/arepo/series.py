@@ -29,6 +29,10 @@ class ArepoSimulation(DatasetSeries):
         gpaths = sorted([p for p in Path(outpath).glob(gprefix + "_*")])
         spaths = sorted([p for p in Path(outpath).glob(sprefix + "_*")])
 
+        # sometimes there are backup folders with different suffix, exclude those.
+        gpaths = [p for p in gpaths if str(p).split("_")[-1].isdigit()]
+        spaths = [p for p in spaths if str(p).split("_")[-1].isdigit()]
+
         assert len(gpaths) == len(spaths)
         p = spaths[0]
         cls = _determine_type(p)[1][0]
