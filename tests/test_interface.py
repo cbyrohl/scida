@@ -4,7 +4,7 @@ import dask.array as da
 import numpy as np
 
 from scida.convenience import load
-from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
+from scida.customs.gadget.gadgetstyle import GadgetStyleSnapshot
 from scida.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 

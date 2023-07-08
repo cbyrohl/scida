@@ -2,7 +2,7 @@ import os
 from os.path import join
 from pathlib import Path
 
-from scida.discovertypes import _determine_mixins, _determine_type
+from scida.discovertypes import CandidateStatus, _determine_mixins, _determine_type
 from scida.interface import create_MixinDataset
 from scida.series import DatasetSeries
 
@@ -49,14 +49,19 @@ class ArepoSimulation(DatasetSeries):
         # self.redshifts = np.array([ds.redshift for ds in self.datasets])
 
     @classmethod
-    def validate_path(cls, path, *args, **kwargs):
+    def validate_path(cls, path, *args, **kwargs) -> CandidateStatus:
+        valid = CandidateStatus.NO
         if not os.path.isdir(path):
-            return False
+            return CandidateStatus.NO
         fns = os.listdir(path)
+        if "gizmo_parameters.txt" in fns:
+            return CandidateStatus.NO
         sprefixs = ["snapdir", "snapshot"]
         opath = path
         if "output" in fns:
             opath = join(path, "output")
         folders = os.listdir(opath)
         folders = [f for f in folders if os.path.isdir(join(opath, f))]
-        return any([f.startswith(k) for f in folders for k in sprefixs])
+        if any([f.startswith(k) for f in folders for k in sprefixs]):
+            valid = CandidateStatus.MAYBE
+        return valid

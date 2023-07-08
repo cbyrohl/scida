@@ -11,12 +11,13 @@ from dask import delayed
 from numba import jit
 from numpy.typing import NDArray
 
-from scida.discovertypes import _determine_mixins
+from scida.customs.gadget.gadgetstyle import GadgetStyleSnapshot
+from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
 from scida.helpers_misc import computedecorator, get_args, get_kwargs, parse_humansize
 from scida.interface import Selector, create_MixinDataset
-from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
 from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
+from scida.io import load_metadata
 
 log = logging.getLogger(__name__)
 
@@ -158,8 +159,23 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.metadata = md
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, **kwargs
+    ) -> CandidateStatus:
         valid = super().validate_path(path, *args, **kwargs)
+        if valid.value > CandidateStatus.MAYBE.value:
+            valid = CandidateStatus.MAYBE
+        else:
+            return valid
+        # Arepo has no dedicated attribute to identify such runs.
+        # lets just query a bunch of attributes that are present for arepo runs
+        metadata_raw = load_metadata(path, **kwargs)
+        matchingattrs = True
+        matchingattrs &= "Git_commit" in metadata_raw["/Header"]
+
+        if matchingattrs:
+            valid = CandidateStatus.MAYBE
+
         return valid
 
     @classmethod
@@ -419,7 +435,9 @@ class ArepoCatalog(ArepoSnapshot):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, **kwargs
+    ) -> CandidateStatus:
         kwargs["fileprefix"] = cls._get_fileprefix(path)
         valid = super().validate_path(path, *args, expect_grp=True, **kwargs)
         return valid
