@@ -35,8 +35,9 @@ class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             return CandidateStatus.YES  # safe to assume this is a gizmo snapshot
 
         matchingattrs = True
+        matchingattrs &= "Flag_IC_Info" in metadata_raw["/Header"]
+        # Following not present in gizmo
         matchingattrs &= "Git_commit" not in metadata_raw["/Header"]  # only in arepo?
-        # gizmo does not have Config and Parameter attributes
         matchingattrs &= "/Config" not in metadata_raw
         matchingattrs &= "/Parameters" not in metadata_raw
 

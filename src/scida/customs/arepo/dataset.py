@@ -193,6 +193,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         metadata_raw = load_metadata(path, **kwargs)
         matchingattrs = True
         matchingattrs &= "Git_commit" in metadata_raw["/Header"]
+        # not existent for any arepo run?
+        matchingattrs &= "Compactify_Version" not in metadata_raw["/Header"]
 
         if matchingattrs:
             valid = CandidateStatus.MAYBE

@@ -1,8 +1,9 @@
 import pathlib
 from typing import Type
 
-from scida import ArepoSnapshot
+from scida import ArepoSnapshot, MTNGArepoSnapshot
 from scida.customs.arepo.dataset import ArepoCatalog
+from scida.customs.arepo.MTNG.dataset import MTNGArepoCatalog
 from scida.customs.arepo.series import ArepoSimulation
 from scida.customs.gadget.gadgetstyle import SwiftSnapshot
 from scida.customs.gizmo.dataset import GizmoSnapshot
@@ -27,6 +28,11 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
     name = name.lower()
     if any(k in name for k in ["mtnggadget4"]):
         return None  # TODO: Gadget4 snapshot
+    elif "mtngarepo" in name:
+        if "group" in name:
+            return MTNGArepoCatalog
+        else:
+            return MTNGArepoSnapshot
     elif any(k in name for k in ["tng", "illustris", "auriga"]):
         if "group" in name:
             return ArepoCatalog
