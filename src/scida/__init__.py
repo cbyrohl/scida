@@ -10,5 +10,6 @@ from scida.customs.arepo.series import ArepoSimulation
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot, SwiftSnapshot
 from scida.customs.gizmo.dataset import GizmoSnapshot
 from scida.customs.gizmo.series import GizmoSimulation
+from scida.customs.rockstar.dataset import RockstarCatalog
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)

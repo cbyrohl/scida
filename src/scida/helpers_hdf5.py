@@ -30,7 +30,7 @@ def get_dtype(obj):
         return None
 
 
-def walk_group(obj, tree, get_attrs=False):
+def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
     if len(tree) == 0:
         tree.update(**dict(attrs={}, groups=[], datasets=[]))
     if get_attrs and len(obj.attrs) > 0:
@@ -38,6 +38,8 @@ def walk_group(obj, tree, get_attrs=False):
     if isinstance(obj, (h5py.Dataset, zarr.Array)):
         dtype = get_dtype(obj)
         tree["datasets"].append([obj.name, obj.shape, dtype])
+        if scalar_to_attr and len(obj.shape) == 0:
+            tree["attrs"][obj.name] = obj[()]
     elif isinstance(obj, (h5py.Group, zarr.Group)):
         tree["groups"].append(obj.name)  # continue the walk
         for k, o in obj.items():

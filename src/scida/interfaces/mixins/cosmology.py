@@ -47,6 +47,7 @@ def get_cosmology_from_rawmetadata(metadata_raw):
     import astropy.units as u
     from astropy.cosmology import FlatLambdaCDM
 
+    # gadgetstyle
     aliasdict = dict(h=["HubbleParam"], om0=["Omega0"], ob0=["OmegaBaryon"])
     cparams = dict(h=None, om0=None, ob0=None)
     for grp in ["Parameters", "Header"]:
@@ -55,6 +56,14 @@ def get_cosmology_from_rawmetadata(metadata_raw):
                 continue  # already acquired some value for this item.
             for alias in aliasdict[p]:
                 cparams[p] = metadata_raw.get("/" + grp, {}).get(alias, cparams[p])
+
+    # rockstar
+    if cparams["h"] is None and "/cosmology:hubble" in metadata_raw:
+        cparams["h"] = metadata_raw["/cosmology:hubble"]
+    if cparams["om0"] is None and "/cosmology:omega_matter" in metadata_raw:
+        cparams["om0"] = metadata_raw["/cosmology:omega_matter"]
+    if cparams["ob0"] is None and "/cosmology:omega_baryon" in metadata_raw:
+        cparams["ob0"] = metadata_raw["/cosmology:omega_baryon"]
 
     h, om0, ob0 = cparams["h"], cparams["om0"], cparams["ob0"]
     if None in [h, om0]:

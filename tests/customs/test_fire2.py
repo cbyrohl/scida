@@ -17,6 +17,23 @@ def test_series(testdatapath):
     print(ds.info())
     check_firesnap(ds)
 
+    rh = ds.data["rockstar_halo"]
+
+    print(rh.info())
+    for k, v in rh.items():
+        print(k, v)
+
+    # Rockstar source says:
+    # > chars += fprintf(output, "#Units: Masses in Msun / h\n"
+    # >   "#Units: Positions in Mpc / h (comoving)\n"
+    # >   "#Units: Velocities in km / s (physical, peculiar)\n"
+    # >   "#Units: Halo Distances, Lengths, and Radii in kpc / h (comoving)\n"
+    # >   "#Units: Angular Momenta in (Msun/h) * (Mpc/h) * km/s (physical)\n"
+    # >   "#Units: Spins are dimensionless\n");
+    # > if (np)
+    # >   chars += fprintf(output, "#Units: Total energy in (Msun/h)*(km/s)^2"
+    # >   	     " (physical)\n""
+
 
 def check_firesnap(obj: GizmoSnapshot):
     assert isinstance(obj, GizmoSnapshot)
@@ -72,4 +89,5 @@ def check_firesnap(obj: GizmoSnapshot):
 def test_snapshot(testdatapath):
     """Test loading of a full snapshot"""
     obj: GizmoSnapshot = load(testdatapath)
+    print(obj.info())
     check_firesnap(obj)

@@ -224,19 +224,6 @@ def load(
     msg = "Dataset is identified as '%s' via _determine_type." % cls
     log.debug(msg)
 
-    # determine additional mixins not set by class
-    mixins = []
-    if unitfile:
-        if not units:
-            units = True
-        kwargs["unitfile"] = unitfile
-
-    if units:
-        mixins.append(UnitMixin)
-        kwargs["units"] = units
-
-    kwargs["overwritecache"] = overwrite
-
     # any identifying metadata?
     classtype = "dataset"
     if issubclass(cls, DatasetSeries):
@@ -255,6 +242,21 @@ def load(
 
     if force_class is not None:
         cls = force_class
+
+    # determine additional mixins not set by class
+    mixins = []
+    if hasattr(cls, "_unitfile"):
+        unitfile = cls._unitfile
+    if unitfile:
+        if not units:
+            units = True
+        kwargs["unitfile"] = unitfile
+
+    if units:
+        mixins.append(UnitMixin)
+        kwargs["units"] = units
+
+    kwargs["overwritecache"] = overwrite
 
     # we append since unit mixin is added outside of this func right now
     metadata_raw = dict()
