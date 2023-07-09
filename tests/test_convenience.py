@@ -46,6 +46,7 @@ def test_load_https():
 @require_testdata_path("interface")
 def test_load(testdatapath):
     obj = load(testdatapath)
+    print("type: ", type(obj))
     assert obj.file is not None
     assert obj.data is not None
 

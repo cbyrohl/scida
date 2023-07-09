@@ -66,6 +66,7 @@ class FieldContainer(MutableMapping):
         self._fields.update(*args, **kwargs)
         self._recipes = "bla"
         self._fieldrecipes = {}
+        self._fieldlength = None
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
         self._containers: Dict[
@@ -123,12 +124,23 @@ class FieldContainer(MutableMapping):
 
     @property
     def fieldlength(self):
-        itr = iter(self._fields.values())
-        if len(self._fields) == 0:
-            return None
-        first = next(itr)
+        if self._fieldlength is not None:
+            return self._fieldlength
+        fvals = self._fields.values()
+        itr = iter(fvals)
+        if len(fvals) == 0:
+            # can we infer from recipes?
+            if len(self._fieldrecipes) > 0:
+                # get first recipe
+                name = next(iter(self._fieldrecipes.keys()))
+                first = self._getitem(name, evaluate_recipe=True)
+            else:
+                return None
+        else:
+            first = next(itr)
         if all(first.shape[0] == v.shape[0] for v in self._fields.values()):
-            return first.shape[0]
+            self._fieldlength = first.shape[0]
+            return self._fieldlength
         else:
             return None
 
@@ -261,11 +273,14 @@ class FieldContainer(MutableMapping):
         self.aliases[alias] = name
 
     def add_container(self, key, **kwargs):
+        tkwargs = dict(**kwargs)
+        if "name" not in tkwargs:
+            tkwargs["name"] = key
         self._containers[key] = FieldContainer(
             fieldrecipes_kwargs=self.fieldrecipes_kwargs,
             withunits=self.withunits,
             parent=self,
-            **kwargs,
+            **tkwargs,
         )
 
     def _getitem(

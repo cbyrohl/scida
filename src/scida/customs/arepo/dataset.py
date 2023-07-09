@@ -12,6 +12,7 @@ from dask import delayed
 from numba import jit
 from numpy.typing import NDArray
 
+from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
 from scida.helpers_misc import (
@@ -22,8 +23,8 @@ from scida.helpers_misc import (
     parse_humansize,
 )
 from scida.interface import Selector, create_MixinDataset
-from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
 from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
+from scida.io import load_metadata
 
 log = logging.getLogger(__name__)
 
@@ -143,33 +144,13 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         # merge data
         self.merge_data(self.catalog)
 
-        # starting snapshots often do not have groups
+        # first snapshots often do not have groups
         ngkeys = self.catalog.data["Group"].keys()
         if len(ngkeys) > 0:
             self.add_catalogIDs()
 
         # merge hints from snap and catalog
         self.merge_hints(self.catalog)
-
-    def merge_data(self, secondobj, suffix=""):
-        for k in secondobj.data:
-            key = k + suffix
-            if key not in self.data:
-                self.data[key] = secondobj.data[k]
-            secondobj.data.fieldrecipes_kwargs["snap"] = self
-
-    def merge_hints(self, secondobj):
-        # merge hints from snap and catalog
-        for h in secondobj.hints:
-            if h not in self.hints:
-                self.hints[h] = secondobj.hints[h]
-            elif isinstance(self.hints[h], dict):
-                # merge dicts
-                for k in secondobj.hints[h]:
-                    if k not in self.hints[h]:
-                        self.hints[h][k] = secondobj.hints[h][k]
-            else:
-                pass  # nothing to do; we do not overwrite with catalog props
 
     def _set_metadata(self):
         """
@@ -183,6 +164,21 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         cls, path: Union[str, os.PathLike], *args, **kwargs
     ) -> CandidateStatus:
         valid = super().validate_path(path, *args, **kwargs)
+        if valid.value > CandidateStatus.MAYBE.value:
+            valid = CandidateStatus.MAYBE
+        else:
+            return valid
+        # Arepo has no dedicated attribute to identify such runs.
+        # lets just query a bunch of attributes that are present for arepo runs
+        metadata_raw = load_metadata(path, **kwargs)
+        matchingattrs = True
+        matchingattrs &= "Git_commit" in metadata_raw["/Header"]
+        # not existent for any arepo run?
+        matchingattrs &= "Compactify_Version" not in metadata_raw["/Header"]
+
+        if matchingattrs:
+            valid = CandidateStatus.MAYBE
+
         return valid
 
     @classmethod
@@ -220,12 +216,13 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         -------
 
         """
+        p = str(self.path)
         # order of candidates matters. For Illustris "groups" must precede "fof_subhalo_tab"
         candidates = [
-            self.path.replace("snapshot", "group"),
-            self.path.replace("snapshot", "groups"),
-            self.path.replace("snapdir", "groups").replace("snap", "groups"),
-            self.path.replace("snapdir", "groups").replace("snap", "fof_subhalo_tab"),
+            p.replace("snapshot", "group"),
+            p.replace("snapshot", "groups"),
+            p.replace("snapdir", "groups").replace("snap", "groups"),
+            p.replace("snapdir", "groups").replace("snap", "fof_subhalo_tab"),
         ]
         for candidate in candidates:
             if not os.path.exists(candidate):
@@ -452,7 +449,9 @@ class ArepoCatalog(ArepoSnapshot):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, **kwargs
+    ) -> CandidateStatus:
         kwargs["fileprefix"] = cls._get_fileprefix(path)
         valid = super().validate_path(path, *args, expect_grp=True, **kwargs)
         return valid

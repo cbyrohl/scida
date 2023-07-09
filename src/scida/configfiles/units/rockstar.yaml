@@ -1,0 +1,64 @@
+# Rockstar source says:
+# > chars += fprintf(output, "#Units: Masses in Msun / h\n"
+# >   "#Units: Positions in Mpc / h (comoving)\n"
+# >   "#Units: Velocities in km / s (physical, peculiar)\n"
+# >   "#Units: Halo Distances, Lengths, and Radii in kpc / h (comoving)\n"
+# >   "#Units: Angular Momenta in (Msun/h) * (Mpc/h) * km/s (physical)\n"
+# >   "#Units: Spins are dimensionless\n");
+# > if (np)
+# >   chars += fprintf(output, "#Units: Total energy in (Msun/h)*(km/s)^2"
+# >   	     " (physical)\n""
+
+
+units:
+  # h: 0.7 hubble factor, needs to be set by snapshot
+  # a: 1.0 # scale factor, needs to be set by snapshot
+  ckpc: a * kpc
+  cMpc: a * Mpc
+  rockstar_mass: Msun / h
+  rockstar_length: ckpc / h  # positions in: cMpc / h
+  rockstar_velocity: km / s
+fields:
+  _all:
+    # accrete.rate ?
+    # accrete.rate.100Myr ?
+    # accrete.rate.tdyn ?
+    # am.phantom ?
+    # am.progenitor.main ?
+    # axis.b_div.by_a ?
+    # axis.c_div.by_a ?
+    descendant.snapshot:
+    host.distance: rockstar_length
+    host.velocity: rockstar_velocity
+    host.velocity.rad: rockstar_velocity
+    host.velocity.tan: rockstar_velocity
+    id:
+    id.to.index:
+    infall.first.mass: rockstar_mass
+    infall.first.snapshot:
+    infall.first.vel.circ.max: rockstar_velocity
+    major.merger.snapshot:
+    mass: rockstar_mass
+    mass.180m: rockstar_mass
+    mass.200c: rockstar_mass
+    mass.200m: rockstar_mass
+    mass.500c: rockstar_mass
+    mass.bound: rockstar_mass
+    mass.half.snapshot:
+    mass.lowres: rockstar_mass
+    mass.peak: rockstar_mass
+    mass.peak.snapshot:
+    mass.vir: rockstar_mass
+    position: cMpc / h
+    position.offset: cMpc / h
+    progenitor.number:
+    radius: rockstar_length
+    scale.radius: rockstar_length
+    scale.radius.klypin: rockstar_length
+    spin.bullock:
+    spin.peebles:
+    tree.index:
+    vel.circ.max: rockstar_velocity
+    vel.circ.peak: rockstar_velocity
+    vel.std: rockstar_velocity
+    velocity.offset: rockstar_velocity

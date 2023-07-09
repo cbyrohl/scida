@@ -7,7 +7,7 @@ from tests.testdata_properties import require_testdata_path
 def test_fullsnapshot(testdatapath):
     """Test loading of a full snapshot"""
     obj = load(testdatapath)
-    # print(obj.info())
+    assert isinstance(obj, MTNGArepoSnapshot)
     containernames = [
         "PartType0",
         "PartType1",

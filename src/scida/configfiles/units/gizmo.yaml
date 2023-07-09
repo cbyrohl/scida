@@ -15,7 +15,7 @@ units:
 fields:
   _all:
     Coordinates: code_length
-    Velocities: code_velocity
+    Velocities: a^0.5 * code_velocity
     ParticleIDs:
     ParticleChildIDsNumber:
     ParticleIDGenerationNumber:

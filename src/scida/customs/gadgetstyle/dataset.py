@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -83,18 +83,18 @@ class GadgetStyleSnapshot(Dataset):
         bool
         """
         path = str(path)
-        possibly_valid = False
+        possibly_valid = CandidateStatus.NO
         iszarr = path.rstrip("/").endswith(".zarr")
         if path.endswith(".hdf5") or iszarr:
-            possibly_valid = True
+            possibly_valid = CandidateStatus.MAYBE
         if os.path.isdir(path):
             files = os.listdir(path)
             sufxs = [f.split(".")[-1] for f in files]
             if not iszarr and len(set(sufxs)) > 1:
-                possibly_valid = False
+                possibly_valid = CandidateStatus.NO
             if sufxs[0] == "hdf5":
-                possibly_valid = True
-        if possibly_valid:
+                possibly_valid = CandidateStatus.MAYBE
+        if possibly_valid != CandidateStatus.NO:
             metadata_raw = load_metadata(path, **kwargs)
             # need some silly combination of attributes to be sure
             if all([k in metadata_raw for k in ["/Header"]]):
@@ -112,14 +112,43 @@ class GadgetStyleSnapshot(Dataset):
                     ]
                 )
                 if is_grp:
-                    return CandidateStatus.MAYBE
+                    return CandidateStatus.YES
                 if is_snap and not expect_grp:
-                    return CandidateStatus.MAYBE
+                    return CandidateStatus.YES
         return CandidateStatus.NO
 
     def register_field(self, parttype, name=None, description=""):
         res = self.data.register_field(parttype, name=name, description=description)
         return res
+
+    def merge_data(
+        self, secondobj, fieldname_suffix="", root_group: Optional[str] = None
+    ):
+        data = self.data
+        if root_group is not None:
+            if root_group not in data._containers:
+                data.add_container(root_group)
+            data = self.data[root_group]
+        for k in secondobj.data:
+            key = k + fieldname_suffix
+            if key not in data:
+                data[key] = secondobj.data[k]
+            else:
+                log.debug("Not overwriting field '%s' during merge_data." % key)
+            secondobj.data.fieldrecipes_kwargs["snap"] = self
+
+    def merge_hints(self, secondobj):
+        # merge hints from snap and catalog
+        for h in secondobj.hints:
+            if h not in self.hints:
+                self.hints[h] = secondobj.hints[h]
+            elif isinstance(self.hints[h], dict):
+                # merge dicts
+                for k in secondobj.hints[h]:
+                    if k not in self.hints[h]:
+                        self.hints[h][k] = secondobj.hints[h][k]
+            else:
+                pass  # nothing to do; we do not overwrite with catalog props
 
 
 class SwiftSnapshot(GadgetStyleSnapshot):
@@ -135,22 +164,6 @@ class SwiftSnapshot(GadgetStyleSnapshot):
         comparestr = metadata_raw.get("/Code", {}).get("Code", b"").decode()
         valid = "SWIFT" in comparestr
         return valid
-
-
-class GizmoSnapshot(GadgetStyleSnapshot):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
-
-    @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
-        valid = super().validate_path(path, *args, **kwargs)
-        if not valid:
-            return False
-        # there does not seem to be identifying metadata for Gizmo (? see SIMBA snap),
-        # so we just return False for now (i.e. falling back onto GadgetStyleSnapshot on auto-detection)
-        # TODO: split routine into "validate" and "identify"? One accessing whether we *could* read the data,
-        # the other checking whether we *should* primarily read the data this way?
-        return False
 
 
 # right now ArepoSnapshot is defined in separate file

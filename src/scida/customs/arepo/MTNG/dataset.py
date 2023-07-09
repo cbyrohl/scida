@@ -1,12 +1,13 @@
 import os
 from typing import Union
 
-from scida.customs.arepo.dataset import ArepoSnapshot
+from scida.customs.arepo.dataset import ArepoCatalog, ArepoSnapshot
+from scida.discovertypes import CandidateStatus
 from scida.io import load_metadata
 
 
 class MTNGArepoSnapshot(ArepoSnapshot):
-    _fileprefix_catalog = "groups"
+    _fileprefix_catalog = "fof_subhalo_tab"
     _fileprefix = "snapshot_"  # underscore is important!
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:
@@ -42,10 +43,12 @@ class MTNGArepoSnapshot(ArepoSnapshot):
         ]:
             if k in self.mostbound.data:
                 del self.mostbound.data[k]
-        self.merge_data(self.mostbound, suffix="_mostbound")
+        self.merge_data(self.mostbound, fieldname_suffix="_mostbound")
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, **kwargs
+    ) -> CandidateStatus:
         tkwargs = dict(
             fileprefix=cls._fileprefix, fileprefix_catalog=cls._fileprefix_catalog
         )
@@ -56,9 +59,40 @@ class MTNGArepoSnapshot(ArepoSnapshot):
             # might be a partial snapshot
             tkwargs.update(fileprefix="snapshot-prevmostboundonly_")
             valid = super().validate_path(path, *args, **tkwargs)
-        if not valid:
-            return False
+        if valid == CandidateStatus.NO:
+            return valid
         metadata_raw = load_metadata(path, **tkwargs)
-        if not all([k in metadata_raw for k in ["/Header"]]):
-            return False
-        return True
+        if "/Config" not in metadata_raw:
+            return CandidateStatus.NO
+        if "MTNG" not in metadata_raw["/Config"]:
+            return CandidateStatus.NO
+
+        # if not all([k in metadata_raw for k in ["/Header", "/Config", "/Parameters"]]):
+        #    return CandidateStatus.NO
+        return CandidateStatus.MAYBE
+
+
+class MTNGArepoCatalog(ArepoCatalog):
+    _fileprefix = "fof_subhalo_tab"
+
+    def __init__(self, *args, **kwargs):
+        kwargs["iscatalog"] = True
+        if "fileprefix" not in kwargs:
+            kwargs["fileprefix"] = "fof_subhalo_tab"
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def validate_path(
+        cls, path: Union[str, os.PathLike], *args, **kwargs
+    ) -> CandidateStatus:
+        tkwargs = dict(fileprefix=cls._fileprefix)
+        tkwargs.update(**kwargs)
+        valid = super().validate_path(path, *args, **tkwargs)
+        if valid == CandidateStatus.NO:
+            return valid
+        metadata_raw = load_metadata(path, **tkwargs)
+        if "/Config" not in metadata_raw:
+            return CandidateStatus.NO
+        if "MTNG" not in metadata_raw["/Config"]:
+            return CandidateStatus.NO
+        return CandidateStatus.YES

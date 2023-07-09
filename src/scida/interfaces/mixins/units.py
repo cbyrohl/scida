@@ -202,7 +202,7 @@ class UnitMixin(Mixin):
             dsprops = c["data"][self.hints["dsname"]]
             missing_units = dsprops.get("missing_units", missing_units)
             unitfile = dsprops.get("unitfile", "")
-        unitfile = kwargs.pop("unitfile", unitfile)
+        unitfile = kwargs.pop("unitfile", unitfile)  # passed kwarg takes precedence
         unitdefs = get_config_fromfile("units/general.yaml").get("units", {})
         if unitfile != "":
             unithints = get_config_fromfile(unitfile)

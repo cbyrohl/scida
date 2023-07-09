@@ -41,7 +41,7 @@ fields:
     GFM_MetalsTagged:
     GFM_WindDMVelDisp: km / s
     GFM_WindHostHaloMass: code_mass
-    InternalEnergy: (km / s)^2
+    InternalEnergy: (km / s) ^ 2
     InternalEnergyOld: (km / s)^2
     Machnumber:
     MagneticField: (h / a^2) * (code_pressure)^(1/2)
