@@ -14,6 +14,7 @@ def test_series(testdatapath):
     assert isinstance(obj, GizmoSimulation)
 
     ds = obj[0]
+    print(ds.info())
     check_firesnap(ds)
 
 

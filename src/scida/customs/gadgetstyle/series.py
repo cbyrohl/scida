@@ -37,6 +37,8 @@ class GadgetStyleSimulation(DatasetSeries):
             subpath = subpath_dict.get(k, "output")
             sp = p / subpath
             if not sp.exists():
+                if k != "paths":
+                    continue  # do not require optional sources
                 raise ValueError("Specified path '%s' does not exist." % (p / subpath))
             fns = os.listdir(sp)
             prfxs = set([f.split("_")[0] for f in fns if f.startswith(prefix)])
@@ -45,7 +47,11 @@ class GadgetStyleSimulation(DatasetSeries):
 
             paths = sorted([p for p in sp.glob(prfx + "_*")])
             # sometimes there are backup folders with different suffix, exclude those.
-            paths = [p for p in paths if str(p).split("_")[-1].isdigit()]
+            paths = [
+                p
+                for p in paths
+                if str(p).split("_")[-1].isdigit() or str(p).endswith(".hdf5")
+            ]
             paths_dict[k] = paths
 
         # make sure we have the same amount of paths respectively

@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -120,6 +120,35 @@ class GadgetStyleSnapshot(Dataset):
     def register_field(self, parttype, name=None, description=""):
         res = self.data.register_field(parttype, name=name, description=description)
         return res
+
+    def merge_data(
+        self, secondobj, fieldname_suffix="", root_group: Optional[str] = None
+    ):
+        data = self.data
+        if root_group is not None:
+            if root_group not in data._containers:
+                data.add_container(root_group)
+            data = self.data[root_group]
+        for k in secondobj.data:
+            key = k + fieldname_suffix
+            if key not in data:
+                data[key] = secondobj.data[k]
+            else:
+                log.debug("Not overwriting field '%s' during merge_data." % key)
+            secondobj.data.fieldrecipes_kwargs["snap"] = self
+
+    def merge_hints(self, secondobj):
+        # merge hints from snap and catalog
+        for h in secondobj.hints:
+            if h not in self.hints:
+                self.hints[h] = secondobj.hints[h]
+            elif isinstance(self.hints[h], dict):
+                # merge dicts
+                for k in secondobj.hints[h]:
+                    if k not in self.hints[h]:
+                        self.hints[h][k] = secondobj.hints[h][k]
+            else:
+                pass  # nothing to do; we do not overwrite with catalog props
 
 
 class SwiftSnapshot(GadgetStyleSnapshot):

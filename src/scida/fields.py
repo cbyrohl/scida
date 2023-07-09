@@ -273,11 +273,14 @@ class FieldContainer(MutableMapping):
         self.aliases[alias] = name
 
     def add_container(self, key, **kwargs):
+        tkwargs = dict(**kwargs)
+        if "name" not in tkwargs:
+            tkwargs["name"] = key
         self._containers[key] = FieldContainer(
             fieldrecipes_kwargs=self.fieldrecipes_kwargs,
             withunits=self.withunits,
             parent=self,
-            **kwargs,
+            **tkwargs,
         )
 
     def _getitem(

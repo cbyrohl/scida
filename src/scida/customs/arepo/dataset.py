@@ -144,33 +144,13 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         # merge data
         self.merge_data(self.catalog)
 
-        # starting snapshots often do not have groups
+        # first snapshots often do not have groups
         ngkeys = self.catalog.data["Group"].keys()
         if len(ngkeys) > 0:
             self.add_catalogIDs()
 
         # merge hints from snap and catalog
         self.merge_hints(self.catalog)
-
-    def merge_data(self, secondobj, suffix=""):
-        for k in secondobj.data:
-            key = k + suffix
-            if key not in self.data:
-                self.data[key] = secondobj.data[k]
-            secondobj.data.fieldrecipes_kwargs["snap"] = self
-
-    def merge_hints(self, secondobj):
-        # merge hints from snap and catalog
-        for h in secondobj.hints:
-            if h not in self.hints:
-                self.hints[h] = secondobj.hints[h]
-            elif isinstance(self.hints[h], dict):
-                # merge dicts
-                for k in secondobj.hints[h]:
-                    if k not in self.hints[h]:
-                        self.hints[h][k] = secondobj.hints[h][k]
-            else:
-                pass  # nothing to do; we do not overwrite with catalog props
 
     def _set_metadata(self):
         """

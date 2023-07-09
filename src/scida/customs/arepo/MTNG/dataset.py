@@ -43,7 +43,7 @@ class MTNGArepoSnapshot(ArepoSnapshot):
         ]:
             if k in self.mostbound.data:
                 del self.mostbound.data[k]
-        self.merge_data(self.mostbound, suffix="_mostbound")
+        self.merge_data(self.mostbound, fieldname_suffix="_mostbound")
 
     @classmethod
     def validate_path(

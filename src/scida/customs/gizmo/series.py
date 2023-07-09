@@ -8,10 +8,20 @@ class GizmoSimulation(GadgetStyleSimulation):
     """A series representing a gizmo simulation."""
 
     def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
-        prefix_dict = dict(paths="snapdir")
+        prefix_dict = dict(paths="snapdir", rh_paths="halo", rs_paths="star")
+        subpath_dict = dict(
+            paths="output",
+            rh_paths="halo/rockstar_dm/catalog_hdf5",
+            rs_paths="halo/rockstar_dm/catalog_hdf5",
+        )
+        arg_dict = dict(
+            rh_paths="catalog_rockstar_halo", rs_paths="catalog_rockstar_star"
+        )
         super().__init__(
             path,
             prefix_dict=prefix_dict,
+            subpath_dict=subpath_dict,
+            arg_dict=arg_dict,
             lazy=lazy,
             async_caching=async_caching,
             **interface_kwargs
