@@ -42,3 +42,8 @@ runs:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_FIRE2_simulation.tar.gz
         url: https://heibox.uni-heidelberg.de/f/99a6c5fe31eb430f90e2/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_TNG-Cluster_snapshot_z0.hdf5
+        url: https://heibox.uni-heidelberg.de/f/fe582fbe745445d7a448/?dl=1

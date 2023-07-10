@@ -145,9 +145,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.merge_data(self.catalog)
 
         # first snapshots often do not have groups
-        ngkeys = self.catalog.data["Group"].keys()
-        if len(ngkeys) > 0:
-            self.add_catalogIDs()
+        if "Group" in self.catalog.data:
+            ngkeys = self.catalog.data["Group"].keys()
+            if len(ngkeys) > 0:
+                self.add_catalogIDs()
 
         # merge hints from snap and catalog
         self.merge_hints(self.catalog)

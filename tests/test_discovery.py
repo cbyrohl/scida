@@ -1,7 +1,7 @@
 import pathlib
 from typing import Type
 
-from scida import ArepoSnapshot, MTNGArepoSnapshot
+from scida import ArepoSnapshot, MTNGArepoSnapshot, TNGClusterSnapshot
 from scida.customs.arepo.dataset import ArepoCatalog
 from scida.customs.arepo.MTNG.dataset import MTNGArepoCatalog
 from scida.customs.arepo.series import ArepoSimulation
@@ -33,6 +33,8 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
             return MTNGArepoCatalog
         else:
             return MTNGArepoSnapshot
+    elif any([k in name for k in ["tng-cluster", "tngcluster"]]):
+        return TNGClusterSnapshot
     elif any(k in name for k in ["tng", "illustris", "auriga"]):
         if "group" in name:
             return ArepoCatalog
