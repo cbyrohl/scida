@@ -1,4 +1,5 @@
 import abc
+import copy
 import hashlib
 import logging
 import os
@@ -13,7 +14,7 @@ import scida.io
 from scida.fields import FieldContainer
 from scida.helpers_misc import make_serializable, sprint
 from scida.interfaces.mixins import UnitMixin
-from scida.misc import check_config_for_dataset, deepdictkeycopy
+from scida.misc import check_config_for_dataset
 from scida.registries import dataset_type_registry
 
 log = logging.getLogger(__name__)
@@ -379,8 +380,8 @@ class Selector(object):
         def newfn(*args, **kwargs):
             # TODO: Add graceful exit/restore after exception in self.prepare
             self.data_backup = args[0].data
-            self.data = FieldContainer()
-            deepdictkeycopy(self.data_backup, self.data)
+            self.data = copy.copy(args[0].data)
+            # deepdictkeycopy(self.data_backup, self.data)
 
             self.prepare(*args, **kwargs)
             if self.keys is None:

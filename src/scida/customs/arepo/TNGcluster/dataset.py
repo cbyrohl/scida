@@ -49,7 +49,9 @@ class TNGClusterSelector(Selector):
             else:
                 offset = offsets
                 length = lengths
-            for k, v in self.data_backup[p].items():
+
+            def get_slicedarr(v, offset, length):
+                nonlocal offsets_fuzz, lengths_fuzz
                 arr = v[offset : offset + length]
                 if fuzz and key == "particles":
                     offset_fuzz = offsets_fuzz[pnum]
@@ -59,7 +61,16 @@ class TNGClusterSelector(Selector):
                         arr = arr_fuzz
                     else:
                         arr = np.concatenate([arr, arr_fuzz])
-                self.data[p][k] = arr
+                return arr
+
+            # need to evaluate without recipes first
+            for k, v in self.data_backup[p].items(withrecipes=False):
+                self.data[p][k] = get_slicedarr(v, offset, length)
+
+            for k, v in self.data_backup[p].items(
+                withfields=False, withrecipes=True, evaluate=True
+            ):
+                self.data[p][k] = get_slicedarr(v, offset, length)
         snap.data = self.data
 
 
