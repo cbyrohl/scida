@@ -76,11 +76,16 @@ class TNGClusterSnapshot(ArepoSnapshot):
         # each zoom-target has two entries i and i+N, where N=352 is the number of zoom targets.
         # the first file contains the particles that were contained in the original low-res run
         # the second file contains all other remaining particles in a given zoom target
-        self.lengths_zoom = self.header["NumPart_ThisFile"]
-        self.offsets_zoom = np.cumsum(np.vstack([6 * [0], self.lengths_zoom]), axis=0)[
-            :-1
-        ]
-        pass
+        def len_to_offsets(lengths):
+            return np.cumsum(np.vstack([6 * [0], lengths]), axis=0)[:-1]
+        self.lengths_zoom = dict(particles=self.header["NumPart_ThisFile"]) 
+        self.offsets_zoom = dict(particles=len_to_offsets(self.lengths_zoom))
+         
+        if hasattr(self, "catalog"):
+            self.lengths_zoom["groups"] = self.header["Ngroups_ThisFile"]) 
+            self.offsets_zoom["groups"] = len_to_offsets(self.lengths_zoom["groups"]) 
+            self.lengths_zoom["subgroups"] = self.header["Nsubgroups_ThisFile"])
+            self.offsets_zoom["subgroups"] = len_to_offsets(self.lengths_zoom["subgroups"])
 
     @TNGClusterSelector()
     def return_data(self):
