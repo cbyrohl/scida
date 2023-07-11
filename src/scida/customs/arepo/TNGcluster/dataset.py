@@ -91,7 +91,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
             particles=len_to_offsets(self.lengths_zoom["particles"])
         )
 
-        if hasattr(self, "catalog"):
+        if hasattr(self, "catalog") and self.catalog is not None:
             self.lengths_zoom["groups"] = self.catalog.header["Ngroups_ThisFile"]
             self.offsets_zoom["groups"] = len_to_offsets(self.lengths_zoom["groups"])
             self.lengths_zoom["subgroups"] = self.catalog.header["Nsubgroups_ThisFile"]

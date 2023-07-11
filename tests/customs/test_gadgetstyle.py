@@ -1,6 +1,5 @@
-from testdata_properties import require_testdata_path
-
 from scida import GadgetStyleSnapshot
+from tests.testdata_properties import require_testdata_path
 
 
 @require_testdata_path("interface", only=["TNG50-4_group"])
