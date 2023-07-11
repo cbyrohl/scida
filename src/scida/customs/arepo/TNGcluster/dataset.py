@@ -72,6 +72,10 @@ class TNGClusterSnapshot(ArepoSnapshot):
         ]
         pass
 
+    @TNGClusterSelector()
+    def return_data(self):
+        return super().return_data()
+
     @classmethod
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, **kwargs
