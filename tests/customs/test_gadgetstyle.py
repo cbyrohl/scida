@@ -7,4 +7,3 @@ from scida import GadgetStyleSnapshot
 def test_grp(testdatapath):
     grp = GadgetStyleSnapshot(testdatapath, virtualcache=False)
     assert len(grp.header["Ngroups_ThisFile"]) == 11
-    pass

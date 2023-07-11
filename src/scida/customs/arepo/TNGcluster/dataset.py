@@ -23,33 +23,43 @@ class TNGClusterSelector(Selector):
             return
         if zoom_id < 0 or zoom_id > (snap.ntargets - 1):
             raise ValueError("zoomID must be in range 0-%i" % (snap.ntargets - 1))
-        lengths = snap.lengths_zoom[zoom_id, :]
-        offsets = snap.offsets_zoom[zoom_id, :]
-        lengths_fuzz = None
-        offsets_fuzz = None
-        if fuzz:
-            lengths_fuzz = snap.lengths_zoom[zoom_id + snap.ntargets, :]
-            offsets_fuzz = snap.offsets_zoom[zoom_id + snap.ntargets, :]
+
         for p in self.data_backup:
-            splt = p.split("PartType")
-            if len(splt) == 1:
-                for k, v in self.data_backup[p].items():
-                    self.data[p][k] = v
+            if p.startswith("PartType"):
+                key = "particles"
+            elif p == "Groups":
+                key = "groups"
+            elif p == "Subhalos":
+                key = "subgroups"
             else:
+                continue
+            lengths = snap.lengths_zoom[key][zoom_id]
+            offsets = snap.offsets_zoom[key][zoom_id]
+            lengths_fuzz = None
+            offsets_fuzz = None
+            if fuzz and key == "particles":  # fuzz files only for particles
+                lengths_fuzz = snap.lengths_zoom[key][zoom_id + snap.ntargets]
+                offsets_fuzz = snap.offsets_zoom[key][zoom_id + snap.ntargets]
+
+            if key == "particles":
+                splt = p.split("PartType")
                 pnum = int(splt[1])
                 offset = offsets[pnum]
                 length = lengths[pnum]
-                for k, v in self.data_backup[p].items():
-                    arr = v[offset : offset + length]
-                    if fuzz:
-                        offset_fuzz = offsets_fuzz[pnum]
-                        length_fuzz = lengths_fuzz[pnum]
-                        arr_fuzz = v[offset_fuzz : offset_fuzz + length_fuzz]
-                        if onlyfuzz:
-                            arr = arr_fuzz
-                        else:
-                            arr = np.concatenate([arr, arr_fuzz])
-                    self.data[p][k] = arr
+            else:
+                offset = offsets
+                length = lengths
+            for k, v in self.data_backup[p].items():
+                arr = v[offset : offset + length]
+                if fuzz and key == "particles":
+                    offset_fuzz = offsets_fuzz[pnum]
+                    length_fuzz = lengths_fuzz[pnum]
+                    arr_fuzz = v[offset_fuzz : offset_fuzz + length_fuzz]
+                    if onlyfuzz:
+                        arr = arr_fuzz
+                    else:
+                        arr = np.concatenate([arr, arr_fuzz])
+                self.data[p][k] = arr
         snap.data = self.data
 
 
