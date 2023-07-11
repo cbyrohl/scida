@@ -150,7 +150,12 @@ class ChunkedHDF5Loader(Loader):
             create = True
 
         if create:
-            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
+            print_cachefile_creation = kwargs.get("print_cachefile_creation", True)
+            self.create_cachefile(
+                fileprefix=fileprefix,
+                virtualcache=virtualcache,
+                verbose=print_cachefile_creation,
+            )
 
         try:
             datadict = self.load_cachefile(
@@ -206,9 +211,11 @@ class ChunkedHDF5Loader(Loader):
         files = files[sortidx]
         return files
 
-    def create_cachefile(self, fileprefix="", virtualcache=False):
+    def create_cachefile(self, fileprefix="", virtualcache=False, verbose=None):
         config = get_config()
-        print_msg = config.get("print_cachefile_creation", True)
+        print_msg = verbose
+        if verbose is None:
+            print_msg = config.get("print_cachefile_creation", True)
         if print_msg:
             print("Creating cache file, this may take a while...")
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
@@ -396,8 +403,6 @@ def load_datadict_old(
             print("no uid created for %s" % container.name)
 
     walk_container(data, handler_group=create_uids)
-
-    # walk_container(data, handler_field=lambda x, y: print(x, y))
 
     # attrs
     metadata = tree["attrs"]

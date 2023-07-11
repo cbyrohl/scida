@@ -243,7 +243,7 @@ def create_mergedhdf5file(
                 else:
                     if not len(set(attrvallist)) == 1:
                         log.debug("%s: %s has different values." % (apath, k))
-                        attrs_differ[apath][k] = np.array(attrval0)
+                        attrs_differ[apath][k] = np.array(attrvallist)
                         continue
                 attrs_same[apath][k] = attrval0
         for apath in attrspaths_all:
