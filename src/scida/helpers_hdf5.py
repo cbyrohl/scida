@@ -241,7 +241,12 @@ def create_mergedhdf5file(
                         attrs_differ[apath][k] = np.stack(attrvallist)
                         continue
                 else:
-                    if not len(set(attrvallist)) == 1:
+                    same = len(set(attrvallist)) == 1
+                    if isinstance(attrval0, np.floating):
+                        # for floats we do not require binary equality
+                        # (we had some incident...)
+                        same = np.allclose(attrval0, attrvallist)
+                    if not same:
                         log.debug("%s: %s has different values." % (apath, k))
                         attrs_differ[apath][k] = np.array(attrvallist)
                         continue

@@ -101,7 +101,8 @@ def extract_units_from_attrs(
     # get dimensions
     unit = cgsfactor
     if isinstance(unit, np.ndarray):
-        assert len(unit) == 1
+        if len(unit) != 1:
+            log.debug("Unexpected shape (%s) of unit factor." % unit.shape)
         unit = unit[0]
     if unit == 0.0:
         unit = ureg.Quantity(1.0)  # zero makes no sense.

@@ -27,9 +27,9 @@ class TNGClusterSelector(Selector):
         for p in self.data_backup:
             if p.startswith("PartType"):
                 key = "particles"
-            elif p == "Groups":
+            elif p == "Group":
                 key = "groups"
-            elif p == "Subhalos":
+            elif p == "Subhalo":
                 key = "subgroups"
             else:
                 continue
@@ -70,6 +70,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         # we can get the offsets from the header as our load routine concats the various values from different files
         # these offsets can be used to select a given halo.
         # see: https://tng-project.org/w/index.php/TNG-Cluster
@@ -77,15 +78,26 @@ class TNGClusterSnapshot(ArepoSnapshot):
         # the first file contains the particles that were contained in the original low-res run
         # the second file contains all other remaining particles in a given zoom target
         def len_to_offsets(lengths):
-            return np.cumsum(np.vstack([6 * [0], lengths]), axis=0)[:-1]
-        self.lengths_zoom = dict(particles=self.header["NumPart_ThisFile"]) 
-        self.offsets_zoom = dict(particles=len_to_offsets(self.lengths_zoom))
-         
+            shp = len(lengths.shape)
+            n = lengths.shape[-1]
+            if shp == 1:
+                res = np.concatenate([np.zeros(1), np.cumsum(lengths)])[:-1]
+            else:
+                res = np.cumsum(np.vstack([np.zeros(n), lengths]), axis=0)[:-1]
+            return res
+
+        self.lengths_zoom = dict(particles=self.header["NumPart_ThisFile"])
+        self.offsets_zoom = dict(
+            particles=len_to_offsets(self.lengths_zoom["particles"])
+        )
+
         if hasattr(self, "catalog"):
-            self.lengths_zoom["groups"] = self.header["Ngroups_ThisFile"]) 
-            self.offsets_zoom["groups"] = len_to_offsets(self.lengths_zoom["groups"]) 
-            self.lengths_zoom["subgroups"] = self.header["Nsubgroups_ThisFile"])
-            self.offsets_zoom["subgroups"] = len_to_offsets(self.lengths_zoom["subgroups"])
+            self.lengths_zoom["groups"] = self.catalog.header["Ngroups_ThisFile"]
+            self.offsets_zoom["groups"] = len_to_offsets(self.lengths_zoom["groups"])
+            self.lengths_zoom["subgroups"] = self.catalog.header["Nsubgroups_ThisFile"]
+            self.offsets_zoom["subgroups"] = len_to_offsets(
+                self.lengths_zoom["subgroups"]
+            )
 
     @TNGClusterSelector()
     def return_data(self):
