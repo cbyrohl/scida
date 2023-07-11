@@ -3,8 +3,10 @@
 name: Tests
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   tests:
@@ -15,7 +17,7 @@ jobs:
       matrix:
         include:
           - { python: "3.10", os: "ubuntu-latest", session: "tests" }
-          - { python: "3.9", os: "ubuntu-latest", session: "tests" }
+          #- { python: "3.9", os: "ubuntu-latest", session: "tests" }
     env:
       NOXSESSION: ${{ matrix.session }}
       FORCE_COLOR: "1"

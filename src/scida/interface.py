@@ -370,14 +370,16 @@ class Selector(object):
 
     def __init__(self):
         self.keys = None  # the keys we check for.
-        self.data_backup = {}  # holds a copy of the species' fields
-        self.data = {}  # holds the species' fields we operate on
+        self.data_backup = FieldContainer()  # holds a copy of the species' fields
+        self.data: FieldContainer = (
+            FieldContainer()
+        )  # holds the species' fields we operate on
 
     def __call__(self, fn, *args, **kwargs):
         def newfn(*args, **kwargs):
             # TODO: Add graceful exit/restore after exception in self.prepare
             self.data_backup = args[0].data
-            self.data = {}
+            self.data = FieldContainer()
             deepdictkeycopy(self.data_backup, self.data)
 
             self.prepare(*args, **kwargs)

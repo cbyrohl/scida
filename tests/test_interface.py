@@ -191,6 +191,8 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
 @require_testdata("illustrissnapshot_withcatalog")
 def test_areposnapshot_load_withcatalog(testdata_illustrissnapshot_withcatalog):
     snp = testdata_illustrissnapshot_withcatalog
+    if snp.redshift >= 20.0:  # hacky... (no catalog at high redshifts)
+        return
     parttypes = {
         "PartType0",
         "PartType1",

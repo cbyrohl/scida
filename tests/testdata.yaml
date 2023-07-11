@@ -170,6 +170,13 @@ testdata:
       - rockstar
     fn: "rockstar_star.hdf5"
 
+  TNGCluster_snapshot_z0_minimal:
+    types:
+      - interface
+      - areposnapshot
+      - tngclustersnapshot
+      # - areposnapshot_withcatalog|F|0|2
+    fn: minimal_TNG-Cluster_snapshot_z0.hdf5
 
 
 
