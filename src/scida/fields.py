@@ -78,6 +78,12 @@ class FieldContainer(MutableMapping):
         self.internals = ["uid"]  # names of internal fields/groups
         self.parent = parent
 
+    def copy_skeleton(self) -> FieldContainer:
+        res = FieldContainer()
+        for k, cntr in self._containers.items():
+            res[k] = cntr.copy_skeleton()
+        return res
+
     def info(self, level=0, name: Optional[str] = None) -> str:
         rep = ""
         length = self.fieldlength
@@ -148,15 +154,16 @@ class FieldContainer(MutableMapping):
         self, withgroups=True, withrecipes=True, withinternal=False, withfields=True
     ):
         fieldkeys = []
+        recipekeys = []
         if withfields:
             fieldkeys = list(self._fields.keys())
             if not withinternal:
                 for ikey in self.internals:
                     if ikey in fieldkeys:
                         fieldkeys.remove(ikey)
-            if withrecipes:
-                recipekeys = self._fieldrecipes.keys()
-                fieldkeys = list(set(fieldkeys) | set(recipekeys))
+        if withrecipes:
+            recipekeys = self._fieldrecipes.keys()
+        fieldkeys = list(set(fieldkeys) | set(recipekeys))
         if withgroups:
             groupkeys = self._containers.keys()
             fieldkeys = list(set(fieldkeys) | set(groupkeys))

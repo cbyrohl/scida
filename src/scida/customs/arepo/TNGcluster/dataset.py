@@ -5,6 +5,7 @@ import numpy as np
 
 from scida import ArepoSnapshot
 from scida.discovertypes import CandidateStatus
+from scida.fields import DerivedFieldRecipe, FieldRecipe
 from scida.interface import Selector
 from scida.io import load_metadata
 
@@ -35,11 +36,17 @@ class TNGClusterSelector(Selector):
                 continue
             lengths = snap.lengths_zoom[key][zoom_id]
             offsets = snap.offsets_zoom[key][zoom_id]
-            lengths_fuzz = None
-            offsets_fuzz = None
+            length_fuzz = None
+            offset_fuzz = None
+
             if fuzz and key == "particles":  # fuzz files only for particles
                 lengths_fuzz = snap.lengths_zoom[key][zoom_id + snap.ntargets]
                 offsets_fuzz = snap.offsets_zoom[key][zoom_id + snap.ntargets]
+
+                splt = p.split("PartType")
+                pnum = int(splt[1])
+                offset_fuzz = offsets_fuzz[pnum]
+                length_fuzz = lengths_fuzz[pnum]
 
             if key == "particles":
                 splt = p.split("PartType")
@@ -50,12 +57,11 @@ class TNGClusterSelector(Selector):
                 offset = offsets
                 length = lengths
 
-            def get_slicedarr(v, offset, length):
-                nonlocal offsets_fuzz, lengths_fuzz
+            def get_slicedarr(
+                v, offset, length, offset_fuzz, length_fuzz, key, fuzz=False
+            ):
                 arr = v[offset : offset + length]
-                if fuzz and key == "particles":
-                    offset_fuzz = offsets_fuzz[pnum]
-                    length_fuzz = lengths_fuzz[pnum]
+                if offset_fuzz is not None:
                     arr_fuzz = v[offset_fuzz : offset_fuzz + length_fuzz]
                     if onlyfuzz:
                         arr = arr_fuzz
@@ -63,14 +69,44 @@ class TNGClusterSelector(Selector):
                         arr = np.concatenate([arr, arr_fuzz])
                 return arr
 
+            def get_slicedfunc(
+                func, offset, length, offset_fuzz, length_fuzz, key, fuzz=False
+            ):
+                def newfunc(
+                    arrs, o=offset, ln=length, of=offset_fuzz, lnf=length_fuzz, **kwargs
+                ):
+                    arr_all = func(arrs, **kwargs)
+                    arr = arr_all[o : o + ln]
+                    if of is None:
+                        return arr
+                    arr_fuzz = arr_all[of : of + lnf]
+                    if onlyfuzz:
+                        return arr_fuzz
+                    else:
+                        return np.concatenate([arr, arr_fuzz])
+
+                return newfunc
+
             # need to evaluate without recipes first
             for k, v in self.data_backup[p].items(withrecipes=False):
-                self.data[p][k] = get_slicedarr(v, offset, length)
+                self.data[p][k] = get_slicedarr(
+                    v, offset, length, offset_fuzz, length_fuzz, key, fuzz
+                )
 
             for k, v in self.data_backup[p].items(
-                withfields=False, withrecipes=True, evaluate=True
+                withfields=False, withrecipes=True, evaluate=False
             ):
-                self.data[p][k] = get_slicedarr(v, offset, length)
+                if not isinstance(v, FieldRecipe):
+                    continue  # already evaluated, no need to port recipe (?)
+                rcp: FieldRecipe = v
+                func = get_slicedfunc(
+                    v.func, offset, length, offset_fuzz, length_fuzz, key, fuzz
+                )
+                newrcp = DerivedFieldRecipe(rcp.name, func)
+                newrcp.type = rcp.type
+                newrcp.description = rcp.description
+                newrcp.units = rcp.units
+                self.data[p][k] = newrcp
         snap.data = self.data
 
 
@@ -89,12 +125,18 @@ class TNGClusterSnapshot(ArepoSnapshot):
         # the first file contains the particles that were contained in the original low-res run
         # the second file contains all other remaining particles in a given zoom target
         def len_to_offsets(lengths):
+            lengths = np.array(lengths)
             shp = len(lengths.shape)
             n = lengths.shape[-1]
             if shp == 1:
-                res = np.concatenate([np.zeros(1), np.cumsum(lengths)])[:-1]
+                res = np.concatenate(
+                    [np.zeros(1, dtype=np.int64), np.cumsum(lengths.astype(np.int64))]
+                )[:-1]
             else:
-                res = np.cumsum(np.vstack([np.zeros(n), lengths]), axis=0)[:-1]
+                res = np.cumsum(
+                    np.vstack([np.zeros(n, dtype=np.int64), lengths.astype(np.int64)]),
+                    axis=0,
+                )[:-1]
             return res
 
         self.lengths_zoom = dict(particles=self.header["NumPart_ThisFile"])

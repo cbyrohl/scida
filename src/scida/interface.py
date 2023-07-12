@@ -1,5 +1,4 @@
 import abc
-import copy
 import hashlib
 import logging
 import os
@@ -371,16 +370,16 @@ class Selector(object):
 
     def __init__(self):
         self.keys = None  # the keys we check for.
-        self.data_backup = FieldContainer()  # holds a copy of the species' fields
-        self.data: FieldContainer = (
-            FieldContainer()
-        )  # holds the species' fields we operate on
+        # holds a copy of the species' fields
+        self.data_backup = FieldContainer()
+        # holds the species' fields we operate on
+        self.data: FieldContainer = FieldContainer()
 
     def __call__(self, fn, *args, **kwargs):
         def newfn(*args, **kwargs):
             # TODO: Add graceful exit/restore after exception in self.prepare
             self.data_backup = args[0].data
-            self.data = copy.copy(args[0].data)
+            self.data = args[0].data.copy_skeleton()
             # deepdictkeycopy(self.data_backup, self.data)
 
             self.prepare(*args, **kwargs)
