@@ -124,22 +124,6 @@ class BaseDataset(metaclass=MixinMeta):
             rep += self._info_custom()
         rep += sprint("=== data ===")
         rep += self.data.info(name="root")
-        # for k in sorted(self.data.keys()):
-        #    v = self.data[k]
-        #    if isinstance(v, FieldContainer):
-        #        length = v.fieldlength
-        #        count = v.fieldcount
-        #        if length is not None:
-        #            rep += sprint("+", k, "(fields: %i, entries: %i)" % (count, length))
-        #        else:
-        #            rep += sprint("+", k)
-        #        if not listfields:
-        #            continue
-        #        for k2, v2 in v.items():
-        #            rep += sprint("--", k2)
-        #    else:
-        #        pass #rep += sprint("--", k)
-        #    self.data.info()
         rep += sprint("============")
         print(rep)
 
