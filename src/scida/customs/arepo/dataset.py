@@ -52,6 +52,10 @@ class ArepoSelector(Selector):
                 pnum = int(splt[1])
                 offset = offsets[pnum]
                 length = lengths[pnum]
+                if hasattr(offset, "magnitude"):  # hack for issue 59
+                    offset = offset.magnitude
+                if hasattr(length, "magnitude"):
+                    length = length.magnitude
                 for k, v in self.data_backup[p].items():
                     self.data[p][k] = v[offset : offset + length]
         snap.data = self.data
