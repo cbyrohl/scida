@@ -145,7 +145,7 @@ def test_areposnapshot_halooperation(testdata_illustrissnapshot_withcatalog):
     assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
 
 
-@require_testdata("areposnapshot_withcatalog", nmax=1)
+@require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])
 def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
     # check bound mass sums as a start

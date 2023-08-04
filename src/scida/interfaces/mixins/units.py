@@ -218,8 +218,7 @@ class UnitMixin(Mixin):
             raise ValueError("Unknown unit mode '%s'" % unitfile)
 
         # initialize unit registry
-        if unitfile != "":
-            update_unitregistry_fromdict(unitdefs, self.ureg)
+        update_unitregistry_fromdict(unitdefs, self.ureg)
         self.ureg.default_system = "cgs"
 
         # update fields with units

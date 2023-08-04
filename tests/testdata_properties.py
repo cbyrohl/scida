@@ -7,7 +7,10 @@ import yaml
 
 from scida.config import get_config
 
-silent_unavailable = False  # unav aiet tests wildataset l be constructed but skipped if true (otherwise no construct)
+# if false, testdata that is not available will be explicitly skipped
+# unav aiet tests wildataset l be constructed but skipped if true (otherwise no construct)
+silent_unavailable = os.environ.get("SCIDA_TESTDATA_SILENT_UNAVAILABLE", "TRUE")
+silent_unavailable = silent_unavailable.upper() in ["TRUE", "1"]
 
 datapath = os.path.expanduser(get_config().get("testdata_path", os.getcwd()))
 testdataskip = os.environ.get("SCIDA_TESTDATA_SKIP", "")
