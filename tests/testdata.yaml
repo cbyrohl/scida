@@ -23,6 +23,18 @@ testdata:
     types:
       - interface
     fn: "SWIFTnoncosmo_snapshot.hdf5"
+  TNG50_snapshot:
+    types:
+      - interface
+  TNG100_snapshot:
+    types:
+      - interface
+  TNG100-2_snapshot:
+    types:
+      - interface
+  TNG100-3_snapshot:
+    types:
+      - interface
   TNG50-4_snapshot:
     types:
       - interface
