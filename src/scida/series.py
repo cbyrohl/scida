@@ -128,7 +128,7 @@ class DatasetSeries(object):
             rep += sprint("=== metadata ===")
             # we print the range of each metadata attribute
             minmax_dct = {}
-            for dsid, mdct in self.metadata.items():
+            for mdct in self.metadata.values():
                 for k, v in mdct.items():
                     if k not in minmax_dct:
                         minmax_dct[k] = [v, v]
@@ -257,7 +257,7 @@ class DatasetSeries(object):
             if is_candidate:
                 candidates.append(i)
             else:  # unroll changes
-                for p, lst in candidates_props.items():
+                for lst in candidates_props.values():
                     if len(lst) > len(candidates):
                         lst.pop()
         # find candidate closest to request
@@ -331,5 +331,5 @@ class HomogeneousSeries(DatasetSeries):
     """Series consisting of same-type data sets."""
 
     def __init__(self, path, **interface_kwargs):
+        # TODO
         super().__init__()
-        pass  # TODO

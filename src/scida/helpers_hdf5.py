@@ -42,7 +42,7 @@ def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
             tree["attrs"][obj.name] = obj[()]
     elif isinstance(obj, (h5py.Group, zarr.Group)):
         tree["groups"].append(obj.name)  # continue the walk
-        for k, o in obj.items():
+        for o in obj.values():
             walk_group(o, tree, get_attrs=get_attrs)
 
 
@@ -62,6 +62,7 @@ def create_mergedhdf5file(
     fn, files, max_workers=16, virtual=True, groupwise_shape=False
 ):
     """
+    Creates a virtual hdf5 file from list of given files. Virtual by default.
 
     Parameters
     ----------
@@ -75,7 +76,6 @@ def create_mergedhdf5file(
     -------
 
     """
-    """Creates a virtual hdf5 file from list of given files. Virtual by default."""
     # first obtain all datasets and groups
     trees = [{} for i in range(len(files))]
 
@@ -182,8 +182,8 @@ def create_mergedhdf5file(
                     newshape = (totentries,) + extrashapes
                     hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
                 counters = {field: 0 for field in groupfields}
-                for k in range(len(files)):
-                    with h5py.File(files[k]) as hf_load:
+                for k, fl in enumerate(files):
+                    with h5py.File(fl) as hf_load:
                         for field in groupfields:
                             n = shapes[field].get(k, [0, 0])[0]
                             if n == 0:

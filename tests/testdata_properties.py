@@ -194,12 +194,12 @@ def get_testdata_params_ids(
 
 
 def get_params(datatype, **kwargs):
-    params, ids = get_testdata_params_ids(datatype, **kwargs)
+    params, _ = get_testdata_params_ids(datatype, **kwargs)
     return params
 
 
 def get_ids(datatype, **kwargs):
-    params, ids = get_testdata_params_ids(datatype, **kwargs)
+    _, ids = get_testdata_params_ids(datatype, **kwargs)
     return ids
 
 

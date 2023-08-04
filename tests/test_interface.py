@@ -168,10 +168,10 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     # Test unspecified fieldnames when grouping
     g2 = snp.grouped()
 
-    def customfunc(arr, fieldnames="Masses"):
+    def customfunc1(arr, fieldnames="Masses"):
         return arr[::2]
 
-    s = g2.apply(customfunc).sum()
+    s = g2.apply(customfunc1).sum()
     assert np.allclose(s.evaluate(), g.half().sum().evaluate())
 
     # Test custom dask array input
@@ -180,10 +180,10 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     assert 0.0 < boundvol2 < 1.0
 
     # Test multifield
-    def customfunc(dens, vol, fieldnames=["Density", "Masses"]):
+    def customfunc2(dens, vol, fieldnames=["Density", "Masses"]):
         return dens * vol
 
-    s = g2.apply(customfunc).sum()
+    s = g2.apply(customfunc2).sum()
     boundvol = s.evaluate().sum()
     assert np.isclose(boundvol, boundvol2)
 

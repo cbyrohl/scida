@@ -3,7 +3,6 @@ import re
 from math import pi
 
 # TODO: Switch to pint for unit consistency
-import astropy.units
 import astropy.units as u
 import dask.array as da
 import numpy as np
@@ -65,12 +64,12 @@ def test_tng_units(testdatapath):
                 print("WARNING (TODO): Field '%s' has no units." % k)
             u2 = units[pk2][k]
             mag2 = ds_nounits.data[pk1][k][0].compute()
-            if isinstance(u2, astropy.units.Quantity):
+            if isinstance(u2, u.Quantity):
                 mag2 = mag2 * u2.cgs.value
             if not np.allclose(mag1, mag2, rtol=1e-3):
                 print(pk1, k)
                 print("conversion factor from TNG docs:")
-                if isinstance(u2, astropy.units.Quantity):
+                if isinstance(u2, u.Quantity):
                     print("in cgs: ", u2.cgs)
                 else:
                     print("in cgs: ", u2)
@@ -121,7 +120,7 @@ def get_units_from_arepodocs(unitstr, codeunitdict):
             fieldentry = [s.strip() for s in line.split("|")[1:-1]]
         else:
             continue
-        name, blkid, units, desc = fieldentry
+        name, _, units, desc = fieldentry
         if " name" in name:
             typekey = typemapping[name]
             if typekey not in unittupledict:

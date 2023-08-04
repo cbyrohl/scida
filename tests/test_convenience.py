@@ -167,7 +167,7 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
 
     # count total files by walking folders without counting those
     nfiles = 0
-    for root, dirs, files in os.walk(cachedir):
+    for _, _, files in os.walk(cachedir):
         nfiles += len(files)
     assert (
         nfiles == 0
