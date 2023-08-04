@@ -150,7 +150,7 @@ def get_units_from_unittuples(unittuples, codeunitdict):
     assert "UnitVelocity_in_cm_per_s" in codeunitdict
     assert "HubbleParam" in codeunitdict
     assert "Redshift" in codeunitdict
-    cudict = {}
+    cudict = dict()
     cudict["UnitLength"] = codeunitdict["UnitLength_in_cm"] * u.cm
     cudict["UnitMass"] = codeunitdict["UnitMass_in_g"] * u.g
     cudict["UnitVelocity"] = codeunitdict["UnitVelocity_in_cm_per_s"] * u.cm / u.s
@@ -201,7 +201,7 @@ def get_units_from_TNGdocs(codeunitdict):
 
 # IllustrisTNG units from documentation (https://arepo-code.org/wp-content/userguide/snapshotformat.html, Jan 22)
 def get_unittuples_from_TNGdocs_particles():
-    uts = {}
+    uts = dict()
     # Parts0
     uts["CenterOfMass"] = [("ckpc",), ("h", -1)]
     uts["Coordinates"] = [("ckpc",), ("h", -1)]
@@ -307,7 +307,7 @@ def get_unittuples_from_TNGdocs_particles():
 
 
 def get_unittuples_from_TNGdocs_groups():
-    uts = {}
+    uts = dict()
     uts["GroupBHMass"] = [(10, 10), ("Msun",), ("h", -1)]
     uts["GroupBHMdot"] = uts["GroupBHMass"] + [(0.978, -1), ("Gyr", -1), ("h", 1)]
     uts["GroupCM"] = [("ckpc",), ("h", -1)]
@@ -337,7 +337,7 @@ def get_unittuples_from_TNGdocs_groups():
 
 
 def get_unittuples_from_TNGdocs_subhalos():
-    uts = {}
+    uts = dict()
     uts["SubhaloFlag"] = []
     uts["SubhaloBHMass"] = [(10, 10), ("Msun",), ("h", -1)]
     uts["SubhaloBHMdot"] = uts["SubhaloBHMass"] + [(0.978, -1), ("Gyr", -1), ("h", 1)]
