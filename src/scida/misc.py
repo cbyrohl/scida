@@ -181,7 +181,7 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique=True):
     return candidates
 
 
-def deepdictkeycopy(olddict, newdict) -> None:
+def deepdictkeycopy(olddict: object, newdict: object) -> None:
     """
     Recursively walk nested dictionary, only creating empty dictionaries for entries that are dictionaries themselves.
     Parameters
@@ -193,7 +193,8 @@ def deepdictkeycopy(olddict, newdict) -> None:
     -------
 
     """
+    cls = olddict.__class__
     for k, v in olddict.items():
         if isinstance(v, MutableMapping):
-            newdict[k] = {}
+            newdict[k] = cls()
             deepdictkeycopy(v, newdict[k])

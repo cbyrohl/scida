@@ -52,6 +52,7 @@ memray = "^1.6.0"
 mkdocs-video = "^1.4.0"
 jupyter-contrib-nbextensions = "^0.7.0"
 typer = "^0.9.0"
+dask-jobqueue = "^0.8.2"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]

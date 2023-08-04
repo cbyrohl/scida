@@ -78,6 +78,12 @@ class FieldContainer(MutableMapping):
         self.internals = ["uid"]  # names of internal fields/groups
         self.parent = parent
 
+    def copy_skeleton(self) -> FieldContainer:
+        res = FieldContainer()
+        for k, cntr in self._containers.items():
+            res[k] = cntr.copy_skeleton()
+        return res
+
     def info(self, level=0, name: Optional[str] = None) -> str:
         rep = ""
         length = self.fieldlength
@@ -148,25 +154,29 @@ class FieldContainer(MutableMapping):
         self, withgroups=True, withrecipes=True, withinternal=False, withfields=True
     ):
         fieldkeys = []
+        recipekeys = []
         if withfields:
             fieldkeys = list(self._fields.keys())
             if not withinternal:
                 for ikey in self.internals:
                     if ikey in fieldkeys:
                         fieldkeys.remove(ikey)
-            if withrecipes:
-                recipekeys = self._fieldrecipes.keys()
-                fieldkeys = list(set(fieldkeys) | set(recipekeys))
+        if withrecipes:
+            recipekeys = self._fieldrecipes.keys()
+        fieldkeys = list(set(fieldkeys) | set(recipekeys))
         if withgroups:
             groupkeys = self._containers.keys()
             fieldkeys = list(set(fieldkeys) | set(groupkeys))
         return sorted(fieldkeys)
 
-    def items(self):
-        return ((k, self._getitem(k, evaluate_recipe=True)) for k in self.keys())
+    def items(self, withrecipes=True, withfields=True, evaluate=True):
+        return (
+            (k, self._getitem(k, evaluate_recipe=evaluate))
+            for k in self.keys(withrecipes=withrecipes, withfields=withfields)
+        )
 
-    def values(self):
-        return (self._getitem(k, evaluate_recipe=True) for k in self.keys())
+    def values(self, evaluate=True):
+        return (self._getitem(k, evaluate_recipe=evaluate) for k in self.keys())
 
     def register_field(
         self,
@@ -206,6 +216,8 @@ class FieldContainer(MutableMapping):
             key = self.aliases[key]
         if isinstance(value, FieldContainer):
             self._containers[key] = value
+        elif isinstance(value, DerivedFieldRecipe):
+            self._fieldrecipes[key] = value
         else:
             self._fields[key] = value
 

@@ -667,13 +667,16 @@ def compute_haloindex(gidx, halocelloffsets, *args):
 
 def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     """Computes a halo quantity for each particle with dask."""
+    units = None
+    if hasattr(hvals, "units"):
+        units = hvals.units
     res = map_blocks(
         get_haloquantity_daskwrap,
         gidx,
         halocelloffsets,
         hvals,
         meta=np.array((), dtype=hvals.dtype),
-        output_units=hvals.units,
+        output_units=units,
     )
     return res
 
