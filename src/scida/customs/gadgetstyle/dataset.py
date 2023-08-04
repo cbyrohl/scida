@@ -16,7 +16,7 @@ class GadgetStyleSnapshot(Dataset):
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
         """We define gadget-style snapshots as nbody/hydrodynamical simulation snapshots that follow
         the common /PartType0, /PartType1 grouping scheme."""
-        self.boxsize = np.full(3, np.nan)
+        self.boxsize = np.nan
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
         defaultattributes = ["config", "header", "parameters"]

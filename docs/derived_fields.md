@@ -9,9 +9,9 @@ There are two ways to create new derived fields. For quick analysis, we can simp
 
 ``` py
 from scida import load
-ds = load("somedataset") # (1)!
+ds = load("TNG50-4_snapshot") # (1)!
 gas = ds.data['gas']
-kineticenergy = 0.5*gas['Masses']*gas['Velocities']**2
+kineticenergy = 0.5*gas['Masses']*(gas['Velocities']**2).sum(axis=1)
 ```
 
 1.  In this example, we assume a dataset, such as the 'TNG50\_snapshot' test data set, that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
@@ -33,15 +33,16 @@ For this purpose, **field recipes** are available. An example of such recipe is 
 
 
 ``` py
-import dask.array as da
+import numpy as np
 
 from scida import load
-ds = load("somedataset")
+ds = load("TNG50-4_snapshot")
 
-@snap.register_field("stars")  # (1)!
+@ds.register_field("stars")  # (1)!
 def VelMag(arrs, **kwargs):
+    import dask.array as da
     vel = arrs['Velocities']
-    return np.sqrt( vel[:,0]**2 + vel[:,1]**2 + vel[:,2]**2 )
+    return da.sqrt(vel[:,0]**2 + vel[:,1]**2 + vel[:,2]**2)
 ```
 
 1.  Here, *stars* is the name of the **field container** the field should be added to. The field will now be available as ds\['stars'\]\['VelMag'\]
@@ -69,7 +70,24 @@ def Volume(arrs, **kwargs):
     return arrs["Masses"]/arrs["Density"]
 
 @fielddefs.register_field("all") # (3)!
+def GroupDistance3D(arrs, snap=None):
+    """Returns distance to hosting group center. Returns rubbish if not actually associated with a group."""
+    import dask.array as da
+    boxsize = snap.header["BoxSize"]
+    pos_part = arrs["Coordinates"]
+    groupid = arrs["GroupID"]
+    if hasattr(groupid, "magnitude"):
+        groupid = groupid.magnitude
+        boxsize *= snap.ureg("code_length")
+    pos_cat = snap.data["Group"]["GroupPos"][groupid]
+    dist3 = pos_part-pos_cat
+    dist3 = da.where(dist3>boxsize/2.0, boxsize-dist3, dist3)
+    dist3 = da.where(dist3<=-boxsize/2.0, boxsize+dist3, dist3) # PBC
+    return dist3
+
+@fielddefs.register_field("all")
 def GroupDistance(arrs, snap=None):
+    import dask.array as da
     dist3 = arrs["GroupDistance3D"]
     dist = da.sqrt((dist3**2).sum(axis=1))
     dist = da.where(arrs["GroupID"]==-1, np.nan, dist) # set unbound gas to nan
@@ -83,7 +101,7 @@ def GroupDistance(arrs, snap=None):
 Finally, we just need to import the *fielddefs* object (if we have defined it in another file) and merge them with a dataset that we loaded:
 
 ``` py
-ds = load("snapshot")
+ds = load("TNG50-4_snapshot")
 ds.data.merge(fielddefs)
 ```
 

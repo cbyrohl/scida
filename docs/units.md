@@ -2,7 +2,7 @@
 
 ## Loading data with units
 
-Loading data sets with 
+Loading data sets with
 
 ``` py
 from scida import load
@@ -16,6 +16,7 @@ Units are introduced via the [pint](https://pint.readthedocs.io/en/stable/) pack
 
 
 ``` pycon
+>>> gas = ds.data["PartType0"]
 >>> gas["Coordinates"]
 dask.array<mul, shape=(18540104, 3), dtype=float64, chunksize=(5592405, 3), chunktype=numpy.ndarray> <Unit('code_length')>
 ```
@@ -34,7 +35,7 @@ We can change units for evaluation as desired:
 
 ``` pycon
 >>> coords = gas["Coordinates"]
->>> coords.to("cm") 
+>>> coords.to("cm")
 >>> # here the default system is cgs, thus we get the same result from
 >>> coords.to_base_units()
 dask.array<mul, shape=(18540104, 3), dtype=float64, chunksize=(5592405, 3), chunktype=numpy.ndarray> <Unit('centimeter')>
@@ -76,5 +77,3 @@ dask.array<mul, shape=(18540104,), dtype=float64, chunksize=(18540104,), chunkty
 >>> coords.to("halfmeter")[0].compute()
 array([6.64064027e+23, 2.23858253e+24, 1.94176712e+24]) <Unit('halfmeter')>
 ```
-
-
