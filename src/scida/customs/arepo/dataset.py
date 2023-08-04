@@ -32,15 +32,47 @@ log = logging.getLogger(__name__)
 class ArepoSelector(Selector):
     def __init__(self) -> None:
         super().__init__()
-        self.keys = ["haloID"]
+        self.keys = ["haloID", "unbound"]
 
     def prepare(self, *args, **kwargs) -> None:
         snap = args[0]
+        halo_id = kwargs.get("haloID", None)
+        unbound = kwargs.get("unbound", None)
+        if halo_id is None and unbound is None:
+            return
+        elif unbound is True and halo_id is not None:
+            raise ValueError(
+                "Cannot select for haloID and unbound particles at the same time."
+            )
         if snap.catalog is None:
             raise ValueError("Cannot select for haloID without catalog loaded.")
-        halo_id = kwargs.get("haloID", None)
-        if halo_id is None:
-            return
+
+        # select for halo
+        if halo_id is not None:
+            self.select_halo(snap, halo_id)
+        elif unbound is True:
+            self.select_unbound(snap)
+
+    def select_unbound(self, snap):
+        lengths = self.data_backup["Group"]["GroupLenType"][-1, :].compute()
+        offsets = self.data_backup["Group"]["GroupOffsetsType"][-1, :].compute()
+        # for unbound gas, we start after the last halo particles
+        offsets = offsets + lengths
+        for p in self.data_backup:
+            splt = p.split("PartType")
+            if len(splt) == 1:
+                for k, v in self.data_backup[p].items():
+                    self.data[p][k] = v
+            else:
+                pnum = int(splt[1])
+                offset = offsets[pnum]
+                if hasattr(offset, "magnitude"):  # hack for issue 59
+                    offset = offset.magnitude
+                for k, v in self.data_backup[p].items():
+                    self.data[p][k] = v[offset:-1]
+        snap.data = self.data
+
+    def select_halo(self, snap, halo_id):
         lengths = self.data_backup["Group"]["GroupLenType"][halo_id, :].compute()
         offsets = self.data_backup["Group"]["GroupOffsetsType"][halo_id, :].compute()
         for p in self.data_backup:
