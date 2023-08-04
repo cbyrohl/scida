@@ -494,6 +494,29 @@ class ArepoCatalog(ArepoSnapshot):
         return valid
 
 
+class ChainOps:
+    def __init__(self, *funcs):
+        self.funcs = funcs
+        self.kwargs = get_kwargs(
+            funcs[-1]
+        )  # so we can pass info from kwargs to map_halo_operation
+
+        def chained_call(*args):
+            cf = None
+            for i, f in enumerate(funcs):
+                # first chain element can be multiple fields. treat separately
+                if i == 0:
+                    cf = f(*args)
+                else:
+                    cf = f(cf)
+            return cf
+
+        self.call = chained_call
+
+    def __call__(self, *args, **kwargs):
+        return self.call(*args, **kwargs)
+
+
 class GroupAwareOperation:
     opfuncs = dict(min=np.min, max=np.max, sum=np.sum, half=lambda x: x[::2])
     finalops = {"min", "max", "sum"}
@@ -570,20 +593,7 @@ class GroupAwareOperation:
         funcdict.update(**self.opfuncs)
         funcdict.update(**self.opfuncs_custom)
 
-        def chainops(*funcs):
-            def chained_call(*args):
-                cf = None
-                for i, f in enumerate(funcs):
-                    # first chain element can be multiple fields. treat separately
-                    if i == 0:
-                        cf = f(*args)
-                    else:
-                        cf = f(cf)
-                return cf
-
-            return chained_call
-
-        func = chainops(*[funcdict[k] for k in self.ops])
+        func = ChainOps(*[funcdict[k] for k in self.ops])
 
         fieldnames = list(self.arrs.keys())
         if self.inputfields is None:
@@ -972,7 +982,10 @@ def map_halo_operation(
             '"chunksize" parameter is depreciated and has no effect. Specify Nmin for control.',
             DeprecationWarning,
         )
-    dfltkwargs = get_kwargs(func)
+    if isinstance(func, ChainOps):
+        dfltkwargs = func.kwargs
+    else:
+        dfltkwargs = get_kwargs(func)
     if fieldnames is None:
         fieldnames = dfltkwargs.get("fieldnames", None)
     if fieldnames is None:
