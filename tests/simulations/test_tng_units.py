@@ -120,7 +120,7 @@ def get_units_from_arepodocs(unitstr, codeunitdict):
             fieldentry = [s.strip() for s in line.split("|")[1:-1]]
         else:
             continue
-        name, _, units, desc = fieldentry
+        name, _, units, _ = fieldentry
         if " name" in name:
             typekey = typemapping[name]
             if typekey not in unittupledict:
