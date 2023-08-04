@@ -11,6 +11,8 @@ from scida.customs.gizmo.series import GizmoSimulation
 from scida.customs.rockstar.dataset import RockstarCatalog
 from scida.discovertypes import _determine_type, _determine_type_from_simconfig
 from scida.interface import Dataset
+from scida.io import load_metadata
+from scida.misc import check_config_for_dataset
 from scida.series import DatasetSeries
 from tests.testdata_properties import require_testdata_path
 
@@ -131,3 +133,38 @@ def check_type(
         assert issubclass(cls, cls_intended)
     else:
         assert cls == cls_intended
+
+
+@require_testdata_path("interface")
+def test_simconf_detection(testdatapath):
+    metadata_raw = load_metadata(testdatapath, fileprefix=None)
+    tp = check_config_for_dataset(metadata_raw, path=testdatapath, unique=True)
+    if "TNG50-1" in testdatapath:
+        assert tp[0] == "TNG50"
+    elif "TNG50-2" in testdatapath:
+        assert tp[0] == "TNG50-2"
+    elif "TNG50-3" in testdatapath:
+        assert tp[0] == "TNG50-3"
+    if "TNG50-4" in testdatapath:
+        assert tp[0] == "TNG50-4"
+    elif "TNG100-1" in testdatapath:
+        assert tp[0] == "TNG100-1"
+    elif "TNG100-2" in testdatapath:
+        assert tp[0] == "TNG100-2"
+    elif "TNG100-3" in testdatapath:
+        assert tp[0] == "TNG100-3"
+    elif "TNG300-1" in testdatapath:
+        assert tp[0] == "TNG300-1"
+    elif "TNG300-2" in testdatapath:
+        assert tp[0] == "TNG300-2"
+    elif "TNG300-3" in testdatapath:
+        assert tp[0] == "TNG300-3"
+    elif "TNGCluster" in testdatapath:
+        assert tp[0] == "TNGCluster"
+    elif "gaia-dr3" in testdatapath:
+        assert tp[0] == "gaia-dr3"
+    elif "FIRE2" in testdatapath:
+        assert tp[0] == "FIRE2"
+    else:
+        pass  # no special type here.
+    # print(testdatapath, tp)

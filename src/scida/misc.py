@@ -119,8 +119,22 @@ def rectangular_cutout_mask(
     return mask
 
 
-def check_config_for_dataset(metadata, path: Optional[str] = None, unique=True):
-    """Check whether the given dataset can be identified to be a certain simulation (type) by its metadata"""
+def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool = True):
+    """
+    Check whether the given dataset can be identified to be a certain simulation (type) by its metadata.
+    Parameters
+    ----------
+    metadata: dict
+        metadata of the dataset used for identification
+    path: str
+        path to the dataset, sometimes helpful for identification
+    unique: bool
+        whether to expect return to be unique
+
+    Returns
+    -------
+
+    """
     c = get_simulationconfig()
 
     candidates = []
