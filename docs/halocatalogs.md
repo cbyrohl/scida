@@ -7,7 +7,7 @@ Currently, we support the usual FOF/Subfind combination and format. Their presen
 
 ``` py
 from scida import load
-ds = load("snapshot") # (1)!
+ds = load("TNG50-4_snapshot") # (1)!
 ```
 
 1.  In this example, we assume a dataset, such as the 'TNG50\_snapshot' test data set, that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
