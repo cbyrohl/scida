@@ -23,7 +23,7 @@ class RecursiveNamespace(types.SimpleNamespace):
 
     def __elt(self, elt):
         """Recurse into elt to create leaf namespace objects"""
-        if type(elt) is dict:
+        if isinstance(elt, dict):
             return type(self)(**elt)
         if type(elt) in (list, tuple):
             return [self.__elt(i) for i in elt]

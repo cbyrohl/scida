@@ -65,10 +65,10 @@ def extract_units_from_attrs(
     udict["time"] = str_to_unit("s", ureg)
     if mode == "mks":
         raise NotImplementedError("TBD.")
-        udict["length"] = str_to_unit("m", ureg)
-        udict["mass"] = str_to_unit("kg", ureg)
-        udict["velocity"] = str_to_unit("m/s", ureg)
-        udict["time"] = str_to_unit("s", ureg)
+        # udict["length"] = str_to_unit("m", ureg)
+        # udict["mass"] = str_to_unit("kg", ureg)
+        # udict["velocity"] = str_to_unit("m/s", ureg)
+        # udict["time"] = str_to_unit("s", ureg)
     if mode == "code":
         for k in ["length", "mass", "velocity", "time"]:
             cstr = "code_" + k

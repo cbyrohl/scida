@@ -271,7 +271,7 @@ def load_datadict_old(
     """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
     # TODO: Refactor and rename
     inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
-    if type(file) == h5py._hl.files.File:
+    if isinstance(file, h5py.File):
         inline_array = False
 
     data = {}

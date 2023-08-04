@@ -3,7 +3,6 @@ import re
 from math import pi
 
 # TODO: Switch to pint for unit consistency
-import astropy.units
 import astropy.units as u
 import dask.array as da
 import numpy as np
@@ -65,12 +64,12 @@ def test_tng_units(testdatapath):
                 print("WARNING (TODO): Field '%s' has no units." % k)
             u2 = units[pk2][k]
             mag2 = ds_nounits.data[pk1][k][0].compute()
-            if isinstance(u2, astropy.units.Quantity):
+            if isinstance(u2, u.Quantity):
                 mag2 = mag2 * u2.cgs.value
             if not np.allclose(mag1, mag2, rtol=1e-3):
                 print(pk1, k)
                 print("conversion factor from TNG docs:")
-                if isinstance(u2, astropy.units.Quantity):
+                if isinstance(u2, u.Quantity):
                     print("in cgs: ", u2.cgs)
                 else:
                     print("in cgs: ", u2)
@@ -121,7 +120,7 @@ def get_units_from_arepodocs(unitstr, codeunitdict):
             fieldentry = [s.strip() for s in line.split("|")[1:-1]]
         else:
             continue
-        name, blkid, units, desc = fieldentry
+        name, _, units, _ = fieldentry
         if " name" in name:
             typekey = typemapping[name]
             if typekey not in unittupledict:
@@ -151,7 +150,7 @@ def get_units_from_unittuples(unittuples, codeunitdict):
     assert "UnitVelocity_in_cm_per_s" in codeunitdict
     assert "HubbleParam" in codeunitdict
     assert "Redshift" in codeunitdict
-    cudict = {}
+    cudict = dict()
     cudict["UnitLength"] = codeunitdict["UnitLength_in_cm"] * u.cm
     cudict["UnitMass"] = codeunitdict["UnitMass_in_g"] * u.g
     cudict["UnitVelocity"] = codeunitdict["UnitVelocity_in_cm_per_s"] * u.cm / u.s
@@ -202,7 +201,7 @@ def get_units_from_TNGdocs(codeunitdict):
 
 # IllustrisTNG units from documentation (https://arepo-code.org/wp-content/userguide/snapshotformat.html, Jan 22)
 def get_unittuples_from_TNGdocs_particles():
-    uts = {}
+    uts = dict()
     # Parts0
     uts["CenterOfMass"] = [("ckpc",), ("h", -1)]
     uts["Coordinates"] = [("ckpc",), ("h", -1)]
@@ -308,7 +307,7 @@ def get_unittuples_from_TNGdocs_particles():
 
 
 def get_unittuples_from_TNGdocs_groups():
-    uts = {}
+    uts = dict()
     uts["GroupBHMass"] = [(10, 10), ("Msun",), ("h", -1)]
     uts["GroupBHMdot"] = uts["GroupBHMass"] + [(0.978, -1), ("Gyr", -1), ("h", 1)]
     uts["GroupCM"] = [("ckpc",), ("h", -1)]
@@ -338,7 +337,7 @@ def get_unittuples_from_TNGdocs_groups():
 
 
 def get_unittuples_from_TNGdocs_subhalos():
-    uts = {}
+    uts = dict()
     uts["SubhaloFlag"] = []
     uts["SubhaloBHMass"] = [(10, 10), ("Msun",), ("h", -1)]
     uts["SubhaloBHMdot"] = uts["SubhaloBHMass"] + [(0.978, -1), ("Gyr", -1), ("h", 1)]
