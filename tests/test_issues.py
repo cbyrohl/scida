@@ -12,3 +12,15 @@ def test_issue_59(testdatapath):
     # in the Selector
     obj = load(testdatapath, units=True)
     _ = obj.return_data(haloID=42)
+
+
+@require_testdata_path("interface", only=["TNG100-3_snapshot_z0_minimal"])
+def test_issue_63(testdatapath):
+    ds = load(testdatapath, units=True)
+
+    gas = ds.data["PartType0"]
+    coords = gas["Coordinates"]
+    assert coords.to_base_units().units == ds.ureg("centimeter")
+    grp = ds.data["Group"]
+    coords = grp["GroupPos"]
+    assert coords.to_base_units().units == ds.ureg("centimeter")
