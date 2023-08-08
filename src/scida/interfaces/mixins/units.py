@@ -252,7 +252,17 @@ class UnitMixin(Mixin):
                 return  # no units for this container
             if gfwu is None:
                 gfwu = {}  # marginal case where no fields are given
-            for k in sorted(container.keys(withgroups=False)):
+            keys = sorted(
+                container.keys(withfields=False, withrecipes=True, withgroups=False)
+            )
+            nrecipes = len(keys)
+            keys += sorted(
+                container.keys(withfields=True, withrecipes=False, withgroups=False)
+            )
+            recipe_mask = np.zeros(len(keys), dtype=bool)
+            recipe_mask[:nrecipes] = True
+            for i, k in enumerate(keys):
+                is_recipe = recipe_mask[i]
                 path = basepath + "/" + k
                 unit = None
                 if basepath == "/":
@@ -345,11 +355,15 @@ class UnitMixin(Mixin):
                     # we treat recipes separately so that they stay recipes
                     # this is important due to the following memory issue for now:
                     # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
-                    if k not in container._fields and k in container._fieldrecipes:
+                    if is_recipe:
                         container._fieldrecipes[k].units = unit
                         # TODO: Add cgs conversion for recipes, see else-statement.
                     else:
-                        container[k] = unit * container[k]
+                        if isinstance(container[k], pint.Quantity):
+                            log.debug("Field %s already has units, overwriting." % k)
+                            container[k] = container[k].magnitude * unit
+                        else:
+                            container[k] = unit * container[k]
                         if units == "cgs" and isinstance(container[k], pint.Quantity):
                             container[k] = container[k].to_base_units()
 
