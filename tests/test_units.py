@@ -45,6 +45,9 @@ def test_load_codeunits(testdatapath):
     # we know that TNG uses u.Msun/yr for SFR
     assert sfr.units == u.Msun / u.yr
 
+    # assert that IDs are not pint quantities
+    assert not hasattr(gas["ParticleIDs"], "units")
+
 
 def test_update_unitregistry():
     # update fields with units
@@ -83,3 +86,12 @@ def test_missingunits(monkeypatch, tmp_path, caplog):
     get_config(reload=True)
     load(str(p), units=True)
     assert "Cannot determine units" in caplog.text
+
+
+def test_misc():
+    ureg = UnitRegistry()
+    print(ureg("dimensionless"))
+    ureg.define("unknown = 1.0")
+    a = 1.0 * ureg("unknown")
+    print(a.dimensionality)
+    print(ureg("unknown"))

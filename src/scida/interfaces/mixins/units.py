@@ -1,6 +1,6 @@
 import contextlib
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pint
@@ -14,7 +14,9 @@ from scida.interfaces.mixins.base import Mixin
 log = logging.getLogger(__name__)
 
 
-def str_to_unit(unitstr: Optional[str], ureg: pint.UnitRegistry) -> pint.Unit:
+def str_to_unit(
+    unitstr: Optional[str], ureg: pint.UnitRegistry
+) -> Union[pint.Unit, str]:
     """
     Convert a string to a unit.
     Parameters
@@ -31,6 +33,8 @@ def str_to_unit(unitstr: Optional[str], ureg: pint.UnitRegistry) -> pint.Unit:
     """
     if unitstr is not None:
         unitstr = unitstr.replace("dex", "decade")
+        if unitstr.lower() == "none":
+            return "none"
     return ureg(unitstr)
 
 
@@ -174,6 +178,12 @@ def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry, warn_redef=Fal
             ureg.load_definitions(ulist)
 
 
+def new_unitregistry() -> UnitRegistry:
+    ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
+    ureg.define("unknown = 1.0")
+    return ureg
+
+
 def update_unitregistry(filepath: str, ureg: UnitRegistry):
     conf = get_config_fromfile(filepath).get("units", {})
     update_unitregistry_fromdict(conf, ureg)
@@ -187,7 +197,8 @@ class UnitMixin(Mixin):
 
         ureg = kwargs.pop("ureg", None)
         if ureg is None:
-            ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
+            ureg = new_unitregistry()
+
         self.ureg = self.unitregistry = ureg
 
         super().__init__(*args, **kwargs)
@@ -288,7 +299,7 @@ class UnitMixin(Mixin):
                         print("Hint: Did you pass a unit file? Is it complete?")
                         raise ValueError("Could not find units for '%s'" % path)
 
-                if unit is not None and unit_metadata is not None:
+                if (unit is not None and unit != "none") and unit_metadata is not None:
                     # check whether both metadata and unit file agree
                     val_cgs_uf = unit.to_base_units().magnitude
                     val_cgs_md = unit_metadata.to_base_units().magnitude
@@ -311,7 +322,7 @@ class UnitMixin(Mixin):
 
                 # if we still don't have a unit, we raise/warn as needed
                 if unit is None:
-                    unit = ureg("")
+                    unit = ureg("unknown")
                     msg = (
                         "Cannot determine units from neither unit file nor metadata for '%s'."
                         % path
@@ -328,18 +339,19 @@ class UnitMixin(Mixin):
                     if p not in udict:
                         udict[p] = {}
                     udict = udict[p]
-                udict[k] = unit
-                # redefine dask arrays with units
-                # we treat recipes separately so that they stay recipes
-                # this is important due to the following memory issue for now:
-                # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
-                if k not in container._fields and k in container._fieldrecipes:
-                    container._fieldrecipes[k].units = unit
-                    # TODO: Add cgs conversion for recipes, see else-statement.
-                else:
-                    container[k] = unit * container[k]
-                    if units == "cgs" and isinstance(container[k], pint.Quantity):
-                        container[k] = container[k].to_base_units()
+                if unit != "none":
+                    udict[k] = unit
+                    # redefine dask arrays with units
+                    # we treat recipes separately so that they stay recipes
+                    # this is important due to the following memory issue for now:
+                    # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
+                    if k not in container._fields and k in container._fieldrecipes:
+                        container._fieldrecipes[k].units = unit
+                        # TODO: Add cgs conversion for recipes, see else-statement.
+                    else:
+                        container[k] = unit * container[k]
+                        if units == "cgs" and isinstance(container[k], pint.Quantity):
+                            container[k] = container[k].to_base_units()
 
         # fwu = unithints.get("fields", {})
         # for ptype in sorted(self.data):
