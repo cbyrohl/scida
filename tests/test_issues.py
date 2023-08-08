@@ -1,9 +1,8 @@
 # tests for gh issues. to be cleaned up and moved to the right place eventually
 import pathlib
 
-from helpers import write_gadget_testfile
-
 from scida import load
+from tests.helpers import write_gadget_testfile
 from tests.testdata_properties import require_testdata_path
 
 
