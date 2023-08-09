@@ -195,11 +195,22 @@ testdata:
     types:
       - interface
     fn: "minimal_FIRE2_snapshot_z1.hdf5"
+
   FIRE2_series_minimal:
     types:
       - series
       - areposimulation
     fn: "minimal_FIRE2_simulation"
+
+  LGal21_z3_minimal:
+    types:
+      - interface
+    fn: "minimal_LGal21_z3.hdf5"
+
+  LGal21_snapshot_z3:
+    types:
+      - interface
+    fn: "LGal_Ayromlou2021_snap33.hdf5"
 
   rockstar_halo:
     types:

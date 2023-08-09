@@ -1,0 +1,69 @@
+metadata_unitsystem: cgs
+units:
+  # h: 0.6774 hubble factor, needs to be set by snapshot
+  # a: 1.0 # scale factor, needs to be set by snapshot
+  ckpc: a * kpc
+  code_length: ckpc / h
+  code_velocity: km / s
+  code_mass: 1e10 * Msun / h
+  code_time: 0.978 * Gyr
+  code_pressure: (code_mass / code_length) / code_time^2
+fields:
+  Galaxy:
+    BulgeSize:
+    Central_M_Crit200:
+    Central_R_Crit200:
+    ColdGasMass:
+    CoolingRadius:
+    CoolingRate:
+    CoolingRate_beforeAGN:
+    CosInclination:
+    DisruptOn:
+    DistanceToCentralGal:
+    EjectedMass:
+    GasDiskRadius:
+    H2fraction:
+    HaloIndex:
+    HaloSpin:
+    HaloStellarMass:
+    HotGasMass:
+    HotGasRadius:
+    InfallHotGasMass:
+    InfallSnap:
+    InfallVmax:
+    InfallVmaxPeak:
+    LookBackTimeToSnap:
+    M_Crit200:
+    Mag:
+    MagBulge:
+    MagDust:
+    MassWeightAge:
+    MergTime:
+    MergeOn:
+    OriMergTime:
+    Pos:
+    PrimordialAccretionRate:
+    QuasarAccretionRate:
+    R_Crit200:
+    RadioAccretionRate:
+    Redshift:
+    SnapNum:
+    StarFormationRate:
+    StarFormationRateBulge:
+    StellarBulgeMass:
+    StellarDiskMass:
+    StellarDiskRadius:
+    StellarHalfLightRadius:
+    StellarHalfMassRadius:
+    StellarMass:
+    SuhaloLen:
+    Type:
+    Vel:
+    Vel_LBE:
+    Vmax:
+    Vvir:
+    XrayLum:
+    rBandWeightAge:
+    rho_LBE_Gas:
+    rho_LBE_Total:
+    BlackHoleMass:

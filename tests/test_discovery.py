@@ -165,6 +165,8 @@ def test_simconf_detection(testdatapath):
         assert tp[0] == "gaia-dr3"
     elif "FIRE2" in testdatapath:
         assert tp[0] == "FIRE2"
+    elif "LGal" in testdatapath:
+        assert tp[0] == "LGalaxies"
     else:
         pass  # no special type here.
     # print(testdatapath, tp)
