@@ -308,8 +308,10 @@ class UnitMixin(Mixin):
                             raise e
                         print("Hint: Did you pass a unit file? Is it complete?")
                         raise ValueError("Could not find units for '%s'" % path)
-
-                if (unit is not None and unit != "none") and unit_metadata is not None:
+                without_units = isinstance(unit, str) and unit == "none"
+                if (
+                    unit is not None and not without_units
+                ) and unit_metadata is not None:
                     # check whether both metadata and unit file agree
                     val_cgs_uf = unit.to_base_units().magnitude
                     val_cgs_md = unit_metadata.to_base_units().magnitude
@@ -349,7 +351,8 @@ class UnitMixin(Mixin):
                     if p not in udict:
                         udict[p] = {}
                     udict = udict[p]
-                if unit != "none":
+                without_units = isinstance(unit, str) and unit == "none"
+                if not without_units:
                     udict[k] = unit
                     # redefine dask arrays with units
                     # we treat recipes separately so that they stay recipes
