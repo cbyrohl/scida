@@ -319,13 +319,12 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             return
 
         glen = self.data["Group"]["GroupLenType"]
-        da_halocelloffsets = (
-            da.concatenate(  # TODO: Do not hardcode shape of 6 particle types!
-                [
-                    np.zeros((1, 6), dtype=np.int64),
-                    da.cumsum(glen, axis=0, dtype=np.int64),
-                ]
-            )
+        ngrp = glen.shape[0]
+        da_halocelloffsets = da.concatenate(
+            [
+                np.zeros((1, 6), dtype=np.int64),
+                da.cumsum(glen, axis=0, dtype=np.int64),
+            ]
         )
         # remove last entry to match shapematch shape
         self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(
@@ -370,24 +369,48 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         if hasattr(subhalocellcounts, "magnitude"):
             subhalocellcounts = subhalocellcounts.magnitude
 
+        grp = self.data["Group"]
+        if "GroupFirstSub" not in grp or "GroupNsubs" not in grp:
+            # if not provided, we calculate:
+            # "GroupFirstSub": First subhalo index for each halo
+            # "GroupNsubs": Number of subhalos for each halo
+            dlyd = delayed(get_shcounts_shcells)(subhalogrnr, ngrp)
+            grp["GroupFirstSub"] = dask.compute(dlyd[1])[0]
+            grp["GroupNsubs"] = dask.compute(dlyd[0])[0]
+
+        # remove "units" for numba funcs
+        grpfirstsub = grp["GroupFirstSub"]
+        if hasattr(grpfirstsub, "magnitude"):
+            grpfirstsub = grpfirstsub.magnitude
+        grpnsubs = grp["GroupNsubs"]
+        if hasattr(grpnsubs, "magnitude"):
+            grpnsubs = grpnsubs.magnitude
+
         for key in self.data:
             if not (key.startswith("PartType")):
                 continue
             num = int(key[-1])
+            pdata = self.data[key]
             if "uid" not in self.data[key]:
                 continue  # can happen for empty containers
-            gidx = self.data[key]["uid"]
-            dlyd = delayed(get_shcounts_shcells)(
-                subhalogrnr, halocelloffsets[:, num].shape[0]
-            )
-            sidx = compute_subhaloindex(
+            gidx = pdata["uid"]
+
+            sidx = compute_localsubhaloindex(
                 gidx,
                 halocelloffsets[:, num],
-                dlyd[1],
-                dlyd[0],
+                grpfirstsub,
+                grpnsubs,
                 subhalocellcounts[:, num],
             )
-            self.data[key]["SubhaloID"] = sidx
+
+            pdata["LocalSubhaloID"] = sidx
+
+            # reconstruct SubhaloID from Group's GroupFirstSub and LocalSubhaloID
+            # should be easier to do it directly, but quicker to write down like this:
+
+            # calculate first subhalo of each halo that a particle belongs to
+            self.add_groupquantity_to_particles("GroupFirstSub", parttype=key)
+            pdata["SubhaloID"] = pdata["GroupFirstSub"] + pdata["LocalSubhaloID"]
 
     @computedecorator
     def map_halo_operation(
@@ -714,7 +737,7 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
 
 
 @jit(nopython=True)
-def get_shidx(
+def get_localshidx(
     gidx_start: int,
     gidx_count: int,
     celloffsets: NDArray[np.int64],
@@ -722,6 +745,23 @@ def get_shidx(
     shcounts,
     shcellcounts,
 ):
+    """
+    Get the local subhalo index for each particle. This is the subhalo index within each
+    halo group. Particles belonging to the central galaxies will have index 0, particles
+    belonging to the first satellite will have index 1, etc.
+    Parameters
+    ----------
+    gidx_start
+    gidx_count
+    celloffsets
+    shnumber
+    shcounts
+    shcellcounts
+
+    Returns
+    -------
+
+    """
     res = -1 * np.ones(gidx_count, dtype=np.int32)  # fuzz has negative index.
 
     # find initial Group we are in
@@ -785,7 +825,7 @@ def get_shidx(
     return res
 
 
-def get_shidx_daskwrap(
+def get_local_shidx_daskwrap(
     gidx: NDArray[np.int64],
     halocelloffsets: NDArray[np.int64],
     shnumber,
@@ -794,16 +834,16 @@ def get_shidx_daskwrap(
 ) -> np.ndarray:
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
-    return get_shidx(
+    return get_localshidx(
         gidx_start, gidx_count, halocelloffsets, shnumber, shcounts, shcellcounts
     )
 
 
-def compute_subhaloindex(
+def compute_localsubhaloindex(
     gidx, halocelloffsets, shnumber, shcounts, shcellcounts
 ) -> da.Array:
     return da.map_blocks(
-        get_shidx_daskwrap,
+        get_local_shidx_daskwrap,
         gidx,
         halocelloffsets,
         shnumber,
@@ -815,11 +855,22 @@ def compute_subhaloindex(
 
 @jit(nopython=True)
 def get_shcounts_shcells(SubhaloGrNr, hlength):
-    """Returns the number offset and count of subhalos per halo."""
-    shcounts = np.zeros(hlength, dtype=np.int32)
-    shnumber = np.zeros(hlength, dtype=np.int32)
+    """
+    Returns the id of the first subhalo and count of subhalos per halo.
+    Parameters
+    ----------
+    SubhaloGrNr: np.ndarray
+    The group identifier that each subhalo belongs to respectively
+    hlength: int
+    The number of halos in the snapshot
+
+    Returns
+    -------
+
+    """
+    shcounts = np.zeros(hlength, dtype=np.int32)  # number of subhalos per halo
+    shnumber = np.zeros(hlength, dtype=np.int32)  # index of first subhalo per halo
     i = 0
-    hid = 0
     hid_old = 0
     while i < SubhaloGrNr.shape[0]:
         hid = SubhaloGrNr[i]

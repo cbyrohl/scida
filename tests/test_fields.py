@@ -24,7 +24,7 @@ def test_fieldtypes(testdatapath):
     snp = load(testdatapath)
     gas = snp.data["PartType0"]
     fnames = list(gas.keys(withrecipes=False))
-    assert len(fnames) < 5, "not lazy loading fields (into recipes)"
+    assert len(fnames) < 10, "not lazy loading fields (into recipes)"
     fnames = list(gas.keys())
     assert len(fnames) > 5, "not correctly considering recipes"
     assert gas.fieldcount == len(fnames)
