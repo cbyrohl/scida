@@ -207,6 +207,12 @@ testdata:
       - interface
     fn: "minimal_LGal21_z3.hdf5"
 
+  LGal21_extra_z0_minimal:
+    types:
+      - interface
+    fn: "minimal_LGal21_extra_z0.hdf5"
+
+
   LGal21_snapshot_z3:
     types:
       - interface

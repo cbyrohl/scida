@@ -1,69 +1,103 @@
+# provided by @mayromlou
 metadata_unitsystem: cgs
 units:
-  # h: 0.6774 hubble factor, needs to be set by snapshot
   # a: 1.0 # scale factor, needs to be set by snapshot
+  h: 0.673 hubble factor, needs to be set by snapshot
   ckpc: a * kpc
   code_length: ckpc / h
   code_velocity: km / s
   code_mass: 1e10 * Msun / h
   code_time: 0.978 * Gyr
   code_pressure: (code_mass / code_length) / code_time^2
+  code_Mdot: Msun / yr
+  code_time_yr: yr
+  code_time_Gyr: code_time_yr * 1e9
+
 fields:
   Galaxy:
-    BulgeSize:
-    Central_M_Crit200:
-    Central_R_Crit200:
-    ColdGasMass:
-    CoolingRadius:
-    CoolingRate:
-    CoolingRate_beforeAGN:
-    CosInclination:
-    DisruptOn:
-    DistanceToCentralGal:
-    EjectedMass:
-    GasDiskRadius:
-    H2fraction:
-    HaloIndex:
-    HaloSpin:
-    HaloStellarMass:
-    HotGasMass:
-    HotGasRadius:
-    InfallHotGasMass:
-    InfallSnap:
-    InfallVmax:
-    InfallVmaxPeak:
-    LookBackTimeToSnap:
-    M_Crit200:
-    Mag:
-    MagBulge:
-    MagDust:
-    MassWeightAge:
-    MergTime:
-    MergeOn:
-    OriMergTime:
-    Pos:
-    PrimordialAccretionRate:
-    QuasarAccretionRate:
-    R_Crit200:
-    RadioAccretionRate:
-    Redshift:
-    SnapNum:
-    StarFormationRate:
-    StarFormationRateBulge:
-    StellarBulgeMass:
-    StellarDiskMass:
-    StellarDiskRadius:
-    StellarHalfLightRadius:
-    StellarHalfMassRadius:
-    StellarMass:
-    SuhaloLen:
-    Type:
-    Vel:
-    Vel_LBE:
-    Vmax:
-    Vvir:
-    XrayLum:
-    rBandWeightAge:
-    rho_LBE_Gas:
-    rho_LBE_Total:
-    BlackHoleMass:
+    # default quantities
+    BulgeSize: code_length
+    Central_M_Crit200: code_mass
+    Central_R_Crit200: code_length
+    ColdGasMass: code_mass
+    CoolingRadius: code_length
+    CoolingRate: code_Mdot
+    CoolingRate_beforeAGN: code_Mdot
+    CosInclination: deg
+    DisruptOn: none
+    DistanceToCentralGal: code_length
+    EjectedMass: code_mass
+    GasDiskRadius: code_length
+    H2fraction: dimensionless
+    HaloIndex: none
+    HaloSpin: code_length * code_velocity
+    HaloStellarMass: code_mass
+    HotGasMass: code_mass
+    HotGasRadius: code_length
+    InfallHotGasMass: code_mass
+    InfallSnap: none
+    InfallVmax: code_velocity
+    InfallVmaxPeak: code_velocity
+    LookBackTimeToSnap: code_time_yr
+    M_Crit200: code_mass
+    Mag: dimensionless
+    MagBulge: dimensionless
+    MagDust: dimensionless
+    MassWeightAge: code_time_Gyr
+    MergTime: code_time
+    MergeOn: none
+    OriMergTime: code_time
+    Pos: code_length
+    PrimordialAccretionRate: code_Mdot
+    QuasarAccretionRate: code_Mdot
+    R_Crit200: code_length
+    RadioAccretionRate: code_Mdot
+    Redshift: dimensionless
+    SnapNum: none
+    StarFormationRate: code_Mdot
+    StarFormationRateBulge: code_Mdot
+    StellarBulgeMass: code_mass
+    StellarDiskMass: code_mass
+    StellarDiskRadius: code_length
+    StellarHalfLightRadius: code_length
+    StellarHalfMassRadius: code_length
+    StellarMass: code_mass
+    SuhaloLen: none
+    Type: none
+    Vel: code_velocity
+    Vel_LBE: code_velocity
+    Vmax: code_velocity
+    Vvir: code_velocity
+    XrayLum: dimensionless # log10(erg / s) but not sure how to treat yet in pint
+    rBandWeightAge: code_time_Gyr
+    rho_LBE_Gas: code_mass / code_length^3
+    rho_LBE_Total: code_mass / code_length^3
+    BlackHoleMass: code_mass
+    # extra quantities
+    BulgeMass_elements: Msun
+    ColdGasMassRings: code_mass
+    ColdGasRings_elements: Msun
+    ColdGas_elements: Msun
+    DiskMassRings_elements: Msun
+    DiskMass_elements: Msun
+    EjectedMass_elements: Msun
+    H2fractionRings: dimensionless
+    HotGas_elements: Msun
+    ICM_elements: Msun
+    MetalsColdGasMass: code_mass
+    MetalsColdGasMassRings: code_mass
+    MetalsEjectedMass: code_mass
+    MetalsHaloStellarMass: code_mass
+    MetalsHotGasMass: code_mass
+    MetalsStellarBulgeMass: code_mass
+    MetalsStellarBulgeMassRings: code_mass
+    MetalsStellarDiskMass: code_mass
+    MetalsStellarDiskMassRings: code_mass
+    MetalsStellarMass: code_mass
+    StarFormationRateRings: code_Mdot
+    StellarBulgeMassRings: code_mass
+    StellarDiskMassRings: code_mass
+    StellarMassFromBursts: code_mass
+    StellarMassFromInSitu: code_mass
+    StellarMassFromMergers: code_mass
+    BulgeMassRings_elements: Msun

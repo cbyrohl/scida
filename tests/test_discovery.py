@@ -44,7 +44,7 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
             return ArepoSnapshot
     elif any(k in name for k in ["eagle"]):
         return ArepoSnapshot  # TODO: Change once we abstracted a GadgetSnapshot class
-    elif any(k in name for k in ["gaia"]):
+    elif any(k in name for k in ["gaia", "lgal"]):
         return Dataset
     elif any(k in name for k in ["swift"]):
         return SwiftSnapshot
