@@ -2,7 +2,7 @@
 metadata_unitsystem: cgs
 units:
   # a: 1.0 # scale factor, needs to be set by snapshot
-  h: 0.673 hubble factor, needs to be set by snapshot
+  h: 0.673 # hubble factor, needs to be set by snapshot
   ckpc: a * kpc
   code_length: ckpc / h
   code_velocity: km / s
