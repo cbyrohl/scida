@@ -508,21 +508,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../config/" class="md-nav__link">
-        Configuration
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../api_docs/" class="md-nav__link">
         API documentation
       </a>
@@ -1658,42 +1643,18 @@ gas = ds.data["PartType0"]</div>
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">ValueError</span>                                Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[1], line 2</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">from</span> <span class="ansi-bold" style="color: rgb(0,0,255)">scida</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> load
-<span class="ansi-green-fg">----&gt; 2</span> ds <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">load</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">testdata://TNG50-4_snapshot</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">units</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">)</span>  <span style="color: rgb(95,135,135)"># units=True equals units="code"</span>
-<span class="ansi-green-intense-fg ansi-bold">      3</span> gas <span style="color: rgb(98,98,98)">=</span> ds<span style="color: rgb(98,98,98)">.</span>data[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">PartType0</span><span style="color: rgb(175,0,0)">"</span>]
-
-File <span class="ansi-green-fg">~/repos/scida/src/scida/convenience.py:205</span>, in <span class="ansi-cyan-fg">load</span><span class="ansi-blue-fg">(path, units, unitfile, overwrite, force_class, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    197</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">load</span>(
-<span class="ansi-green-intense-fg ansi-bold">    198</span>     path: <span style="color: rgb(0,135,0)">str</span>,
-<span class="ansi-green-intense-fg ansi-bold">    199</span>     units: Union[<span style="color: rgb(0,135,0)">bool</span>, <span style="color: rgb(0,135,0)">str</span>] <span style="color: rgb(98,98,98)">=</span> <span class="ansi-bold" style="color: rgb(0,135,0)">True</span>,
-<span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    203</span>     <span style="color: rgb(98,98,98)">*</span><span style="color: rgb(98,98,98)">*</span>kwargs
-<span class="ansi-green-intense-fg ansi-bold">    204</span> ):
-<span class="ansi-green-fg">--&gt; 205</span>     path <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">find_path</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">path</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">overwrite</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">overwrite</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    207</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">catalog</span><span style="color: rgb(175,0,0)">"</span> <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> kwargs:
-<span class="ansi-green-intense-fg ansi-bold">    208</span>         c <span style="color: rgb(98,98,98)">=</span> kwargs[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">catalog</span><span style="color: rgb(175,0,0)">"</span>]
-
-File <span class="ansi-green-fg">~/repos/scida/src/scida/convenience.py:172</span>, in <span class="ansi-cyan-fg">find_path</span><span class="ansi-blue-fg">(path, overwrite)</span>
-<span class="ansi-green-intense-fg ansi-bold">    170</span>     path <span style="color: rgb(98,98,98)">=</span> extractpath
-<span class="ansi-green-intense-fg ansi-bold">    171</span> <span class="ansi-bold" style="color: rgb(0,135,0)">elif</span> databackend <span style="color: rgb(98,98,98)">==</span> <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">testdata</span><span style="color: rgb(175,0,0)">"</span>:
-<span class="ansi-green-fg">--&gt; 172</span>     path <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">get_testdata</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">dataname</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    173</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-<span class="ansi-green-intense-fg ansi-bold">    174</span>     <span style="color: rgb(95,135,135)"># potentially custom dataset.</span>
-<span class="ansi-green-intense-fg ansi-bold">    175</span>     resources <span style="color: rgb(98,98,98)">=</span> config<span style="color: rgb(98,98,98)">.</span>get(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">resources</span><span style="color: rgb(175,0,0)">"</span>, {})
-
-File <span class="ansi-green-fg">~/repos/scida/src/scida/convenience.py:100</span>, in <span class="ansi-cyan-fg">get_testdata</span><span class="ansi-blue-fg">(name)</span>
-<span class="ansi-green-intense-fg ansi-bold">     98</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Test data directory not specified in configuration</span><span style="color: rgb(175,0,0)">"</span>)
-<span class="ansi-green-intense-fg ansi-bold">     99</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> os<span style="color: rgb(98,98,98)">.</span>path<span style="color: rgb(98,98,98)">.</span>isdir(tdpath):
-<span class="ansi-green-fg">--&gt; 100</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Invalid test data path</span><span style="color: rgb(175,0,0)">"</span>)
-<span class="ansi-green-intense-fg ansi-bold">    101</span> res <span style="color: rgb(98,98,98)">=</span> {f: os<span style="color: rgb(98,98,98)">.</span>path<span style="color: rgb(98,98,98)">.</span>join(tdpath, f) <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> f <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> os<span style="color: rgb(98,98,98)">.</span>listdir(tdpath)}
-<span class="ansi-green-intense-fg ansi-bold">    102</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> name <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> res<span style="color: rgb(98,98,98)">.</span>keys():
-
-<span class="ansi-red-fg">ValueError</span>: Invalid test data path</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType0/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType0/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType1/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType1/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType3/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType3/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType4/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType4/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType5/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType5/LocalSubhaloID'.
+</pre>
 </div>
 </div>
 
@@ -1766,18 +1727,72 @@ File <span class="ansi-green-fg">~/repos/scida/src/scida/convenience.py:100</spa
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[2], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">gas</span>[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Coordinates</span><span style="color: rgb(175,0,0)">"</span>]
 
-<span class="ansi-red-fg">NameError</span>: name 'gas' is not defined</pre>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<table><tbody><tr><th>Magnitude</th><td style="text-align:left;"><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 424.35 MiB </td>
+                        <td> 128.00 MiB </td>
+                    </tr>
+                    
+                    <tr>
+                        <th> Shape </th>
+                        <td> (18540104, 3) </td>
+                        <td> (5592405, 3) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 4 chunks in 3 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float64 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="75" height="170" style="stroke:rgb(0,0,0);stroke-width:1">
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="25" y2="0" style="stroke-width:2"></line>
+  <line x1="0" y1="36" x2="25" y2="36"></line>
+  <line x1="0" y1="72" x2="25" y2="72"></line>
+  <line x1="0" y1="108" x2="25" y2="108"></line>
+  <line x1="0" y1="120" x2="25" y2="120" style="stroke-width:2"></line>
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2"></line>
+  <line x1="25" y1="0" x2="25" y2="120" style="stroke-width:2"></line>
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 25.412616514582485,0.0 25.412616514582485,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"></polygon>
+
+  <!-- Text -->
+  <text x="12.706308" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle">3</text>
+  <text x="45.412617" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,45.412617,60.000000)">18540104</text>
+</svg>
+        </td>
+    </tr>
+</table></td></tr><tr><th>Units</th><td style="text-align:left;">code_length</td></tr></tbody></table>
 </div>
+
 </div>
 
 </div>
@@ -1828,19 +1843,16 @@ gas["Coordinates"][0].magnitude.compute(), gas["Coordinates"].units</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[3], line 2</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># calculate magnitude (of first entry) and units</span>
-<span class="ansi-green-fg">----&gt; 2</span> <span class="ansi-yellow-bg">gas</span>[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Coordinates</span><span style="color: rgb(175,0,0)">"</span>][<span style="color: rgb(98,98,98)">0</span>]<span style="color: rgb(98,98,98)">.</span>magnitude<span style="color: rgb(98,98,98)">.</span>compute(), gas[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Coordinates</span><span style="color: rgb(175,0,0)">"</span>]<span style="color: rgb(98,98,98)">.</span>units
 
-<span class="ansi-red-fg">NameError</span>: name 'gas' is not defined</pre>
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>(array([ 7289.11170968, 24571.84466211, 21313.84458652]),
+ &lt;Unit('code_length')&gt;)</pre>
 </div>
+
 </div>
 
 </div>
@@ -1907,20 +1919,72 @@ coords.to_base_units()</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[4], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> coords <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">gas</span>[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Coordinates</span><span style="color: rgb(175,0,0)">"</span>]
-<span class="ansi-green-intense-fg ansi-bold">      2</span> coords<span style="color: rgb(98,98,98)">.</span>to(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">cm</span><span style="color: rgb(175,0,0)">"</span>) 
-<span class="ansi-green-intense-fg ansi-bold">      3</span> <span style="color: rgb(95,135,135)"># here the default system is cgs, thus we get the same result from</span>
 
-<span class="ansi-red-fg">NameError</span>: name 'gas' is not defined</pre>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<table><tbody><tr><th>Magnitude</th><td style="text-align:left;"><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 424.35 MiB </td>
+                        <td> 128.00 MiB </td>
+                    </tr>
+                    
+                    <tr>
+                        <th> Shape </th>
+                        <td> (18540104, 3) </td>
+                        <td> (5592405, 3) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 4 chunks in 4 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float64 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="75" height="170" style="stroke:rgb(0,0,0);stroke-width:1">
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="25" y2="0" style="stroke-width:2"></line>
+  <line x1="0" y1="36" x2="25" y2="36"></line>
+  <line x1="0" y1="72" x2="25" y2="72"></line>
+  <line x1="0" y1="108" x2="25" y2="108"></line>
+  <line x1="0" y1="120" x2="25" y2="120" style="stroke-width:2"></line>
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="120" style="stroke-width:2"></line>
+  <line x1="25" y1="0" x2="25" y2="120" style="stroke-width:2"></line>
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 25.412616514582485,0.0 25.412616514582485,120.0 0.0,120.0" style="fill:#ECB172A0;stroke-width:0"></polygon>
+
+  <!-- Text -->
+  <text x="12.706308" y="140.000000" font-size="1.0rem" font-weight="100" text-anchor="middle">3</text>
+  <text x="45.412617" y="60.000000" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(-90,45.412617,60.000000)">18540104</text>
+</svg>
+        </td>
+    </tr>
+</table></td></tr><tr><th>Units</th><td style="text-align:left;">centimeter</td></tr></tbody></table>
 </div>
+
 </div>
 
 </div>
@@ -1985,20 +2049,14 @@ ureg("m")</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[5], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> ureg <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">ds</span><span style="color: rgb(98,98,98)">.</span>ureg
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span style="color: rgb(95,135,135)"># get the unit meter</span>
-<span class="ansi-green-intense-fg ansi-bold">      3</span> ureg(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">m</span><span style="color: rgb(175,0,0)">"</span>)
 
-<span class="ansi-red-fg">NameError</span>: name 'ds' is not defined</pre>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+1 meter
 </div>
+
 </div>
 
 </div>
@@ -2051,20 +2109,14 @@ np.arange(10) * ureg("m")</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[6], line 3</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span style="color: rgb(95,135,135)"># define an array with units meter (dask arrays analogously)</span>
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-bold" style="color: rgb(0,135,0)">import</span> <span class="ansi-bold" style="color: rgb(0,0,255)">numpy</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> <span class="ansi-bold" style="color: rgb(0,0,255)">np</span>
-<span class="ansi-green-fg">----&gt; 3</span> np<span style="color: rgb(98,98,98)">.</span>arange(<span style="color: rgb(98,98,98)">10</span>) <span style="color: rgb(98,98,98)">*</span> <span class="ansi-yellow-bg">ureg</span>(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">m</span><span style="color: rgb(175,0,0)">"</span>)
 
-<span class="ansi-red-fg">NameError</span>: name 'ureg' is not defined</pre>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<table><tbody><tr><th>Magnitude</th><td style="text-align:left;"><pre>[0 1 2 3 4 5 6 7 8 9]</pre></td></tr><tr><th>Units</th><td style="text-align:left;">meter</td></tr></tbody></table>
 </div>
+
 </div>
 
 </div>
@@ -2127,19 +2179,69 @@ energy_restframe</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[7], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> energy_restframe <span style="color: rgb(98,98,98)">=</span> (<span class="ansi-yellow-bg">gas</span>[<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Masses</span><span style="color: rgb(175,0,0)">"</span>]<span style="color: rgb(98,98,98)">*</span>ureg(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">c</span><span style="color: rgb(175,0,0)">"</span>)<span style="color: rgb(98,98,98)">*</span><span style="color: rgb(98,98,98)">*</span><span style="color: rgb(98,98,98)">2</span>)<span style="color: rgb(98,98,98)">.</span>to(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">erg</span><span style="color: rgb(175,0,0)">"</span>)  <span style="color: rgb(95,135,135)"># E=mc^2</span>
-<span class="ansi-green-intense-fg ansi-bold">      2</span> energy_restframe
 
-<span class="ansi-red-fg">NameError</span>: name 'gas' is not defined</pre>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<table><tbody><tr><th>Magnitude</th><td style="text-align:left;"><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 141.45 MiB </td>
+                        <td> 141.45 MiB </td>
+                    </tr>
+                    
+                    <tr>
+                        <th> Shape </th>
+                        <td> (18540104,) </td>
+                        <td> (18540104,) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 5 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float64 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="170" height="75" style="stroke:rgb(0,0,0);stroke-width:1">
+
+  <!-- Horizontal lines -->
+  <line x1="0" y1="0" x2="120" y2="0" style="stroke-width:2"></line>
+  <line x1="0" y1="25" x2="120" y2="25" style="stroke-width:2"></line>
+
+  <!-- Vertical lines -->
+  <line x1="0" y1="0" x2="0" y2="25" style="stroke-width:2"></line>
+  <line x1="120" y1="0" x2="120" y2="25" style="stroke-width:2"></line>
+
+  <!-- Colored Rectangle -->
+  <polygon points="0.0,0.0 120.0,0.0 120.0,25.412616514582485 0.0,25.412616514582485" style="fill:#ECB172A0;stroke-width:0"></polygon>
+
+  <!-- Text -->
+  <text x="60.000000" y="45.412617" font-size="1.0rem" font-weight="100" text-anchor="middle">18540104</text>
+  <text x="140.000000" y="12.706308" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,140.000000,12.706308)">1</text>
+</svg>
+        </td>
+    </tr>
+</table></td></tr><tr><th>Units</th><td style="text-align:left;">erg</td></tr></tbody></table>
 </div>
+
 </div>
 
 </div>
@@ -2204,20 +2306,14 @@ coords.to("halfmeter")[0].compute()</div>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[8], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">ureg</span><span style="color: rgb(98,98,98)">.</span>define(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">halfmeter = 0.5 * m</span><span style="color: rgb(175,0,0)">"</span>)
-<span class="ansi-green-intense-fg ansi-bold">      2</span> <span style="color: rgb(95,135,135)"># first particle coordinates in halfmeters</span>
-<span class="ansi-green-intense-fg ansi-bold">      3</span> coords<span style="color: rgb(98,98,98)">.</span>to(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">halfmeter</span><span style="color: rgb(175,0,0)">"</span>)[<span style="color: rgb(98,98,98)">0</span>]<span style="color: rgb(98,98,98)">.</span>compute()
 
-<span class="ansi-red-fg">NameError</span>: name 'ureg' is not defined</pre>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<table><tbody><tr><th>Magnitude</th><td style="text-align:left;"><pre>[6.640640269082875e+23 2.2385825275808592e+24 1.941767121804299e+24]</pre></td></tr><tr><th>Units</th><td style="text-align:left;">halfmeter</td></tr></tbody></table>
 </div>
+
 </div>
 
 </div>

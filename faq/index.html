@@ -556,21 +556,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../config/" class="md-nav__link">
-        Configuration
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../api_docs/" class="md-nav__link">
         API documentation
       </a>
@@ -647,14 +632,14 @@
 <p>After loading some dataset, you can add custom fields to a given container, here called <em>PartType0</em> by simply assigning a dask array under the desired key to it.</p>
 <p>Please note that all fields within a container are expected to have the same shape in their first axis.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="kn">import</span> <span class="nn">da.array</span> <span class="k">as</span> <span class="nn">da</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'simname'</span><span class="p">)</span>
-<span class="n">array</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">][:,</span><span class="mi">0</span><span class="p">])</span>
+<span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'TNG50-4_snapshot'</span><span class="p">)</span>
+<span class="n">array</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">])</span>
 <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"zerofield"</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span>
 </code></pre></div>
 <p>As we operate with dask, make sure to cast your array accordingly. For example, if your field is just a numpy array or a hdf5 memmap, you can use <code>da.from_array</code> to cast it to a dask array.
 Alternatively, if you have another dataset loaded, you can assign fields from one to another:</p>
-<div class="highlight"><pre><span></span><code><span class="n">ds2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'simname2'</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">ds2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'TNG50-4_snapshot'</span><span class="p">)</span>
 <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"NewDensity"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">]</span>
 </code></pre></div>
 <h2 id="misc">Misc</h2>
@@ -703,13 +688,13 @@ as so-called <a href="https://en.wikipedia.org/wiki/Mixin">Mixins</a> to the dat
       
       
         
-        <a href="../config/" class="md-footer__link md-footer__link--next" aria-label="Next: Configuration" rel="next">
+        <a href="../api_docs/" class="md-footer__link md-footer__link--next" aria-label="Next: API documentation" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Configuration
+              API documentation
             </div>
           </div>
           <div class="md-footer__button md-icon">

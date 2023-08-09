@@ -508,21 +508,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config/" class="md-nav__link">
-        Configuration
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../api_docs/" class="md-nav__link">
         API documentation
       </a>
@@ -1684,8 +1669,8 @@ Licensed under the Apache License, Version 2.0.
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1715,6 +1700,40 @@ ds = load("TNG50-4_snapshot", units=True)</div>
     </div>
 
 </div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Creating cache file, this may take a while...
+Creating cache file, this may take a while...
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType0/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType0/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType1/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType1/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType3/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType3/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType4/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType4/LocalSubhaloID'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType5/GroupFirstSub'.
+WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType5/LocalSubhaloID'.
+</pre>
+</div>
+</div>
+
+</div>
+
 </div>
 
 </div>
@@ -1776,7 +1795,7 @@ ds = load("TNG50-4_snapshot", units=True)</div>
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>class: ArepoSnapshotWithUnitMixinAndCosmologyMixin
-source: /home/cbyrohl/data/testdata-astrodask/TNG50-4_snapshot
+source: /fastdata/public/testdata-astrodask/TNG50-4_snapshot
 === Cosmological Simulation ===
 z = 0.00
 cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3.04, m_nu=None, Ob0=0.0486)
@@ -1786,11 +1805,11 @@ cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3
 === data ===
 + root (containers: 7)
 ++ Group (fields: 26, entries: 25257)
-++ PartType0 (fields: 29, entries: 18540104)
-++ PartType1 (fields: 10, entries: 19683000)
-++ PartType3 (fields: 4, entries: 19683000)
-++ PartType4 (fields: 20, entries: 605779)
-++ PartType5 (fields: 26, entries: 3486)
+++ PartType0 (fields: 31, entries: 18540104)
+++ PartType1 (fields: 12, entries: 19683000)
+++ PartType3 (fields: 6, entries: 19683000)
+++ PartType4 (fields: 22, entries: 605779)
+++ PartType5 (fields: 28, entries: 3486)
 ++ Subhalo (fields: 51, entries: 22869)
 ============
 
@@ -2018,10 +2037,10 @@ Particle species: PartType0
 Three of its fields: ['CenterOfMass', 'Coordinates', 'Density']
 
 Particle species: PartType1
-Three of its fields: ['Coordinates', 'GroupID', 'ParticleIDs']
+Three of its fields: ['Coordinates', 'GroupFirstSub', 'GroupID']
 
 Particle species: PartType3
-Three of its fields: ['GroupID', 'ParentID', 'SubhaloID']
+Three of its fields: ['GroupFirstSub', 'GroupID', 'LocalSubhaloID']
 
 Particle species: PartType4
 Three of its fields: ['BirthPos', 'BirthVel', 'Coordinates']
