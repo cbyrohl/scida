@@ -6,6 +6,7 @@ from scida import ArepoSnapshot, load
 from scida.config import get_config
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.series import DatasetSeries
+from tests.helpers import DummyGadgetFile, DummyTNGFile
 
 flag_test_long = False  # Set to true to run time-taking tests.
 
@@ -66,3 +67,21 @@ def cleancache(cachedir):
     """Always start with empty cache."""
     get_config(reload=True)
     return cachedir
+
+
+# dummy gadgetstyle snapshot fixtures
+
+@pytest.fixture
+def gadgetfile_dummy(tmp_path):
+    dummy = DummyGadgetFile()
+    dummy.write(tmp_path / "dummy.hdf5")
+    return dummy
+
+
+@pytest.fixture
+def tngfile_dummy(tmp_path):
+    dummy = DummyTNGFile()
+    print(dummy.particles["PartType0"])
+    dummy.write(tmp_path / "dummy.hdf5")
+    return dummy
+
