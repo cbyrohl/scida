@@ -94,55 +94,6 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
     assert "Subhalo" in grp.data.keys()
 
 
-@require_testdata(
-    "illustrissnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
-)
-def test_areposnapshot_halooperation(testdata_illustrissnapshot_withcatalog):
-    snap = testdata_illustrissnapshot_withcatalog
-
-    def calculate_count(GroupID, parttype="PartType0"):
-        """Halo Count per halo. Has to be 1 exactly."""
-        return np.unique(GroupID).shape[0]
-
-    def calculate_partcount(GroupID, parttype="PartType0"):
-        """Particle Count per halo."""
-        return GroupID.shape[0]
-
-    def calculate_haloid(GroupID, parttype="PartType0"):
-        """returns Halo ID"""
-        return GroupID[-1]
-
-    counttask = snap.map_halo_operation(calculate_count, compute=False, Nmin=20)
-    partcounttask = snap.map_halo_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6)
-    )
-    hidtask = snap.map_halo_operation(
-        calculate_haloid, compute=False, chunksize=int(3e6)
-    )
-    count = counttask.compute()
-    partcount = partcounttask.compute()
-    hid = hidtask.compute()
-
-    count0 = np.where(partcount == 0)[0]
-    diff0 = np.sort(np.concatenate((count0, count0 - 1)))
-    # determine halos that hold no particles.
-    assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(diff0.tolist())
-
-    if not (np.diff(hid).max() == np.diff(hid).min() == 1):
-        assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(
-            diff0.tolist()
-        )  # gotta check; potentially empty halos
-        assert np.all(counttask.compute() <= 1)
-    else:
-        assert np.all(counttask.compute() == 1)
-    print(count.shape, counttask.compute().shape)
-    assert (
-        count.shape == counttask.compute().shape
-    ), "Expected shape different from result's shape."
-    assert count.shape[0] == snap.data["Group"]["GroupPos"].shape[0]
-    assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
-
-
 @require_testdata("illustrissnapshot_withcatalog")
 def test_areposnapshot_load_withcatalog(testdata_illustrissnapshot_withcatalog):
     snp = testdata_illustrissnapshot_withcatalog

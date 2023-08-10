@@ -18,6 +18,73 @@ def test_selector(testdatapath):
     assert da.all(d["PartType0"]["GroupID"] == 9223372036854775807).compute()
 
 
+def halooperations(path, catalogpath=None):
+    snap = load(path, catalog=catalogpath)
+
+    def calculate_count(GroupID, parttype="PartType0"):
+        """Number of unique halo associations found in each halo. Has to be 1 exactly."""
+        return np.unique(GroupID).shape[0]
+
+    def calculate_partcount(GroupID, parttype="PartType0"):
+        """Particle Count per halo."""
+        return GroupID.shape[0]
+
+    def calculate_haloid(GroupID, parttype="PartType0"):
+        """returns Halo ID"""
+        return GroupID[-1]
+
+    counttask = snap.map_halo_operation(calculate_count, compute=False, min_grpcount=20)
+    partcounttask = snap.map_halo_operation(
+        calculate_partcount, compute=False, chunksize=int(3e6)
+    )
+    hidtask = snap.map_halo_operation(
+        calculate_haloid, compute=False, chunksize=int(3e6)
+    )
+    count = counttask.compute()
+    partcount = partcounttask.compute()
+    hid = hidtask.compute()
+
+    count0 = np.where(partcount == 0)[0]
+    diff0 = np.sort(np.concatenate((count0, count0 - 1)))
+    # determine halos that hold no particles.
+    assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(diff0.tolist())
+
+    if not (np.diff(hid).max() == np.diff(hid).min() == 1):
+        assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(
+            diff0.tolist()
+        )  # gotta check; potentially empty halos
+        assert np.all(counttask.compute() <= 1)
+    else:
+        assert np.all(counttask.compute() == 1)
+    print(count.shape, counttask.compute().shape)
+    assert (
+        count.shape == counttask.compute().shape
+    ), "Expected shape different from result's shape."
+    assert count.shape[0] == snap.data["Group"]["GroupPos"].shape[0]
+    assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
+
+    # test nmax
+    nmax = 10
+    partcounttask = snap.map_halo_operation(
+        calculate_partcount, compute=False, chunksize=int(3e6), nmax=nmax
+    )
+    partcount2 = partcounttask.compute()
+    assert partcount2.shape[0] == nmax
+    assert np.all(partcount2 == partcount[:nmax])
+
+
+# Test the map_halo_operation/grouped functionality
+def test_areposnapshot_halooperation(tngfile_dummy, gadgetcatalogfile_dummy):
+    path = tngfile_dummy.path
+    catalogpath = gadgetcatalogfile_dummy.path
+    halooperations(path, catalogpath)
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_areposnapshot_halooperation_realworld(testdatapath):
+    halooperations(testdatapath)
+
+
 @require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])
 def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog

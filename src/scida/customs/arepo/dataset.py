@@ -1,7 +1,6 @@
 import copy
 import logging
 import os
-import warnings
 from typing import Dict, List, Optional, Union
 
 import dask
@@ -285,7 +284,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         -------
 
         """
-        num = partTypeNum(parttype)
+        num = part_type_num(parttype)
         if construct:  # TODO: introduce (immediate) construct option later
             raise NotImplementedError
         if num == -1:  # TODO: all particle species
@@ -418,9 +417,31 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         func,
         chunksize=int(3e7),
         cpucost_halo=1e4,
-        Nmin=None,
+        min_grpcount=None,
         chunksize_bytes=None,
+        nmax=None,
     ):
+        """
+        Apply a function to each halo in the catalog.
+
+        Parameters
+        ----------
+        func: function
+            Function to apply to each halo. Must take a dictionary of arrays as input.
+        chunksize: int
+            Number of particles to process at once. Default: 3e7
+        cpucost_halo:
+            "CPU cost" of processing a single halo. This is a relative value to the processing time per input particle
+            used for calculating the dask chunks. Default: 1e4
+        min_grpcount: Optional[int]
+            Minimum number of particles in a halo to process it. Default: None
+        chunksize_bytes: Optional[int]
+        nmax: Optional[int]
+            Only process the first nmax halos.
+        Returns
+        -------
+
+        """
         dfltkwargs = get_kwargs(func)
         fieldnames = dfltkwargs.get("fieldnames", None)
         if fieldnames is None:
@@ -435,9 +456,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             arrdict,
             chunksize=chunksize,
             cpucost_halo=cpucost_halo,
-            Nmin=Nmin,
+            min_grpcount=min_grpcount,
             chunksize_bytes=chunksize_bytes,
             entry_nbytes_in=entry_nbytes_in,
+            nmax=nmax,
         )
 
     def add_groupquantity_to_particles(self, name, parttype="PartType0"):
@@ -462,14 +484,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.data[parttype][name] = hquantity
 
     def get_grouplengths(self, parttype="PartType0"):
-        # todo: write/use PartType func always using integer rather than string?
-        if parttype not in self._grouplengths:
-            partnum = int(parttype[-1])
-            lengths = self.data["Group"]["GroupLenType"][:, partnum].compute()
+        """Get the total number of particles of a given type in all halos."""
+        pnum = part_type_num(parttype)
+        ptype = "PartType%i" % pnum
+        if ptype not in self._grouplengths:
+            lengths = self.data["Group"]["GroupLenType"][:, pnum].compute()
             if isinstance(lengths, pint.Quantity):
                 lengths = lengths.magnitude
-            self._grouplengths[parttype] = lengths
-        return self._grouplengths[parttype]
+            self._grouplengths[ptype] = lengths
+        return self._grouplengths[ptype]
 
     def grouped(
         self,
@@ -884,26 +907,27 @@ def get_shcounts_shcells(SubhaloGrNr, hlength):
     return shcounts, shnumber
 
 
-def partTypeNum(partType):
+def part_type_num(ptype):
     """Mapping between common names and numeric particle types."""
-    if str(partType).isdigit():
-        return int(partType)
+    ptype = str(ptype).replace("PartType", "")
+    if ptype.isdigit():
+        return int(ptype)
 
-    if str(partType).lower() in ["gas", "cells"]:
+    if str(ptype).lower() in ["gas", "cells"]:
         return 0
-    if str(partType).lower() in ["dm", "darkmatter"]:
+    if str(ptype).lower() in ["dm", "darkmatter"]:
         return 1
-    if str(partType).lower() in ["dmlowres"]:
+    if str(ptype).lower() in ["dmlowres"]:
         return 2  # only zoom simulations, not present in full periodic boxes
-    if str(partType).lower() in ["tracer", "tracers", "tracermc", "trmc"]:
+    if str(ptype).lower() in ["tracer", "tracers", "tracermc", "trmc"]:
         return 3
-    if str(partType).lower() in ["star", "stars", "stellar"]:
+    if str(ptype).lower() in ["star", "stars", "stellar"]:
         return 4  # only those with GFM_StellarFormationTime>0
-    if str(partType).lower() in ["wind"]:
+    if str(ptype).lower() in ["wind"]:
         return 4  # only those with GFM_StellarFormationTime<0
-    if str(partType).lower() in ["bh", "bhs", "blackhole", "blackholes", "black"]:
+    if str(ptype).lower() in ["bh", "bhs", "blackhole", "blackholes", "black"]:
         return 5
-    if str(partType).lower() in ["all"]:
+    if str(ptype).lower() in ["all"]:
         return -1
 
 
@@ -941,9 +965,26 @@ def map_halo_operation_get_chunkedges(
     entry_nbytes_in,
     entry_nbytes_out,
     cpucost_halo=1.0,
-    Nmin=None,
+    min_grpcount=None,
     chunksize_bytes=None,
 ):
+    """
+    Compute the chunking of a halo operation.
+
+    Parameters
+    ----------
+    lengths: np.ndarray
+        The number of particles per halo.
+    entry_nbytes_in
+    entry_nbytes_out
+    cpucost_halo
+    min_grpcount
+    chunksize_bytes
+
+    Returns
+    -------
+
+    """
     cpucost_particle = 1.0  # we only care about ratio, so keep particle cost fixed.
     cost = cpucost_particle * lengths + cpucost_halo
     sumcost = cost.cumsum()
@@ -955,23 +996,20 @@ def map_halo_operation_get_chunkedges(
 
     if not np.max(cost_memory) < chunksize_bytes:
         raise ValueError(
-            "Some halo requires more memory than allowed (%i allowed, %i requested). Consider overriding chunksize_bytes."
-            % (chunksize_bytes, np.max(cost_memory))
+            "Some halo requires more memory than allowed (%i allowed, %i requested). Consider overriding "
+            "chunksize_bytes." % (chunksize_bytes, np.max(cost_memory))
         )
 
-    N = int(np.ceil(np.sum(cost_memory) / chunksize_bytes))
-    N = int(np.ceil(1.3 * N))  # fudge factor
-    if Nmin is not None:
-        N = max(Nmin, N)
-    targetcost = sumcost[-1] / N
-    arr = np.diff(sumcost % targetcost)
+    nchunks = int(np.ceil(np.sum(cost_memory) / chunksize_bytes))
+    nchunks = int(np.ceil(1.3 * nchunks))  # fudge factor
+    if min_grpcount is not None:
+        nchunks = max(min_grpcount, nchunks)
+    targetcost = sumcost[-1] / nchunks  # chunk target cost = total cost / nchunks
+
+    arr = np.diff(sumcost % targetcost)  # find whenever exceeding modulo target cost
     idx = [0] + list(np.where(arr < 0)[0] + 1)
-    if len(idx) == N + 1:
-        idx[-1] = sumcost.shape[0]
-    elif len(idx) - N in [0, -1, -2]:
+    if idx[-1] != sumcost.shape[0]:
         idx.append(sumcost.shape[0])
-    else:
-        raise ValueError("Unexpected chunk indices.")
     list_chunkedges = []
     for i in range(len(idx) - 1):
         list_chunkedges.append([idx[i], idx[i + 1]])
@@ -995,21 +1033,26 @@ def map_halo_operation(
     arrdict,
     chunksize=int(3e7),
     cpucost_halo=1e4,
-    Nmin: Optional[int] = None,
+    min_grpcount: Optional[int] = None,
     chunksize_bytes: Optional[int] = None,
     entry_nbytes_in: Optional[int] = 4,
     fieldnames: Optional[List[str]] = None,
+    nmax: Optional[int] = None,
 ) -> da.Array:
     """
     Map a function to all halos in a halo catalog.
     Parameters
     ----------
+    nmax: Optional[int]
+        Only process the first nmax halos.
     func
-    lengths
+    lengths: np.ndarray
+        Number of particles per halo.
     arrdict
     chunksize
     cpucost_halo
-    Nmin
+    min_grpcount: Optional[int]
+        Lower bound on the number of halos per chunk.
     chunksize_bytes
     entry_nbytes_in
     fieldnames
@@ -1019,9 +1062,8 @@ def map_halo_operation(
 
     """
     if chunksize is not None:
-        warnings.warn(
-            '"chunksize" parameter is depreciated and has no effect. Specify Nmin for control.',
-            DeprecationWarning,
+        log.warning(
+            '"chunksize" parameter is depreciated and has no effect. Specify "min_grpcount" for control.'
         )
     dfltkwargs = get_kwargs(func)
     if fieldnames is None:
@@ -1031,6 +1073,9 @@ def map_halo_operation(
     shape = dfltkwargs.get("shape", (1,))
     dtype = dfltkwargs.get("dtype", "float64")
     default = dfltkwargs.get("default", 0)
+
+    if nmax is not None:
+        lengths = lengths[:nmax]
 
     offsets = np.concatenate([[0], np.cumsum(lengths)])
 
@@ -1044,7 +1089,7 @@ def map_halo_operation(
         entry_nbytes_in,
         entry_nbytes_out,
         cpucost_halo=cpucost_halo,
-        Nmin=Nmin,
+        min_grpcount=min_grpcount,
         chunksize_bytes=chunksize_bytes,
     )
 
