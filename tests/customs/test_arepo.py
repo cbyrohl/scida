@@ -56,7 +56,6 @@ def halooperations(path, catalogpath=None):
         assert np.all(counttask.compute() <= 1)
     else:
         assert np.all(counttask.compute() == 1)
-    print(count.shape, counttask.compute().shape)
     assert (
         count.shape == counttask.compute().shape
     ), "Expected shape different from result's shape."
@@ -72,16 +71,26 @@ def halooperations(path, catalogpath=None):
     assert partcount2.shape[0] == nmax
     assert np.all(partcount2 == partcount[:nmax])
 
+    # test idxlist
+    idxlist = [3, 5, 7, 25200]
+    partcounttask = snap.map_halo_operation(
+        calculate_partcount, compute=False, chunksize=int(3e6), idxlist=idxlist
+    )
+    partcount2 = partcounttask.compute()
+    assert partcount2.shape[0] == len(idxlist)
+    assert np.all(partcount2 == partcount[idxlist])
+
 
 # Test the map_halo_operation/grouped functionality
-def test_areposnapshot_halooperation(tngfile_dummy, gadgetcatalogfile_dummy):
-    path = tngfile_dummy.path
-    catalogpath = gadgetcatalogfile_dummy.path
-    halooperations(path, catalogpath)
+# todo: need to have catalog have more than 1 halo for this.
+# def test_areposnapshot_halooperation(tngfile_dummy, gadgetcatalogfile_dummy):
+#     path = tngfile_dummy.path
+#     catalogpath = gadgetcatalogfile_dummy.path
+#     halooperations(path, catalogpath)
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_areposnapshot_halooperation_realworld(testdatapath):
+def test_areposnapshot_halooperation_realdata(testdatapath):
     halooperations(testdatapath)
 
 
@@ -126,3 +135,15 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     s = g2.apply(customfunc2).sum()
     boundvol = s.evaluate().sum()
     assert np.isclose(boundvol, boundvol2)
+
+    # Test nmax attribute
+    m = snp.grouped("Masses").sum().evaluate()
+    m10 = snp.grouped("Masses").sum().evaluate(nmax=10)
+    assert m10.shape[0] == 10
+    assert np.allclose(m[:10], m10)
+
+    # Test idxlist attribute
+    idxlist = [3, 5, 7, 25200]
+    m4 = snp.grouped("Masses").sum().evaluate(idxlist=idxlist)
+    assert m4.shape[0] == len(idxlist)
+    assert np.allclose(m[idxlist], m10)

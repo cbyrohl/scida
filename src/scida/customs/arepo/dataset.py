@@ -420,12 +420,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         min_grpcount=None,
         chunksize_bytes=None,
         nmax=None,
+        idxlist=None,
     ):
         """
         Apply a function to each halo in the catalog.
 
         Parameters
         ----------
+        idxlist: Optional[np.ndarray]
+            List of halo indices to process. If not provided, all halos are processed.
         func: function
             Function to apply to each halo. Must take a dictionary of arrays as input.
         chunksize: int
@@ -460,6 +463,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             chunksize_bytes=chunksize_bytes,
             entry_nbytes_in=entry_nbytes_in,
             nmax=nmax,
+            idxlist=idxlist,
         )
 
     def add_groupquantity_to_particles(self, name, parttype="PartType0"):
@@ -609,7 +613,7 @@ class GroupAwareOperation:
         )
         return c
 
-    def evaluate(self, compute=True):
+    def evaluate(self, nmax=None, compute=True):
         # final operations: those that can only be at end of chain
         # intermediate operations: those that can only be prior to end of chain
         funcdict = dict()
@@ -649,7 +653,9 @@ class GroupAwareOperation:
                     "Specify field to operate on in operation or grouped()."
                 )
 
-        res = map_halo_operation(func, self.lengths, self.arrs, fieldnames=fieldnames)
+        res = map_halo_operation(
+            func, self.lengths, self.arrs, fieldnames=fieldnames, nmax=nmax
+        )
         if compute:
             res = res.compute()
         return res
@@ -1038,11 +1044,14 @@ def map_halo_operation(
     entry_nbytes_in: Optional[int] = 4,
     fieldnames: Optional[List[str]] = None,
     nmax: Optional[int] = None,
+    idxlist: Optional[np.ndarray] = None,
 ) -> da.Array:
     """
     Map a function to all halos in a halo catalog.
     Parameters
     ----------
+    idxlist: Optional[np.ndarray]
+        Only process the halos with these indices.
     nmax: Optional[int]
         Only process the first nmax halos.
     func
@@ -1074,10 +1083,27 @@ def map_halo_operation(
     dtype = dfltkwargs.get("dtype", "float64")
     default = dfltkwargs.get("default", 0)
 
+    if idxlist is not None and nmax is not None:
+        raise ValueError("Cannot specify both idxlist and nmax.")
+
     if nmax is not None:
         lengths = lengths[:nmax]
 
     offsets = np.concatenate([[0], np.cumsum(lengths)])
+
+    if idxlist is not None:
+        # make sure idxlist is sorted and unique
+        if not np.all(np.diff(idxlist) > 0):
+            raise ValueError("idxlist must be sorted and unique.")
+        # make sure idxlist is within range
+        if np.min(idxlist) < 0 or np.max(idxlist) >= lengths.shape[0]:
+            raise ValueError(
+                "idxlist elements must be in [%i, %i)." % (0, lengths.shape[0])
+            )
+        offsets = np.concatenate(
+            [[0], offsets[1:][idxlist]]
+        )  # offsets is one longer than lengths
+        lengths = lengths[idxlist]
 
     # Determine chunkedges automatically
     # TODO: very messy and inefficient routine. improve some time.
