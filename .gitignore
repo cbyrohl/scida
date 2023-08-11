@@ -168,3 +168,6 @@ pre-commit
 
 # no images
 *.png
+
+# VS code
+.vscode
