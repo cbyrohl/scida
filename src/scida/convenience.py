@@ -137,6 +137,7 @@ def find_path(path, overwrite=False):
                 savepath = config.get("cache_path")
             savepath = os.path.expanduser(savepath)
             savepath = pathlib.Path(savepath)
+            savepath.mkdir(parents=True, exist_ok=True)
             urlhash = str(
                 int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8
             )
