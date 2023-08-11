@@ -18,6 +18,18 @@ def test_selector(testdatapath):
     assert da.all(d["PartType0"]["GroupID"] == 9223372036854775807).compute()
 
 
+# test catalog calculation off (sub)halo lengths and offsets
+# for particle data fields and selections
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_subhalolengths(testdatapath):
+    pass
+    # obj = load(testdatapath, units=False)
+    # glen = obj.get_grouplengths()
+    # shlen = obj.get_subhalolengths()
+    # offsets = obj.get_subhalooffsets()
+    # TBD
+
+
 def halooperations(path, catalogpath=None):
     snap = load(path, catalog=catalogpath)
 
@@ -83,20 +95,51 @@ def halooperations(path, catalogpath=None):
 
 # Test the map_halo_operation/grouped functionality
 # todo: need to have catalog have more than 1 halo for this.
-# def test_areposnapshot_halooperation(tngfile_dummy, gadgetcatalogfile_dummy):
+# def test_areposnapshot_selector_halos(tngfile_dummy, gadgetcatalogfile_dummy):
 #     path = tngfile_dummy.path
 #     catalogpath = gadgetcatalogfile_dummy.path
 #     halooperations(path, catalogpath)
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_areposnapshot_halooperation_realdata(testdatapath):
+def test_areposnapshot_selector_halos_realdata(testdatapath):
     halooperations(testdatapath)
+
+
+# @require_testdata_path("interface", only=["TNG50-4_snapshot"])
+# def test_areposnapshot_selector_subhalos_realdata(testdatapath):
+#     snap = load(testdatapath)
+#
+#     def calculate_count(SubhaloID, parttype="PartType0"):
+#         """Number of unique subhalo associations found in each subhalo. Has to be 1 exactly."""
+#         return np.unique(SubhaloID).shape[0]
+#
+#     def calculate_partcount(SubhaloID, parttype="PartType0"):
+#         """Particle Count per halo."""
+#         return SubhaloID.shape[0]
+#
+#     def calculate_haloid(SubhaloID, parttype="PartType0"):
+#         """returns Halo ID"""
+#         return SubhaloID[-1]
+#
+#     counttask = snap.map_halo_operation(calculate_count, compute=False, min_grpcount=20)
+#     partcounttask = snap.map_halo_operation(
+#         calculate_partcount, compute=False, chunksize=int(3e6)
+#     )
+#     hidtask = snap.map_halo_operation(
+#         calculate_haloid, compute=False, chunksize=int(3e6)
+#     )
+#     count = counttask.compute()
+#     partcount = partcounttask.compute()
+#     sid = hidtask.compute()
+#     print(sid)
+# TBD
 
 
 @require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])
 def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
+
     # check bound mass sums as a start
     g = snp.grouped("Masses")
     boundmass = np.sum(g.sum().evaluate())
@@ -146,4 +189,4 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     idxlist = [3, 5, 7, 25200]
     m4 = snp.grouped("Masses").sum().evaluate(idxlist=idxlist)
     assert m4.shape[0] == len(idxlist)
-    assert np.allclose(m[idxlist], m10)
+    assert np.allclose(m[idxlist], m4)
