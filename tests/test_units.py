@@ -8,39 +8,37 @@ from pint import UnitRegistry
 from scida.config import get_config
 from scida.convenience import load
 from scida.interfaces.mixins.units import update_unitregistry
-from tests.helpers import write_gadget_testfile
-from tests.testdata_properties import require_testdata_path
 
 
-@require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_load_cgs(testdatapath):
-    ds = load(testdatapath, units="cgs")
+def test_load_cgs(tngfile_dummy):
+    p = tngfile_dummy.path
+    ds = load(p, units="cgs")
+    u = ds.ureg
     # test units of some fields
     ptype = "PartType0"
     gas = ds.data[ptype]
     coords = gas["Coordinates"]
-    dens = gas["Density"]
-    sfr = gas["StarFormationRate"]
-    u = ds.ureg
     assert coords.units == u.cm
+    dens = gas["Density"]
     assert dens.units == u.g / u.cm**3
+    sfr = gas["StarFormationRate"]
     assert sfr.units == u.g / u.s
 
 
-@require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_load_codeunits(testdatapath):
-    ds = load(testdatapath, units=True)
+def test_load_codeunits(tngfile_dummy):
+    p = tngfile_dummy.path
+    ds = load(p, units=True)
+    u = ds.ureg
     # test units of some fields
     ptype = "PartType0"
     gas = ds.data[ptype]
     coords = gas["Coordinates"]
-    dens = gas["Density"]
-    sfr = gas["StarFormationRate"]
-    u = ds.ureg
     assert coords.units == u.code_length
+    dens = gas["Density"]
     assert dens.units == u.code_mass / u.code_length**3
     code_time = u.code_velocity / u.code_length
     # SFR is an important test-case, as the units cannot be inferred from the dimensionality (not in code units)
+    sfr = gas["StarFormationRate"]
     assert sfr.units != u.code_mass / code_time  # == code_mass/code_time is wrong!
     # we know that TNG uses u.Msun/yr for SFR
     assert sfr.units == u.Msun / u.yr
@@ -61,9 +59,8 @@ def test_update_unitregistry():
     )  # 1/h for a=1.0
 
 
-def test_missingunits(monkeypatch, tmp_path, caplog):
-    p = pathlib.Path(tmp_path) / "test.hdf5"
-    write_gadget_testfile(p)
+def test_missingunits(monkeypatch, gadgetfile_dummy, caplog):
+    p = gadgetfile_dummy.path
     with h5py.File(p, "r+") as f:
         f["PartType0"]["FieldWithoutUnits"] = np.ones(1)
 

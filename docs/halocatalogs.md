@@ -73,9 +73,19 @@ data = ds.return_data(haloID=42)
 
 *data* will have the same structure as *ds.data* but restricted to particles of a given group.
 
-### Operations on particle data for all groups
+### Applying to all groups in parallel
 
 In many cases, we do not want the particle data of an individual group, but we want to calculate some reduced statistic from the bound particles of each group. For this, we provide the *grouped* functionality. In the following we give a range of examples of its use.
+
+
+???+ warning
+
+    Executing the following commands can be demanding on compute resources and memory.
+    Usually, one wants to restrict the groups to run on. You can either specify "nmax"
+    to limit the maximum halo id to evaluate up to. This is usually desired in any case
+    as halos are ordered (in descending order) by their mass. For more fine-grained control,
+    you can also pass a list of halo IDs to evaluate via the "idxlist" keyword.
+    These keywords should be passed to the "evaluate" call.
 
 
 #### Baryon mass
