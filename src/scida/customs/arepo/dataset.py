@@ -101,6 +101,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.config = {}
         self.parameters = {}
         self._grouplengths = {}
+        self.misc = {}  # for storing misc info
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:
             prfx = self._get_fileprefix(path)
@@ -306,15 +307,21 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         # TODO: make these delayed objects and properly pass into (delayed?) numba functions:
         # https://docs.dask.org/en/stable/delayed-best-practices.html#avoid-repeatedly-putting-large-inputs-into-delayed-calls
 
+        maxint = np.iinfo(np.int64).max
+        self.misc["unboundID"] = maxint
+
         # Group ID
         if "Group" not in self.data:  # can happen for empty catalogs
             for key in self.data:
                 if not (key.startswith("PartType")):
                     continue
-                maxint = np.iinfo(np.int64).max
                 uid = self.data[key]["uid"]
-                self.data[key]["GroupID"] = maxint * da.ones_like(uid, dtype=np.int64)
-                self.data[key]["SubhaloID"] = -1 * da.ones_like(uid, dtype=np.int64)
+                self.data[key]["GroupID"] = self.misc["unboundID"] * da.ones_like(
+                    uid, dtype=np.int64
+                )
+                self.data[key]["SubhaloID"] = self.misc["unboundID"] * da.ones_like(
+                    uid, dtype=np.int64
+                )
             return
 
         glen = self.data["Group"]["GroupLenType"]
@@ -331,6 +338,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         )
         halocelloffsets = da_halocelloffsets.rechunk(-1)
 
+        index_unbound = self.misc["unboundID"]
+
         for key in self.data:
             if not (key.startswith("PartType")):
                 continue
@@ -338,7 +347,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             if "uid" not in self.data[key]:
                 continue  # can happen for empty containers
             gidx = self.data[key]["uid"]
-            hidx = compute_haloindex(gidx, halocelloffsets[:, num])
+            hidx = compute_haloindex(
+                gidx, halocelloffsets[:, num], index_unbound=index_unbound
+            )
             self.data[key]["GroupID"] = hidx
 
         # Subhalo ID
@@ -400,6 +411,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 grpfirstsub,
                 grpnsubs,
                 subhalocellcounts[:, num],
+                index_unbound=index_unbound,
             )
 
             pdata["LocalSubhaloID"] = sidx
@@ -410,6 +422,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             # calculate first subhalo of each halo that a particle belongs to
             self.add_groupquantity_to_particles("GroupFirstSub", parttype=key)
             pdata["SubhaloID"] = pdata["GroupFirstSub"] + pdata["LocalSubhaloID"]
+            pdata["SubHaloID"] = da.where(
+                pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"]
+            )
 
     @computedecorator
     def map_halo_operation(
@@ -690,7 +705,7 @@ def wrap_func_scalar(
 
 
 @jit(nopython=True)
-def get_hidx(gidx_start, gidx_count, celloffsets):
+def get_hidx(gidx_start, gidx_count, celloffsets, index_unbound=None):
     """Get halo index of a given cell
 
     Parameters
@@ -702,9 +717,13 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
     celloffsets : array
         An array holding the starting cell offset for each halo. Needs to include the
         offset after the last halo. The required shape is thus (Nhalo+1,).
+    index_unbound : integer, optional
+        The index to use for unbound particles. If None, the maximum integer value
+        of the dtype is used.
     """
     dtype = np.int64
-    index_unbound = np.iinfo(dtype).max
+    if index_unbound is None:
+        index_unbound = np.iinfo(dtype).max
     res = index_unbound * np.ones(gidx_count, dtype=dtype)
     # find initial celloffset
     hidx_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
@@ -727,10 +746,12 @@ def get_hidx(gidx_start, gidx_count, celloffsets):
     return res
 
 
-def get_hidx_daskwrap(gidx, halocelloffsets):
+def get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=None):
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
-    return get_hidx(gidx_start, gidx_count, halocelloffsets)
+    return get_hidx(
+        gidx_start, gidx_count, halocelloffsets, index_unbound=index_unbound
+    )
 
 
 def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
@@ -742,10 +763,14 @@ def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
     return result
 
 
-def compute_haloindex(gidx, halocelloffsets, *args):
+def compute_haloindex(gidx, halocelloffsets, *args, index_unbound=None):
     """Computes the halo index for each particle with dask."""
     return da.map_blocks(
-        get_hidx_daskwrap, gidx, halocelloffsets, meta=np.array((), dtype=np.int64)
+        get_hidx_daskwrap,
+        gidx,
+        halocelloffsets,
+        index_unbound=index_unbound,
+        meta=np.array((), dtype=np.int64),
     )
 
 
@@ -773,6 +798,7 @@ def get_localshidx(
     shnumber,
     shcounts,
     shcellcounts,
+    index_unbound=None,
 ):
     """
     Get the local subhalo index for each particle. This is the subhalo index within each
@@ -786,12 +812,18 @@ def get_localshidx(
     shnumber
     shcounts
     shcellcounts
+    index_unbound: integer, optional
+        The index to use for unbound particles. If None, the maximum integer value
+        of the dtype is used.
 
     Returns
     -------
 
     """
-    res = -1 * np.ones(gidx_count, dtype=np.int32)  # fuzz has negative index.
+    dtype = np.int32
+    if index_unbound is None:
+        index_unbound = np.iinfo(dtype).max
+    res = index_unbound * np.ones(gidx_count, dtype=dtype)  # fuzz has negative index.
 
     # find initial Group we are in
     hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
@@ -860,16 +892,23 @@ def get_local_shidx_daskwrap(
     shnumber,
     shcounts,
     shcellcounts,
+    index_unbound=None,
 ) -> np.ndarray:
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
     return get_localshidx(
-        gidx_start, gidx_count, halocelloffsets, shnumber, shcounts, shcellcounts
+        gidx_start,
+        gidx_count,
+        halocelloffsets,
+        shnumber,
+        shcounts,
+        shcellcounts,
+        index_unbound=index_unbound,
     )
 
 
 def compute_localsubhaloindex(
-    gidx, halocelloffsets, shnumber, shcounts, shcellcounts
+    gidx, halocelloffsets, shnumber, shcounts, shcellcounts, index_unbound=None
 ) -> da.Array:
     return da.map_blocks(
         get_local_shidx_daskwrap,
@@ -878,6 +917,7 @@ def compute_localsubhaloindex(
         shnumber,
         shcounts,
         shcellcounts,
+        index_unbound=index_unbound,
         meta=np.array((), dtype=np.int64),
     )
 
