@@ -25,5 +25,5 @@ def test_ioload_gadget(tmp_path):
     res = load(p)
     fcc, metadata, hf, tmpfile = res
 
-    assert "BoxSize" in metadata["/"]
+    assert "BoxSize" in metadata["/Header"]
     assert "PartType0" in fcc

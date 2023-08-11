@@ -44,7 +44,7 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
             return ArepoSnapshot
     elif any(k in name for k in ["eagle"]):
         return ArepoSnapshot  # TODO: Change once we abstracted a GadgetSnapshot class
-    elif any(k in name for k in ["gaia"]):
+    elif any(k in name for k in ["gaia", "lgal"]):
         return Dataset
     elif any(k in name for k in ["swift"]):
         return SwiftSnapshot
@@ -165,6 +165,8 @@ def test_simconf_detection(testdatapath):
         assert tp[0] == "gaia-dr3"
     elif "FIRE2" in testdatapath:
         assert tp[0] == "FIRE2"
+    elif "LGal" in testdatapath:
+        assert tp[0] == "LGalaxies"
     else:
         pass  # no special type here.
     # print(testdatapath, tp)

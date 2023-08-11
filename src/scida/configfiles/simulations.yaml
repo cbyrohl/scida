@@ -122,3 +122,9 @@ data:
     dataset_type:
       series: GizmoSimulation
       dataset: GizmoSnapshot
+
+  LGalaxies:
+    unitfile: units/lgalaxies.yaml
+    identifiers:
+      Header:
+        Simulation: "L-Galaxies run on the Millennium Simulation"
