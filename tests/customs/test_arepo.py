@@ -3,19 +3,43 @@ import numpy as np
 import pint
 
 from scida import load
+from scida.customs.arepo.dataset import part_type_num
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_selector(testdatapath):
+    parttype = "PartType0"
+    # test selecting by halo id
     hid = 41
     obj = load(testdatapath, units=False)
     d = obj.return_data(haloID=hid)
-    assert da.all(d["PartType0"]["GroupID"] == hid).compute()
+    assert da.all(d[parttype]["GroupID"] == hid).compute()
 
+    # test selecting by subhalo id
+    shid = 42 * 42
+    d = obj.return_data(subhaloID=shid)
+    p0_shid = d[parttype]["SubhaloID"]
+    assert p0_shid.shape[0] == obj.get_subhalolengths(parttype)[shid]
+    assert da.all(p0_shid == shid).compute()
+
+    # test selecting by unbound gas
     d = obj.return_data(unbound=True)
     # unbound gas has groupid = max_int64 = 9223372036854775807
-    assert da.all(d["PartType0"]["GroupID"] == 9223372036854775807).compute()
+    unbound_id = obj.misc["unboundID"]
+    assert da.all(d[parttype]["GroupID"] == unbound_id).compute()
+
+
+# test catalog calculation off (sub)halo lengths and offsets
+# for particle data fields and selections
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_subhalolengths(testdatapath):
+    pass
+    # obj = load(testdatapath, units=False)
+    # glen = obj.get_grouplengths()
+    # shlen = obj.get_subhalolengths()
+    # offsets = obj.get_subhalooffsets()
+    # TBD
 
 
 def halooperations(path, catalogpath=None):
@@ -31,13 +55,18 @@ def halooperations(path, catalogpath=None):
 
     def calculate_haloid(GroupID, parttype="PartType0"):
         """returns Halo ID"""
-        return GroupID[-1]
+        if len(GroupID) > 0:
+            return GroupID[-1]
+        else:
+            return -21
 
-    counttask = snap.map_halo_operation(calculate_count, compute=False, min_grpcount=20)
-    partcounttask = snap.map_halo_operation(
+    counttask = snap.map_group_operation(
+        calculate_count, compute=False, min_grpcount=20
+    )
+    partcounttask = snap.map_group_operation(
         calculate_partcount, compute=False, chunksize=int(3e6)
     )
-    hidtask = snap.map_halo_operation(
+    hidtask = snap.map_group_operation(
         calculate_haloid, compute=False, chunksize=int(3e6)
     )
     count = counttask.compute()
@@ -64,7 +93,7 @@ def halooperations(path, catalogpath=None):
 
     # test nmax
     nmax = 10
-    partcounttask = snap.map_halo_operation(
+    partcounttask = snap.map_group_operation(
         calculate_partcount, compute=False, chunksize=int(3e6), nmax=nmax
     )
     partcount2 = partcounttask.compute()
@@ -73,7 +102,7 @@ def halooperations(path, catalogpath=None):
 
     # test idxlist
     idxlist = [3, 5, 7, 25200]
-    partcounttask = snap.map_halo_operation(
+    partcounttask = snap.map_group_operation(
         calculate_partcount, compute=False, chunksize=int(3e6), idxlist=idxlist
     )
     partcount2 = partcounttask.compute()
@@ -83,20 +112,110 @@ def halooperations(path, catalogpath=None):
 
 # Test the map_halo_operation/grouped functionality
 # todo: need to have catalog have more than 1 halo for this.
-# def test_areposnapshot_halooperation(tngfile_dummy, gadgetcatalogfile_dummy):
+# def test_areposnapshot_selector_halos(tngfile_dummy, gadgetcatalogfile_dummy):
 #     path = tngfile_dummy.path
 #     catalogpath = gadgetcatalogfile_dummy.path
 #     halooperations(path, catalogpath)
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_areposnapshot_halooperation_realdata(testdatapath):
+def test_areposnapshot_selector_halos_realdata(testdatapath):
     halooperations(testdatapath)
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_areposnapshot_selector_subhalos_realdata(testdatapath):
+    snap = load(testdatapath)
+    # "easy starting point as subhalos are guaranteed to have dm particles"
+    # apparently above statement is not true. there are subhalos without dm particles in TNG.
+    parttype = "PartType1"
+
+    def calculate_pindex_min(uid, parttype=parttype):
+        """Minimum particle index to consider."""
+        try:
+            return uid.min()
+        except:  # noqa
+            return -21
+
+    def calculate_subhalocount(SubhaloID, parttype=parttype):
+        """Number of unique subhalo associations found in each subhalo. Has to be 1 exactly."""
+        return np.unique(SubhaloID).shape[0]
+
+    def calculate_halocount(GroupID, parttype=parttype, dtype=np.int64):
+        """Number of unique halo associations found in each subhalo. Has to be 1 exactly."""
+        return np.unique(GroupID).shape[0]
+
+    def calculate_partcount(SubhaloID, parttype=parttype, dtype=np.int64):
+        """Particle Count per halo."""
+        return SubhaloID.shape[0]
+
+    def calculate_subhaloid(
+        SubhaloID, parttype=parttype, fill_value=-21, dtype=np.int64
+    ):
+        """returns Subhalo ID"""
+        return SubhaloID[0]
+
+    def calculate_haloid(GroupID, parttype=parttype, fill_value=-21, dtype=np.int64):
+        """returns Halo ID"""
+        return GroupID[0]
+
+    pindextask = snap.map_group_operation(
+        calculate_pindex_min, compute=False, min_grpcount=20, objtype="subhalo"
+    )
+    shcounttask = snap.map_group_operation(
+        calculate_subhalocount, compute=False, min_grpcount=20, objtype="subhalo"
+    )
+    hcounttask = snap.map_group_operation(
+        calculate_halocount, compute=False, min_grpcount=20, objtype="subhalo"
+    )
+    partcounttask = snap.map_group_operation(
+        calculate_partcount, compute=False, chunksize=int(3e6), objtype="subhalo"
+    )
+    hidtask = snap.map_group_operation(
+        calculate_haloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+    )
+    sidtask = snap.map_group_operation(
+        calculate_subhaloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+    )
+    pindex_min = pindextask.compute()
+    hcount = hcounttask.compute()
+    shcount = shcounttask.compute()
+    partcount = partcounttask.compute()
+    hid = hidtask.compute()
+    sid = sidtask.compute()
+    # the hid should SubhaloGrNr
+    # the sid should just be the calling subhalo index itself
+
+    shgrnr = snap.data["Subhalo"]["SubhaloGrNr"].compute()
+    assert hid.shape[0] == shgrnr.shape[0]
+
+    sh_pcount = snap.data["Subhalo"]["SubhaloLenType"][
+        :, part_type_num(parttype)
+    ].compute()
+    mask = sh_pcount > 0
+
+    # each subhalo belongs only to one halo
+    assert np.all(hcount[mask] == 1)
+    # all subhalo particles of given subhalo to one halo (which is itself...)
+    assert np.all(shcount[mask] == 1)
+    # all particles of given subhalo only belong to the parent halo
+    assert np.all(hid[mask] == shgrnr[mask])
+    # all particles of given subhalo only belong to a specified subhalo
+    assert np.all(sid[mask] == np.arange(sid.shape[0])[mask])
+
+    # check for correct particle offsets
+    shoffsets = snap.get_subhalooffsets(parttype)
+    assert np.all(pindex_min[mask] == shoffsets[mask])
+
+    # check for correct particle count
+    shlengths = snap.get_subhalolengths(parttype)
+    assert np.all(partcount[mask] == shlengths[mask])
 
 
 @require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])
 def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
+
     # check bound mass sums as a start
     g = snp.grouped("Masses")
     boundmass = np.sum(g.sum().evaluate())
@@ -146,4 +265,9 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     idxlist = [3, 5, 7, 25200]
     m4 = snp.grouped("Masses").sum().evaluate(idxlist=idxlist)
     assert m4.shape[0] == len(idxlist)
-    assert np.allclose(m[idxlist], m10)
+    assert np.allclose(m[idxlist], m4)
+
+    # Test subhalos
+    nsubs = snp.data["Subhalo"]["SubhaloMass"].shape[0]
+    m = snp.grouped("Masses", objtype="subhalos").sum().evaluate()
+    assert m.shape[0] == nsubs

@@ -31,24 +31,32 @@ log = logging.getLogger(__name__)
 class ArepoSelector(Selector):
     def __init__(self) -> None:
         super().__init__()
-        self.keys = ["haloID", "unbound"]
+        self.keys = ["haloID", "subhaloID", "unbound"]
 
     def prepare(self, *args, **kwargs) -> None:
-        snap = args[0]
+        if all([kwargs.get(k, None) is None for k in self.keys]):
+            return  # no specific selection, thus just return
+        snap: ArepoSnapshot = args[0]
         halo_id = kwargs.get("haloID", None)
+        subhalo_id = kwargs.get("subhaloID", None)
         unbound = kwargs.get("unbound", None)
-        if halo_id is None and unbound is None:
-            return
-        elif unbound is True and halo_id is not None:
+
+        if halo_id is not None and subhalo_id is not None:
+            raise ValueError("Cannot select for haloID and subhaloID at the same time.")
+
+        if unbound is True and (halo_id is not None or subhalo_id is not None):
             raise ValueError(
-                "Cannot select for haloID and unbound particles at the same time."
+                "Cannot select haloID/subhaloID and unbound particles at the same time."
             )
+
         if snap.catalog is None:
             raise ValueError("Cannot select for haloID without catalog loaded.")
 
         # select for halo
-        if halo_id is not None:
-            self.select_halo(snap, halo_id)
+        idx = subhalo_id if subhalo_id is not None else halo_id
+        objtype = "subhalo" if subhalo_id is not None else "halo"
+        if idx is not None:
+            self.select_group(snap, idx, objtype=objtype)
         elif unbound is True:
             self.select_unbound(snap)
 
@@ -71,9 +79,17 @@ class ArepoSelector(Selector):
                     self.data[p][k] = v[offset:-1]
         snap.data = self.data
 
-    def select_halo(self, snap, halo_id):
-        lengths = self.data_backup["Group"]["GroupLenType"][halo_id, :].compute()
-        offsets = self.data_backup["Group"]["GroupOffsetsType"][halo_id, :].compute()
+    def select_group(self, snap, idx, objtype="Group"):
+        objtype = grp_type_str(objtype)
+        if objtype == "halo":
+            lengths = self.data_backup["Group"]["GroupLenType"][idx, :].compute()
+            offsets = self.data_backup["Group"]["GroupOffsetsType"][idx, :].compute()
+        elif objtype == "subhalo":
+            lengths = {i: snap.get_subhalolengths(i)[idx] for i in range(6)}
+            offsets = {i: snap.get_subhalooffsets(i)[idx] for i in range(6)}
+        else:
+            raise ValueError("Unknown object type: %s" % objtype)
+
         for p in self.data_backup:
             splt = p.split("PartType")
             if len(splt) == 1:
@@ -101,6 +117,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.config = {}
         self.parameters = {}
         self._grouplengths = {}
+        self._subhalolengths = {}
+        # not needed for group catalogs as entries are back-to-back there, we will provide a property for this
+        self._subhalooffsets = {}
         self.misc = {}  # for storing misc info
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:
@@ -427,7 +446,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             )
 
     @computedecorator
-    def map_halo_operation(
+    def map_group_operation(
         self,
         func,
         chunksize=int(3e7),
@@ -436,12 +455,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         chunksize_bytes=None,
         nmax=None,
         idxlist=None,
+        objtype="halo",
     ):
         """
         Apply a function to each halo in the catalog.
 
         Parameters
         ----------
+        objtype: str
+            Type of object to process. Can be "halo" or "subhalo". Default: "halo"
         idxlist: Optional[np.ndarray]
             List of halo indices to process. If not provided, all halos are processed.
         func: function
@@ -466,10 +488,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             fieldnames = get_args(func)
         parttype = dfltkwargs.get("parttype", "PartType0")
         entry_nbytes_in = np.sum([self.data[parttype][f][0].nbytes for f in fieldnames])
-        lengths = self.get_grouplengths(parttype=parttype)
+        objtype = grp_type_str(objtype)
+        if objtype == "halo":
+            lengths = self.get_grouplengths(parttype=parttype)
+            offsets = self.get_groupoffsets(parttype=parttype)
+        elif objtype == "subhalo":
+            lengths = self.get_subhalolengths(parttype=parttype)
+            offsets = self.get_subhalooffsets(parttype=parttype)
+        else:
+            raise ValueError(f"objtype must be 'halo' or 'subhalo', not {objtype}")
         arrdict = self.data[parttype]
-        return map_halo_operation(
+        return map_group_operation(
             func,
+            offsets,
             lengths,
             arrdict,
             chunksize=chunksize,
@@ -513,10 +544,64 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             self._grouplengths[ptype] = lengths
         return self._grouplengths[ptype]
 
+    def get_groupoffsets(self, parttype="PartType0"):
+        if parttype not in self._grouplengths:
+            # need to calculate group lengths first
+            self.get_grouplengths(parttype=parttype)
+        return self._groupoffsets[parttype]
+
+    @property
+    def _groupoffsets(self):
+        lengths = self._grouplengths
+        offsets = {
+            k: np.concatenate([[0], np.cumsum(v)[:-1]]) for k, v in lengths.items()
+        }
+        return offsets
+
+    def get_subhalolengths(self, parttype="PartType0"):
+        """Get the total number of particles of a given type in all halos."""
+        pnum = part_type_num(parttype)
+        ptype = "PartType%i" % pnum
+        if ptype in self._subhalolengths:
+            return self._subhalolengths[ptype]
+        lengths = self.data["Subhalo"]["SubhaloLenType"][:, pnum].compute()
+        if isinstance(lengths, pint.Quantity):
+            lengths = lengths.magnitude
+        self._subhalolengths[ptype] = lengths
+        return self._subhalolengths[ptype]
+
+    def get_subhalooffsets(self, parttype="PartType0"):
+        pnum = part_type_num(parttype)
+        ptype = "PartType%i" % pnum
+        if ptype in self._subhalooffsets:
+            return self._subhalooffsets[ptype]  # use cached result
+        goffsets = self.get_groupoffsets(ptype)
+        shgrnr = self.data["Subhalo"]["SubhaloGrNr"]
+        # calculate the index of the first particle for the central subhalo of each subhalos's parent halo
+        shoffset_central = goffsets[shgrnr]
+
+        grpfirstsub = self.data["Group"]["GroupFirstSub"]
+        shlens = self.get_subhalolengths(ptype)
+        shoffsets = np.concatenate([[0], np.cumsum(shlens)[:-1]])
+
+        # particle offset for the first subhalo of each group that a subhalo belongs to
+        shfirstshoffset = shoffsets[grpfirstsub[shgrnr]]
+
+        # "LocalSubhaloOffset": particle offset of each subhalo in the parent group
+        shoffset_local = shoffsets - shfirstshoffset
+
+        # "SubhaloOffset": particle offset of each subhalo in the simulation
+        offsets = shoffset_central + shoffset_local
+
+        self._subhalooffsets[ptype] = offsets
+
+        return offsets
+
     def grouped(
         self,
         fields: Union[str, da.Array, List[str], Dict[str, da.Array]] = "",
         parttype="PartType0",
+        objtype="halo",
     ):
         inputfields = None
         if isinstance(fields, str):
@@ -537,8 +622,21 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             inputfields = list(arrdict.keys())
         else:
             raise ValueError("Unknown input type '%s'." % type(fields))
+        objtype = grp_type_str(objtype)
+        if objtype == "halo":
+            offsets = self.get_groupoffsets(parttype=parttype)
+            lengths = self.get_grouplengths(parttype=parttype)
+        elif objtype == "subhalo":
+            offsets = self.get_subhalooffsets(parttype=parttype)
+            lengths = self.get_subhalolengths(parttype=parttype)
+        else:
+            raise ValueError("Unknown object type '%s'." % objtype)
+
         gop = GroupAwareOperation(
-            self.get_grouplengths(parttype=parttype), arrdict, inputfields=inputfields
+            offsets,
+            lengths,
+            arrdict,
+            inputfields=inputfields,
         )
         return gop
 
@@ -562,11 +660,25 @@ class ArepoCatalog(ArepoSnapshot):
 class GroupAwareOperation:
     opfuncs = dict(min=np.min, max=np.max, sum=np.sum, half=lambda x: x[::2])
     finalops = {"min", "max", "sum"}
-    __slots__ = ("arrs", "ops", "lengths", "final", "inputfields", "opfuncs_custom")
+    __slots__ = (
+        "arrs",
+        "ops",
+        "offsets",
+        "lengths",
+        "final",
+        "inputfields",
+        "opfuncs_custom",
+    )
 
     def __init__(
-        self, lengths: NDArray, arrs: Dict[str, da.Array], ops=None, inputfields=None
+        self,
+        offsets: NDArray,
+        lengths: NDArray,
+        arrs: Dict[str, da.Array],
+        ops=None,
+        inputfields=None,
     ):
+        self.offsets = offsets
         self.lengths = lengths
         self.arrs = arrs
         self.opfuncs_custom = {}
@@ -624,11 +736,15 @@ class GroupAwareOperation:
     def __copy__(self):
         # overwrite method so that copy holds a new ops list.
         c = type(self)(
-            self.lengths, self.arrs, ops=list(self.ops), inputfields=self.inputfields
+            self.offsets,
+            self.lengths,
+            self.arrs,
+            ops=list(self.ops),
+            inputfields=self.inputfields,
         )
         return c
 
-    def evaluate(self, nmax=None, compute=True):
+    def evaluate(self, nmax=None, idxlist=None, compute=True):
         # final operations: those that can only be at end of chain
         # intermediate operations: those that can only be prior to end of chain
         funcdict = dict()
@@ -668,8 +784,14 @@ class GroupAwareOperation:
                     "Specify field to operate on in operation or grouped()."
                 )
 
-        res = map_halo_operation(
-            func, self.lengths, self.arrs, fieldnames=fieldnames, nmax=nmax
+        res = map_group_operation(
+            func,
+            self.offsets,
+            self.lengths,
+            self.arrs,
+            fieldnames=fieldnames,
+            nmax=nmax,
+            idxlist=idxlist,
         )
         if compute:
             res = res.compute()
@@ -678,28 +800,27 @@ class GroupAwareOperation:
 
 def wrap_func_scalar(
     func,
-    halolengths_in_chunks,
+    offsets_in_chunks,
+    lengths_in_chunks,
     *arrs,
     block_info=None,
     block_id=None,
     func_output_shape=(1,),
     func_output_dtype="float64",
-    func_output_default=0,
+    fill_value=0,
 ):
-    lengths = halolengths_in_chunks[block_id[0]]
+    offsets = offsets_in_chunks[block_id[0]]
+    lengths = lengths_in_chunks[block_id[0]]
 
-    offsets = np.cumsum([0] + list(lengths))
     res = []
-    for i, o in enumerate(offsets[:-1]):
-        if o == offsets[i + 1]:
-            res.append(
-                func_output_default
-                * np.ones(func_output_shape, dtype=func_output_dtype)
-            )
+    for i, length in enumerate(lengths):
+        o = offsets[i]
+        if length == 0:
+            res.append(fill_value * np.ones(func_output_shape, dtype=func_output_dtype))
             if func_output_shape == (1,):
                 res[-1] = res[-1].item()
             continue
-        arrchunks = [arr[o : offsets[i + 1]] for arr in arrs]
+        arrchunks = [arr[o : o + length] for arr in arrs]
         res.append(func(*arrchunks))
     return np.array(res)
 
@@ -953,6 +1074,14 @@ def get_shcounts_shcells(SubhaloGrNr, hlength):
     return shcounts, shnumber
 
 
+def grp_type_str(gtype):
+    if str(gtype).lower() in ["group", "groups", "halo", "halos"]:
+        return "halo"
+    if str(gtype).lower() in ["subgroup", "subgroups", "subhalo", "subhalos"]:
+        return "subhalo"
+    raise ValueError("Unknown group type: %s" % gtype)
+
+
 def part_type_num(ptype):
     """Mapping between common names and numeric particle types."""
     ptype = str(ptype).replace("PartType", "")
@@ -1006,7 +1135,7 @@ def memorycost_limiter(cost_memory, cost_cpu, list_chunkedges, cost_memory_max):
     return list_chunkedges_new
 
 
-def map_halo_operation_get_chunkedges(
+def map_group_operation_get_chunkedges(
     lengths,
     entry_nbytes_in,
     entry_nbytes_out,
@@ -1073,8 +1202,9 @@ def map_halo_operation_get_chunkedges(
     return list_chunkedges
 
 
-def map_halo_operation(
+def map_group_operation(
     func,
+    offsets,
     lengths,
     arrdict,
     chunksize=int(3e7),
@@ -1095,6 +1225,8 @@ def map_halo_operation(
     nmax: Optional[int]
         Only process the first nmax halos.
     func
+    offsets: np.ndarray
+        Offset of each group in the particle catalog.
     lengths: np.ndarray
         Number of particles per halo.
     arrdict
@@ -1121,15 +1253,20 @@ def map_halo_operation(
         fieldnames = get_args(func)
     shape = dfltkwargs.get("shape", (1,))
     dtype = dfltkwargs.get("dtype", "float64")
-    default = dfltkwargs.get("default", 0)
+    fill_value = dfltkwargs.get("fill_value", 0)
 
     if idxlist is not None and nmax is not None:
         raise ValueError("Cannot specify both idxlist and nmax.")
 
+    lengths_all = lengths
+    offsets_all = offsets
+    if len(lengths) == len(offsets):
+        # the offsets array here is one longer here, holding the total number of particles in the last halo.
+        offsets_all = np.concatenate([offsets_all, [offsets_all[-1] + lengths[-1]]])
+
     if nmax is not None:
         lengths = lengths[:nmax]
-
-    offsets = np.concatenate([[0], np.cumsum(lengths)])
+        offsets = offsets[:nmax]
 
     if idxlist is not None:
         # make sure idxlist is sorted and unique
@@ -1138,57 +1275,83 @@ def map_halo_operation(
         # make sure idxlist is within range
         if np.min(idxlist) < 0 or np.max(idxlist) >= lengths.shape[0]:
             raise ValueError(
-                "idxlist elements must be in [%i, %i)." % (0, lengths.shape[0])
+                "idxlist elements must be in [%i, %i), but covers range [%i, %i]."
+                % (0, lengths.shape[0], np.min(idxlist), np.max(idxlist))
             )
-        offsets = np.concatenate(
-            [[0], offsets[1:][idxlist]]
-        )  # offsets is one longer than lengths
+        offsets = offsets[idxlist]
         lengths = lengths[idxlist]
+
+    if len(lengths) == len(offsets):
+        # the offsets array here is one longer here, holding the total number of particles in the last halo.
+        offsets = np.concatenate([offsets, [offsets[-1] + lengths[-1]]])
 
     # Determine chunkedges automatically
     # TODO: very messy and inefficient routine. improve some time.
     # TODO: Set entry_bytes_out
     nbytes_dtype_out = 4  # TODO: hardcode 4 byte output dtype as estimate for now
     entry_nbytes_out = nbytes_dtype_out * np.product(shape)
-    list_chunkedges = map_halo_operation_get_chunkedges(
-        lengths,
-        entry_nbytes_in,
-        entry_nbytes_out,
-        cpucost_halo=cpucost_halo,
-        min_grpcount=min_grpcount,
-        chunksize_bytes=chunksize_bytes,
-    )
+    # list_chunkedges refers to bounds of index intervals to be processed together
+    # if idxlist is specified, then these indices do not have to refer to group indices
 
-    # TODO: Get rid of oindex; only here because have not adjusted code to map_halo_operation_get_chunkedges
-    totlength = int(offsets[-1])
-    oindex = np.array(list(list_chunkedges[:, 0]) + [list_chunkedges[-1, -1]])
+    # if idxlist is given, we enforce that particle data is contiguous
+    # by putting each idx from idxlist into its own chunk.
+    # in the future, we should optimize this
+    if idxlist is not None:
+        list_chunkedges = [[idx, idx + 1] for idx in np.arange(len(idxlist))]
+    else:
+        list_chunkedges = map_group_operation_get_chunkedges(
+            lengths,
+            entry_nbytes_in,
+            entry_nbytes_out,
+            cpucost_halo=cpucost_halo,
+            min_grpcount=min_grpcount,
+            chunksize_bytes=chunksize_bytes,
+        )
+
+    minentry = offsets[0]
+    maxentry = offsets[-1]  # the last particle that needs to be processed
+
+    # chunks specify the number of groups in each chunk
+    chunks = [tuple(np.diff(list_chunkedges, axis=1).flatten())]
+
+    # slcoffsets = [offsets[chunkedge[0]] for chunkedge in list_chunkedges]
+    # the actual length of relevant data in each chunk
+    slclengths = [
+        offsets[chunkedge[1]] - offsets[chunkedge[0]] for chunkedge in list_chunkedges
+    ]
+    if idxlist is not None:
+        # the chunk length to be fed into map_blocks
+        tmplist = np.concatenate([idxlist, [len(lengths_all)]])
+        slclengths_map = [
+            offsets_all[tmplist[chunkedge[1]]] - offsets_all[tmplist[chunkedge[0]]]
+            for chunkedge in list_chunkedges
+        ]
+        slcoffsets_map = [
+            offsets_all[tmplist[chunkedge[0]]] for chunkedge in list_chunkedges
+        ]
+        slclengths_map[0] = slcoffsets_map[0]
+        slcoffsets_map[0] = 0
+    else:
+        slclengths_map = slclengths
 
     new_axis = None
-    chunks = np.diff(oindex)
-    # TODO: Where does the next line come from? Does not make sense
-    # chunks[-1] += lengths.shape[0]
-    chunks = [tuple(chunks.tolist())]
     if isinstance(shape, tuple) and shape != (1,):
-        chunks += [(s,) for s in shape]
         new_axis = np.arange(1, len(shape) + 1).tolist()
 
-    slcoffsets = offsets[oindex]
-    slclengths = np.diff(slcoffsets)
+    slcs = [slice(chunkedge[0], chunkedge[1]) for chunkedge in list_chunkedges]
+    offsets_in_chunks = [offsets[slc] - offsets[slc.start] for slc in slcs]
+    lengths_in_chunks = [lengths[slc] for slc in slcs]
+    d_oic = delayed(offsets_in_chunks)
+    d_hic = delayed(lengths_in_chunks)
 
-    slcs = [slice(oindex[i], oindex[i + 1]) for i in range(len(oindex) - 1)]
-    slcs[-1] = slice(oindex[-2], oindex[-1] + 2)  # hacky! why needed? see TODO above.
-
-    halolengths_in_chunks = [lengths[slc] for slc in slcs]
-
-    d_hic = delayed(halolengths_in_chunks)
-
-    arrs = [arrdict[f][:totlength] for f in fieldnames]
+    arrs = [arrdict[f][minentry:maxentry] for f in fieldnames]
     for i, arr in enumerate(arrs):
-        arrchunks = (tuple(slclengths.tolist()),)
+        arrchunks = ((tuple(slclengths)),)
         if len(arr.shape) > 1:
             arrchunks = arrchunks + (arr.shape[1:],)
         arrs[i] = arr.rechunk(chunks=arrchunks)
     arrdims = np.array([len(arr.shape) for arr in arrs])
+
     assert np.all(arrdims == arrdims[0])  # Cannot handle different input dims for now
 
     drop_axis = []
@@ -1198,6 +1361,7 @@ def map_halo_operation(
     calc = da.map_blocks(
         wrap_func_scalar,
         func,
+        d_oic,
         d_hic,
         *arrs,
         dtype=dtype,
@@ -1206,7 +1370,7 @@ def map_halo_operation(
         drop_axis=drop_axis,
         func_output_shape=shape,
         func_output_dtype=dtype,
-        func_output_default=default,
+        fill_value=fill_value,
     )
 
     return calc
