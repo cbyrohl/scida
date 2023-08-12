@@ -266,3 +266,8 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     m4 = snp.grouped("Masses").sum().evaluate(idxlist=idxlist)
     assert m4.shape[0] == len(idxlist)
     assert np.allclose(m[idxlist], m4)
+
+    # Test subhalos
+    nsubs = snp.data["Subhalo"]["SubhaloMass"].shape[0]
+    m = snp.grouped("Masses", objtype="subhalos").sum().evaluate()
+    assert m.shape[0] == nsubs

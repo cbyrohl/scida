@@ -601,6 +601,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self,
         fields: Union[str, da.Array, List[str], Dict[str, da.Array]] = "",
         parttype="PartType0",
+        objtype="halo",
     ):
         inputfields = None
         if isinstance(fields, str):
@@ -621,9 +622,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             inputfields = list(arrdict.keys())
         else:
             raise ValueError("Unknown input type '%s'." % type(fields))
+        objtype = grp_type_str(objtype)
+        if objtype == "halo":
+            offsets = self.get_groupoffsets(parttype=parttype)
+            lengths = self.get_grouplengths(parttype=parttype)
+        elif objtype == "subhalo":
+            offsets = self.get_subhalooffsets(parttype=parttype)
+            lengths = self.get_subhalolengths(parttype=parttype)
+        else:
+            raise ValueError("Unknown object type '%s'." % objtype)
+
         gop = GroupAwareOperation(
-            self.get_groupoffsets(parttype=parttype),
-            self.get_grouplengths(parttype=parttype),
+            offsets,
+            lengths,
             arrdict,
             inputfields=inputfields,
         )
@@ -1264,7 +1275,8 @@ def map_group_operation(
         # make sure idxlist is within range
         if np.min(idxlist) < 0 or np.max(idxlist) >= lengths.shape[0]:
             raise ValueError(
-                "idxlist elements must be in [%i, %i)." % (0, lengths.shape[0])
+                "idxlist elements must be in [%i, %i), but covers range [%i, %i]."
+                % (0, lengths.shape[0], np.min(idxlist), np.max(idxlist))
             )
         offsets = offsets[idxlist]
         lengths = lengths[idxlist]
