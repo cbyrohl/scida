@@ -147,3 +147,19 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     m4 = snp.grouped("Masses").sum().evaluate(idxlist=idxlist)
     assert m4.shape[0] == len(idxlist)
     assert np.allclose(m[idxlist], m10)
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_groupedoperations_nonscalar(testdatapath):
+    # Test non-scalar output
+    snp = load(testdatapath)
+    g = snp.grouped()
+
+    shape = (2,)
+
+    def customfunc(mass, fieldnames=["Masses"], shape=shape):
+        return np.array([np.min(mass), np.max(mass)])
+
+    s = g.apply(customfunc)
+    res = s.evaluate()
+    assert res.shape[1] == shape[0]

@@ -94,20 +94,6 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
     assert "Subhalo" in grp.data.keys()
 
 
-@require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])
-def test_interface_groupedoperations_nonscalar(testdata_areposnapshot_withcatalog):
-    # Test non-scalar output
-    snp = testdata_areposnapshot_withcatalog
-    g = snp.grouped()
-
-    def customfunc3(dens, vol, fieldnames=["Density", "Masses"], shape=(2,)):
-        return np.array([(dens * vol).max(), vol.max()])
-
-    s = g.apply(customfunc3)
-    res = s.evaluate()
-    print(res)
-
-
 @require_testdata("illustrissnapshot_withcatalog")
 def test_areposnapshot_load_withcatalog(testdata_illustrissnapshot_withcatalog):
     snp = testdata_illustrissnapshot_withcatalog
