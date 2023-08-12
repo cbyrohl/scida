@@ -3,6 +3,7 @@ import numpy as np
 import pint
 
 from scida import load
+from scida.customs.arepo.dataset import part_type_num
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
@@ -43,13 +44,18 @@ def halooperations(path, catalogpath=None):
 
     def calculate_haloid(GroupID, parttype="PartType0"):
         """returns Halo ID"""
-        return GroupID[-1]
+        if len(GroupID) > 0:
+            return GroupID[-1]
+        else:
+            return -21
 
-    counttask = snap.map_halo_operation(calculate_count, compute=False, min_grpcount=20)
-    partcounttask = snap.map_halo_operation(
+    counttask = snap.map_group_operation(
+        calculate_count, compute=False, min_grpcount=20
+    )
+    partcounttask = snap.map_group_operation(
         calculate_partcount, compute=False, chunksize=int(3e6)
     )
-    hidtask = snap.map_halo_operation(
+    hidtask = snap.map_group_operation(
         calculate_haloid, compute=False, chunksize=int(3e6)
     )
     count = counttask.compute()
@@ -76,7 +82,7 @@ def halooperations(path, catalogpath=None):
 
     # test nmax
     nmax = 10
-    partcounttask = snap.map_halo_operation(
+    partcounttask = snap.map_group_operation(
         calculate_partcount, compute=False, chunksize=int(3e6), nmax=nmax
     )
     partcount2 = partcounttask.compute()
@@ -85,7 +91,7 @@ def halooperations(path, catalogpath=None):
 
     # test idxlist
     idxlist = [3, 5, 7, 25200]
-    partcounttask = snap.map_halo_operation(
+    partcounttask = snap.map_group_operation(
         calculate_partcount, compute=False, chunksize=int(3e6), idxlist=idxlist
     )
     partcount2 = partcounttask.compute()
@@ -106,34 +112,93 @@ def test_areposnapshot_selector_halos_realdata(testdatapath):
     halooperations(testdatapath)
 
 
-# @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-# def test_areposnapshot_selector_subhalos_realdata(testdatapath):
-#     snap = load(testdatapath)
-#
-#     def calculate_count(SubhaloID, parttype="PartType0"):
-#         """Number of unique subhalo associations found in each subhalo. Has to be 1 exactly."""
-#         return np.unique(SubhaloID).shape[0]
-#
-#     def calculate_partcount(SubhaloID, parttype="PartType0"):
-#         """Particle Count per halo."""
-#         return SubhaloID.shape[0]
-#
-#     def calculate_haloid(SubhaloID, parttype="PartType0"):
-#         """returns Halo ID"""
-#         return SubhaloID[-1]
-#
-#     counttask = snap.map_halo_operation(calculate_count, compute=False, min_grpcount=20)
-#     partcounttask = snap.map_halo_operation(
-#         calculate_partcount, compute=False, chunksize=int(3e6)
-#     )
-#     hidtask = snap.map_halo_operation(
-#         calculate_haloid, compute=False, chunksize=int(3e6)
-#     )
-#     count = counttask.compute()
-#     partcount = partcounttask.compute()
-#     sid = hidtask.compute()
-#     print(sid)
-# TBD
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_areposnapshot_selector_subhalos_realdata(testdatapath):
+    snap = load(testdatapath)
+    # "easy starting point as subhalos are guaranteed to have dm particles"
+    # apparently above statement is not true. there are subhalos without dm particles in TNG.
+    parttype = "PartType1"
+
+    def calculate_pindex_min(uid, parttype=parttype):
+        """Minimum particle index to consider."""
+        try:
+            return uid.min()
+        except:  # noqa
+            return -21
+
+    def calculate_subhalocount(SubhaloID, parttype=parttype):
+        """Number of unique subhalo associations found in each subhalo. Has to be 1 exactly."""
+        return np.unique(SubhaloID).shape[0]
+
+    def calculate_halocount(GroupID, parttype=parttype, dtype=np.int64):
+        """Number of unique halo associations found in each subhalo. Has to be 1 exactly."""
+        return np.unique(GroupID).shape[0]
+
+    def calculate_partcount(SubhaloID, parttype=parttype, dtype=np.int64):
+        """Particle Count per halo."""
+        return SubhaloID.shape[0]
+
+    def calculate_subhaloid(
+        SubhaloID, parttype=parttype, fill_value=-21, dtype=np.int64
+    ):
+        """returns Subhalo ID"""
+        return SubhaloID[0]
+
+    def calculate_haloid(GroupID, parttype=parttype, fill_value=-21, dtype=np.int64):
+        """returns Halo ID"""
+        return GroupID[0]
+
+    pindextask = snap.map_group_operation(
+        calculate_pindex_min, compute=False, min_grpcount=20, objtype="subhalo"
+    )
+    shcounttask = snap.map_group_operation(
+        calculate_subhalocount, compute=False, min_grpcount=20, objtype="subhalo"
+    )
+    hcounttask = snap.map_group_operation(
+        calculate_halocount, compute=False, min_grpcount=20, objtype="subhalo"
+    )
+    partcounttask = snap.map_group_operation(
+        calculate_partcount, compute=False, chunksize=int(3e6), objtype="subhalo"
+    )
+    hidtask = snap.map_group_operation(
+        calculate_haloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+    )
+    sidtask = snap.map_group_operation(
+        calculate_subhaloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+    )
+    pindex_min = pindextask.compute()
+    hcount = hcounttask.compute()
+    shcount = shcounttask.compute()
+    partcount = partcounttask.compute()
+    hid = hidtask.compute()
+    sid = sidtask.compute()
+    # the hid should SubhaloGrNr
+    # the sid should just be the calling subhalo index itself
+
+    shgrnr = snap.data["Subhalo"]["SubhaloGrNr"].compute()
+    assert hid.shape[0] == shgrnr.shape[0]
+
+    sh_pcount = snap.data["Subhalo"]["SubhaloLenType"][
+        :, part_type_num(parttype)
+    ].compute()
+    mask = sh_pcount > 0
+
+    # each subhalo belongs only to one halo
+    assert np.all(hcount[mask] == 1)
+    # all subhalo particles of given subhalo to one halo (which is itself...)
+    assert np.all(shcount[mask] == 1)
+    # all particles of given subhalo only belong to the parent halo
+    assert np.all(hid[mask] == shgrnr[mask])
+    # all particles of given subhalo only belong to a specified subhalo
+    assert np.all(sid[mask] == np.arange(sid.shape[0])[mask])
+
+    # check for correct particle offsets
+    shoffsets = snap.get_subhalooffsets(parttype)
+    assert np.all(pindex_min[mask] == shoffsets[mask])
+
+    # check for correct particle count
+    shlengths = snap.get_subhalolengths(parttype)
+    assert np.all(partcount[mask] == shlengths[mask])
 
 
 @require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])

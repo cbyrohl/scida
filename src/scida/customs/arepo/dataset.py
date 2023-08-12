@@ -447,7 +447,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             )
 
     @computedecorator
-    def map_halo_operation(
+    def map_group_operation(
         self,
         func,
         chunksize=int(3e7),
@@ -494,12 +494,12 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             lengths = self.get_grouplengths(parttype=parttype)
             offsets = self.get_groupoffsets(parttype=parttype)
         elif objtype == "subhalo":
-            lengths = self.get_subgrouplengths(parttype=parttype)
-            offsets = self.get_subgroupoffsets(parttype=parttype)
+            lengths = self.get_subhalolengths(parttype=parttype)
+            offsets = self.get_subhalooffsets(parttype=parttype)
         else:
             raise ValueError(f"objtype must be 'halo' or 'subhalo', not {objtype}")
         arrdict = self.data[parttype]
-        return map_halo_operation(
+        return map_group_operation(
             func,
             offsets,
             lengths,
@@ -576,7 +576,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         ptype = "PartType%i" % pnum
         if ptype in self._subhalooffsets:
             return self._subhalooffsets[ptype]  # use cached result
-        goffsets = self._groupoffsets[ptype]
+        goffsets = self.get_groupoffsets(ptype)
         shgrnr = self.data["Subhalo"]["SubhaloGrNr"]
         # calculate the index of the first particle for the central subhalo of each subhalos's parent halo
         shoffset_central = goffsets[shgrnr]
@@ -774,7 +774,7 @@ class GroupAwareOperation:
                     "Specify field to operate on in operation or grouped()."
                 )
 
-        res = map_halo_operation(
+        res = map_group_operation(
             func,
             self.offsets,
             self.lengths,
@@ -790,28 +790,27 @@ class GroupAwareOperation:
 
 def wrap_func_scalar(
     func,
-    halolengths_in_chunks,
+    offsets_in_chunks,
+    lengths_in_chunks,
     *arrs,
     block_info=None,
     block_id=None,
     func_output_shape=(1,),
     func_output_dtype="float64",
-    func_output_default=0,
+    fill_value=0,
 ):
-    lengths = halolengths_in_chunks[block_id[0]]
+    offsets = offsets_in_chunks[block_id[0]]
+    lengths = lengths_in_chunks[block_id[0]]
 
-    offsets = np.cumsum([0] + list(lengths))
     res = []
-    for i, o in enumerate(offsets[:-1]):
-        if o == offsets[i + 1]:
-            res.append(
-                func_output_default
-                * np.ones(func_output_shape, dtype=func_output_dtype)
-            )
+    for i, length in enumerate(lengths):
+        o = offsets[i]
+        if length == 0:
+            res.append(fill_value * np.ones(func_output_shape, dtype=func_output_dtype))
             if func_output_shape == (1,):
                 res[-1] = res[-1].item()
             continue
-        arrchunks = [arr[o : offsets[i + 1]] for arr in arrs]
+        arrchunks = [arr[o : o + length] for arr in arrs]
         res.append(func(*arrchunks))
     return np.array(res)
 
@@ -1126,7 +1125,7 @@ def memorycost_limiter(cost_memory, cost_cpu, list_chunkedges, cost_memory_max):
     return list_chunkedges_new
 
 
-def map_halo_operation_get_chunkedges(
+def map_group_operation_get_chunkedges(
     lengths,
     entry_nbytes_in,
     entry_nbytes_out,
@@ -1193,7 +1192,7 @@ def map_halo_operation_get_chunkedges(
     return list_chunkedges
 
 
-def map_halo_operation(
+def map_group_operation(
     func,
     offsets,
     lengths,
@@ -1244,7 +1243,7 @@ def map_halo_operation(
         fieldnames = get_args(func)
     shape = dfltkwargs.get("shape", (1,))
     dtype = dfltkwargs.get("dtype", "float64")
-    default = dfltkwargs.get("default", 0)
+    fill_value = dfltkwargs.get("fill_value", 0)
 
     if idxlist is not None and nmax is not None:
         raise ValueError("Cannot specify both idxlist and nmax.")
@@ -1289,7 +1288,7 @@ def map_halo_operation(
     if idxlist is not None:
         list_chunkedges = [[idx, idx + 1] for idx in np.arange(len(idxlist))]
     else:
-        list_chunkedges = map_halo_operation_get_chunkedges(
+        list_chunkedges = map_group_operation_get_chunkedges(
             lengths,
             entry_nbytes_in,
             entry_nbytes_out,
@@ -1298,7 +1297,6 @@ def map_halo_operation(
             chunksize_bytes=chunksize_bytes,
         )
 
-    totlength = np.sum(lengths)
     minentry = offsets[0]
     maxentry = offsets[-1]  # the last particle that needs to be processed
 
@@ -1313,7 +1311,6 @@ def map_halo_operation(
     if idxlist is not None:
         # the chunk length to be fed into map_blocks
         tmplist = np.concatenate([idxlist, [len(lengths_all)]])
-        print(tmplist)
         slclengths_map = [
             offsets_all[tmplist[chunkedge[1]]] - offsets_all[tmplist[chunkedge[0]]]
             for chunkedge in list_chunkedges
@@ -1323,15 +1320,6 @@ def map_halo_operation(
         ]
         slclengths_map[0] = slcoffsets_map[0]
         slcoffsets_map[0] = 0
-
-        print("lens")
-        print(slclengths_map)
-        print(slclengths)
-        print("sums")
-        print(np.sum(slclengths_map))
-        print(np.sum(slclengths))
-        print(maxentry, totlength)
-        print(minentry)
     else:
         slclengths_map = slclengths
 
@@ -1340,8 +1328,10 @@ def map_halo_operation(
         new_axis = np.arange(1, len(shape) + 1).tolist()
 
     slcs = [slice(chunkedge[0], chunkedge[1]) for chunkedge in list_chunkedges]
-    halolengths_in_chunks = [lengths[slc] for slc in slcs]
-    d_hic = delayed(halolengths_in_chunks)
+    offsets_in_chunks = [offsets[slc] - offsets[slc.start] for slc in slcs]
+    lengths_in_chunks = [lengths[slc] for slc in slcs]
+    d_oic = delayed(offsets_in_chunks)
+    d_hic = delayed(lengths_in_chunks)
 
     arrs = [arrdict[f][minentry:maxentry] for f in fieldnames]
     for i, arr in enumerate(arrs):
@@ -1360,6 +1350,7 @@ def map_halo_operation(
     calc = da.map_blocks(
         wrap_func_scalar,
         func,
+        d_oic,
         d_hic,
         *arrs,
         dtype=dtype,
@@ -1368,7 +1359,7 @@ def map_halo_operation(
         drop_axis=drop_axis,
         func_output_shape=shape,
         func_output_dtype=dtype,
-        func_output_default=default,
+        fill_value=fill_value,
     )
 
     return calc
