@@ -61,7 +61,21 @@ def test_tng_units(testdatapath):
                     print(
                         "Skipping validation of '%s' due to underlying Nan entry." % k
                     )
-                print("WARNING (TODO): Field '%s' has no units." % k)
+                if not any(
+                    [
+                        s in k
+                        for s in [
+                            "ID",
+                            "GrNr",
+                            "Len",
+                            "Flag",
+                            "Parent",
+                            "GroupFirstSub",
+                            "Nsubs",
+                        ]
+                    ]
+                ):
+                    print("WARNING (TODO): Field '%s' has no units." % k)
             u2 = units[pk2][k]
             mag2 = ds_nounits.data[pk1][k][0].compute()
             if isinstance(u2, u.Quantity):
@@ -75,7 +89,7 @@ def test_tng_units(testdatapath):
                     print("in cgs: ", u2)
                 print("mag1, mag2:", mag1, mag2)
                 print("ratio:", mag1 / mag2)
-                raise ValueError("Entries do not match.")
+                assert mag1 == pytest.approx(mag2, rel=1e-3)
     pass
 
 

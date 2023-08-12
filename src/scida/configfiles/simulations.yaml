@@ -4,7 +4,7 @@ defs:
     dataset_type:
       series: ArepoSimulation
       dataset: ArepoSnapshot
-    unitfile: units/illustris.yaml
+    unitfile: units/gadget.yaml
   tng_props: &tng_props
     code: arepo
     suite: TNG
@@ -12,7 +12,7 @@ defs:
   illustris_params: &illustris_params
     dataset_type:
       dataset: ArepoSnapshot
-    unitfile: units/illustris.yaml
+    unitfile: units/gadget.yaml
 
 data:
   TNG50:
@@ -122,3 +122,9 @@ data:
     dataset_type:
       series: GizmoSimulation
       dataset: GizmoSnapshot
+
+  LGalaxies:
+    unitfile: units/lgalaxies.yaml
+    identifiers:
+      Header:
+        Simulation: "L-Galaxies run on the Millennium Simulation"

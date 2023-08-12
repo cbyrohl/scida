@@ -26,6 +26,9 @@ nav:
     - 'Derived fields': derived_fields.md
     - 'Data series': series.md
     - 'Large datasets': largedatasets.md
+  - 'Advanced Topics':
+    - 'Arepo Simulations':
+      - 'Halo Catalogs': halocatalogs.md
   # - 'Cookbook':
   #   - 'Units': notebooks/cookbook/units.ipynb
   - 'FAQ': faq.md

@@ -40,6 +40,7 @@ class CosmologyMixin(Mixin):
 
 def get_redshift_from_rawmetadata(metadata_raw):
     z = metadata_raw.get("/Header", {}).get("Redshift", np.nan)
+    z = float(z)
     return z
 
 

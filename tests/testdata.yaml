@@ -132,6 +132,37 @@ testdata:
     fn: minimal_MTNG-arepo270hydro_simulation
 
   # minimal datasets extracted with testdata_extractor.py
+  TNG100-2_snapshot_z0_minimal:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|TNG100-2|0|2
+    fn: minimal_TNG100-2_snapshot_z0.hdf5
+
+  TNG100-2_group_z0_minimal:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|TNG100-2|1|2
+    fn: minimal_TNG100-2_group_z0.hdf5
+
+  TNG100-3_snapshot_z0_minimal:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|TNG100-3|0|2
+    fn: minimal_TNG100-3_snapshot_z0.hdf5
+
+  TNG100-3_group_z0_minimal:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|TNG100-3|1|2
+    fn: minimal_TNG100-3_group_z0.hdf5
+
+
+
+
   TNG50-1_snapshot_z3_minimal:
     types:
       - interface
@@ -164,11 +195,28 @@ testdata:
     types:
       - interface
     fn: "minimal_FIRE2_snapshot_z1.hdf5"
+
   FIRE2_series_minimal:
     types:
       - series
       - areposimulation
     fn: "minimal_FIRE2_simulation"
+
+  LGal21_z3_minimal:
+    types:
+      - interface
+    fn: "minimal_LGal21_z3.hdf5"
+
+  LGal21_extra_z0_minimal:
+    types:
+      - interface
+    fn: "minimal_LGal21_extra_z0.hdf5"
+
+
+  LGal21_snapshot_z3:
+    types:
+      - interface
+    fn: "LGal_Ayromlou2021_snap33.hdf5"
 
   rockstar_halo:
     types:
