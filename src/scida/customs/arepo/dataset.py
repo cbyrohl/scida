@@ -54,8 +54,9 @@ class ArepoSelector(Selector):
 
         # select for halo
         idx = subhalo_id if subhalo_id is not None else halo_id
+        objtype = "subhalo" if subhalo_id is not None else "halo"
         if idx is not None:
-            self.select_group(snap, idx)
+            self.select_group(snap, idx, objtype=objtype)
         elif unbound is True:
             self.select_unbound(snap)
 
@@ -84,10 +85,8 @@ class ArepoSelector(Selector):
             lengths = self.data_backup["Group"]["GroupLenType"][idx, :].compute()
             offsets = self.data_backup["Group"]["GroupOffsetsType"][idx, :].compute()
         elif objtype == "subhalo":
-            # lengths = self.data_backup["Subhalo"]["SubhaloLenType"][idx, :].compute()
-            # offsets = self.data_backup["Subhalo"]["SubhaloOffsetsType"][idx, :].compute()
-            lengths = {i: snap.get_subhalolengths(i) for i in idx}
-            offsets = {i: snap.get_subhalooffsets(i) for i in idx}
+            lengths = {i: snap.get_subhalolengths(i)[idx] for i in range(6)}
+            offsets = {i: snap.get_subhalooffsets(i)[idx] for i in range(6)}
         else:
             raise ValueError("Unknown object type: %s" % objtype)
 

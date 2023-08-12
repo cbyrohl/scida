@@ -9,14 +9,25 @@ from tests.testdata_properties import require_testdata, require_testdata_path
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_selector(testdatapath):
+    parttype = "PartType0"
+    # test selecting by halo id
     hid = 41
     obj = load(testdatapath, units=False)
     d = obj.return_data(haloID=hid)
-    assert da.all(d["PartType0"]["GroupID"] == hid).compute()
+    assert da.all(d[parttype]["GroupID"] == hid).compute()
 
+    # test selecting by subhalo id
+    shid = 42 * 42
+    d = obj.return_data(subhaloID=shid)
+    p0_shid = d[parttype]["SubhaloID"]
+    assert p0_shid.shape[0] == obj.get_subhalolengths(parttype)[shid]
+    assert da.all(p0_shid == shid).compute()
+
+    # test selecting by unbound gas
     d = obj.return_data(unbound=True)
     # unbound gas has groupid = max_int64 = 9223372036854775807
-    assert da.all(d["PartType0"]["GroupID"] == 9223372036854775807).compute()
+    unbound_id = obj.misc["unboundID"]
+    assert da.all(d[parttype]["GroupID"] == unbound_id).compute()
 
 
 # test catalog calculation off (sub)halo lengths and offsets
