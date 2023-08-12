@@ -87,6 +87,11 @@ In many cases, we do not want the particle data of an individual group, but we w
     you can also pass a list of halo IDs to evaluate via the "idxlist" keyword.
     These keywords should be passed to the "evaluate" call.
 
+!!!+ note
+
+    By default, operations are done on for halos. By passing `objtype="subhalo"` to the
+    `grouped` call, the operation is done on subhalos instead.
+
 
 #### Baryon mass
 Let's say we want to calculate the baryon mass for each halo from the particles.
