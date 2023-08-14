@@ -1,9 +1,9 @@
 # Handling Large Data Sets
 Until now, we have applied our framework to a very small simulation.
-However, what if we are working with a very large data set 
+However, what if we are working with a very large data set
 (like the TNG50-1 cosmological simulation, which has $2160^3$ particles, $512$ times more than TNG50-4)?
 
-# Starting simple: computing in chunks
+## Starting simple: computing in chunks
 
 First, we can still run the same calculation as above, and it will "just work" (hopefully).
 
@@ -39,12 +39,13 @@ Wall time: 3min 16s
 
 ## More advanced: computing in parallel
 
-Rather than sequentially calculating large tasks, we can also run the computation in parallel. 
+Rather than sequentially calculating large tasks, we can also run the computation in parallel.
 
-To do so different advanced dask schedulers are available. 
+To do so different advanced dask schedulers are available.
 Here, we use the most straight forward [distributed scheduler](https://docs.dask.org/en/latest/how-to/deploy-dask/single-distributed.html).
 
-Usually, we would start a scheduler and then connect new workers (e.g. running on multiple compute/backend nodes of a HPC cluster). 
+### Running a LocalCluster
+Usually, we would start a scheduler and then connect new workers (e.g. running on multiple compute/backend nodes of a HPC cluster).
 After, tasks (either interactively or scripted) can leverage the power of these connected resources.
 
 For this example, we will use the same "distributed" scheduler/API, but keep things simple by using just the one (local) node we are currently running on.
@@ -53,7 +54,7 @@ While the result is eventually computed, it is a bit slow, primarily because the
 
 ```pycon
 >>> from dask.distributed import Client, LocalCluster
->>> cluster = LocalCluster(n_workers=16, threads_per_worker=1, 
+>>> cluster = LocalCluster(n_workers=16, threads_per_worker=1,
                            dashboard_address=":8787")
 >>> client = Client(cluster)
 >>> client
@@ -75,7 +76,7 @@ Wall time: 24.7 s
 52722.6796875 code_mass
 ```
 
-The progress bar, we could use for the default scheduler (before initializing `LocalCluster`), 
+The progress bar, we could use for the default scheduler (before initializing `LocalCluster`),
 is unavailable for the distributed scheduler.
 However, we can still view the progress of this task as it executes using its status dashboard
 (as a webpage in a new browser tab or within [jupyter lab](https://github.com/dask/dask-labextension)).
@@ -83,5 +84,31 @@ You can find it by clicking on the "Dashboard" link above.
 If running this notebook server remotely, e.g. on a login node of a HPC cluster,
 you may have to change the '127.0.0.1' part of the address to be the same machine name/IP.
 
+### Running a SLURMCluster
+
 If you are working with HPC resources, such as compute clusters with common schedulers (e.g. SLURM),
-check out [Dask-Jobqueue](https://jobqueue.dask.org/en/latest/) to automatically batch jobs spawning dask workers. 
+check out [Dask-Jobqueue](https://jobqueue.dask.org/en/latest/) to automatically batch jobs spawning dask workers.
+
+Below is an example using the SLURMCluster.
+We configure the job and node resources before submitting the job via the `scale()` method.
+
+``` pycon
+>>> from dask.distributed import Client
+>>> from dask_jobqueue import SLURMCluster
+>>> cluster = SLURMCluster(queue='p.large', cores=72, memory="500 GB",
+>>>                        processes=36,
+>>>                        scheduler_options={"dashboard_address": ":8811"})
+>>> cluster.scale(jobs=1)  # submit 1 job for 1 node
+>>> client = Client(cluster)
+
+>>> from scida import load
+>>> ds = load("TNG50_snapshot")
+>>> %time ds.data["PartType0"]["Masses"].sum().compute()
+CPU times: user 1.27 s, sys: 152 ms, total: 1.43 s
+Wall time: 21.4 s
+>>> client.shutdown()
+```
+
+The SLURM job will be killed by invoking `client.shutdown()` or if the spawning python process or ipython kernel dies.
+Make sure to properly handle exceptions, particularly in active jupyter notebooks, as allocated nodes might otherwise
+idle and not be cleaned up.
