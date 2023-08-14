@@ -39,7 +39,7 @@ def str_to_unit(
 
 
 def extract_units_from_attrs(
-    attrs,
+    attrs: dict,
     require: bool = False,
     mode: str = "cgs",
     ureg: Optional[pint.UnitRegistry] = None,
@@ -61,36 +61,18 @@ def extract_units_from_attrs(
     -------
 
     """
-    assert ureg is not None, "Always require passing registry now."
-    udict = {}
-    udict["length"] = str_to_unit("cm", ureg)
-    udict["mass"] = str_to_unit("g", ureg)
-    udict["velocity"] = str_to_unit("cm/s", ureg)
-    udict["time"] = str_to_unit("s", ureg)
-    if mode == "mks":
-        raise NotImplementedError("TBD.")
-        # udict["length"] = str_to_unit("m", ureg)
-        # udict["mass"] = str_to_unit("kg", ureg)
-        # udict["velocity"] = str_to_unit("m/s", ureg)
-        # udict["time"] = str_to_unit("s", ureg)
-    if mode == "code":
-        for k in ["length", "mass", "velocity", "time"]:
-            cstr = "code_" + k
-            if cstr in ureg:
-                udict[k] = str_to_unit(cstr, ureg)
     if mode not in ["code", "mks", "cgs"]:
         raise KeyError("Unknown unit mode '%s'." % mode)
-    if "h" in ureg:
-        udict["h"] = str_to_unit("h", ureg)
-    if "a" in ureg:
-        udict["a"] = str_to_unit("a", ureg)
-    # nothing to do if mode == "code" as we take values as they are
-    cgsfactor = ureg.Quantity(1.0)
-    # for non-codeunits, we need to be provided some conversion factor or explicit units
-    has_convfactor = False
-    has_expl_units = False
-    cgskey = None
-    if mode != "code":
+    udict = _get_default_units(mode, ureg)
+
+    if mode == "code":
+        # nothing to do if mode == "code" as we take values as they are
+        cgsfactor = ureg.Quantity(1.0)
+    else:
+        # for non-codeunits, we need to be provided some conversion factor or explicit units
+        has_convfactor = False
+        has_expl_units = False
+        cgskey = None
         # the common mode is to expect some hints how to convert to cgs
         # get the conversion factor
         cgskey = [k for k in attrs if "cgs" in k.lower()]
@@ -165,6 +147,50 @@ def extract_units_from_attrs(
     if require:
         raise ValueError("Could not find units.")
     return str_to_unit("", ureg)
+
+
+def _get_default_units(mode: str, ureg: pint.UnitRegistry) -> dict:
+    """
+    Get the default units for the given mode.
+    Parameters
+    ----------
+    mode
+        The unit mode to use (right now: cgs or code).
+    ureg
+        The unit registry to use.
+
+    Returns
+    -------
+    dict
+        The default units.
+    """
+    if mode not in ["code", "mks", "cgs"]:
+        raise KeyError("Unknown unit mode '%s'." % mode)
+    if mode == "code":
+        keys = ["length", "mass", "velocity", "time"]
+        udict = {k: str(ureg["code_" + k]) for k in keys if "code_" + k in ureg}
+    if mode == "mks":
+        udict = {
+            "length": ureg.m,
+            "mass": ureg.kg,
+            "velocity": ureg.m / ureg.s,
+            "time": ureg.s,
+        }
+    if mode == "cgs":
+        udict = {
+            "length": ureg.cm,
+            "mass": ureg.g,
+            "velocity": ureg.cm / ureg.s,
+            "time": ureg.s,
+        }
+
+    # common factors in cosmological simulations
+    if "h" in ureg:
+        udict["h"] = str_to_unit("h", ureg)
+    if "a" in ureg:
+        udict["a"] = str_to_unit("a", ureg)
+
+    return udict
 
 
 def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry, warn_redef=False):
