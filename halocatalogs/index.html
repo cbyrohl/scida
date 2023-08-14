@@ -917,10 +917,11 @@ as halos are ordered (in descending order) by their mass. For more fine-grained 
 you can also pass a list of halo IDs to evaluate via the "idxlist" keyword.
 These keywords should be passed to the "evaluate" call.</p>
 </details>
-<p>!!!+ note</p>
-<pre><code>By default, operations are done on for halos. By passing `objtype="subhalo"` to the
-`grouped` call, the operation is done on subhalos instead.
-</code></pre>
+<details class="note" open="open">
+<summary>Note</summary>
+<p>By default, operations are done on for halos. By passing <code>objtype="subhalo"</code> to the
+<code>grouped</code> call, the operation is done on subhalos instead.</p>
+</details>
 <h4 id="baryon-mass">Baryon mass</h4>
 <p>Let's say we want to calculate the baryon mass for each halo from the particles.</p>
 <div class="highlight"><pre><span></span><code><span class="n">mass</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">grouped</span><span class="p">(</span><span class="s2">"Masses"</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
