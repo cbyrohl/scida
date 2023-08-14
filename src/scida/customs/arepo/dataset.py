@@ -449,9 +449,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     def map_group_operation(
         self,
         func,
-        chunksize=int(3e7),
         cpucost_halo=1e4,
-        min_grpcount=None,
+        nchunks_min=None,
         chunksize_bytes=None,
         nmax=None,
         idxlist=None,
@@ -468,12 +467,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             List of halo indices to process. If not provided, all halos are processed.
         func: function
             Function to apply to each halo. Must take a dictionary of arrays as input.
-        chunksize: int
-            Number of particles to process at once. Default: 3e7
         cpucost_halo:
             "CPU cost" of processing a single halo. This is a relative value to the processing time per input particle
             used for calculating the dask chunks. Default: 1e4
-        min_grpcount: Optional[int]
+        nchunks_min: Optional[int]
             Minimum number of particles in a halo to process it. Default: None
         chunksize_bytes: Optional[int]
         nmax: Optional[int]
@@ -503,9 +500,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             offsets,
             lengths,
             arrdict,
-            chunksize=chunksize,
             cpucost_halo=cpucost_halo,
-            min_grpcount=min_grpcount,
+            nchunks_min=nchunks_min,
             chunksize_bytes=chunksize_bytes,
             entry_nbytes_in=entry_nbytes_in,
             nmax=nmax,
@@ -1152,7 +1148,7 @@ def map_group_operation_get_chunkedges(
     entry_nbytes_in,
     entry_nbytes_out,
     cpucost_halo=1.0,
-    min_grpcount=None,
+    nchunks_min=None,
     chunksize_bytes=None,
 ):
     """
@@ -1165,7 +1161,7 @@ def map_group_operation_get_chunkedges(
     entry_nbytes_in
     entry_nbytes_out
     cpucost_halo
-    min_grpcount
+    nchunks_min
     chunksize_bytes
 
     Returns
@@ -1189,8 +1185,8 @@ def map_group_operation_get_chunkedges(
 
     nchunks = int(np.ceil(np.sum(cost_memory) / chunksize_bytes))
     nchunks = int(np.ceil(1.3 * nchunks))  # fudge factor
-    if min_grpcount is not None:
-        nchunks = max(min_grpcount, nchunks)
+    if nchunks_min is not None:
+        nchunks = max(nchunks_min, nchunks)
     targetcost = sumcost[-1] / nchunks  # chunk target cost = total cost / nchunks
 
     arr = np.diff(sumcost % targetcost)  # find whenever exceeding modulo target cost
@@ -1219,9 +1215,8 @@ def map_group_operation(
     offsets,
     lengths,
     arrdict,
-    chunksize=int(3e7),
     cpucost_halo=1e4,
-    min_grpcount: Optional[int] = None,
+    nchunks_min: Optional[int] = None,
     chunksize_bytes: Optional[int] = None,
     entry_nbytes_in: Optional[int] = 4,
     fieldnames: Optional[List[str]] = None,
@@ -1242,9 +1237,8 @@ def map_group_operation(
     lengths: np.ndarray
         Number of particles per halo.
     arrdict
-    chunksize
     cpucost_halo
-    min_grpcount: Optional[int]
+    nchunks_min: Optional[int]
         Lower bound on the number of halos per chunk.
     chunksize_bytes
     entry_nbytes_in
@@ -1254,10 +1248,6 @@ def map_group_operation(
     -------
 
     """
-    if chunksize is not None:
-        log.warning(
-            '"chunksize" parameter is depreciated and has no effect. Specify "min_grpcount" for control.'
-        )
     if isinstance(func, ChainOps):
         dfltkwargs = func.kwargs
     else:
@@ -1333,7 +1323,7 @@ def map_group_operation(
             entry_nbytes_in,
             entry_nbytes_out,
             cpucost_halo=cpucost_halo,
-            min_grpcount=min_grpcount,
+            nchunks_min=nchunks_min,
             chunksize_bytes=chunksize_bytes,
         )
 

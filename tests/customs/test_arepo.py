@@ -62,15 +62,9 @@ def halooperations(path, catalogpath=None):
         else:
             return -21
 
-    counttask = snap.map_group_operation(
-        calculate_count, compute=False, min_grpcount=20
-    )
-    partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6)
-    )
-    hidtask = snap.map_group_operation(
-        calculate_haloid, compute=False, chunksize=int(3e6)
-    )
+    counttask = snap.map_group_operation(calculate_count, compute=False, nchunks_min=20)
+    partcounttask = snap.map_group_operation(calculate_partcount, compute=False)
+    hidtask = snap.map_group_operation(calculate_haloid, compute=False)
     count = counttask.compute()
     partcount = partcounttask.compute()
     hid = hidtask.compute()
@@ -96,7 +90,7 @@ def halooperations(path, catalogpath=None):
     # test nmax
     nmax = 10
     partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6), nmax=nmax
+        calculate_partcount, compute=False, nmax=nmax
     )
     partcount2 = partcounttask.compute()
     assert partcount2.shape[0] == nmax
@@ -105,7 +99,7 @@ def halooperations(path, catalogpath=None):
     # test idxlist
     idxlist = [3, 5, 7, 25200]
     partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6), idxlist=idxlist
+        calculate_partcount, compute=False, idxlist=idxlist
     )
     partcount2 = partcounttask.compute()
     assert partcount2.shape[0] == len(idxlist)
@@ -162,22 +156,22 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
         return GroupID[0]
 
     pindextask = snap.map_group_operation(
-        calculate_pindex_min, compute=False, min_grpcount=20, objtype="subhalo"
+        calculate_pindex_min, compute=False, nchunks_min=20, objtype="subhalo"
     )
     shcounttask = snap.map_group_operation(
-        calculate_subhalocount, compute=False, min_grpcount=20, objtype="subhalo"
+        calculate_subhalocount, compute=False, nchunks_min=20, objtype="subhalo"
     )
     hcounttask = snap.map_group_operation(
-        calculate_halocount, compute=False, min_grpcount=20, objtype="subhalo"
+        calculate_halocount, compute=False, nchunks_min=20, objtype="subhalo"
     )
     partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6), objtype="subhalo"
+        calculate_partcount, compute=False, objtype="subhalo"
     )
     hidtask = snap.map_group_operation(
-        calculate_haloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+        calculate_haloid, compute=False, objtype="subhalo"
     )
     sidtask = snap.map_group_operation(
-        calculate_subhaloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+        calculate_subhaloid, compute=False, objtype="subhalo"
     )
     pindex_min = pindextask.compute()
     hcount = hcounttask.compute()
