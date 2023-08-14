@@ -1256,6 +1256,7 @@ def map_group_operation(
         fieldnames = dfltkwargs.get("fieldnames", None)
     if fieldnames is None:
         fieldnames = get_args(func)
+    units = dfltkwargs.get("units", None)
     shape = dfltkwargs.get("shape", None)
     dtype = dfltkwargs.get("dtype", "float64")
     fill_value = dfltkwargs.get("fill_value", 0)
@@ -1290,19 +1291,55 @@ def map_group_operation(
         # the offsets array here is one longer here, holding the total number of particles in the last halo.
         offsets = np.concatenate([offsets, [offsets[-1] + lengths[-1]]])
 
-    if shape is None or (isinstance(shape, str) and shape == "auto"):
+    # shape/units inference
+    infer_shape = shape is None or (isinstance(shape, str) and shape == "auto")
+    infer_units = units is None
+    infer = infer_shape or infer_units
+    if infer:
         # attempt to determine shape.
-        log.debug("No shape specified. Attempting to determine shape of func output.")
+        if infer_shape:
+            log.debug(
+                "No shape specified. Attempting to determine shape of func output."
+            )
+        if infer_units:
+            log.debug(
+                "No units specified. Attempting to determine units of func output."
+            )
         arrs = [arrdict[f][:1].compute() for f in fieldnames]
         # remove units if present
-        arrs = [arr.magnitude if hasattr(arr, "magnitude") else arr for arr in arrs]
+        # arrs = [arr.magnitude if hasattr(arr, "magnitude") else arr for arr in arrs]
+        # arrs = [arr.magnitude for arr in arrs]
+        dummyres = None
         try:
             dummyres = func(*arrs)
-            shape = dummyres.shape
+        except Exception as e:  # noqa
+            log.warning("Exception during shape/unit inference: %s." % str(e))
+        if dummyres is not None:
+            if infer_units and hasattr(dummyres, "units"):
+                units = dummyres.units
             log.debug("Shape inference: %s." % str(shape))
-        except:  # noqa
+        if infer_units and dummyres is None:
+            units_present = any([hasattr(arr, "units") for arr in arrs])
+            if units_present:
+                log.warning("Exception during unit inference. Assuming no units.")
+        if dummyres is None and infer_shape:
+            # due to https://github.com/hgrecco/pint/issues/1037 innocent np.array operations on unit scalars can fail.
+            # we can still attempt to infer shape by removing units prior to calling func.
+            arrs = [arr.magnitude if hasattr(arr, "magnitude") else arr for arr in arrs]
+            try:
+                dummyres = func(*arrs)
+            except Exception as e:  # noqa
+                # no more logging needed here
+                pass
+        if dummyres is not None and infer_shape:
+            if np.isscalar(dummyres):
+                shape = (1,)
+            else:
+                shape = dummyres.shape
+        if infer_shape and dummyres is None and shape is None:
             log.warning("Exception during shape inference. Using shape (1,).")
-            shape = (1,)
+            shape = ()
+    # unit inference
 
     # Determine chunkedges automatically
     # TODO: very messy and inefficient routine. improve some time.
@@ -1383,7 +1420,7 @@ def map_group_operation(
             "dtype must be specified, dask will not be able to automatically determine this here."
         )
 
-    calc = da.map_blocks(
+    calc = map_blocks(
         wrap_func_scalar,
         func,
         d_oic,
@@ -1396,6 +1433,7 @@ def map_group_operation(
         func_output_shape=shape,
         func_output_dtype=dtype,
         fill_value=fill_value,
+        output_units=units,
     )
 
     return calc

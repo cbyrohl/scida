@@ -2,11 +2,10 @@ import logging
 
 import dask.array as da
 import numpy as np
-import pint
 
 from scida import load
 from scida.customs.arepo.dataset import part_type_num
-from tests.testdata_properties import require_testdata, require_testdata_path
+from tests.testdata_properties import require_testdata_path
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
@@ -208,19 +207,19 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
     assert np.all(partcount[mask] == shlengths[mask])
 
 
-@require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])
-def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
-    snp = testdata_areposnapshot_withcatalog
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_groupedoperations(testdatapath):
+    snp = load(testdatapath, units=True)
 
     # check bound mass sums as a start
     g = snp.grouped("Masses")
-    boundmass = np.sum(g.sum().evaluate())
+    boundmass = g.sum().evaluate().sum()
     boundmass2 = da.sum(
         snp.data["PartType0"]["Masses"][: np.sum(snp.get_grouplengths())]
     ).compute()
-    if isinstance(boundmass2, pint.Quantity):
-        boundmass2 = boundmass2.magnitude
+    assert boundmass.units == boundmass2.units
     assert np.isclose(boundmass, boundmass2)
+
     # Test chaining
     assert np.sum(g.half().sum().evaluate()) < np.sum(g.sum().evaluate())
 
@@ -241,11 +240,12 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     # Test custom dask array input
     arr = snp.data["PartType0"]["Density"] * snp.data["PartType0"]["Masses"]
     boundvol2 = snp.grouped(arr).sum().evaluate().sum()
-    assert 0.0 < boundvol2 < 1.0
+    units = arr.units
+    assert 0.0 * units < boundvol2 < 1.0 * units
 
     # Test multifield
-    def customfunc2(dens, vol, fieldnames=["Density", "Masses"]):
-        return dens * vol
+    def customfunc2(dens, mass, fieldnames=["Density", "Masses"]):
+        return dens * mass
 
     s = g2.apply(customfunc2).sum()
     boundvol = s.evaluate().sum()
