@@ -29,6 +29,23 @@ class GadgetStyleSnapshot(Dataset):
                 elif "Boxsize" in self.__dict__[name]:
                     self.boxsize = self.__dict__[name]["Boxsize"]
 
+        sanity_check = kwargs.get("sanity_check", False)
+        key_nparts = "NumPart_Total"
+        key_nparts_hw = "NumPart_Total_HighWord"
+        if sanity_check and key_nparts in self.header and key_nparts_hw in self.header:
+            nparts = self.header[key_nparts_hw] * 2**32 + self.header[key_nparts]
+            for i, n in enumerate(nparts):
+                pkey = "PartType%i" % i
+                if pkey in self.data:
+                    pdata = self.data[pkey]
+                    fkey = next(iter(pdata.keys()))
+                    nparts_loaded = pdata[fkey].shape[0]
+                    if nparts_loaded != n:
+                        raise ValueError(
+                            "Number of particles in header (%i) does not match number of particles loaded (%i) "
+                            "for particle type %i" % (n, nparts_loaded, i)
+                        )
+
     @classmethod
     def _get_fileprefix(cls, path: Union[str, os.PathLike], **kwargs) -> str:
         """
