@@ -1,11 +1,14 @@
 import hashlib
 import inspect
 import io
+import logging
 import re
 import types
 
 import dask.array as da
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 
 def hash_path(path):
@@ -123,6 +126,9 @@ def map_blocks(
         **kwargs,
     )
     if output_units is not None:
+        if hasattr(res, "magnitude"):
+            log.info("map_blocks output already has units, overwriting.")
+            res = res.magnitude * output_units
         res = res * output_units
 
     return res

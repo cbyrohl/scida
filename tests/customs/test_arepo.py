@@ -1,10 +1,11 @@
+import logging
+
 import dask.array as da
 import numpy as np
-import pint
 
 from scida import load
 from scida.customs.arepo.dataset import part_type_num
-from tests.testdata_properties import require_testdata, require_testdata_path
+from tests.testdata_properties import require_testdata_path
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
@@ -60,15 +61,9 @@ def halooperations(path, catalogpath=None):
         else:
             return -21
 
-    counttask = snap.map_group_operation(
-        calculate_count, compute=False, min_grpcount=20
-    )
-    partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6)
-    )
-    hidtask = snap.map_group_operation(
-        calculate_haloid, compute=False, chunksize=int(3e6)
-    )
+    counttask = snap.map_group_operation(calculate_count, compute=False, nchunks_min=20)
+    partcounttask = snap.map_group_operation(calculate_partcount, compute=False)
+    hidtask = snap.map_group_operation(calculate_haloid, compute=False)
     count = counttask.compute()
     partcount = partcounttask.compute()
     hid = hidtask.compute()
@@ -94,7 +89,7 @@ def halooperations(path, catalogpath=None):
     # test nmax
     nmax = 10
     partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6), nmax=nmax
+        calculate_partcount, compute=False, nmax=nmax
     )
     partcount2 = partcounttask.compute()
     assert partcount2.shape[0] == nmax
@@ -103,7 +98,7 @@ def halooperations(path, catalogpath=None):
     # test idxlist
     idxlist = [3, 5, 7, 25200]
     partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6), idxlist=idxlist
+        calculate_partcount, compute=False, idxlist=idxlist
     )
     partcount2 = partcounttask.compute()
     assert partcount2.shape[0] == len(idxlist)
@@ -160,22 +155,22 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
         return GroupID[0]
 
     pindextask = snap.map_group_operation(
-        calculate_pindex_min, compute=False, min_grpcount=20, objtype="subhalo"
+        calculate_pindex_min, compute=False, nchunks_min=20, objtype="subhalo"
     )
     shcounttask = snap.map_group_operation(
-        calculate_subhalocount, compute=False, min_grpcount=20, objtype="subhalo"
+        calculate_subhalocount, compute=False, nchunks_min=20, objtype="subhalo"
     )
     hcounttask = snap.map_group_operation(
-        calculate_halocount, compute=False, min_grpcount=20, objtype="subhalo"
+        calculate_halocount, compute=False, nchunks_min=20, objtype="subhalo"
     )
     partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6), objtype="subhalo"
+        calculate_partcount, compute=False, objtype="subhalo"
     )
     hidtask = snap.map_group_operation(
-        calculate_haloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+        calculate_haloid, compute=False, objtype="subhalo"
     )
     sidtask = snap.map_group_operation(
-        calculate_subhaloid, compute=False, chunksize=int(3e6), objtype="subhalo"
+        calculate_subhaloid, compute=False, objtype="subhalo"
     )
     pindex_min = pindextask.compute()
     hcount = hcounttask.compute()
@@ -212,19 +207,19 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
     assert np.all(partcount[mask] == shlengths[mask])
 
 
-@require_testdata("areposnapshot_withcatalog", only=["TNG50-4_snapshot"])
-def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
-    snp = testdata_areposnapshot_withcatalog
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_groupedoperations(testdatapath):
+    snp = load(testdatapath, units=True)
 
     # check bound mass sums as a start
     g = snp.grouped("Masses")
-    boundmass = np.sum(g.sum().evaluate())
+    boundmass = g.sum().evaluate().sum()
     boundmass2 = da.sum(
         snp.data["PartType0"]["Masses"][: np.sum(snp.get_grouplengths())]
     ).compute()
-    if isinstance(boundmass2, pint.Quantity):
-        boundmass2 = boundmass2.magnitude
+    assert boundmass.units == boundmass2.units
     assert np.isclose(boundmass, boundmass2)
+
     # Test chaining
     assert np.sum(g.half().sum().evaluate()) < np.sum(g.sum().evaluate())
 
@@ -245,11 +240,12 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     # Test custom dask array input
     arr = snp.data["PartType0"]["Density"] * snp.data["PartType0"]["Masses"]
     boundvol2 = snp.grouped(arr).sum().evaluate().sum()
-    assert 0.0 < boundvol2 < 1.0
+    units = arr.units
+    assert 0.0 * units < boundvol2 < 1.0 * units
 
     # Test multifield
-    def customfunc2(dens, vol, fieldnames=["Density", "Masses"]):
-        return dens * vol
+    def customfunc2(dens, mass, fieldnames=["Density", "Masses"]):
+        return dens * mass
 
     s = g2.apply(customfunc2).sum()
     boundvol = s.evaluate().sum()
@@ -271,3 +267,45 @@ def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
     nsubs = snp.data["Subhalo"]["SubhaloMass"].shape[0]
     m = snp.grouped("Masses", objtype="subhalos").sum().evaluate()
     assert m.shape[0] == nsubs
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_groupedoperations_nonscalar(testdatapath, caplog):
+    """Test grouped operations with non-scalar function outputs."""
+    snp = load(testdatapath)
+
+    # 1. specify non-scalar operation output via shape parameter
+    ngrp = snp.data["Group"]["GroupMass"].shape[0]
+    g = snp.grouped()
+    shape = (2,)
+
+    def customfunc(mass, fieldnames=["Masses"], shape=shape):
+        return np.array([np.min(mass), np.max(mass)])
+
+    s = g.apply(customfunc)
+    res = s.evaluate()
+    assert res.shape[0] == ngrp
+    assert res.shape[1] == shape[0]
+    assert np.all(res[:, 0] <= res[:, 1])
+
+    # 2. check behavior when forgetting additional shape specification
+    # for non-scalar operation output
+    # 2.1 simple case where inference should work
+    def customfunc2(mass, fieldnames=["Masses"]):
+        return np.array([np.min(mass), np.max(mass)])
+
+    s = g.apply(customfunc2)
+    res = s.evaluate()
+    assert res.shape[1] == shape[0]
+
+    # 2.2 case where inference should fail
+    def customfunc3(mass, fieldnames=["Masses"]):
+        return [mass[2], mass[3]]
+
+    s = g.apply(customfunc3)
+    caplog.set_level(logging.WARNING)
+    try:
+        res = s.evaluate()
+    except IndexError:
+        pass  # we expect an index error further down the evaluate call.
+    assert "Exception during shape inference" in caplog.text
