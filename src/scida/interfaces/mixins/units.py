@@ -61,29 +61,18 @@ def extract_units_from_attrs(
     -------
 
     """
+    # initialize unit dictionary and registry to chosen mode
     if mode not in ["code", "mks", "cgs"]:
         raise KeyError("Unknown unit mode '%s'." % mode)
     udict = _get_default_units(mode, ureg)
 
-    if mode == "code":
-        # nothing to do if mode == "code" as we take values as they are
-        cgsfactor = ureg.Quantity(1.0)
-    else:
-        # for non-codeunits, we need to be provided some conversion factor or explicit units
-        has_convfactor = False
-        has_expl_units = False
-        cgskey = None
-        # the common mode is to expect some hints how to convert to cgs
-        # get the conversion factor
-        cgskey = [k for k in attrs if "cgs" in k.lower()]
-        if mode + "units" in cgskey:
-            # these are the units not the normalization factor
-            cgskey.remove(mode + "units")
-        assert len(cgskey) <= 1
-        has_convfactor = len(cgskey) > 0
-        if has_convfactor:
-            cgskey = cgskey[0]
-            cgsfactor = attrs[cgskey]
+    # determine any conversion factor as possible/needed
+    cgskey, cgsfactor = _get_cgs_params(attrs, ureg, mode=mode)
+    has_convfactor = cgskey is not None
+    if has_convfactor:
+        cgskey = cgskey[0]
+        cgsfactor = attrs[cgskey]
+
     # get dimensions
     unit = cgsfactor
     if isinstance(unit, np.ndarray):
@@ -147,6 +136,29 @@ def extract_units_from_attrs(
     if require:
         raise ValueError("Could not find units.")
     return str_to_unit("", ureg)
+
+
+def _get_cgs_params(attrs: dict, ureg: UnitRegistry, mode: str = "code") -> tuple:
+    cgsfactor = None
+    cgskey = None
+    if mode == "code":
+        # nothing to do if mode == "code" as we take values as they are
+        cgsfactor = ureg.Quantity(1.0)
+        return cgskey, cgsfactor
+
+    # for non-codeunits, we need to be provided some conversion factor or explicit units
+    # has_convfactor = False
+    # has_expl_units = False
+    cgskey = None
+    # the common mode is to expect some hints how to convert to cgs
+    # get the conversion factor
+    cgskey = [k for k in attrs if "cgs" in k.lower()]
+    if mode + "units" in cgskey:
+        # these are the units not the normalization factor
+        cgskey.remove(mode + "units")
+    assert len(cgskey) <= 1
+
+    return cgskey, cgsfactor
 
 
 def _get_default_units(mode: str, ureg: pint.UnitRegistry) -> dict:
@@ -256,11 +268,11 @@ class UnitMixin(Mixin):
 
         # initialize unit registry
         update_unitregistry_fromdict(unitdefs, self.ureg)
-        self.ureg.default_system = "cgs"
+        self.ureg.default_system = unithints.get("metadata_unitsystem", "cgs")
 
         # update fields with units
         fwu = unithints.get("fields", {})
-        mode_metadata = unithints.get("metadata_unitsystem", units)
+        mode = units
         # TODO: Not sure about block below needed again
         # if mode_metadata == "code":
         #     if "code_length" not in self.ureg:
@@ -326,7 +338,7 @@ class UnitMixin(Mixin):
                         unit_metadata = extract_units_from_attrs(
                             attrs,
                             require=False,
-                            mode=mode_metadata,
+                            mode=mode,
                             ureg=self.unitregistry,
                         )
                     except ValueError as e:
