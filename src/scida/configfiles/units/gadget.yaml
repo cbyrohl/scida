@@ -1,4 +1,4 @@
-metadata_unitsystem: cgs
+metadata_unitsystem: cgs  # this means we have a cgs conversion factor available
 units:
   # h: 0.6774 hubble factor, needs to be set by snapshot
   # a: 1.0 # scale factor, needs to be set by snapshot

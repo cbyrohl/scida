@@ -135,4 +135,4 @@ data:
       Parameters:
         "Snapshots:basename": "flamingo"
     dataset_type:
-      dataset: GizmoSnapshot
+      dataset: SwiftSnapshot

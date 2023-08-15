@@ -46,7 +46,7 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
         return ArepoSnapshot  # TODO: Change once we abstracted a GadgetSnapshot class
     elif any(k in name for k in ["gaia", "lgal"]):
         return Dataset
-    elif any(k in name for k in ["swift"]):
+    elif any(k in name for k in ["swift", "flamingo"]):
         return SwiftSnapshot
     elif any(k in name for k in ["simba"]):
         # these are GizmoSnapshots. Current public Gizmo code has an identifying
@@ -55,7 +55,7 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
         # hence fire2 might be identified GadgetStyleSnapshot as GizmoSnapshot
         # via the configuration files (which is not tested against here)
         return GizmoSnapshot
-    elif "fire2" in name:
+    elif any(k in name for k in ["fire2"]):
         return GizmoSnapshot
     elif any(k in name for k in ["rockstar"]):
         return RockstarCatalog

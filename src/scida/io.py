@@ -384,13 +384,13 @@ def load_datadict_old(
     return data, metadata
 
 
-def determine_loader(path):
+def determine_loader(path, **kwargs):
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, ".zgroup")):
             # object is a zarr object
             loader = ZarrLoader(path)
             return loader
-        newpath = _cachefile_available_in_path(path)
+        newpath = _cachefile_available_in_path(path, **kwargs)
         if newpath:  # check whether a virtual merged HDF5 file is present in folder
             loader = HDF5Loader(newpath)
         else:
@@ -404,19 +404,19 @@ def determine_loader(path):
 
 def load_metadata(path, **kwargs):
     """only returns attributes"""
-    loader = determine_loader(path)
+    loader = determine_loader(path, **kwargs)
     metadata = loader.load_metadata(**kwargs)
     return metadata
 
 
 def load_metadata_all(path, **kwargs):
-    loader = determine_loader(path)
+    loader = determine_loader(path, **kwargs)
     metadata = loader.load_metadata_all(**kwargs)
     return metadata
 
 
 def load(path, **kwargs):
-    loader = determine_loader(path)
+    loader = determine_loader(path, **kwargs)
     data, metadata = loader.load(**kwargs)
     file = loader.file
     tmpfile = loader.tempfile
@@ -424,10 +424,11 @@ def load(path, **kwargs):
 
 
 def _cachefile_available_in_path(
-    path: str, fileprefix: Optional[str] = ""
+    path: str, fileprefix: Optional[str] = "", **kwargs
 ) -> Union[bool, str]:
     chnkfiles = _get_chunkedfiles(path, fileprefix=fileprefix)
-    assert len(chnkfiles) > 0
+    if len(chnkfiles) == 0:
+        return False
     fn = chnkfiles[0]
     p = pathlib.Path(fn)
     s = p.name.split(".")
