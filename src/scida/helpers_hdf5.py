@@ -6,6 +6,8 @@ import h5py
 import numpy as np
 import zarr
 
+from scida.config import get_config
+
 log = logging.getLogger(__name__)
 
 
@@ -59,7 +61,7 @@ def walk_hdf5file(fn, tree, get_attrs=True):
 
 
 def create_mergedhdf5file(
-    fn, files, max_workers=16, virtual=True, groupwise_shape=False
+    fn, files, max_workers=None, virtual=True, groupwise_shape=False
 ):
     """
     Creates a virtual hdf5 file from list of given files. Virtual by default.
@@ -76,6 +78,10 @@ def create_mergedhdf5file(
     -------
 
     """
+    if max_workers is None:
+        # read from config
+        config = get_config()
+        max_workers = config.get("nthreads", 16)
     # first obtain all datasets and groups
     trees = [{} for i in range(len(files))]
 
@@ -228,11 +234,11 @@ def create_mergedhdf5file(
                 ]
             )
             for k in attrsnames:
-                # we ignore apaths existing in some datasets.
+                # we ignore apaths and k existing in some files.
                 attrvallist = [
                     result[i]["attrs"][apath][k]
                     for i in range(nfiles)
-                    if apath in result[i]["attrs"]
+                    if apath in result[i]["attrs"] and k in result[i]["attrs"][apath]
                 ]
                 attrval0 = attrvallist[0]
                 if isinstance(attrval0, np.ndarray):

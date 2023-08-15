@@ -131,6 +131,11 @@ testdata:
       - areposimulation
     fn: minimal_MTNG-arepo270hydro_simulation
 
+  FLAMINGO_snapshot_reduced:
+    types:
+      - interface
+    fn: flamingo_snapshot_reduced
+
   # minimal datasets extracted with testdata_extractor.py
   TNG100-2_snapshot_z0_minimal:
     types:
@@ -159,9 +164,6 @@ testdata:
       - areposnapshot
       - areposnapshot_withcatalog|TNG100-3|1|2
     fn: minimal_TNG100-3_group_z0.hdf5
-
-
-
 
   TNG50-1_snapshot_z3_minimal:
     types:
@@ -237,9 +239,6 @@ testdata:
       - tngclustersnapshot
       # - areposnapshot_withcatalog|F|0|2
     fn: minimal_TNG-Cluster_snapshot_z0.hdf5
-
-
-
 
   tng_halocutout_zarr:
     types:
