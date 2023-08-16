@@ -148,7 +148,6 @@ def extract_units_from_attrs(
 
 
 def _get_cgs_params(attrs: dict, ureg: UnitRegistry, mode: str = "code") -> tuple:
-    cgsfactor = None
     cgskeys = None
     if mode == "code":
         # nothing to do if mode == "code" as we take values as they are
@@ -166,7 +165,8 @@ def _get_cgs_params(attrs: dict, ureg: UnitRegistry, mode: str = "code") -> tupl
         cgskeys.remove(mode + "units")
 
     correct_keynames = [
-        "Conversion factor to physical CGS (including cosmological corrections)"
+        "Conversion factor to physical CGS (including cosmological corrections)",
+        "to_cgs",
     ]
     cgskeys = [k for k in cgskeys if k in correct_keynames]
 
