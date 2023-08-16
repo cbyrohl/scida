@@ -5,15 +5,16 @@ If you want to use a dataset that is not listed here, read on [here](dataset_str
 
 | Name                                                  | Support                               | Description                                                                                                     |
 |-------------------------------------------------------|---------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| [TNG](https://www.tng-project.org/)                   | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
-| [Illustris](https://www.illustris-project.org/)       | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
-| [FIRE2](https://wetzel.ucdavis.edu/fire-simulations/) | :material-check-all:                  | Cosmological zoom-in galaxy formation *simulations*                                                             |
-| [EAGLE](https://icc.dur.ac.uk/Eagle/)                 | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
-| [SIMBA](http://simba.roe.ac.uk/)                      | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
-| TNG-Cluster                                           | :material-check-all:                  | Cosmological zoom-in galaxy formation *simulations*                                                             |
 | [AURIGA](https://wwwmpa.mpa-garching.mpg.de/auriga/)  | :material-check-all:                  | Cosmological zoom-in galaxy formation *simulations*                                                             |
+| [EAGLE](https://icc.dur.ac.uk/Eagle/)                 | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
+| [FIRE2](https://wetzel.ucdavis.edu/fire-simulations/) | :material-check-all:                  | Cosmological zoom-in galaxy formation *simulations*                                                             |
+| [FLAMINGO](https://flamingo.strw.leidenuniv.nl/)      | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
 | [Gaia](https://www.cosmos.esa.int/web/gaia/dr3)       | :material-database-check-outline:[^1] | *Observations* of a billion nearby stars                                                                        |
+| [Illustris](https://www.illustris-project.org/)       | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
 | [LGalaxies](customs/lgalaxies.md)                     | :material-check-all:                  | Semi-analytical model for [Millenium](https://wwwmpa.mpa-garching.mpg.de/galform/virgo/millennium/) simulations |
+| [SIMBA](http://simba.roe.ac.uk/)                      | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
+| [TNG](https://www.tng-project.org/)                   | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
+| TNG-Cluster                                           | :material-check-all:                  | Cosmological zoom-in galaxy formation *simulations*                                                             |
 
 
 A :material-check-all: checkmark indicates support out-of-the-box, a :material-check: checkmark indicates support by creating a suitable configuration file.

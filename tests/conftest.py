@@ -13,6 +13,10 @@ flag_test_long = False  # Set to true to run time-taking tests.
 scope_snapshot = "function"
 
 
+numba_logger = logging.getLogger("numba")
+numba_logger.setLevel(logging.WARNING)
+
+
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: mark test as slow to run")
     config.addinivalue_line("markers", "big: mark test as big")

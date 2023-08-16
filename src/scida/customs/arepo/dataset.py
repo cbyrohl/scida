@@ -208,13 +208,6 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         # merge hints from snap and catalog
         self.merge_hints(self.catalog)
 
-    def _set_metadata(self):
-        """
-        Set metadata from header and config.
-        """
-        md = self._clean_metadata_from_raw(self._metadata_raw)
-        self.metadata = md
-
     @classmethod
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, **kwargs
@@ -236,24 +229,6 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             valid = CandidateStatus.MAYBE
 
         return valid
-
-    @classmethod
-    def _clean_metadata_from_raw(cls, rawmetadata):
-        """
-        Set metadata from raw metadata.
-        """
-        metadata = dict()
-        if "/Header" in rawmetadata:
-            header = rawmetadata["/Header"]
-            if "Redshift" in header:
-                metadata["redshift"] = header["Redshift"]
-                metadata["z"] = metadata["redshift"]
-            if "BoxSize" in header:
-                metadata["boxsize"] = header["BoxSize"]
-            if "Time" in header:
-                metadata["time"] = header["Time"]
-                metadata["t"] = metadata["time"]
-        return metadata
 
     @ArepoSelector()
     def return_data(self):

@@ -133,6 +133,8 @@ class DatasetSeries(object):
                     if k not in minmax_dct:
                         minmax_dct[k] = [v, v]
                     else:
+                        if not np.isscalar(v):
+                            continue  # cannot compare arrays
                         minmax_dct[k][0] = min(minmax_dct[k][0], v)
                         minmax_dct[k][1] = max(minmax_dct[k][1], v)
             for k in minmax_dct:
@@ -140,7 +142,9 @@ class DatasetSeries(object):
                 if isinstance(reprval1, float):
                     reprval1 = "%.2f" % reprval1
                     reprval2 = "%.2f" % reprval2
-                if minmax_dct[k][0] == minmax_dct[k][1]:
+                m1 = minmax_dct[k][0]
+                m2 = minmax_dct[k][1]
+                if (not np.isscalar(m1)) or (np.isscalar(m1) and m1 == m2):
                     rep += sprint("%s: %s" % (k, minmax_dct[k][0]))
                 else:
                     rep += sprint(

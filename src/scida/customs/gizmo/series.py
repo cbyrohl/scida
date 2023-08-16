@@ -5,9 +5,8 @@ from scida.discovertypes import CandidateStatus
 
 
 class GizmoSimulation(GadgetStyleSimulation):
-    """A series representing a gizmo simulation."""
-
     def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
+        """A series representing a gizmo simulation."""
         prefix_dict = dict(paths="snapdir", rh_paths="halo", rs_paths="star")
         subpath_dict = dict(
             paths="output",

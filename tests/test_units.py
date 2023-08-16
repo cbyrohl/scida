@@ -1,5 +1,3 @@
-import pathlib
-
 import h5py
 import numpy as np
 import pytest
@@ -75,7 +73,6 @@ def test_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     monkeypatch.setenv("SCIDA_MISSING_UNITS", "warn")
     get_config(reload=True)
     load(str(p), units=True)
-    print("???", caplog.text)
     assert "Cannot determine units" in caplog.text
 
     # ignore

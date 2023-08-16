@@ -39,7 +39,7 @@ def str_to_unit(
 
 
 def extract_units_from_attrs(
-    attrs,
+    attrs: dict,
     require: bool = False,
     mode: str = "cgs",
     ureg: Optional[pint.UnitRegistry] = None,
@@ -61,57 +61,32 @@ def extract_units_from_attrs(
     -------
 
     """
-    assert ureg is not None, "Always require passing registry now."
-    udict = {}
-    udict["length"] = str_to_unit("cm", ureg)
-    udict["mass"] = str_to_unit("g", ureg)
-    udict["velocity"] = str_to_unit("cm/s", ureg)
-    udict["time"] = str_to_unit("s", ureg)
-    if mode == "mks":
-        raise NotImplementedError("TBD.")
-        # udict["length"] = str_to_unit("m", ureg)
-        # udict["mass"] = str_to_unit("kg", ureg)
-        # udict["velocity"] = str_to_unit("m/s", ureg)
-        # udict["time"] = str_to_unit("s", ureg)
-    if mode == "code":
-        for k in ["length", "mass", "velocity", "time"]:
-            cstr = "code_" + k
-            if cstr in ureg:
-                udict[k] = str_to_unit(cstr, ureg)
+    # initialize unit dictionary and registry to chosen mode
     if mode not in ["code", "mks", "cgs"]:
         raise KeyError("Unknown unit mode '%s'." % mode)
-    if "h" in ureg:
-        udict["h"] = str_to_unit("h", ureg)
-    if "a" in ureg:
-        udict["a"] = str_to_unit("a", ureg)
-    # nothing to do if mode == "code" as we take values as they are
-    cgsfactor = ureg.Quantity(1.0)
+    udict = _get_default_units(mode, ureg)
+
+    # determine any conversion factor as possible/needed
+    cgskey, cgsfactor = _get_cgs_params(attrs, ureg, mode=mode)
+
     # for non-codeunits, we need to be provided some conversion factor or explicit units
-    has_convfactor = False
+    has_convfactor = cgskey is not None
     has_expl_units = False
-    cgskey = None
-    if mode != "code":
-        # the common mode is to expect some hints how to convert to cgs
-        # get the conversion factor
-        cgskey = [k for k in attrs if "cgs" in k.lower()]
-        if mode + "units" in cgskey:
-            # these are the units not the normalization factor
-            cgskey.remove(mode + "units")
-        assert len(cgskey) <= 1
-        has_convfactor = len(cgskey) > 0
-        if has_convfactor:
-            cgskey = cgskey[0]
-            cgsfactor = attrs[cgskey]
-    # get dimensions
-    unit = cgsfactor
+
+    unit = 1.0
+    # we can already set the value if we have a conversion factor
+    if has_convfactor:
+        unit = cgsfactor
+
+    # now, need to get correct dimensions to the value
     if isinstance(unit, np.ndarray):
         if len(unit) != 1:
             log.debug("Unexpected shape (%s) of unit factor." % unit.shape)
         unit = unit[0]
     if unit == 0.0:
         unit = ureg.Quantity(1.0)  # zero makes no sense.
-    # TODO: Missing a scaling?
-    # TODO: Missing h scaling?
+
+    # TODO: recheck that a and h scaling are added IFF code units are used
     ukeys = ["length", "mass", "velocity", "time", "h", "a"]
     if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
         if mode != "cgs":
@@ -123,13 +98,18 @@ def extract_units_from_attrs(
             aname = k + "_scaling"
             unit *= udict[k] ** attrs.get(aname, 0.0)
         return unit
-    if "Conversion factor" in attrs.keys():  # like SWIFT
-        ustr = str(attrs["Conversion factor"])
+    # like a) generic SWIFT or b) FLAMINGO-SWIFT
+    swiftkeys = ["Conversion factor", "Expression for physical CGS units"]
+    swiftkeymatches = [k in attrs.keys() for k in swiftkeys]
+    if any(swiftkeymatches):  # like SWIFT
+        swiftkey = swiftkeys[np.where(swiftkeymatches)[0][0]]
+        ustr = str(attrs[swiftkey])
         ustr = ustr.split("[")[-1].split("]")[0]
         if ustr.strip() == "-":  # no units, done
             return unit
         unit *= str_to_unit(ustr, ureg)
         return unit
+
     if "cgsunits" in attrs.keys():  # like EAGLE
         if attrs["cgsunits"] is not None:  # otherwise, this field has no units
             unitstr = attrs["cgsunits"]
@@ -165,6 +145,81 @@ def extract_units_from_attrs(
     if require:
         raise ValueError("Could not find units.")
     return str_to_unit("", ureg)
+
+
+def _get_cgs_params(attrs: dict, ureg: UnitRegistry, mode: str = "code") -> tuple:
+    cgskeys = None
+    if mode == "code":
+        # nothing to do if mode == "code" as we take values as they are
+        cgsfactor = ureg.Quantity(1.0)
+        return cgskeys, cgsfactor
+
+    # the common mode is to expect some hints how to convert to cgs
+    # get the conversion factor
+    cgskeys = [k for k in attrs if "cgs" in k.lower()]
+
+    # there should be only one key holding the cgs factor.
+    # remove those that are not
+    if mode + "units" in cgskeys:
+        # these are the units not the normalization factor
+        cgskeys.remove(mode + "units")
+
+    correct_keynames = [
+        "Conversion factor to physical CGS (including cosmological corrections)",
+        "to_cgs",
+    ]
+    cgskeys = [k for k in cgskeys if k in correct_keynames]
+
+    assert len(cgskeys) <= 1  # only one key should be left
+    if cgskeys is not None and len(cgskeys) > 0:
+        cgskey = cgskeys[0]
+        cgsfactor = attrs[cgskey]
+        return cgskey, cgsfactor
+    return None, None
+
+
+def _get_default_units(mode: str, ureg: pint.UnitRegistry) -> dict:
+    """
+    Get the default units for the given mode.
+    Parameters
+    ----------
+    mode
+        The unit mode to use (right now: cgs or code).
+    ureg
+        The unit registry to use.
+
+    Returns
+    -------
+    dict
+        The default units.
+    """
+    if mode not in ["code", "mks", "cgs"]:
+        raise KeyError("Unknown unit mode '%s'." % mode)
+    if mode == "code":
+        keys = ["length", "mass", "velocity", "time"]
+        udict = {k: ureg["code_" + k] for k in keys if "code_" + k in ureg}
+    if mode == "mks":
+        udict = {
+            "length": ureg.m,
+            "mass": ureg.kg,
+            "velocity": ureg.m / ureg.s,
+            "time": ureg.s,
+        }
+    if mode == "cgs":
+        udict = {
+            "length": ureg.cm,
+            "mass": ureg.g,
+            "velocity": ureg.cm / ureg.s,
+            "time": ureg.s,
+        }
+
+    # common factors in cosmological simulations
+    if "h" in ureg:
+        udict["h"] = str_to_unit("h", ureg)
+    if "a" in ureg:
+        udict["a"] = str_to_unit("a", ureg)
+
+    return udict
 
 
 def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry, warn_redef=False):
@@ -234,22 +289,20 @@ class UnitMixin(Mixin):
 
         # update fields with units
         fwu = unithints.get("fields", {})
-        mode_metadata = unithints.get("metadata_unitsystem", units)
-        # TODO: Not sure about block below needed again
-        # if mode_metadata == "code":
-        #     if "code_length" not in self.ureg:
-        #         log.debug("No code units given, assuming cgs.")
-        #         mode_metadata = "cgs"
+        mode_metadata = unithints.get("metadata_unitsystem", "cgs")
 
         def add_units(container: FieldContainer, basepath: str):
             # first we check whether we are explicitly given a unit by a unit file
             override = False  # whether to override the metadata units
-            gfwu = fwu
-            k = basepath.split("/")
-            for p in basepath.split("/"):
-                gfwu = fwu.get(p, {})
-            if gfwu == "no_units":
-                return  # no units for this container
+            gfwu = dict(**fwu)
+            splt = basepath.split("/")
+            for p in splt:
+                if p == "":
+                    continue  # skip empty path
+                gfwu = gfwu.get(p, {})
+                # if any parent container specifies "no_units", we will not add units, thus return
+                if gfwu == "no_units":
+                    return
             if gfwu is None:
                 gfwu = {}  # marginal case where no fields are given
             keys = sorted(

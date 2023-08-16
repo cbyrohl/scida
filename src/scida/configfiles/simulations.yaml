@@ -128,3 +128,11 @@ data:
     identifiers:
       Header:
         Simulation: "L-Galaxies run on the Millennium Simulation"
+
+  FLAMINGO:
+    unitfile: units/flamingo.yaml
+    identifiers:
+      Parameters:
+        "Snapshots:basename": "flamingo"
+    dataset_type:
+      dataset: SwiftSnapshot

@@ -47,7 +47,6 @@ runs:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG-Cluster_snapshot_z0.hdf5
         url: https://heibox.uni-heidelberg.de/f/fe582fbe745445d7a448/?dl=1
-
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
@@ -73,3 +72,8 @@ runs:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG100-2_group_z0.hdf5
         url: https://heibox.uni-heidelberg.de/f/ed8a1b34a9fe40b1b493/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_flamingo_snapshot.hdf5
+        url: https://heibox.uni-heidelberg.de/f/8749a46fdfc74577b29a/?dl=1
