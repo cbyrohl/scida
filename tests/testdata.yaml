@@ -137,6 +137,12 @@ testdata:
     fn: flamingo_snapshot_reduced
 
   # minimal datasets extracted with testdata_extractor.py
+
+  FLAMINGO_snapshot_minimal:
+    types:
+      - interface
+    fn: "minimal_flamingo_snapshot.hdf5"
+
   TNG100-2_snapshot_z0_minimal:
     types:
       - interface

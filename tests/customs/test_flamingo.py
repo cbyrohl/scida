@@ -46,10 +46,12 @@ def check_flamingosnap(obj: SwiftSnapshot, obj_wu: SwiftSnapshot):
     assert not hasattr(pdata["ParticleIDs"], "units")  # we do not want units for IDs
 
 
-@require_testdata_path("interface", only=["FLAMINGO_snapshot_reduced"])
+@require_testdata_path(
+    "interface", only=["FLAMINGO_snapshot_reduced", "FLAMINGO_snapshot_minimal"]
+)
 def test_snapshot(testdatapath):
     """Test loading of a full snapshot"""
     obj: SwiftSnapshot = load(testdatapath, units=True)
     obj_wu: SwiftSnapshot = load(testdatapath, units=False)
-    print(obj.info())
+    obj.info()
     check_flamingosnap(obj, obj_wu)
