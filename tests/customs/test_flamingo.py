@@ -2,7 +2,9 @@ import astropy.units as u
 import pytest
 from astropy.cosmology import FlatLambdaCDM
 
-from scida import SwiftSnapshot, load
+from scida import load
+from scida.customs.swift.dataset import SwiftSnapshot
+from scida.customs.swift.series import SwiftSimulation
 from tests.testdata_properties import require_testdata_path
 
 
@@ -55,3 +57,12 @@ def test_snapshot(testdatapath):
     obj_wu: SwiftSnapshot = load(testdatapath, units=False)
     obj.info()
     check_flamingosnap(obj, obj_wu)
+
+
+@require_testdata_path("series", only=["FLAMINGO_simulation_minimal"])
+def test_series(testdatapath):
+    obj: SwiftSimulation = load(testdatapath, units=True)
+    obj.info()
+    z = 4.75
+    ds = obj.get_dataset(redshift=z)
+    assert ds.redshift == z

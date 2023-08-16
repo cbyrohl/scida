@@ -143,6 +143,11 @@ testdata:
       - interface
     fn: "minimal_flamingo_snapshot.hdf5"
 
+  FLAMINGO_simulation_minimal:
+    types:
+      - series
+    fn: "minimal_flamingo_simulation"
+
   TNG100-2_snapshot_z0_minimal:
     types:
       - interface

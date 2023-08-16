@@ -129,9 +129,9 @@ class GadgetStyleSnapshot(Dataset):
                     ]
                 )
                 if is_grp:
-                    return CandidateStatus.YES
+                    return CandidateStatus.MAYBE
                 if is_snap and not expect_grp:
-                    return CandidateStatus.YES
+                    return CandidateStatus.MAYBE
         return CandidateStatus.NO
 
     def register_field(self, parttype, name=None, description=""):
@@ -167,20 +167,28 @@ class GadgetStyleSnapshot(Dataset):
             else:
                 pass  # nothing to do; we do not overwrite with catalog props
 
-
-class SwiftSnapshot(GadgetStyleSnapshot):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
-
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
-        valid = super().validate_path(path, *args, **kwargs)
-        if not valid:
-            return False
-        metadata_raw = load_metadata(path, **kwargs)
-        comparestr = metadata_raw.get("/Code", {}).get("Code", b"").decode()
-        valid = "SWIFT" in comparestr
-        return valid
+    def _clean_metadata_from_raw(cls, rawmetadata):
+        """
+        Set metadata from raw metadata.
+        """
+        metadata = dict()
+        if "/Header" in rawmetadata:
+            header = rawmetadata["/Header"]
+            if "Redshift" in header:
+                metadata["redshift"] = float(header["Redshift"])
+                metadata["z"] = metadata["redshift"]
+            if "BoxSize" in header:
+                # can be scalar or array
+                metadata["boxsize"] = header["BoxSize"]
+            if "Time" in header:
+                metadata["time"] = float(header["Time"])
+                metadata["t"] = metadata["time"]
+        return metadata
 
-
-# right now ArepoSnapshot is defined in separate file
+    def _set_metadata(self):
+        """
+        Set metadata from header and config.
+        """
+        md = self._clean_metadata_from_raw(self._metadata_raw)
+        self.metadata = md

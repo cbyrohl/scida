@@ -1,4 +1,5 @@
 import os
+import pathlib
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -32,17 +33,26 @@ class GadgetStyleSimulation(DatasetSeries):
         if not (p.exists()):
             raise ValueError("Specified path '%s' does not exist." % path)
         paths_dict = dict()
-        for k in prefix_dict.keys():
-            prefix = prefix_dict[k]
+        keys = []
+        for d in [prefix_dict, subpath_dict, arg_dict]:
+            keys.extend(list(d.keys()))
+        keys = set(keys)
+        for k in keys:
             subpath = subpath_dict.get(k, "output")
             sp = p / subpath
+
+            prefix = _get_snapshotfolder_prefix(sp)
+            prefix = prefix_dict.get(k, prefix)
             if not sp.exists():
                 if k != "paths":
                     continue  # do not require optional sources
                 raise ValueError("Specified path '%s' does not exist." % (p / subpath))
             fns = os.listdir(sp)
             prfxs = set([f.split("_")[0] for f in fns if f.startswith(prefix)])
-            assert len(prfxs) == 1
+            if len(prfxs) == 0:
+                raise ValueError(
+                    "Could not find any files with prefix '%s' in '%s'." % (prefix, sp)
+                )
             prfx = prfxs.pop()
 
             paths = sorted([p for p in sp.glob(prfx + "_*")])
@@ -63,7 +73,9 @@ class GadgetStyleSimulation(DatasetSeries):
             else:
                 assert length == len(paths)
 
-        paths = paths_dict.pop("paths")
+        paths = paths_dict.pop("paths", None)
+        if paths is None:
+            raise ValueError("Could not find any snapshot paths.")
         p = paths[0]
         cls = _determine_type(p)[1][0]
 
@@ -80,3 +92,16 @@ class GadgetStyleSimulation(DatasetSeries):
             **kwargs,
             **interface_kwargs
         )
+
+
+def _get_snapshotfolder_prefix(path) -> str:
+    """Try to infer the snapshot folder prefix"""
+    p = pathlib.Path(path)
+    if not p.exists():
+        raise ValueError("Specified path '%s' does not exist." % path)
+    fns = os.listdir(p)
+    fns = [f for f in fns if os.path.isdir(p / f)]
+    # find most occuring prefix
+    prefixes = [f.split("_")[0] for f in fns]
+    prefix = max(set(prefixes), key=prefixes.count)
+    return prefix
