@@ -22,10 +22,28 @@ def check_flamingosnap(obj: SwiftSnapshot, obj_wu: SwiftSnapshot):
     # test units
     pdata = obj.data["PartType0"]
     pdata_wu = obj_wu.data["PartType0"]
-    # Coordinates
-    uq = (pdata["Coordinates"][0, 0].compute()).to("cm").magnitude
-    uq_ref = pdata_wu["Coordinates"][0, 0].compute() * a * (1.0 * u.Mpc).to("cm").value
-    assert pytest.approx(uq) == uq_ref
+
+    cgs_convfactors = {}
+    cgs_convfactors["Coordinates"] = a * (1.0 * u.Mpc).to("cm").value  # from cMpc
+    cgs_convfactors["Velocities"] = (1.0 * u.km / u.s).to("cm/s").value  # from km/s
+    cgs_convfactors["Masses"] = (1e10 * u.Msun).to("g").value  # from 1e10 Msun
+    cgs_convfactors["Temperatures"] = 1.0  # from K
+    ureg = obj.ureg
+    cgs_units = {}
+    cgs_units["Coordinates"] = ureg.cm
+    cgs_units["Velocities"] = ureg.cm / ureg.s
+    cgs_units["Masses"] = ureg.g
+    cgs_units["Temperatures"] = ureg.K
+
+    for k, f in cgs_convfactors.items():
+        print("Verifying unit conversion for", k)
+        v = (pdata[k][0].compute()).to_base_units()
+        uq = v.magnitude
+        uq_ref = pdata_wu[k][0].compute() * f
+        assert pytest.approx(uq) == uq_ref
+        assert v.units == cgs_units[k]
+
+    assert not hasattr(pdata["ParticleIDs"], "units")  # we do not want units for IDs
 
 
 @require_testdata_path("interface", only=["FLAMINGO_snapshot_reduced"])

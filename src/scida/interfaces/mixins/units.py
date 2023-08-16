@@ -290,21 +290,19 @@ class UnitMixin(Mixin):
         # update fields with units
         fwu = unithints.get("fields", {})
         mode_metadata = unithints.get("metadata_unitsystem", "cgs")
-        # TODO: Not sure about block below needed again
-        # if mode_metadata == "code":
-        #     if "code_length" not in self.ureg:
-        #         log.debug("No code units given, assuming cgs.")
-        #         mode_metadata = "cgs"
 
         def add_units(container: FieldContainer, basepath: str):
             # first we check whether we are explicitly given a unit by a unit file
             override = False  # whether to override the metadata units
-            gfwu = fwu
-            k = basepath.split("/")
-            for p in basepath.split("/"):
-                gfwu = fwu.get(p, {})
-            if gfwu == "no_units":
-                return  # no units for this container
+            gfwu = dict(**fwu)
+            splt = basepath.split("/")
+            for p in splt:
+                if p == "":
+                    continue  # skip empty path
+                gfwu = gfwu.get(p, {})
+                # if any parent container specifies "no_units", we will not add units, thus return
+                if gfwu == "no_units":
+                    return
             if gfwu is None:
                 gfwu = {}  # marginal case where no fields are given
             keys = sorted(
