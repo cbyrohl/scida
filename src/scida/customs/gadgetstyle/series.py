@@ -103,5 +103,7 @@ def _get_snapshotfolder_prefix(path) -> str:
     fns = [f for f in fns if os.path.isdir(p / f)]
     # find most occuring prefix
     prefixes = [f.split("_")[0] for f in fns]
+    if len(prefixes) == 0:
+        return ""
     prefix = max(set(prefixes), key=prefixes.count)
     return prefix
