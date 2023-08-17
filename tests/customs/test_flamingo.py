@@ -63,6 +63,8 @@ def test_snapshot(testdatapath):
 def test_series(testdatapath):
     obj: SwiftSimulation = load(testdatapath, units=True)
     obj.info()
+    assert isinstance(obj, SwiftSimulation)
     z = 4.75
     ds = obj.get_dataset(redshift=z)
+    assert isinstance(ds, SwiftSnapshot)
     assert ds.redshift == z
