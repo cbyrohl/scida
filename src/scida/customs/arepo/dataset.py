@@ -1437,7 +1437,7 @@ fielddefs = FieldContainer(containers=groupnames)
 
 
 @fielddefs.register_field("PartType0")
-def Temperature(arrs, **kwargs):
+def Temperature(arrs, ureg=None, **kwargs):
     """Compute gas temperature given (ElectronAbundance,InternalEnergy) in [K]."""
     xh = 0.76
     gamma = 5.0 / 3.0
@@ -1448,11 +1448,16 @@ def Temperature(arrs, **kwargs):
     UnitEnergy_over_UnitMass = (
         1e10  # standard unit system (TODO: can obtain from snapshot)
     )
+    f = UnitEnergy_over_UnitMass
+    if ureg is not None:
+        f = 1.0
+        m_p = m_p * ureg.g
+        k_B = k_B * ureg.erg / ureg.K
 
     xe = arrs["ElectronAbundance"]
     u_internal = arrs["InternalEnergy"]
 
     mu = 4 / (1 + 3 * xh + 4 * xh * xe) * m_p
-    temp = (gamma - 1.0) * u_internal / k_B * UnitEnergy_over_UnitMass * mu
+    temp = f * (gamma - 1.0) * u_internal / k_B * mu
 
     return temp

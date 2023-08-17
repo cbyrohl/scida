@@ -309,3 +309,13 @@ def test_interface_groupedoperations_nonscalar(testdatapath, caplog):
     except IndexError:
         pass  # we expect an index error further down the evaluate call.
     assert "Exception during shape inference" in caplog.text
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_default_recipes(testdatapath):
+    obj = load(testdatapath)
+    T = obj.data["PartType0"]["Temperature"][0].compute()
+    v1 = T.to_base_units().magnitude
+    obj2 = load(testdatapath, units=False)
+    v2 = obj2.data["PartType0"]["Temperature"][0].compute()
+    assert np.allclose(v1, v2)

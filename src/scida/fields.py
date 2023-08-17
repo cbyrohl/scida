@@ -358,7 +358,17 @@ class FieldContainer(MutableMapping):
         # finally, instantiate field
         field = func(self, **kwargs)
         if self.withunits and units is not None:
-            field = field * units
+            if not hasattr(field, "units"):
+                field = field * units
+            else:
+                if field.units != units:
+                    try:
+                        field = field.to(units)
+                    except pint.errors.DimensionalityError as e:
+                        print(e)
+                        raise ValueError(
+                            "Field units '%s' do not match '%s'" % (field.units, units)
+                        )
         return field
 
     def __delitem__(self, key):
