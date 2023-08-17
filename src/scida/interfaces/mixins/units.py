@@ -435,6 +435,13 @@ class UnitMixin(Mixin):
         add_units(self.data, "/")
         walk_container(self.data, handler_group=add_units)
 
+        # add ureg to fieldcontainers
+        def add_ureg(container: FieldContainer, basepath: str):
+            container.set_ureg(self.ureg)
+
+        self.data.set_ureg(self.ureg)
+        walk_container(self.data, handler_group=add_ureg)
+
     def _info_custom(self):
         rep = ""
         if hasattr(super(), "_info_custom"):
