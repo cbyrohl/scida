@@ -337,8 +337,10 @@ class FieldContainer(MutableMapping):
         accept_kwargs = inspect.getfullargspec(func).varkw is not None
         func_kwargs = get_kwargs(func)
         dkwargs = self.fieldrecipes_kwargs
+        ureg = None
         if "ureg" not in dkwargs:
-            dkwargs["ureg"] = self.get_ureg()
+            ureg = self.get_ureg()
+            dkwargs["ureg"] = ureg
         # first, we overwrite all optional arguments with class instance defaults where func kwarg is None
         kwargs = {
             k: dkwargs[k]
@@ -362,13 +364,17 @@ class FieldContainer(MutableMapping):
                 field = field * units
             else:
                 if field.units != units:
-                    try:
-                        field = field.to(units)
-                    except pint.errors.DimensionalityError as e:
-                        print(e)
-                        raise ValueError(
-                            "Field units '%s' do not match '%s'" % (field.units, units)
-                        )
+                    # if unit is present, but unit from metadata is unknown,
+                    # we stick with the former
+                    if not (hasattr(units, "units") and str(units.units) == "unknown"):
+                        try:
+                            field = field.to(units)
+                        except pint.errors.DimensionalityError as e:
+                            print(e)
+                            raise ValueError(
+                                "Field '%s' units '%s' do not match '%s'"
+                                % (key, field.units, units)
+                            )
         return field
 
     def __delitem__(self, key):
