@@ -189,6 +189,7 @@ def find_path(path, overwrite=False) -> str:
         found = False
         if "datafolders" in config:
             for folder in config["datafolders"]:
+                folder = os.path.expanduser(folder)
                 if os.path.exists(os.path.join(folder, path)):
                     path = os.path.join(folder, path)
                     found = True
