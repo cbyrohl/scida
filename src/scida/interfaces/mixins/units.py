@@ -301,7 +301,7 @@ class UnitMixin(Mixin):
                     continue  # skip empty path
                 gfwu = gfwu.get(p, {})
                 # if any parent container specifies "no_units", we will not add units, thus return
-                if gfwu == "no_units":
+                if gfwu == "no_units" or gfwu == "none":
                     return
             if gfwu is None:
                 gfwu = {}  # marginal case where no fields are given
