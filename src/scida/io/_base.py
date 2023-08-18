@@ -58,16 +58,17 @@ class FITSLoader(Loader):
             arr = hdulist[ext].data
         darrs = fitsrecords_to_daskarrays(arr)
 
-        # hosting all data
+        derivedfields_kwargs = kwargs.get("derivedfields_kwargs", {})
+        withunits = kwargs.get("withunits", False)
+        rootcontainer = FieldContainer(
+            fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits
+        )
 
-        # derivedfields_kwargs = kwargs.get("derivedfields_kwargs", {})
-        # withunits = kwargs.get("withunits", False)
-        # rootcontainer = FieldContainer(
-        #     fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits
-        # )
+        for name, darr in darrs.items():
+            rootcontainer[name] = darr
 
         metadata = {}
-        return darrs, metadata
+        return rootcontainer, metadata
 
     def load_metadata(self, **kwargs):
         """Take a quick glance at the metadata, only attributes."""
@@ -370,47 +371,19 @@ def load_datadict_old(
                 )
                 continue
 
-        if lazy and i > 0:  # need one non-lazy entry though later on...
+        lz = lazy and i > 0  # need one non-lazy field (?)
+        fieldpath = dataset[0]
+        _add_hdf5arr_to_fieldcontainer(
+            file,
+            container,
+            fieldpath,
+            fieldname,
+            name,
+            chunksize,
+            inline_array=inline_array,
+            lazy=lz,
+        )
 
-            def field(
-                arrs,
-                snap=None,
-                h5path="",
-                chunksize="",
-                name="",
-                inline_array=False,
-                file=None,
-                **kwargs
-            ):
-                hds = file[h5path]
-                arr = da.from_array(
-                    hds,
-                    chunks=chunksize,
-                    name=name,
-                    inline_array=inline_array,
-                )
-                return arr
-
-            fnc = partial(
-                field,
-                h5path=dataset[0],
-                chunksize=chunksize,
-                name=name,
-                inline_array=inline_array,
-                file=file,
-            )
-            container.register_field(
-                name=fieldname, description=fieldname + ": lazy field from disk"
-            )(fnc)
-        else:
-            hds = file[dataset[0]]
-            ds = da.from_array(
-                hds,
-                chunks=chunksize,
-                name=name,
-                inline_array=inline_array,
-            )
-            container[fieldname] = ds
     data = rootcontainer
 
     dtsdict = {k[0]: k[1:] for k in tree["datasets"]}
@@ -497,6 +470,59 @@ def _cachefile_available_in_path(
     if pnew.exists():
         return str(pnew)
     return False
+
+
+def _add_hdf5arr_to_fieldcontainer(
+    file,
+    container,
+    fieldpath,
+    fieldname,
+    name,
+    chunksize,
+    inline_array=False,
+    lazy=True,
+):
+    if not lazy:
+        hds = file[fieldpath]
+        ds = da.from_array(
+            hds,
+            chunks=chunksize,
+            name=name,
+            inline_array=inline_array,
+        )
+        container[fieldname] = ds
+        return
+
+    def field(
+        arrs,
+        snap=None,
+        h5path="",
+        chunksize="",
+        name="",
+        inline_array=False,
+        file=None,
+        **kwargs
+    ):
+        hds = file[h5path]
+        arr = da.from_array(
+            hds,
+            chunks=chunksize,
+            name=name,
+            inline_array=inline_array,
+        )
+        return arr
+
+    fnc = partial(
+        field,
+        h5path=fieldpath,
+        chunksize=chunksize,
+        name=name,
+        inline_array=inline_array,
+        file=file,
+    )
+    container.register_field(
+        name=fieldname, description=fieldname + ": lazy field from disk"
+    )(fnc)
 
 
 def _get_chunkedfiles(path, fileprefix: Optional[str] = "") -> list:
