@@ -1,6 +1,8 @@
 # tests for gh issues. to be cleaned up and moved to the right place eventually
 import pathlib
 
+import pytest
+
 from scida import ArepoSimulation, load
 from scida.convenience import find_path
 from tests.helpers import write_gadget_testfile
@@ -59,3 +61,13 @@ def test_issue_88(testdatapath, tmp_path):
     # make sure ~ is resolved as home folder
     path = "~/test"
     assert find_path(path).startswith("/")
+
+
+def test_issue_78():
+    # some of the default "datafolders" in config.yaml do not exist on test user
+    # check that is does not matter
+    path = "SomeDataset"
+    with pytest.raises(ValueError) as e:
+        # this dataset does not exist, so should still raise proper exception
+        find_path(path)
+    assert "unknown" in str(e.value)
