@@ -1,4 +1,4 @@
-metadata_unitsystem: cgs
+metadata_unitsystem: cgs  # this means we have a cgs conversion factor available
 units:
   # h: 0.6774 hubble factor, needs to be set by snapshot
   # a: 1.0 # scale factor, needs to be set by snapshot
@@ -22,6 +22,8 @@ fields:
     SubfindVelDisp: km / s
     Velocities: km * a^(1/2) / s
     TimeStep:
+    GroupFirstSub: none
+    LocalSubhaloID: none
   Offsets: "no_units" # "no_units" indicates that no field has units in this group
   # only do this for fields that have wrong or no metadata
   PartType0:

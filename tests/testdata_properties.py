@@ -158,6 +158,8 @@ def get_testdata_params_ids(
                 if k in exclude:
                     continue
         for tp in td.types:
+            if tp is None:
+                continue
             tsplit = tp.split("|")
             tname = tsplit[0]
             if tname != datatype:

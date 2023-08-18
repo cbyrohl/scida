@@ -29,6 +29,23 @@ class GadgetStyleSnapshot(Dataset):
                 elif "Boxsize" in self.__dict__[name]:
                     self.boxsize = self.__dict__[name]["Boxsize"]
 
+        sanity_check = kwargs.get("sanity_check", False)
+        key_nparts = "NumPart_Total"
+        key_nparts_hw = "NumPart_Total_HighWord"
+        if sanity_check and key_nparts in self.header and key_nparts_hw in self.header:
+            nparts = self.header[key_nparts_hw] * 2**32 + self.header[key_nparts]
+            for i, n in enumerate(nparts):
+                pkey = "PartType%i" % i
+                if pkey in self.data:
+                    pdata = self.data[pkey]
+                    fkey = next(iter(pdata.keys()))
+                    nparts_loaded = pdata[fkey].shape[0]
+                    if nparts_loaded != n:
+                        raise ValueError(
+                            "Number of particles in header (%i) does not match number of particles loaded (%i) "
+                            "for particle type %i" % (n, nparts_loaded, i)
+                        )
+
     @classmethod
     def _get_fileprefix(cls, path: Union[str, os.PathLike], **kwargs) -> str:
         """
@@ -112,9 +129,9 @@ class GadgetStyleSnapshot(Dataset):
                     ]
                 )
                 if is_grp:
-                    return CandidateStatus.YES
+                    return CandidateStatus.MAYBE
                 if is_snap and not expect_grp:
-                    return CandidateStatus.YES
+                    return CandidateStatus.MAYBE
         return CandidateStatus.NO
 
     def register_field(self, parttype, name=None, description=""):
@@ -150,20 +167,28 @@ class GadgetStyleSnapshot(Dataset):
             else:
                 pass  # nothing to do; we do not overwrite with catalog props
 
-
-class SwiftSnapshot(GadgetStyleSnapshot):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
-
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
-        valid = super().validate_path(path, *args, **kwargs)
-        if not valid:
-            return False
-        metadata_raw = load_metadata(path, **kwargs)
-        comparestr = metadata_raw.get("/Code", {}).get("Code", b"").decode()
-        valid = "SWIFT" in comparestr
-        return valid
+    def _clean_metadata_from_raw(cls, rawmetadata):
+        """
+        Set metadata from raw metadata.
+        """
+        metadata = dict()
+        if "/Header" in rawmetadata:
+            header = rawmetadata["/Header"]
+            if "Redshift" in header:
+                metadata["redshift"] = float(header["Redshift"])
+                metadata["z"] = metadata["redshift"]
+            if "BoxSize" in header:
+                # can be scalar or array
+                metadata["boxsize"] = header["BoxSize"]
+            if "Time" in header:
+                metadata["time"] = float(header["Time"])
+                metadata["t"] = metadata["time"]
+        return metadata
 
-
-# right now ArepoSnapshot is defined in separate file
+    def _set_metadata(self):
+        """
+        Set metadata from header and config.
+        """
+        md = self._clean_metadata_from_raw(self._metadata_raw)
+        self.metadata = md

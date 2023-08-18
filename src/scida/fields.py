@@ -7,6 +7,7 @@ from typing import Dict, Optional
 
 import dask.array as da
 import dask.dataframe as dd
+import pint
 
 from scida.helpers_misc import get_kwargs, sprint
 
@@ -53,6 +54,7 @@ class FieldContainer(MutableMapping):
         containers=None,
         aliases=None,
         withunits=False,
+        ureg=None,
         parent: Optional[FieldContainer] = None,
         **kwargs,
     ):
@@ -64,11 +66,11 @@ class FieldContainer(MutableMapping):
         self.name = kwargs.pop("name", None)
         self._fields: Dict[str, da.Array] = {}
         self._fields.update(*args, **kwargs)
-        self._recipes = "bla"
         self._fieldrecipes = {}
         self._fieldlength = None
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
+        self._ureg: Optional[pint.UnitRegistry] = ureg
         self._containers: Dict[
             str, FieldContainer
         ] = dict()  # other containers as subgroups
@@ -77,6 +79,19 @@ class FieldContainer(MutableMapping):
                 self.add_container(k)
         self.internals = ["uid"]  # names of internal fields/groups
         self.parent = parent
+
+    def set_ureg(self, ureg):
+        self._ureg = ureg
+
+    def get_ureg(self):
+        keys = self.keys(withgroups=False, withrecipes=False, withinternal=True)
+        for k in keys:
+            if hasattr(self[k], "units"):
+                if isinstance(self[k].units, pint.Unit):
+                    self._ureg = self[k].units._REGISTRY
+        if self._ureg is not None:
+            return self._ureg
+        return None
 
     def copy_skeleton(self) -> FieldContainer:
         res = FieldContainer()
@@ -294,6 +309,7 @@ class FieldContainer(MutableMapping):
             parent=self,
             **tkwargs,
         )
+        self._containers[key].set_ureg(self.get_ureg())
 
     def _getitem(
         self, key, force_derived=False, update_dict=True, evaluate_recipe=True
@@ -308,37 +324,58 @@ class FieldContainer(MutableMapping):
             if key in self._fieldrecipes:
                 if not evaluate_recipe:
                     return self._fieldrecipes[key]
-                func = self._fieldrecipes[key].func
-                units = self._fieldrecipes[key].units
-                accept_kwargs = inspect.getfullargspec(func).varkw is not None
-                func_kwargs = get_kwargs(func)
-                dkwargs = self.fieldrecipes_kwargs
-                # first, we overwrite all optional arguments with class instance defaults where func kwarg is None
-                kwargs = {
-                    k: dkwargs[k]
-                    for k in (
-                        set(dkwargs)
-                        & set([k for k, v in func_kwargs.items() if v is None])
-                    )
-                }
-                # next, we add all optional arguments if func is accepting **kwargs and varname not yet in signature
-                if accept_kwargs:
-                    kwargs.update(
-                        **{
-                            k: v
-                            for k, v in dkwargs.items()
-                            if k not in inspect.getfullargspec(func).args
-                        }
-                    )
-                # finally, instantiate field
-                field = func(self, **kwargs)
-                if self.withunits and units is not None:
-                    field = field * units
+                field = self._instantiate_field(key)
                 if update_dict:
                     self._fields[key] = field
                 return field
             else:
                 raise KeyError("Unknown field '%s'" % key)
+
+    def _instantiate_field(self, key):
+        func = self._fieldrecipes[key].func
+        units = self._fieldrecipes[key].units
+        accept_kwargs = inspect.getfullargspec(func).varkw is not None
+        func_kwargs = get_kwargs(func)
+        dkwargs = self.fieldrecipes_kwargs
+        ureg = None
+        if "ureg" not in dkwargs:
+            ureg = self.get_ureg()
+            dkwargs["ureg"] = ureg
+        # first, we overwrite all optional arguments with class instance defaults where func kwarg is None
+        kwargs = {
+            k: dkwargs[k]
+            for k in (
+                set(dkwargs) & set([k for k, v in func_kwargs.items() if v is None])
+            )
+        }
+        # next, we add all optional arguments if func is accepting **kwargs and varname not yet in signature
+        if accept_kwargs:
+            kwargs.update(
+                **{
+                    k: v
+                    for k, v in dkwargs.items()
+                    if k not in inspect.getfullargspec(func).args
+                }
+            )
+        # finally, instantiate field
+        field = func(self, **kwargs)
+        if self.withunits and units is not None:
+            if not hasattr(field, "units"):
+                field = field * units
+            else:
+                if field.units != units:
+                    # if unit is present, but unit from metadata is unknown,
+                    # we stick with the former
+                    if not (hasattr(units, "units") and str(units.units) == "unknown"):
+                        try:
+                            field = field.to(units)
+                        except pint.errors.DimensionalityError as e:
+                            print(e)
+                            raise ValueError(
+                                "Field '%s' units '%s' do not match '%s'"
+                                % (key, field.units, units)
+                            )
+        return field
 
     def __delitem__(self, key):
         if key in self._fieldrecipes:

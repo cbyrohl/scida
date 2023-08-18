@@ -112,15 +112,16 @@ def _determine_type(
     if len(available_dtypes) > 1:
         # TODO: Rethink how tu use MAYBE/YES information.
         # below lines not suitable for this.
-        # good_matches = [
-        #     k
-        #     for k, v in zip(available_dtypes, dtypes_status)
-        #     if v == CandidateStatus.YES
-        # ]
-        # if len(good_matches) >= 1:
-        #     available_dtypes = (
-        #         good_matches  # discard all MAYBEs as we have better options
-        #     )
+        good_matches = [
+            k
+            for k, v in zip(available_dtypes, dtypes_status)
+            if v == CandidateStatus.YES
+        ]
+        if len(good_matches) >= 1:
+            available_dtypes = (
+                good_matches  # discard all MAYBEs as we have better options
+            )
+
         # reduce candidates by looking at most specific ones.
         inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
         mros = [getmro(reg[k]) for k in reg.keys()]
