@@ -106,7 +106,7 @@ def get_testdata(name: str) -> str:
     return res[name]
 
 
-def find_path(path, overwrite=False):
+def find_path(path, overwrite=False) -> str:
     """
     Find path to dataset.
     Parameters
@@ -117,9 +117,11 @@ def find_path(path, overwrite=False):
 
     Returns
     -------
+    str
 
     """
     config = get_config()
+    path = os.path.expanduser(path)
     if os.path.exists(path):
         # datasets on disk
         pass

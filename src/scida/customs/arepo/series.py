@@ -1,4 +1,5 @@
 import os
+import pathlib
 from os.path import join
 
 from scida.customs.gadgetstyle.series import GadgetStyleSimulation
@@ -9,6 +10,10 @@ class ArepoSimulation(GadgetStyleSimulation):
     """A series representing an arepo simulation."""
 
     def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
+        # choose parent folder as path if we are passed "output" dir
+        p = pathlib.Path(path)
+        if p.name == "output":
+            path = str(p.parent)
         prefix_dict = dict(paths="snapdir", gpaths="group")
         arg_dict = dict(gpaths="catalog")
         super().__init__(
