@@ -423,7 +423,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             # calculate first subhalo of each halo that a particle belongs to
             self.add_groupquantity_to_particles("GroupFirstSub", parttype=key)
             pdata["SubhaloID"] = pdata["GroupFirstSub"] + pdata["LocalSubhaloID"]
-            pdata["SubHaloID"] = da.where(
+            pdata["SubhaloID"] = da.where(
                 pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"]
             )
 

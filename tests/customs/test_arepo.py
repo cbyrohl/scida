@@ -319,3 +319,12 @@ def test_default_recipes(testdatapath):
     obj2 = load(testdatapath, units=False)
     v2 = obj2.data["PartType0"]["Temperature"][0].compute()
     assert np.allclose(v1, v2)
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_allunitsdiscovered(testdatapath, caplog):
+    load(testdatapath)
+    caplog.set_level(logging.DEBUG)
+    assert (
+        "Cannot determine units from neither unit file nor metadata" not in caplog.text
+    )
