@@ -8,7 +8,7 @@ python_dflt = "3.10"
 
 @session(python=python_versions)
 def tests(session):
-    session.install("coverage[toml]", "pytest", "pygments")
+    session.install("coverage[toml]", "pytest", "pytest-mock", "pygments")
     session.install(".")
     try:
         session.run(

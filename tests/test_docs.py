@@ -36,7 +36,7 @@ class DocFile:
                 cblines.append(
                     [k[4:] for k in lines[start + 1 : end] if k.startswith(">>>")]
                 )
-            elif blocktype == "bash":
+            elif blocktype in ["bash", "yaml", "json", "console", "text", "html"]:
                 # not python; ignore
                 pass
             else:

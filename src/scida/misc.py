@@ -54,8 +54,8 @@ def return_cachefile_path(fname: str) -> Optional[str]:
         return None
     cp = config["cache_path"]
     cp = os.path.expanduser(cp)
-    if not os.path.exists(cp):
-        os.mkdir(cp)
+    path = pathlib.Path(cp)
+    path.mkdir(parents=True, exist_ok=True)
     fp = os.path.join(cp, fname)
     fp = os.path.expanduser(fp)
     bp = os.path.dirname(fp)
@@ -140,7 +140,10 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
     candidates = []
     if "data" not in c:
         return candidates
-    for k, vals in c["data"].items():
+    simdct = c["data"]
+    if simdct is None:
+        simdct = {}
+    for k, vals in simdct.items():
         if vals is None:
             continue
         possible_candidate = True
