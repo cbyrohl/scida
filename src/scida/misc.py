@@ -140,7 +140,10 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
     candidates = []
     if "data" not in c:
         return candidates
-    for k, vals in c["data"].items():
+    simdct = c["data"]
+    if simdct is None:
+        simdct = {}
+    for k, vals in simdct.items():
         if vals is None:
             continue
         possible_candidate = True
