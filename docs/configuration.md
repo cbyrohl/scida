@@ -82,3 +82,47 @@ data:
 `dataset_type`
 
 : Can explicitly fix the dataset/series type for a simulation.
+
+
+## Unit files
+Unit files are used to determine the units of datasets, particularly for datasets that do not have metadata
+that can be used to infer units. Unit files are specified either explicitly via the `unitfile` option in `scida.load`
+or implicitly via the simulation configuration, see above. Relative paths, such as `units/simnameunits.yaml` are
+relative to the user/package simulation config folder. The former (`~/.config/scida/`) takes precedence.
+
+A unit file could look like this:
+
+```yaml
+metadata_unitsystem: cgs
+units:
+  unit_length: 100.0 * km
+  unit_mass: g
+fields:
+  _all:
+    CounterID: none
+    Coordinates: unit_length
+  InternalArrays: none
+  PartType0:
+    SubPartType0:
+      FurthestSubgroupDistance: unit_length
+    NearestNeighborDistance: unit_length
+    Energy: 10.0 * erg
+```
+
+`metadata_unitsystem`
+
+: The unitsystem assumed when deducing units from metadata dimensions where available.
+  Only cgs supported right now.
+
+`units`
+
+: unit definitions that are used in the following `fields` section. The units are defined as
+  [pint](https://pint.readthedocs.io/en/stable/) expressions.
+
+`fields`
+
+: A dictionary of fields and their units. The fields are specified as a path to the field in the dataset.
+  The special field `_all` can be used to set the default unit for all fields with a given name irrespective
+  of the path of the field. Other than that, entries represent the fields or containers of fields. The special
+  field `none` can be used to set the unit to None, i.e. no unit. This is differently handled than " "/"dimensionless" as
+  the field will be treated as array rather than dimensionless [pint](https://pint.readthedocs.io/en/stable/) array.
