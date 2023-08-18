@@ -21,14 +21,12 @@ pint = "^0.22"
 requests = "^2.31.0"
 
 
-[tool.poetry.dev-dependencies]
-black = ">=22.1.0"
-pre-commit = ">=2.17.0"
+[tool.poetry.group.dev.dependencies]
 pytest = ">=6.2.5"
+pre-commit = ">=2.17.0"
+black = ">=22.1.0"
 requests = ">=2.2.7"
 coverage = "^7.0.1"
-
-[tool.poetry.group.dev.dependencies]
 pytest-xdist = {extras = ["psutil"], version = "^3.1.0"}
 pytest-profiling = "^1.7.0"
 mypy = ">=0.930"
