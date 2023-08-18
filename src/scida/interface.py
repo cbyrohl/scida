@@ -13,7 +13,7 @@ import scida.io
 from scida.fields import FieldContainer
 from scida.helpers_misc import make_serializable, sprint
 from scida.interfaces.mixins import UnitMixin
-from scida.misc import check_config_for_dataset, deepdictkeycopy
+from scida.misc import check_config_for_dataset
 from scida.registries import dataset_type_registry
 
 log = logging.getLogger(__name__)
@@ -124,22 +124,6 @@ class BaseDataset(metaclass=MixinMeta):
             rep += self._info_custom()
         rep += sprint("=== data ===")
         rep += self.data.info(name="root")
-        # for k in sorted(self.data.keys()):
-        #    v = self.data[k]
-        #    if isinstance(v, FieldContainer):
-        #        length = v.fieldlength
-        #        count = v.fieldcount
-        #        if length is not None:
-        #            rep += sprint("+", k, "(fields: %i, entries: %i)" % (count, length))
-        #        else:
-        #            rep += sprint("+", k)
-        #        if not listfields:
-        #            continue
-        #        for k2, v2 in v.items():
-        #            rep += sprint("--", k2)
-        #    else:
-        #        pass #rep += sprint("--", k)
-        #    self.data.info()
         rep += sprint("============")
         print(rep)
 
@@ -370,15 +354,17 @@ class Selector(object):
 
     def __init__(self):
         self.keys = None  # the keys we check for.
-        self.data_backup = {}  # holds a copy of the species' fields
-        self.data = {}  # holds the species' fields we operate on
+        # holds a copy of the species' fields
+        self.data_backup = FieldContainer()
+        # holds the species' fields we operate on
+        self.data: FieldContainer = FieldContainer()
 
     def __call__(self, fn, *args, **kwargs):
         def newfn(*args, **kwargs):
             # TODO: Add graceful exit/restore after exception in self.prepare
             self.data_backup = args[0].data
-            self.data = {}
-            deepdictkeycopy(self.data_backup, self.data)
+            self.data = args[0].data.copy_skeleton()
+            # deepdictkeycopy(self.data_backup, self.data)
 
             self.prepare(*args, **kwargs)
             if self.keys is None:

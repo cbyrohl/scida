@@ -10,9 +10,9 @@ Please note that all fields within a container are expected to have the same sha
 
 ``` py
 from scida import load
-import da.array as da
-ds = load('simname')
-array = da.zeros_like(ds.data["PartType0"]["Density"][:,0])
+import dask.array as da
+ds = load('TNG50-4_snapshot')
+array = da.zeros_like(ds.data["PartType0"]["Density"])
 ds.data['PartType0']["zerofield"] = array
 ```
 
@@ -20,7 +20,7 @@ As we operate with dask, make sure to cast your array accordingly. For example, 
 Alternatively, if you have another dataset loaded, you can assign fields from one to another:
 
 ``` py
-ds2 = load('simname2')
+ds2 = load('TNG50-4_snapshot')
 ds.data['PartType0']["NewDensity"] = ds2.data['PartType0']["Density"]
 ```
 

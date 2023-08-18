@@ -11,12 +11,14 @@ from typing import Optional, Union
 
 import requests
 
-from scida.config import get_config, get_simulationconfig
-from scida.discovertypes import _determine_mixins, _determine_type
-from scida.interface import Dataset
+from scida.config import get_config
+from scida.discovertypes import (
+    _determine_mixins,
+    _determine_type,
+    _determine_type_from_simconfig,
+)
 from scida.interfaces.mixins import UnitMixin
 from scida.io import load_metadata
-from scida.misc import check_config_for_dataset
 from scida.registries import dataseries_type_registry, dataset_type_registry
 from scida.series import DatasetSeries
 
@@ -104,7 +106,7 @@ def get_testdata(name: str) -> str:
     return res[name]
 
 
-def find_path(path, overwrite=False):
+def find_path(path, overwrite=False) -> str:
     """
     Find path to dataset.
     Parameters
@@ -115,9 +117,11 @@ def find_path(path, overwrite=False):
 
     Returns
     -------
+    str
 
     """
     config = get_config()
+    path = os.path.expanduser(path)
     if os.path.exists(path):
         # datasets on disk
         pass
@@ -185,6 +189,7 @@ def find_path(path, overwrite=False):
         found = False
         if "datafolders" in config:
             for folder in config["datafolders"]:
+                folder = os.path.expanduser(folder)
                 if os.path.exists(os.path.join(folder, path)):
                     path = os.path.join(folder, path)
                     found = True
@@ -222,8 +227,29 @@ def load(
     msg = "Dataset is identified as '%s' via _determine_type." % cls
     log.debug(msg)
 
+    # any identifying metadata?
+    classtype = "dataset"
+    if issubclass(cls, DatasetSeries):
+        classtype = "series"
+    cls_simconf = _determine_type_from_simconfig(path, classtype=classtype, reg=reg)
+
+    if cls_simconf and not issubclass(cls, cls_simconf):
+        oldcls = cls
+        cls = cls_simconf
+        if oldcls != cls:
+            msg = "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
+            log.debug(msg % (cls, oldcls))
+        else:
+            msg = "Dataset is identified as '%s' via the simulation config, identical to prior candidate."
+            log.debug(msg % cls)
+
+    if force_class is not None:
+        cls = force_class
+
     # determine additional mixins not set by class
     mixins = []
+    if hasattr(cls, "_unitfile"):
+        unitfile = cls._unitfile
     if unitfile:
         if not units:
             units = True
@@ -235,46 +261,11 @@ def load(
 
     kwargs["overwritecache"] = overwrite
 
-    # any identifying metadata?
-    metadata_raw = dict()
-    if issubclass(cls, Dataset):
-        metadata_raw = load_metadata(path, fileprefix=None)
-    candidates = check_config_for_dataset(metadata_raw, path=path)
-    assert len(candidates) <= 1
-    if len(candidates) == 1:
-        simconf = get_simulationconfig()
-        dstype = simconf.get("data", {}).get(candidates[0]).get("dataset_type", None)
-        oldcls = cls
-        if isinstance(dstype, dict):
-            # series or dataset based on past candidate
-            if issubclass(cls, DatasetSeries):
-                cls = reg[dstype["series"]]
-            elif issubclass(cls, Dataset):
-                cls = reg[dstype["dataset"]]
-            else:
-                raise ValueError("Unknown type of dataset '%s'." % cls.__name__)
-        elif isinstance(dstype, str):
-            cls = reg[dstype]
-        elif dstype is None:
-            pass  # simply no dataset_type specified
-        else:
-            raise ValueError(
-                "Unknown type of dataset config variable. content: '%s'" % dstype
-            )
-
-        msg = "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
-        if dstype is not None:
-            log.debug(msg % (dstype, oldcls))
-
-    if force_class is not None:
-        cls = force_class
-
-    p = path
-    if metadata_raw is not None:
-        p = None  # if we have metadata, do not pass path (unnecessary IO)
-
     # we append since unit mixin is added outside of this func right now
-    other_mixins = _determine_mixins(path=p, metadata_raw=metadata_raw)
+    metadata_raw = dict()
+    if classtype == "dataset":
+        metadata_raw = load_metadata(path, fileprefix=None)
+    other_mixins = _determine_mixins(path=path, metadata_raw=metadata_raw)
     mixins += other_mixins
 
     log.debug("Adding mixins '%s' to dataset." % mixins)

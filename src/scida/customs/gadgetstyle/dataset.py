@@ -1,10 +1,11 @@
 import logging
 import os
 import re
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 
+from scida.discovertypes import CandidateStatus
 from scida.interface import Dataset
 from scida.io import load_metadata
 
@@ -15,7 +16,7 @@ class GadgetStyleSnapshot(Dataset):
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
         """We define gadget-style snapshots as nbody/hydrodynamical simulation snapshots that follow
         the common /PartType0, /PartType1 grouping scheme."""
-        self.boxsize = np.full(3, np.nan)
+        self.boxsize = np.nan
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
         defaultattributes = ["config", "header", "parameters"]
@@ -27,6 +28,23 @@ class GadgetStyleSnapshot(Dataset):
                     self.boxsize = self.__dict__[name]["BoxSize"]
                 elif "Boxsize" in self.__dict__[name]:
                     self.boxsize = self.__dict__[name]["Boxsize"]
+
+        sanity_check = kwargs.get("sanity_check", False)
+        key_nparts = "NumPart_Total"
+        key_nparts_hw = "NumPart_Total_HighWord"
+        if sanity_check and key_nparts in self.header and key_nparts_hw in self.header:
+            nparts = self.header[key_nparts_hw] * 2**32 + self.header[key_nparts]
+            for i, n in enumerate(nparts):
+                pkey = "PartType%i" % i
+                if pkey in self.data:
+                    pdata = self.data[pkey]
+                    fkey = next(iter(pdata.keys()))
+                    nparts_loaded = pdata[fkey].shape[0]
+                    if nparts_loaded != n:
+                        raise ValueError(
+                            "Number of particles in header (%i) does not match number of particles loaded (%i) "
+                            "for particle type %i" % (n, nparts_loaded, i)
+                        )
 
     @classmethod
     def _get_fileprefix(cls, path: Union[str, os.PathLike], **kwargs) -> str:
@@ -67,7 +85,7 @@ class GadgetStyleSnapshot(Dataset):
     @classmethod
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, expect_grp=False, **kwargs
-    ) -> bool:
+    ) -> CandidateStatus:
         """
         Check if path is valid for this interface.
         Parameters
@@ -82,18 +100,18 @@ class GadgetStyleSnapshot(Dataset):
         bool
         """
         path = str(path)
-        possibly_valid = False
+        possibly_valid = CandidateStatus.NO
         iszarr = path.rstrip("/").endswith(".zarr")
         if path.endswith(".hdf5") or iszarr:
-            possibly_valid = True
+            possibly_valid = CandidateStatus.MAYBE
         if os.path.isdir(path):
             files = os.listdir(path)
             sufxs = [f.split(".")[-1] for f in files]
             if not iszarr and len(set(sufxs)) > 1:
-                possibly_valid = False
+                possibly_valid = CandidateStatus.NO
             if sufxs[0] == "hdf5":
-                possibly_valid = True
-        if possibly_valid:
+                possibly_valid = CandidateStatus.MAYBE
+        if possibly_valid != CandidateStatus.NO:
             metadata_raw = load_metadata(path, **kwargs)
             # need some silly combination of attributes to be sure
             if all([k in metadata_raw for k in ["/Header"]]):
@@ -111,45 +129,66 @@ class GadgetStyleSnapshot(Dataset):
                     ]
                 )
                 if is_grp:
-                    return True
+                    return CandidateStatus.MAYBE
                 if is_snap and not expect_grp:
-                    return True
-        return False
+                    return CandidateStatus.MAYBE
+        return CandidateStatus.NO
 
     def register_field(self, parttype, name=None, description=""):
         res = self.data.register_field(parttype, name=name, description=description)
         return res
 
+    def merge_data(
+        self, secondobj, fieldname_suffix="", root_group: Optional[str] = None
+    ):
+        data = self.data
+        if root_group is not None:
+            if root_group not in data._containers:
+                data.add_container(root_group)
+            data = self.data[root_group]
+        for k in secondobj.data:
+            key = k + fieldname_suffix
+            if key not in data:
+                data[key] = secondobj.data[k]
+            else:
+                log.debug("Not overwriting field '%s' during merge_data." % key)
+            secondobj.data.fieldrecipes_kwargs["snap"] = self
 
-class SwiftSnapshot(GadgetStyleSnapshot):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
+    def merge_hints(self, secondobj):
+        # merge hints from snap and catalog
+        for h in secondobj.hints:
+            if h not in self.hints:
+                self.hints[h] = secondobj.hints[h]
+            elif isinstance(self.hints[h], dict):
+                # merge dicts
+                for k in secondobj.hints[h]:
+                    if k not in self.hints[h]:
+                        self.hints[h][k] = secondobj.hints[h][k]
+            else:
+                pass  # nothing to do; we do not overwrite with catalog props
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
-        valid = super().validate_path(path, *args, **kwargs)
-        if not valid:
-            return False
-        metadata_raw = load_metadata(path, **kwargs)
-        comparestr = metadata_raw.get("/Code", {}).get("Code", b"").decode()
-        valid = "SWIFT" in comparestr
-        return valid
+    def _clean_metadata_from_raw(cls, rawmetadata):
+        """
+        Set metadata from raw metadata.
+        """
+        metadata = dict()
+        if "/Header" in rawmetadata:
+            header = rawmetadata["/Header"]
+            if "Redshift" in header:
+                metadata["redshift"] = float(header["Redshift"])
+                metadata["z"] = metadata["redshift"]
+            if "BoxSize" in header:
+                # can be scalar or array
+                metadata["boxsize"] = header["BoxSize"]
+            if "Time" in header:
+                metadata["time"] = float(header["Time"])
+                metadata["t"] = metadata["time"]
+        return metadata
 
-
-class GizmoSnapshot(GadgetStyleSnapshot):
-    def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
-        super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
-
-    @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
-        valid = super().validate_path(path, *args, **kwargs)
-        if not valid:
-            return False
-        # there does not seem to be identifying metadata for Gizmo (? see SIMBA snap),
-        # so we just return False for now (i.e. falling back onto GadgetStyleSnapshot on auto-detection)
-        # TODO: split routine into "validate" and "identify"? One accessing whether we *could* read the data,
-        # the other checking whether we *should* primarily read the data this way?
-        return False
-
-
-# right now ArepoSnapshot is defined in separate file
+    def _set_metadata(self):
+        """
+        Set metadata from header and config.
+        """
+        md = self._clean_metadata_from_raw(self._metadata_raw)
+        self.metadata = md

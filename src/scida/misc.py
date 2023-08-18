@@ -30,14 +30,18 @@ def get_container_from_path(
     return rv
 
 
-def return_hdf5cachepath(path_original) -> str:
-    fp = return_cachefile_path(os.path.join(hash_path(path_original), "data.hdf5"))
+def return_hdf5cachepath(path_original, fileprefix=None) -> str:
+    path = path_original
+    if fileprefix is not None:
+        path = os.path.join(path, fileprefix)
+    hsh = hash_path(path)
+    fp = return_cachefile_path(os.path.join(hsh, "data.hdf5"))
     return fp
 
 
-def path_hdf5cachefile_exists(path) -> bool:
+def path_hdf5cachefile_exists(path, **kwargs) -> bool:
     """Checks whether a cache file exists for given path."""
-    fp = return_hdf5cachepath(path)
+    fp = return_hdf5cachepath(path, **kwargs)
     if os.path.isfile(fp):
         return True
     return False
@@ -115,8 +119,22 @@ def rectangular_cutout_mask(
     return mask
 
 
-def check_config_for_dataset(metadata, path: Optional[str] = None, unique=True):
-    """Check whether the given dataset can be identified to be a certain simulation (type) by its metadata"""
+def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool = True):
+    """
+    Check whether the given dataset can be identified to be a certain simulation (type) by its metadata.
+    Parameters
+    ----------
+    metadata: dict
+        metadata of the dataset used for identification
+    path: str
+        path to the dataset, sometimes helpful for identification
+    unique: bool
+        whether to expect return to be unique
+
+    Returns
+    -------
+
+    """
     c = get_simulationconfig()
 
     candidates = []
@@ -177,7 +195,7 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique=True):
     return candidates
 
 
-def deepdictkeycopy(olddict, newdict) -> None:
+def deepdictkeycopy(olddict: object, newdict: object) -> None:
     """
     Recursively walk nested dictionary, only creating empty dictionaries for entries that are dictionaries themselves.
     Parameters
@@ -189,7 +207,8 @@ def deepdictkeycopy(olddict, newdict) -> None:
     -------
 
     """
+    cls = olddict.__class__
     for k, v in olddict.items():
         if isinstance(v, MutableMapping):
-            newdict[k] = {}
+            newdict[k] = cls()
             deepdictkeycopy(v, newdict[k])

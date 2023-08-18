@@ -4,7 +4,7 @@ defs:
     dataset_type:
       series: ArepoSimulation
       dataset: ArepoSnapshot
-    unitfile: units/illustris.yaml
+    unitfile: units/gadget.yaml
   tng_props: &tng_props
     code: arepo
     suite: TNG
@@ -12,7 +12,7 @@ defs:
   illustris_params: &illustris_params
     dataset_type:
       dataset: ArepoSnapshot
-    unitfile: units/illustris.yaml
+    unitfile: units/gadget.yaml
 
 data:
   TNG50:
@@ -46,6 +46,17 @@ data:
       identifiers:
           Parameters:
             InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics_201602/ics_illustrisTNGboxes/L75n1820TNG/output/ICs
+  TNG100-2:
+      <<: *tng_params
+      identifiers:
+          Parameters:
+            InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics_201602/ics_illustrisTNGboxes/L75n910TNG/output/ICs
+  TNG100-3:
+      <<: *tng_params
+      identifiers:
+          Parameters:
+            InitCondFile: /zhome/academic/HLRS/lha/zahapill/illustrisTNG_ics_201602/ics_illustrisTNGboxes/L75n455TNG/output/ICs
+
   TNG300:
       <<: *tng_params
       alias:
@@ -103,9 +114,25 @@ data:
       identifiers:
         name_contains: "gaia"
 
-
   FIRE2:
     unitfile: units/gizmo.yaml
     identifiers:
       Header:
         ReadMe: "This snapshot is part of the Feedback in Realistic Environments (FIRE) project -- Use, modification, or distribution only permitted with approval of the PI and the FIRE team -- No warranty, use at your own risk -- compactify_hdf5 (c) RF 2018"
+    dataset_type:
+      series: GizmoSimulation
+      dataset: GizmoSnapshot
+
+  LGalaxies:
+    unitfile: units/lgalaxies.yaml
+    identifiers:
+      Header:
+        Simulation: "L-Galaxies run on the Millennium Simulation"
+
+  FLAMINGO:
+    unitfile: units/flamingo.yaml
+    identifiers:
+      Parameters:
+        "Snapshots:basename": "flamingo"
+    dataset_type:
+      dataset: SwiftSnapshot

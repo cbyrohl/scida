@@ -6,8 +6,10 @@ from functools import reduce
 from inspect import getmro
 from typing import List, Union
 
+from scida.config import get_simulationconfig
 from scida.interfaces.mixins import CosmologyMixin
 from scida.io import load_metadata
+from scida.misc import check_config_for_dataset
 from scida.registries import dataseries_type_registry, dataset_type_registry
 
 log = logging.getLogger(__name__)
@@ -28,6 +30,39 @@ def _determine_mixins(path=None, metadata_raw=None):
     if z is not None:
         mixins.append(CosmologyMixin)
     return mixins
+
+
+def _determine_type_from_simconfig(path, classtype="dataset", reg=None):
+    if reg is None:
+        reg = dict()
+        reg.update(**dataset_type_registry)
+        reg.update(**dataseries_type_registry)
+    metadata_raw = dict()
+    if classtype == "dataset":
+        metadata_raw = load_metadata(path, fileprefix=None)
+    candidates = check_config_for_dataset(metadata_raw, path=path)
+    assert len(candidates) <= 1
+    cls = None
+    if len(candidates) == 1:
+        simconf = get_simulationconfig()
+        dstype = simconf.get("data", {}).get(candidates[0]).get("dataset_type", None)
+        if isinstance(dstype, dict):
+            # series or dataset based on past candidate
+            if classtype == "series":
+                cls = reg[dstype["series"]]
+            elif classtype == "dataset":
+                cls = reg[dstype["dataset"]]
+            else:
+                raise ValueError("Unknown class type '%s'." % classtype)
+        elif isinstance(dstype, str):
+            cls = reg[dstype]  # not split into series and dataset
+        elif dstype is None:
+            pass  # simply no dataset_type specified
+        else:
+            raise ValueError(
+                "Unknown type of dataset config variable. content: '%s'" % dstype
+            )
+    return cls
 
 
 def _determine_type(
@@ -75,6 +110,8 @@ def _determine_type(
     if len(available_dtypes) == 0:
         raise ValueError("Unknown data type.")
     if len(available_dtypes) > 1:
+        # TODO: Rethink how tu use MAYBE/YES information.
+        # below lines not suitable for this.
         good_matches = [
             k
             for k, v in zip(available_dtypes, dtypes_status)
@@ -84,8 +121,14 @@ def _determine_type(
             available_dtypes = (
                 good_matches  # discard all MAYBEs as we have better options
             )
+
         # reduce candidates by looking at most specific ones.
         inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
+        mros = [getmro(reg[k]) for k in reg.keys()]
+        lens = [len([m for m in mro if "Mixin" not in m.__name__]) for mro in mros]
+        zp = zip(available_dtypes, lens, dtypes_status)
+        lst = sorted(zp, key=lambda x: x[2].value)
+        lst = sorted(lst, key=lambda x: x[1])
         # try to find candidate that shows up only once across all inheritance trees.
         # => this will be the most specific candidate(s).
         count = reduce(lambda x, y: x + y, inheritancecounters)

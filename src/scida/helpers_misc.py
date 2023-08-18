@@ -1,10 +1,14 @@
 import hashlib
 import inspect
 import io
+import logging
 import re
 import types
 
+import dask.array as da
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 
 def hash_path(path):
@@ -22,7 +26,7 @@ class RecursiveNamespace(types.SimpleNamespace):
 
     def __elt(self, elt):
         """Recurse into elt to create leaf namespace objects"""
-        if type(elt) is dict:
+        if isinstance(elt, dict):
             return type(self)(**elt)
         if type(elt) in (list, tuple):
             return [self.__elt(i) for i in elt]
@@ -88,3 +92,43 @@ def sprint(*args, end="\n", **kwargs):
     contents = output.getvalue()
     output.close()
     return contents
+
+
+def map_blocks(
+    func,
+    *args,
+    name=None,
+    token=None,
+    dtype=None,
+    chunks=None,
+    drop_axis=None,
+    new_axis=None,
+    enforce_ndim=False,
+    meta=None,
+    output_units=None,
+    **kwargs,
+):
+    """map_blocks with units"""
+    da_kwargs = dict(
+        name=name,
+        token=token,
+        dtype=dtype,
+        chunks=chunks,
+        drop_axis=drop_axis,
+        new_axis=new_axis,
+        enforce_ndim=enforce_ndim,
+        meta=meta,
+    )
+    res = da.map_blocks(
+        func,
+        *args,
+        **da_kwargs,
+        **kwargs,
+    )
+    if output_units is not None:
+        if hasattr(res, "magnitude"):
+            log.info("map_blocks output already has units, overwriting.")
+            res = res.magnitude * output_units
+        res = res * output_units
+
+    return res

@@ -2,7 +2,7 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -10,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 
 from scida.discovertypes import CandidateStatus
-from scida.helpers_misc import hash_path
+from scida.helpers_misc import hash_path, sprint
 from scida.interface import create_MixinDataset
 from scida.io import load_metadata
 from scida.misc import map_interface_args, return_cachefile_path
@@ -118,6 +118,75 @@ class DatasetSeries(object):
     def __getitem__(self, key):
         return self.datasets[key]
 
+    def info(self):
+        rep = ""
+        rep += "class: " + sprint(self.__class__.__name__)
+        props = self._repr_dict()
+        for k, v in props.items():
+            rep += sprint("%s: %s" % (k, v))
+        if self.metadata is not None:
+            rep += sprint("=== metadata ===")
+            # we print the range of each metadata attribute
+            minmax_dct = {}
+            for mdct in self.metadata.values():
+                for k, v in mdct.items():
+                    if k not in minmax_dct:
+                        minmax_dct[k] = [v, v]
+                    else:
+                        if not np.isscalar(v):
+                            continue  # cannot compare arrays
+                        minmax_dct[k][0] = min(minmax_dct[k][0], v)
+                        minmax_dct[k][1] = max(minmax_dct[k][1], v)
+            for k in minmax_dct:
+                reprval1, reprval2 = minmax_dct[k][0], minmax_dct[k][1]
+                if isinstance(reprval1, float):
+                    reprval1 = "%.2f" % reprval1
+                    reprval2 = "%.2f" % reprval2
+                m1 = minmax_dct[k][0]
+                m2 = minmax_dct[k][1]
+                if (not np.isscalar(m1)) or (np.isscalar(m1) and m1 == m2):
+                    rep += sprint("%s: %s" % (k, minmax_dct[k][0]))
+                else:
+                    rep += sprint(
+                        "%s: %s -- %s" % (k, minmax_dct[k][0], minmax_dct[k][1])
+                    )
+            rep += sprint("============")
+        print(rep)
+
+    @property
+    def data(self):
+        raise AttributeError(
+            "Series do not have 'data' attribute. Load a dataset from series.get_dataset()."
+        )
+
+    def _repr_dict(self) -> Dict[str, str]:
+        """
+        Return a dictionary of properties to be printed by __repr__ method.
+        Returns
+        -------
+        dict
+        """
+        props = dict()
+        sources = [str(p) for p in self.paths]
+        props["source(id=0)"] = sources[0]
+        props["Ndatasets"] = len(self.datasets)
+        return props
+
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the object.
+        Returns
+        -------
+        str
+        """
+        props = self._repr_dict()
+        clsname = self.__class__.__name__
+        result = clsname + "["
+        for k, v in props.items():
+            result += "%s=%s, " % (k, v)
+        result = result[:-2] + "]"
+        return result
+
     @classmethod
     def validate_path(cls, path, *args, **kwargs) -> CandidateStatus:
         # estimate whether we have a valid path for this dataseries
@@ -192,7 +261,7 @@ class DatasetSeries(object):
             if is_candidate:
                 candidates.append(i)
             else:  # unroll changes
-                for p, lst in candidates_props.items():
+                for lst in candidates_props.values():
                     if len(lst) > len(candidates):
                         lst.pop()
         # find candidate closest to request
@@ -266,5 +335,5 @@ class HomogeneousSeries(DatasetSeries):
     """Series consisting of same-type data sets."""
 
     def __init__(self, path, **interface_kwargs):
+        # TODO
         super().__init__()
-        pass  # TODO

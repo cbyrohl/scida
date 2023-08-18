@@ -7,13 +7,14 @@ Currently, we support the usual FOF/Subfind combination and format. Their presen
 
 ``` py
 from scida import load
-ds = load("snapshot") # (1)!
+ds = load("TNG50-4_snapshot") # (1)!
 ```
 
 1.  In this example, we assume a dataset, such as the 'TNG50\_snapshot' test data set, that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
 
 The dataset itself passed to load does not possess information about the FoF/Subfind outputs as they are commonly saved in a separate folder or hdf5 file. For typical folder structures of GADGET/AREPO style simulations, an attempt is made to automatically discover and add such information. The path to the catalog can otherwise explicitly be passed to *load()* via the *catalog=...* keyword.
 
+## Accessing halo/galaxy catalog information
 
 Groups and subhalo information is added into the dataset with the data containers *Group* and *Subhalo*. For example, we can obtain the masses of each group as:
 
@@ -22,16 +23,39 @@ Groups and subhalo information is added into the dataset with the data container
 group_mass = ds.data["Group"]["GroupMass"]
 ```
 
+## Accessing particle-level halo/galaxy information
+
 In addition to these two data containers, new information is added to all other containers about their belonging to a given group and subhalo.
 
 ``` py
-groupid = ds.data["PartType0"]["GroupID"]
+groupid = ds.data["PartType0"]["GroupID"] #(1)!
 subhaloid = ds.data["PartType0"]["SubhaloID"]
+localsubhaloid = ds.data["PartType0"]["LocalSubhaloID"]
 ```
 
-In above example, we fetch the virtual dask arrays holding the group and subhalo belonging of each *PartType0* particle. The *groupid* field returns the integer position into the group catalog that given particle belongs to. For the *subhaloid* the subhalo id within a given *groupid* is given, *where subhaloid==0* marks the belonging to the central subhalo in a halo.
+1. This information is also available for the other particle types.
 
-This operation allows us to efficiently query the belonging of given particles. So, for example, we can compute the group IDs of the particles 1000-1099 by running
+In above example, we fetch the virtual dask arrays holding information about the halo and subhalo association for each particle.
+
+`GroupID`
+
+:   The group ID of the group the particle belongs to. This is the index into the group catalog.
+
+`SubhaloID`
+
+:   The subhalo ID of the subhalo the particle belongs to. This is the index into the subhalo catalog.
+
+`LocalSubhaloID`
+
+:  This is the Subhalo ID relative to the central subhalo of a given group. For the central subhalo, this is 0.
+   Satellites accordingly start at index 1.
+
+Particles that are not associated with a group or subhalo that are queried for such ID
+will return `ds.misc['unboundID']'`. This is currently set to 9223372036854775807, but might change to -1 in the future.
+
+
+This operation allows us to efficiently query the belonging of given particles.
+So, for example, we can compute the group IDs of the gas particles 1000-1099 by running
 
 ``` py
 groupid[1000:1100].compute()
@@ -49,9 +73,24 @@ data = ds.return_data(haloID=42)
 
 *data* will have the same structure as *ds.data* but restricted to particles of a given group.
 
-### Operations on particle data for all groups
+### Applying to all groups in parallel
 
 In many cases, we do not want the particle data of an individual group, but we want to calculate some reduced statistic from the bound particles of each group. For this, we provide the *grouped* functionality. In the following we give a range of examples of its use.
+
+
+???+ warning
+
+    Executing the following commands can be demanding on compute resources and memory.
+    Usually, one wants to restrict the groups to run on. You can either specify "nmax"
+    to limit the maximum halo id to evaluate up to. This is usually desired in any case
+    as halos are ordered (in descending order) by their mass. For more fine-grained control,
+    you can also pass a list of halo IDs to evaluate via the "idxlist" keyword.
+    These keywords should be passed to the "evaluate" call.
+
+???+ note
+
+    By default, operations are done on for halos. By passing `objtype="subhalo"` to the
+    `grouped` call, the operation is done on subhalos instead.
 
 
 #### Baryon mass

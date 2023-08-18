@@ -2,15 +2,20 @@ import logging
 
 import pytest
 
-from scida import ArepoSnapshot
+from scida import ArepoSnapshot, load
 from scida.config import get_config
-from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
+from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.series import DatasetSeries
+from tests.helpers import DummyGadgetCatalogFile, DummyGadgetSnapshotFile, DummyTNGFile
 
 flag_test_long = False  # Set to true to run time-taking tests.
 flag_test_big = False  # Set to true to run memory-taking tests.
 
 scope_snapshot = "function"
+
+
+numba_logger = logging.getLogger("numba")
+numba_logger.setLevel(logging.WARNING)
 
 
 def pytest_configure(config):
@@ -43,15 +48,15 @@ def testdata_areposnapshot(request) -> ArepoSnapshot:
 
 @pytest.fixture(scope="function")
 def testdata_areposnapshot_withcatalog(request) -> ArepoSnapshot:
-    tng50_snappath, tng50_grouppath = request.param[0], request.param[1]
-    try:
-        snp = ArepoSnapshot(tng50_snappath, catalog=tng50_grouppath)
-    except ValueError:
-        snp = ArepoSnapshot(
-            tng50_snappath,
-            catalog=tng50_grouppath,
-            catalog_kwargs=dict(fileprefix="group"),
-        )
+    snappath, grouppath = request.param[0], request.param[1]
+    snp = load(snappath, catalog=grouppath)
+    return snp
+
+
+@pytest.fixture(scope="function")
+def testdata_illustrissnapshot_withcatalog(request) -> ArepoSnapshot:
+    snappath, grouppath = request.param[0], request.param[1]
+    snp = load(snappath, catalog=grouppath)
     return snp
 
 
@@ -67,3 +72,27 @@ def cleancache(cachedir):
     """Always start with empty cache."""
     get_config(reload=True)
     return cachedir
+
+
+# dummy gadgetstyle snapshot fixtures
+
+
+@pytest.fixture
+def gadgetfile_dummy(tmp_path):
+    dummy = DummyGadgetSnapshotFile()
+    dummy.write(tmp_path / "dummy_gadgetfile.hdf5")
+    return dummy
+
+
+@pytest.fixture
+def tngfile_dummy(tmp_path):
+    dummy = DummyTNGFile()
+    dummy.write(tmp_path / "dummy_tngfile.hdf5")
+    return dummy
+
+
+@pytest.fixture
+def gadgetcatalogfile_dummy(tmp_path):
+    dummy = DummyGadgetCatalogFile()
+    dummy.write(tmp_path / "dummy_gadgetcatalogfile.hdf5")
+    return dummy

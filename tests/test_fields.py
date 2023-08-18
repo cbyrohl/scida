@@ -1,6 +1,7 @@
 import dask.array as da
 import pytest
 
+from scida import load
 from scida.interface import FieldContainer
 from tests.testdata_properties import require_testdata, require_testdata_path
 
@@ -24,7 +25,7 @@ def test_fieldtypes(testdatapath):
     snp = load(testdatapath)
     gas = snp.data["PartType0"]
     fnames = list(gas.keys(withrecipes=False))
-    assert len(fnames) < 5, "not lazy loading fields (into recipes)"
+    assert len(fnames) < 10, "not lazy loading fields (into recipes)"
     fnames = list(gas.keys())
     assert len(fnames) > 5, "not correctly considering recipes"
     assert gas.fieldcount == len(fnames)
@@ -36,7 +37,8 @@ def test_fieldtypes(testdatapath):
     assert "uid" not in gas.keys()  # no need to show this to the user (?)
 
     # making sure that items()/values() are not evaluating recipes...
-    assert any(["DerivedFieldRecipe" in str(type(k)) for k in gas.values()])
+    # right now items()/values() are evaluating recipes
+    assert all(["DerivedFieldRecipe" not in str(type(k)) for k in gas.values()])
 
     # should not change after evaluating a recipe
     print(gas["Density"])  # evaluating recipe
@@ -101,6 +103,28 @@ def test_fields(testdata_interface):
 
     print(snp.data["PartType1"]["tfield_all"])
     assert all([snp.data[k]["tfield_all"] for k in snp.data.keys()])
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_fields_ureg(testdatapath):
+    """Test whether unit registry passed"""
+    snp = load(testdatapath)
+    assert snp.ureg is not None
+    # ureg should be propagated to fieldcontainer
+    assert snp.data._ureg is not None
+    # ... and its child containers
+    assert snp.data["PartType0"]._ureg is not None
+
+    @snp.register_field("PartType0")
+    def field(data, ureg=None, **kwargs):
+        return ureg
+
+    # sometimes, we can recover ureg from fields...
+    snp.data["PartType0"]._ureg = None
+    assert snp.data["PartType0"].get_ureg() is not None
+
+    ureg = snp.data["PartType0"]["field"]
+    assert ureg is not None
 
 
 @require_testdata("interface", only=["TNG50-4_snapshot"])

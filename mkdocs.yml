@@ -20,12 +20,17 @@ nav:
     #    - 'Series': notebooks/series.ipynb
     #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
   - 'Features':
-    - 'Supported Datasets': supported_data.md
+    - 'Supported datasets': supported_data.md
     - 'Visualization': visualization.md
-    - 'Derived Fields': derived_fields.md
-    - 'Halo and galaxy catalogs': halocatalogs.md
-  - 'Cookbook':
-    - 'Units': notebooks/cookbook/units.ipynb
+    - 'Units': units.md
+    - 'Derived fields': derived_fields.md
+    - 'Data series': series.md
+    - 'Large datasets': largedatasets.md
+  - 'Advanced Topics':
+    - 'Arepo Simulations':
+      - 'Halo Catalogs': halocatalogs.md
+  # - 'Cookbook':
+  #   - 'Units': notebooks/cookbook/units.ipynb
   - 'FAQ': faq.md
   - api_docs.md
 

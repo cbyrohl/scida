@@ -2,10 +2,13 @@ import os
 from typing import Union
 
 from scida.interface import Dataset
+from scida.interfaces.mixins import CosmologyMixin
 from scida.io import load_metadata_all
 
 
-class RockstarCatalog(Dataset):
+class RockstarCatalog(CosmologyMixin, Dataset):
+    _unitfile = "units/rockstar.yaml"
+
     def __init__(self, path, **kwargs) -> None:
         super().__init__(path, **kwargs)
 
@@ -33,11 +36,7 @@ class RockstarCatalog(Dataset):
         if possibly_valid:
             metadata_raw_all = load_metadata_all(path, **kwargs)
 
-            attrs = metadata_raw_all["attrs"]
-
-            # lets use the "feature" that rockstar adds no attributes (?) but uses scalar datasets
-            if len(attrs) != 0:
-                return False
+            # attrs = metadata_raw_all["attrs"]
 
             # usually rockstar has some cosmology parameters attached
             datasets = metadata_raw_all["datasets"]

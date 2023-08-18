@@ -8,7 +8,10 @@ testdata_path: /fastdata/public/testdata-scida  # should be replaced by 'datafol
 nthreads: 8
 
 datafolders: ["/fastdata/public/testdata-scida", "/vera/ptmp/gc/byrohlc/scida-testdata", "/testdata",
-              "/virgotng/universe/IllustrisTNG", "/virgotng/mpia/TNG-Cluster/"]
+              "/virgotng/universe/IllustrisTNG", "/virgotng/mpia/TNG-Cluster/", "/virgotng/universe/Eagle",
+              "~/sims.TNG/",
+              "~/sims.illustris/",
+              "~/sims.other/"]
 
 missing_units: "warn"  # "warn", "raise", "ignore"
 

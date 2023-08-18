@@ -1,6 +1,6 @@
 import contextlib
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pint
@@ -14,7 +14,9 @@ from scida.interfaces.mixins.base import Mixin
 log = logging.getLogger(__name__)
 
 
-def str_to_unit(unitstr: Optional[str], ureg: pint.UnitRegistry) -> pint.Unit:
+def str_to_unit(
+    unitstr: Optional[str], ureg: pint.UnitRegistry
+) -> Union[pint.Unit, str]:
     """
     Convert a string to a unit.
     Parameters
@@ -31,11 +33,13 @@ def str_to_unit(unitstr: Optional[str], ureg: pint.UnitRegistry) -> pint.Unit:
     """
     if unitstr is not None:
         unitstr = unitstr.replace("dex", "decade")
+        if unitstr.lower() == "none":
+            return "none"
     return ureg(unitstr)
 
 
 def extract_units_from_attrs(
-    attrs,
+    attrs: dict,
     require: bool = False,
     mode: str = "cgs",
     ureg: Optional[pint.UnitRegistry] = None,
@@ -57,56 +61,32 @@ def extract_units_from_attrs(
     -------
 
     """
-    assert ureg is not None, "Always require passing registry now."
-    udict = {}
-    udict["length"] = str_to_unit("cm", ureg)
-    udict["mass"] = str_to_unit("g", ureg)
-    udict["velocity"] = str_to_unit("cm/s", ureg)
-    udict["time"] = str_to_unit("s", ureg)
-    if mode == "mks":
-        raise NotImplementedError("TBD.")
-        udict["length"] = str_to_unit("m", ureg)
-        udict["mass"] = str_to_unit("kg", ureg)
-        udict["velocity"] = str_to_unit("m/s", ureg)
-        udict["time"] = str_to_unit("s", ureg)
-    if mode == "code":
-        for k in ["length", "mass", "velocity", "time"]:
-            cstr = "code_" + k
-            if cstr in ureg:
-                udict[k] = str_to_unit(cstr, ureg)
+    # initialize unit dictionary and registry to chosen mode
     if mode not in ["code", "mks", "cgs"]:
         raise KeyError("Unknown unit mode '%s'." % mode)
-    if "h" in ureg:
-        udict["h"] = str_to_unit("h", ureg)
-    if "a" in ureg:
-        udict["a"] = str_to_unit("a", ureg)
-    # nothing to do if mode == "code" as we take values as they are
-    cgsfactor = ureg.Quantity(1.0)
+    udict = _get_default_units(mode, ureg)
+
+    # determine any conversion factor as possible/needed
+    cgskey, cgsfactor = _get_cgs_params(attrs, ureg, mode=mode)
+
     # for non-codeunits, we need to be provided some conversion factor or explicit units
-    has_convfactor = False
+    has_convfactor = cgskey is not None
     has_expl_units = False
-    cgskey = None
-    if mode != "code":
-        # the common mode is to expect some hints how to convert to cgs
-        # get the conversion factor
-        cgskey = [k for k in attrs if "cgs" in k.lower()]
-        if mode + "units" in cgskey:
-            # these are the units not the normalization factor
-            cgskey.remove(mode + "units")
-        assert len(cgskey) <= 1
-        has_convfactor = len(cgskey) > 0
-        if has_convfactor:
-            cgskey = cgskey[0]
-            cgsfactor = attrs[cgskey]
-    # get dimensions
-    unit = cgsfactor
+
+    unit = 1.0
+    # we can already set the value if we have a conversion factor
+    if has_convfactor:
+        unit = cgsfactor
+
+    # now, need to get correct dimensions to the value
     if isinstance(unit, np.ndarray):
-        assert len(unit) == 1
+        if len(unit) != 1:
+            log.debug("Unexpected shape (%s) of unit factor." % unit.shape)
         unit = unit[0]
     if unit == 0.0:
         unit = ureg.Quantity(1.0)  # zero makes no sense.
-    # TODO: Missing a scaling?
-    # TODO: Missing h scaling?
+
+    # TODO: recheck that a and h scaling are added IFF code units are used
     ukeys = ["length", "mass", "velocity", "time", "h", "a"]
     if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
         if mode != "cgs":
@@ -118,13 +98,18 @@ def extract_units_from_attrs(
             aname = k + "_scaling"
             unit *= udict[k] ** attrs.get(aname, 0.0)
         return unit
-    if "Conversion factor" in attrs.keys():  # like SWIFT
-        ustr = str(attrs["Conversion factor"])
+    # like a) generic SWIFT or b) FLAMINGO-SWIFT
+    swiftkeys = ["Conversion factor", "Expression for physical CGS units"]
+    swiftkeymatches = [k in attrs.keys() for k in swiftkeys]
+    if any(swiftkeymatches):  # like SWIFT
+        swiftkey = swiftkeys[np.where(swiftkeymatches)[0][0]]
+        ustr = str(attrs[swiftkey])
         ustr = ustr.split("[")[-1].split("]")[0]
         if ustr.strip() == "-":  # no units, done
             return unit
         unit *= str_to_unit(ustr, ureg)
         return unit
+
     if "cgsunits" in attrs.keys():  # like EAGLE
         if attrs["cgsunits"] is not None:  # otherwise, this field has no units
             unitstr = attrs["cgsunits"]
@@ -162,6 +147,81 @@ def extract_units_from_attrs(
     return str_to_unit("", ureg)
 
 
+def _get_cgs_params(attrs: dict, ureg: UnitRegistry, mode: str = "code") -> tuple:
+    cgskeys = None
+    if mode == "code":
+        # nothing to do if mode == "code" as we take values as they are
+        cgsfactor = ureg.Quantity(1.0)
+        return cgskeys, cgsfactor
+
+    # the common mode is to expect some hints how to convert to cgs
+    # get the conversion factor
+    cgskeys = [k for k in attrs if "cgs" in k.lower()]
+
+    # there should be only one key holding the cgs factor.
+    # remove those that are not
+    if mode + "units" in cgskeys:
+        # these are the units not the normalization factor
+        cgskeys.remove(mode + "units")
+
+    correct_keynames = [
+        "Conversion factor to physical CGS (including cosmological corrections)",
+        "to_cgs",
+    ]
+    cgskeys = [k for k in cgskeys if k in correct_keynames]
+
+    assert len(cgskeys) <= 1  # only one key should be left
+    if cgskeys is not None and len(cgskeys) > 0:
+        cgskey = cgskeys[0]
+        cgsfactor = attrs[cgskey]
+        return cgskey, cgsfactor
+    return None, None
+
+
+def _get_default_units(mode: str, ureg: pint.UnitRegistry) -> dict:
+    """
+    Get the default units for the given mode.
+    Parameters
+    ----------
+    mode
+        The unit mode to use (right now: cgs or code).
+    ureg
+        The unit registry to use.
+
+    Returns
+    -------
+    dict
+        The default units.
+    """
+    if mode not in ["code", "mks", "cgs"]:
+        raise KeyError("Unknown unit mode '%s'." % mode)
+    if mode == "code":
+        keys = ["length", "mass", "velocity", "time"]
+        udict = {k: ureg["code_" + k] for k in keys if "code_" + k in ureg}
+    if mode == "mks":
+        udict = {
+            "length": ureg.m,
+            "mass": ureg.kg,
+            "velocity": ureg.m / ureg.s,
+            "time": ureg.s,
+        }
+    if mode == "cgs":
+        udict = {
+            "length": ureg.cm,
+            "mass": ureg.g,
+            "velocity": ureg.cm / ureg.s,
+            "time": ureg.s,
+        }
+
+    # common factors in cosmological simulations
+    if "h" in ureg:
+        udict["h"] = str_to_unit("h", ureg)
+    if "a" in ureg:
+        udict["a"] = str_to_unit("a", ureg)
+
+    return udict
+
+
 def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry, warn_redef=False):
     ulist = []
     for k, v in udict.items():
@@ -171,6 +231,12 @@ def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry, warn_redef=Fal
     else:
         with ignore_warn_redef(ureg):
             ureg.load_definitions(ulist)
+
+
+def new_unitregistry() -> UnitRegistry:
+    ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
+    ureg.define("unknown = 1.0")
+    return ureg
 
 
 def update_unitregistry(filepath: str, ureg: UnitRegistry):
@@ -184,8 +250,10 @@ class UnitMixin(Mixin):
         self.data = {}
         self._metadata_raw = {}
 
-        ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
-        ureg = kwargs.pop("ureg", ureg)
+        ureg = kwargs.pop("ureg", None)
+        if ureg is None:
+            ureg = new_unitregistry()
+
         self.ureg = self.unitregistry = ureg
 
         super().__init__(*args, **kwargs)
@@ -201,7 +269,7 @@ class UnitMixin(Mixin):
             dsprops = c["data"][self.hints["dsname"]]
             missing_units = dsprops.get("missing_units", missing_units)
             unitfile = dsprops.get("unitfile", "")
-        unitfile = kwargs.pop("unitfile", unitfile)
+        unitfile = kwargs.pop("unitfile", unitfile)  # passed kwarg takes precedence
         unitdefs = get_config_fromfile("units/general.yaml").get("units", {})
         if unitfile != "":
             unithints = get_config_fromfile(unitfile)
@@ -216,31 +284,38 @@ class UnitMixin(Mixin):
             raise ValueError("Unknown unit mode '%s'" % unitfile)
 
         # initialize unit registry
-        if unitfile != "":
-            update_unitregistry_fromdict(unitdefs, self.ureg)
+        update_unitregistry_fromdict(unitdefs, self.ureg)
         self.ureg.default_system = "cgs"
 
         # update fields with units
         fwu = unithints.get("fields", {})
-        mode_metadata = unithints.get("metadata_unitsystem", units)
-        # TODO: Not sure about block below needed again
-        # if mode_metadata == "code":
-        #     if "code_length" not in self.ureg:
-        #         log.debug("No code units given, assuming cgs.")
-        #         mode_metadata = "cgs"
+        mode_metadata = unithints.get("metadata_unitsystem", "cgs")
 
         def add_units(container: FieldContainer, basepath: str):
             # first we check whether we are explicitly given a unit by a unit file
             override = False  # whether to override the metadata units
-            gfwu = fwu
-            k = basepath.split("/")
-            for p in basepath.split("/"):
-                gfwu = fwu.get(p, {})
-            if gfwu == "no_units":
-                return  # no units for this container
+            gfwu = dict(**fwu)
+            splt = basepath.split("/")
+            for p in splt:
+                if p == "":
+                    continue  # skip empty path
+                gfwu = gfwu.get(p, {})
+                # if any parent container specifies "no_units", we will not add units, thus return
+                if gfwu == "no_units":
+                    return
             if gfwu is None:
                 gfwu = {}  # marginal case where no fields are given
-            for k in sorted(container.keys(withgroups=False)):
+            keys = sorted(
+                container.keys(withfields=False, withrecipes=True, withgroups=False)
+            )
+            nrecipes = len(keys)
+            keys += sorted(
+                container.keys(withfields=True, withrecipes=False, withgroups=False)
+            )
+            recipe_mask = np.zeros(len(keys), dtype=bool)
+            recipe_mask[:nrecipes] = True
+            for i, k in enumerate(keys):
+                is_recipe = recipe_mask[i]
                 path = basepath + "/" + k
                 unit = None
                 if basepath == "/":
@@ -286,8 +361,10 @@ class UnitMixin(Mixin):
                             raise e
                         print("Hint: Did you pass a unit file? Is it complete?")
                         raise ValueError("Could not find units for '%s'" % path)
-
-                if unit is not None and unit_metadata is not None:
+                without_units = isinstance(unit, str) and unit == "none"
+                if (
+                    unit is not None and not without_units
+                ) and unit_metadata is not None:
                     # check whether both metadata and unit file agree
                     val_cgs_uf = unit.to_base_units().magnitude
                     val_cgs_md = unit_metadata.to_base_units().magnitude
@@ -310,7 +387,7 @@ class UnitMixin(Mixin):
 
                 # if we still don't have a unit, we raise/warn as needed
                 if unit is None:
-                    unit = ureg("")
+                    unit = ureg("unknown")
                     msg = (
                         "Cannot determine units from neither unit file nor metadata for '%s'."
                         % path
@@ -327,18 +404,24 @@ class UnitMixin(Mixin):
                     if p not in udict:
                         udict[p] = {}
                     udict = udict[p]
-                udict[k] = unit
-                # redefine dask arrays with units
-                # we treat recipes separately so that they stay recipes
-                # this is important due to the following memory issue for now:
-                # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
-                if k not in container._fields and k in container._fieldrecipes:
-                    container._fieldrecipes[k].units = unit
-                    # TODO: Add cgs conversion for recipes, see else-statement.
-                else:
-                    container[k] = unit * container[k]
-                    if units == "cgs" and isinstance(container[k], pint.Quantity):
-                        container[k] = container[k].to_base_units()
+                without_units = isinstance(unit, str) and unit == "none"
+                if not without_units:
+                    udict[k] = unit
+                    # redefine dask arrays with units
+                    # we treat recipes separately so that they stay recipes
+                    # this is important due to the following memory issue for now:
+                    # as we run into a memory issue (https://github.com/h5py/h5py/issues/2220)
+                    if is_recipe:
+                        container._fieldrecipes[k].units = unit
+                        # TODO: Add cgs conversion for recipes, see else-statement.
+                    else:
+                        if isinstance(container[k], pint.Quantity):
+                            log.debug("Field %s already has units, overwriting." % k)
+                            container[k] = container[k].magnitude * unit
+                        else:
+                            container[k] = unit * container[k]
+                        if units == "cgs" and isinstance(container[k], pint.Quantity):
+                            container[k] = container[k].to_base_units()
 
         # fwu = unithints.get("fields", {})
         # for ptype in sorted(self.data):
@@ -351,6 +434,13 @@ class UnitMixin(Mixin):
         # manually run for "/" rest will be handled in walk_container
         add_units(self.data, "/")
         walk_container(self.data, handler_group=add_units)
+
+        # add ureg to fieldcontainers
+        def add_ureg(container: FieldContainer, basepath: str):
+            container.set_ureg(self.ureg)
+
+        self.data.set_ureg(self.ureg)
+        walk_container(self.data, handler_group=add_ureg)
 
     def _info_custom(self):
         rep = ""

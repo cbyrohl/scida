@@ -42,3 +42,38 @@ runs:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_FIRE2_simulation.tar.gz
         url: https://heibox.uni-heidelberg.de/f/99a6c5fe31eb430f90e2/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_TNG-Cluster_snapshot_z0.hdf5
+        url: https://heibox.uni-heidelberg.de/f/fe582fbe745445d7a448/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_LGal21_z3.hdf5
+        url: https://heibox.uni-heidelberg.de/f/6a24e9db7b8a449d94be/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_TNG100-3_snapshot_z0.hdf5
+        url: https://heibox.uni-heidelberg.de/f/6eb403619c534e52bb82/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_TNG100-3_group_z0.hdf5
+        url: https://heibox.uni-heidelberg.de/f/699142c6855341d1bb34/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_TNG100-2_snapshot_z0.hdf5
+        url: https://heibox.uni-heidelberg.de/f/e3c9c3f591574b969557/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_TNG100-2_group_z0.hdf5
+        url: https://heibox.uni-heidelberg.de/f/ed8a1b34a9fe40b1b493/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_flamingo_snapshot.hdf5
+        url: https://heibox.uni-heidelberg.de/f/8749a46fdfc74577b29a/?dl=1

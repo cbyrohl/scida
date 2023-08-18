@@ -6,19 +6,45 @@ import h5py
 import numpy as np
 import zarr
 
+from scida.config import get_config
+
 log = logging.getLogger(__name__)
 
 
-def walk_group(obj, tree, get_attrs=False):
+def get_dtype(obj):
+    if isinstance(obj, h5py.Dataset):
+        try:
+            dtype = obj.dtype
+        except TypeError as e:
+            msg = "data type '<u6' not understood"
+            if msg == e.__str__():
+                # MTNG defines 6 byte unsigned integers, which are not supported by h5py
+                # could not figure out how to query type in h5py other than the reporting error.
+                # (any call to .dtype will try to resolve "<u6" to a numpy dtype, which fails)
+                # we just handle this as 64 bit unsigned integer
+                dtype = np.uint64
+            else:
+                raise e
+        return dtype
+    elif isinstance(obj, zarr.Array):
+        return obj.dtype
+    else:
+        return None
+
+
+def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
     if len(tree) == 0:
         tree.update(**dict(attrs={}, groups=[], datasets=[]))
     if get_attrs and len(obj.attrs) > 0:
         tree["attrs"][obj.name] = dict(obj.attrs)
     if isinstance(obj, (h5py.Dataset, zarr.Array)):
-        tree["datasets"].append([obj.name, obj.shape, obj.dtype])
+        dtype = get_dtype(obj)
+        tree["datasets"].append([obj.name, obj.shape, dtype])
+        if scalar_to_attr and len(obj.shape) == 0:
+            tree["attrs"][obj.name] = obj[()]
     elif isinstance(obj, (h5py.Group, zarr.Group)):
         tree["groups"].append(obj.name)  # continue the walk
-        for k, o in obj.items():
+        for o in obj.values():
             walk_group(o, tree, get_attrs=get_attrs)
 
 
@@ -35,9 +61,10 @@ def walk_hdf5file(fn, tree, get_attrs=True):
 
 
 def create_mergedhdf5file(
-    fn, files, max_workers=16, virtual=True, groupwise_shape=False
+    fn, files, max_workers=None, virtual=True, groupwise_shape=False
 ):
     """
+    Creates a virtual hdf5 file from list of given files. Virtual by default.
 
     Parameters
     ----------
@@ -51,7 +78,10 @@ def create_mergedhdf5file(
     -------
 
     """
-    """Creates a virtual hdf5 file from list of given files. Virtual by default."""
+    if max_workers is None:
+        # read from config
+        config = get_config()
+        max_workers = config.get("nthreads", 16)
     # first obtain all datasets and groups
     trees = [{} for i in range(len(files))]
 
@@ -158,8 +188,8 @@ def create_mergedhdf5file(
                     newshape = (totentries,) + extrashapes
                     hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
                 counters = {field: 0 for field in groupfields}
-                for k in range(len(files)):
-                    with h5py.File(files[k]) as hf_load:
+                for k, fl in enumerate(files):
+                    with h5py.File(fl) as hf_load:
                         for field in groupfields:
                             n = shapes[field].get(k, [0, 0])[0]
                             if n == 0:
@@ -204,11 +234,11 @@ def create_mergedhdf5file(
                 ]
             )
             for k in attrsnames:
-                # we ignore apaths existing in some datasets.
+                # we ignore apaths and k existing in some files.
                 attrvallist = [
                     result[i]["attrs"][apath][k]
                     for i in range(nfiles)
-                    if apath in result[i]["attrs"]
+                    if apath in result[i]["attrs"] and k in result[i]["attrs"][apath]
                 ]
                 attrval0 = attrvallist[0]
                 if isinstance(attrval0, np.ndarray):
@@ -217,9 +247,14 @@ def create_mergedhdf5file(
                         attrs_differ[apath][k] = np.stack(attrvallist)
                         continue
                 else:
-                    if not len(set(attrvallist)) == 1:
+                    same = len(set(attrvallist)) == 1
+                    if isinstance(attrval0, np.floating):
+                        # for floats we do not require binary equality
+                        # (we had some incident...)
+                        same = np.allclose(attrval0, attrvallist)
+                    if not same:
                         log.debug("%s: %s has different values." % (apath, k))
-                        attrs_differ[apath][k] = np.array(attrval0)
+                        attrs_differ[apath][k] = np.array(attrvallist)
                         continue
                 attrs_same[apath][k] = attrval0
         for apath in attrspaths_all:

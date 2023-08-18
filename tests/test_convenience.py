@@ -46,6 +46,7 @@ def test_load_https():
 @require_testdata_path("interface")
 def test_load(testdatapath):
     obj = load(testdatapath)
+    print("type: ", type(obj))
     assert obj.file is not None
     assert obj.data is not None
 
@@ -166,7 +167,7 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
 
     # count total files by walking folders without counting those
     nfiles = 0
-    for root, dirs, files in os.walk(cachedir):
+    for _, _, files in os.walk(cachedir):
         nfiles += len(files)
     assert (
         nfiles == 0

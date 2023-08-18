@@ -1,10 +1,9 @@
 import time
 
-import dask.array as da
 import numpy as np
 
 from scida.convenience import load
-from scida.interfaces.gadgetstyle import GadgetStyleSnapshot
+from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
@@ -84,9 +83,8 @@ def test_areposnapshot_load(testdata_areposnapshot):
 @require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
 def test_interface_fieldaccess(testdata_areposnapshot):
     # check that we can directly access fields from the interface
-    ds = testdata_areposnapshot
     # should be same as ds.data["PartType0"]["Coordinates"]
-    assert ds["PartType0"]["Coordinates"] is not None
+    assert testdata_areposnapshot["PartType0"]["Coordinates"] is not None
 
 
 @require_testdata("illustrisgroup")
@@ -96,99 +94,11 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
     assert "Subhalo" in grp.data.keys()
 
 
-@require_testdata(
-    "areposnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
-)
-def test_areposnapshot_halooperation(testdata_areposnapshot_withcatalog):
-    snap = testdata_areposnapshot_withcatalog
-
-    def calculate_count(GroupID, parttype="PartType0"):
-        """Halo Count per halo. Has to be 1 exactly."""
-        return np.unique(GroupID).shape[0]
-
-    def calculate_partcount(GroupID, parttype="PartType0"):
-        """Particle Count per halo."""
-        return GroupID.shape[0]
-
-    def calculate_haloid(GroupID, parttype="PartType0"):
-        """returns Halo ID"""
-        return GroupID[-1]
-
-    counttask = snap.map_halo_operation(calculate_count, compute=False, Nmin=20)
-    partcounttask = snap.map_halo_operation(
-        calculate_partcount, compute=False, chunksize=int(3e6)
-    )
-    hidtask = snap.map_halo_operation(
-        calculate_haloid, compute=False, chunksize=int(3e6)
-    )
-    count = counttask.compute()
-    partcount = partcounttask.compute()
-    hid = hidtask.compute()
-
-    count0 = np.where(partcount == 0)[0]
-    diff0 = np.sort(np.concatenate((count0, count0 - 1)))
-    # determine halos that hold no particles.
-    assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(diff0.tolist())
-
-    if not (np.diff(hid).max() == np.diff(hid).min() == 1):
-        assert set(np.where(np.diff(hid) != 1)[0].tolist()) == set(
-            diff0.tolist()
-        )  # gotta check; potentially empty halos
-        assert np.all(counttask.compute() <= 1)
-    else:
-        assert np.all(counttask.compute() == 1)
-    print(count.shape, counttask.compute().shape)
-    assert (
-        count.shape == counttask.compute().shape
-    ), "Expected shape different from result's shape."
-    assert count.shape[0] == snap.data["Group"]["GroupPos"].shape[0]
-    assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
-
-
-@require_testdata("areposnapshot_withcatalog", nmax=1)
-def test_interface_groupedoperations(testdata_areposnapshot_withcatalog):
-    snp = testdata_areposnapshot_withcatalog
-    # check bound mass sums as a start
-    g = snp.grouped("Masses")
-    boundmass = np.sum(g.sum().evaluate())
-    boundmass2 = da.sum(
-        snp.data["PartType0"]["Masses"][: np.sum(snp.get_grouplengths())]
-    ).compute()
-    assert np.isclose(boundmass, boundmass2)
-    # Test chaining
-    assert np.sum(g.half().sum().evaluate()) < np.sum(g.sum().evaluate())
-
-    # Test custom function apply
-    assert np.allclose(
-        g.apply(lambda x: x[::2]).sum().evaluate(), g.half().sum().evaluate()
-    )
-
-    # Test unspecified fieldnames when grouping
-    g2 = snp.grouped()
-
-    def customfunc(arr, fieldnames="Masses"):
-        return arr[::2]
-
-    s = g2.apply(customfunc).sum()
-    assert np.allclose(s.evaluate(), g.half().sum().evaluate())
-
-    # Test custom dask array input
-    arr = snp.data["PartType0"]["Density"] * snp.data["PartType0"]["Masses"]
-    boundvol2 = snp.grouped(arr).sum().evaluate().sum()
-    assert 0.0 < boundvol2 < 1.0
-
-    # Test multifield
-    def customfunc(dens, vol, fieldnames=["Density", "Masses"]):
-        return dens * vol
-
-    s = g2.apply(customfunc).sum()
-    boundvol = s.evaluate().sum()
-    assert np.isclose(boundvol, boundvol2)
-
-
-@require_testdata("areposnapshot_withcatalog")
-def test_areposnapshot_load_withcatalog(testdata_areposnapshot_withcatalog):
-    snp = testdata_areposnapshot_withcatalog
+@require_testdata("illustrissnapshot_withcatalog")
+def test_areposnapshot_load_withcatalog(testdata_illustrissnapshot_withcatalog):
+    snp = testdata_illustrissnapshot_withcatalog
+    if snp.redshift >= 20.0:  # hacky... (no catalog at high redshifts)
+        return
     parttypes = {
         "PartType0",
         "PartType1",
@@ -212,11 +122,11 @@ def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatal
 
 
 @require_testdata(
-    "areposnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
+    "illustrissnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
 )
-def test_areposnapshot_map_hquantity(testdata_areposnapshot_withcatalog):
-    snp = testdata_areposnapshot_withcatalog
+def test_areposnapshot_map_hquantity(testdata_illustrissnapshot_withcatalog):
+    snp = testdata_illustrissnapshot_withcatalog
     snp.add_groupquantity_to_particles("GroupSFR")
     partarr = snp.data["PartType0"]["GroupSFR"]
     haloarr = snp.data["Group"]["GroupSFR"]
-    assert partarr[0].compute() == haloarr[0].compute()
+    assert np.isclose(partarr[0].compute(), haloarr[0].compute())

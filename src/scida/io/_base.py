@@ -1,10 +1,11 @@
 import abc
 import logging
 import os
+import pathlib
 import tempfile
 from functools import partial
 from os.path import join
-from typing import Optional
+from typing import Optional, Union
 
 import dask.array as da
 import h5py
@@ -114,7 +115,7 @@ class ChunkedHDF5Loader(Loader):
 
     def load_metadata(self, fileprefix="", **kwargs):
         """Take a quick glance at the metadata."""
-        cachefp = return_hdf5cachepath(self.path)
+        cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         if cachefp is not None and os.path.isfile(cachefp):
             path = cachefp
         else:
@@ -136,7 +137,7 @@ class ChunkedHDF5Loader(Loader):
         virtualcache=False,
         **kwargs
     ):
-        cachefp = return_hdf5cachepath(self.path)
+        cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         # three cases we need to cache:
         create = False
         if cachefp is None:
@@ -150,7 +151,12 @@ class ChunkedHDF5Loader(Loader):
             create = True
 
         if create:
-            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
+            print_cachefile_creation = kwargs.get("print_cachefile_creation", True)
+            self.create_cachefile(
+                fileprefix=fileprefix,
+                virtualcache=virtualcache,
+                verbose=print_cachefile_creation,
+            )
 
         try:
             datadict = self.load_cachefile(
@@ -178,40 +184,16 @@ class ChunkedHDF5Loader(Loader):
         -------
 
         """
+        return _get_chunkedfiles(self.path, fileprefix=fileprefix)
 
-        fns = [f for f in os.listdir(self.path)]
-        files = [join(self.path, f) for f in fns]
-        files = [
-            f for i, f in enumerate(files) if not fns[i].startswith(".")
-        ]  # ignore hidden files
-        files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
-        if fileprefix is not None:
-            files = np.array(
-                [f for f in files if f.split("/")[-1].startswith(fileprefix)]
-            )
-        prfxs = sorted([f.split(".")[0] for f in files])
-        if fileprefix is None:
-            prfx = prfxs[0]
-            prfxs = [prfx]
-            files = np.array([f for f in files if f.startswith(prfx)])
-        if len(set(prfxs)) > 1:
-            # print("Available prefixes:", set(prfxs))
-            msg = (
-                "More than one file prefix in directory '%s', specify 'fileprefix'."
-                % self.path
-            )
-            raise ValueError(msg)
-        nmbrs = [int(f.split(".")[-2]) for f in files]
-        sortidx = np.argsort(nmbrs)
-        files = files[sortidx]
-        return files
-
-    def create_cachefile(self, fileprefix="", virtualcache=False):
+    def create_cachefile(self, fileprefix="", virtualcache=False, verbose=None):
         config = get_config()
-        print_msg = config.get("print_cachefile_creation", True)
+        print_msg = verbose
+        if verbose is None:
+            print_msg = config.get("print_cachefile_creation", True)
         if print_msg:
             print("Creating cache file, this may take a while...")
-        cachefp = return_hdf5cachepath(self.path)
+        cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         files = self.get_chunkedfiles(fileprefix)
 
         self.location = cachefp
@@ -264,7 +246,7 @@ def load_datadict_old(
     """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
     # TODO: Refactor and rename
     inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
-    if type(file) == h5py._hl.files.File:
+    if isinstance(file, h5py.File):
         inline_array = False
 
     data = {}
@@ -308,6 +290,9 @@ def load_datadict_old(
     # datasets
     for i, dataset in enumerate(tree["datasets"]):
         # fpath is the path to the group containing given field
+        # ignore if scalar
+        if len(dataset[1]) == 0:
+            continue
         fpath = "/".join(dataset[0].split("/")[:-1])
         toload = fpath == "" or fpath in datagroups
         if not toload:
@@ -394,18 +379,20 @@ def load_datadict_old(
 
     walk_container(data, handler_group=create_uids)
 
-    # walk_container(data, handler_field=lambda x, y: print(x, y))
-
     # attrs
     metadata = tree["attrs"]
     return data, metadata
 
 
-def determine_loader(path):
+def determine_loader(path, **kwargs):
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, ".zgroup")):
             # object is a zarr object
             loader = ZarrLoader(path)
+            return loader
+        newpath = _cachefile_available_in_path(path, **kwargs)
+        if newpath:  # check whether a virtual merged HDF5 file is present in folder
+            loader = HDF5Loader(newpath)
         else:
             # otherwise expect this is a chunked HDF5 file
             loader = ChunkedHDF5Loader(path)
@@ -417,20 +404,85 @@ def determine_loader(path):
 
 def load_metadata(path, **kwargs):
     """only returns attributes"""
-    loader = determine_loader(path)
+    loader = determine_loader(path, **kwargs)
     metadata = loader.load_metadata(**kwargs)
     return metadata
 
 
 def load_metadata_all(path, **kwargs):
-    loader = determine_loader(path)
+    loader = determine_loader(path, **kwargs)
     metadata = loader.load_metadata_all(**kwargs)
     return metadata
 
 
 def load(path, **kwargs):
-    loader = determine_loader(path)
+    loader = determine_loader(path, **kwargs)
     data, metadata = loader.load(**kwargs)
     file = loader.file
     tmpfile = loader.tempfile
     return data, metadata, file, tmpfile
+
+
+def _cachefile_available_in_path(
+    path: str, fileprefix: Optional[str] = "", **kwargs
+) -> Union[bool, str]:
+    chnkfiles = _get_chunkedfiles(path, fileprefix=fileprefix)
+    if len(chnkfiles) == 0:
+        return False
+    fn = chnkfiles[0]
+    p = pathlib.Path(fn)
+    s = p.name.split(".")
+    if len(s) != 3:  # format "PREFIX.NMBR.HDF5"
+        return False
+    name_new = s[0] + "." + s[2]
+    pnew = p.parent / name_new
+    if pnew.exists():
+        return str(pnew)
+    return False
+
+
+def _get_chunkedfiles(path, fileprefix: Optional[str] = "") -> list:
+    """
+    Get all files in directory with given prefix.
+    Parameters
+    ----------
+    fileprefix: Optional[str]
+        Prefix of files to be loaded. If None, we take the first prefix.
+
+    Returns
+    -------
+
+    """
+
+    fns = [f for f in os.listdir(path)]
+    files = [join(path, f) for f in fns]
+    files = [
+        f for i, f in enumerate(files) if not fns[i].startswith(".")
+    ]  # ignore hidden files
+    files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
+    if fileprefix is not None:
+        files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
+    prfxs = sorted([f.split(".")[0] for f in files])
+    if fileprefix is None:
+        prfx = prfxs[0]
+        prfxs = [prfx]
+        files = np.array([f for f in files if f.startswith(prfx)])
+    if len(set(prfxs)) > 1:
+        # print("Available prefixes:", set(prfxs))
+        msg = (
+            "More than one file prefix in directory '%s', specify 'fileprefix'." % path
+        )
+        raise ValueError(msg)
+    # determine numbers where possible
+    numbers = []
+    files_numbered = []
+    for f in files:
+        try:
+            numbers.append(int(f.split(".")[-2]))
+            files_numbered.append(f)
+        except ValueError:
+            pass  # do not add file
+    sortidx = np.argsort(numbers)
+    files_numbered = np.array(files_numbered)
+    files = files_numbered[sortidx]
+    return files
