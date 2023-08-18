@@ -1,7 +1,8 @@
 # tests for gh issues. to be cleaned up and moved to the right place eventually
 import pathlib
 
-from scida import load
+from scida import ArepoSimulation, load
+from scida.convenience import find_path
 from tests.helpers import write_gadget_testfile
 from tests.testdata_properties import require_testdata_path
 
@@ -43,3 +44,18 @@ def test_issue_63(testdatapath, tmp_path):
     write_gadget_testfile(p)
     ds = load(p, units=True)
     assert ds.data["PartType0"]["Coordinates"].units == "unknown"
+
+
+@require_testdata_path("series", only=["TNGvariation_simulation"])
+def test_issue_88(testdatapath, tmp_path):
+    # pass "output" folder instead of base folder of simulation
+    srs = load(testdatapath, units=True)
+    assert isinstance(srs, ArepoSimulation)
+
+    testdatapath += "/output"
+    srs = load(testdatapath, units=True)
+    assert isinstance(srs, ArepoSimulation)
+
+    # make sure ~ is resolved as home folder
+    path = "~/test"
+    assert find_path(path).startswith("/")
