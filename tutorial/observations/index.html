@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-8.5.10">
     
     
       
@@ -421,6 +421,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#fits-files" class="md-nav__link">
+    FITS files
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -676,21 +683,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../configuration/" class="md-nav__link">
-        Configuration
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../faq/" class="md-nav__link">
         FAQ
       </a>
@@ -790,6 +782,13 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fits-files" class="md-nav__link">
+    FITS files
+  </a>
   
 </li>
       
@@ -935,7 +934,42 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
 <ol>
 <li>The <em>compute()</em> on <code>im2d</code> results in a two-dimensional array which we can display.</li>
 </ol>
-<p><img alt="2D histogram example" src="../../images/simple_hist2d_obs.png"></p></div>
+<p><img alt="2D histogram example" src="../../images/simple_hist2d_obs.png"></p>
+<h2 id="fits-files">FITS files</h2>
+<p>Observations are often stored in <a href="https://en.wikipedia.org/wiki/FITS">FITS</a> files. Support in scida work-in-progress
+and requires the <a href="https://www.astropy.org/">astropy</a> package.</p>
+<p>Here we show use of the SDSS DR16:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="s2">"/virgotng/mpia/obs/SDSS/specObj-dr16.fits"</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cx</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"CX"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cy</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"CY"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cz</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"CZ"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"Z"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># order by redshift for scatter plotting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cz</span><span class="o">.</span><span class="n">magnitude</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cy</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cz</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">cy</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span><span class="n">cx</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">"aitoff"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ra</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dec</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">theta</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sc</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">z</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"redshift"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">'14h'</span><span class="p">,</span><span class="s1">'16h'</span><span class="p">,</span><span class="s1">'18h'</span><span class="p">,</span><span class="s1">'20h'</span><span class="p">,</span><span class="s1">'22h'</span><span class="p">,</span><span class="s1">'0h'</span><span class="p">,</span><span class="s1">'2h'</span><span class="p">,</span><span class="s1">'4h'</span><span class="p">,</span><span class="s1">'6h'</span><span class="p">,</span><span class="s1">'8h'</span><span class="p">,</span><span class="s1">'10h'</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"RA"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"DEC"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"sdss_dr16.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="SDSS DR16 Aitoff projection" src="../../images/sdss_dr16.png"></p></div>
 
 
 
