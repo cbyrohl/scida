@@ -9,6 +9,7 @@ from scida.series import DatasetSeries
 from tests.helpers import DummyGadgetCatalogFile, DummyGadgetSnapshotFile, DummyTNGFile
 
 flag_test_long = False  # Set to true to run time-taking tests.
+flag_test_big = False  # Set to true to run memory-taking tests.
 
 scope_snapshot = "function"
 

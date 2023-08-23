@@ -15,6 +15,7 @@ import zarr
 from scida.config import get_config
 from scida.fields import FieldContainer, walk_container
 from scida.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
+from scida.io.fits import fitsrecords_to_daskarrays
 from scida.misc import get_container_from_path, return_hdf5cachepath
 
 log = logging.getLogger(__name__)
@@ -35,6 +36,59 @@ class Loader(abc.ABC):
         pass
 
 
+class FITSLoader(Loader):
+    def __init__(self, path):
+        super().__init__(path)
+        self.location = self.path
+
+    def load(
+        self,
+        overwrite=False,
+        fileprefix="",
+        token="",
+        chunksize="auto",
+        virtualcache=False,
+        **kwargs
+    ):
+        log.warning("FITS file support is work-in-progress.")
+        self.location = self.path
+        from astropy.io import fits
+
+        ext = 1
+        with fits.open(self.location, memmap=True, mode="denywrite") as hdulist:
+            arr = hdulist[ext].data
+        darrs = fitsrecords_to_daskarrays(arr)
+
+        derivedfields_kwargs = kwargs.get("derivedfields_kwargs", {})
+        withunits = kwargs.get("withunits", False)
+        rootcontainer = FieldContainer(
+            fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits
+        )
+
+        for name, darr in darrs.items():
+            rootcontainer[name] = darr
+
+        metadata = {}
+        return rootcontainer, metadata
+
+    def load_metadata(self, **kwargs):
+        """Take a quick glance at the metadata, only attributes."""
+        from astropy.io import fits
+
+        ext = 0
+        with fits.open(self.location, memmap=True, mode="denywrite") as hdulist:
+            return hdulist[ext].header
+
+    def load_metadata_all(self, **kwargs):
+        """Take a quick glance at metadata."""
+        from astropy.io import fits
+
+        ext = 1
+        with fits.open(self.location, memmap=True, mode="denywrite") as hdulist:
+            arr = hdulist[ext].data
+        return arr.header
+
+
 class HDF5Loader(Loader):
     def __init__(self, path):
         super().__init__(path)
@@ -53,11 +107,11 @@ class HDF5Loader(Loader):
         tree = {}
         walk_hdf5file(self.location, tree=tree)
         file = h5py.File(self.location, "r")
-        datadict = load_datadict_old(
+        data, metadata = load_datadict_old(
             self.path, file, token=token, chunksize=chunksize, **kwargs
         )
         self.file = file
-        return datadict
+        return data, metadata
 
     def load_metadata(self, **kwargs):
         """Take a quick glance at the metadata, only attributes."""
@@ -90,7 +144,7 @@ class ZarrLoader(Loader):
         tree = {}
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
-        datadict = load_datadict_old(
+        data, metadata = load_datadict_old(
             self.path,
             self.file,
             token=token,
@@ -98,7 +152,7 @@ class ZarrLoader(Loader):
             filetype="zarr",
             **kwargs
         )
-        return datadict
+        return data, metadata
 
     def load_metadata(self, **kwargs):
         """Take a quick glance at the metadata."""
@@ -159,7 +213,7 @@ class ChunkedHDF5Loader(Loader):
             )
 
         try:
-            datadict = self.load_cachefile(
+            data, metadata = self.load_cachefile(
                 cachefp, token=token, chunksize=chunksize, **kwargs
             )
         except InvalidCacheError:
@@ -167,10 +221,10 @@ class ChunkedHDF5Loader(Loader):
             log.info("Invalid cache file, attempting to create new one.")
             os.remove(cachefp)
             self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
-            datadict = self.load_cachefile(
+            data, metadata = self.load_cachefile(
                 cachefp, token=token, chunksize=chunksize, **kwargs
             )
-        return datadict
+        return data, metadata
 
     def get_chunkedfiles(self, fileprefix: Optional[str] = "") -> list:
         """
@@ -318,47 +372,19 @@ def load_datadict_old(
                 )
                 continue
 
-        if lazy and i > 0:  # need one non-lazy entry though later on...
+        lz = lazy and i > 0  # need one non-lazy field (?)
+        fieldpath = dataset[0]
+        _add_hdf5arr_to_fieldcontainer(
+            file,
+            container,
+            fieldpath,
+            fieldname,
+            name,
+            chunksize,
+            inline_array=inline_array,
+            lazy=lz,
+        )
 
-            def field(
-                arrs,
-                snap=None,
-                h5path="",
-                chunksize="",
-                name="",
-                inline_array=False,
-                file=None,
-                **kwargs
-            ):
-                hds = file[h5path]
-                arr = da.from_array(
-                    hds,
-                    chunks=chunksize,
-                    name=name,
-                    inline_array=inline_array,
-                )
-                return arr
-
-            fnc = partial(
-                field,
-                h5path=dataset[0],
-                chunksize=chunksize,
-                name=name,
-                inline_array=inline_array,
-                file=file,
-            )
-            container.register_field(
-                name=fieldname, description=fieldname + ": lazy field from disk"
-            )(fnc)
-        else:
-            hds = file[dataset[0]]
-            ds = da.from_array(
-                hds,
-                chunks=chunksize,
-                name=name,
-                inline_array=inline_array,
-            )
-            container[fieldname] = ds
     data = rootcontainer
 
     dtsdict = {k[0]: k[1:] for k in tree["datasets"]}
@@ -396,9 +422,15 @@ def determine_loader(path, **kwargs):
         else:
             # otherwise expect this is a chunked HDF5 file
             loader = ChunkedHDF5Loader(path)
-    else:
+    elif not os.path.exists(path):
+        raise ValueError("Path '%s' does not exist" % path)
+    elif str(path).endswith(".hdf5"):
         # we are directly given a target file
         loader = HDF5Loader(path)
+    elif str(path).endswith(".fits"):
+        loader = FITSLoader(path)
+    else:
+        raise ValueError("Unknown filetype of path '%s'" % path)
     return loader
 
 
@@ -439,6 +471,59 @@ def _cachefile_available_in_path(
     if pnew.exists():
         return str(pnew)
     return False
+
+
+def _add_hdf5arr_to_fieldcontainer(
+    file,
+    container,
+    fieldpath,
+    fieldname,
+    name,
+    chunksize,
+    inline_array=False,
+    lazy=True,
+):
+    if not lazy:
+        hds = file[fieldpath]
+        ds = da.from_array(
+            hds,
+            chunks=chunksize,
+            name=name,
+            inline_array=inline_array,
+        )
+        container[fieldname] = ds
+        return
+
+    def field(
+        arrs,
+        snap=None,
+        h5path="",
+        chunksize="",
+        name="",
+        inline_array=False,
+        file=None,
+        **kwargs
+    ):
+        hds = file[h5path]
+        arr = da.from_array(
+            hds,
+            chunks=chunksize,
+            name=name,
+            inline_array=inline_array,
+        )
+        return arr
+
+    fnc = partial(
+        field,
+        h5path=fieldpath,
+        chunksize=chunksize,
+        name=name,
+        inline_array=inline_array,
+        file=file,
+    )
+    container.register_field(
+        name=fieldname, description=fieldname + ": lazy field from disk"
+    )(fnc)
 
 
 def _get_chunkedfiles(path, fileprefix: Optional[str] = "") -> list:

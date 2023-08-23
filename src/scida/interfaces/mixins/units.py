@@ -419,7 +419,8 @@ class UnitMixin(Mixin):
                             log.debug("Field %s already has units, overwriting." % k)
                             container[k] = container[k].magnitude * unit
                         else:
-                            container[k] = unit * container[k]
+                            if np.issubdtype(container[k].dtype, np.number):
+                                container[k] = unit * container[k]
                         if units == "cgs" and isinstance(container[k], pint.Quantity):
                             container[k] = container[k].to_base_units()
 
