@@ -24,7 +24,5 @@ def test_fitsread(testdatapath):
 def test_fitsdataset(testdatapath):
     path = testdatapath
 
-    # from scida.io import load as ioload
-    # a,b,c,d = ioload(path)
     ds = load(path)
-    print(ds)
+    assert "CX" in ds.data

@@ -50,6 +50,7 @@ class FITSLoader(Loader):
         virtualcache=False,
         **kwargs
     ):
+        log.warning("FITS file support is work-in-progress.")
         self.location = self.path
         from astropy.io import fits
 

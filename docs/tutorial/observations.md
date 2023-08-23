@@ -163,3 +163,45 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
 
 ![2D histogram example](../images/simple_hist2d_obs.png)
+
+
+## FITS files
+
+Observations are often stored in [FITS](https://en.wikipedia.org/wiki/FITS) files. Support in scida work-in-progress
+and requires the [astropy](https://www.astropy.org/) package.
+
+Here we show use of the SDSS DR16:
+
+```pycon
+>>> from scida import load
+>>> import matplotlib.pyplot as plt
+>>> import numpy as np
+>>> path = "/virgotng/mpia/obs/SDSS/specObj-dr16.fits"
+>>> ds = load(path)
+>>>
+>>> cx = ds.data["CX"].compute()
+>>> cy = ds.data["CY"].compute()
+>>> cz = ds.data["CZ"].compute()
+>>> z = ds.data["Z"].compute()
+>>>
+>>> # order by redshift for scatter plotting
+>>> idx = np.argsort(z)
+>>>
+>>> theta = np.arccos(cz.magnitude / np.sqrt(cx**2 + cy**2 + cz**2).magnitude)
+>>> phi = np.arctan2(cy.magnitude,cx.magnitude)
+>>>
+>>> fig = plt.figure(figsize=(10,5))
+>>> ax = fig.add_subplot(111, projection="aitoff")
+>>> ra = phi[idx]
+>>> dec = -(theta-np.pi/2.0)
+>>> sc = ax.scatter(ra, dec[idx], s=0.05, c=z[idx], rasterized=True)
+>>> fig.colorbar(sc, label="redshift")
+>>> ax.set_xticklabels(['14h','16h','18h','20h','22h','0h','2h','4h','6h','8h','10h'])
+>>> ax.set_xlabel("RA")
+>>> ax.set_ylabel("DEC")
+>>> ax.grid(True)
+>>> plt.savefig("sdss_dr16.png", dpi=150)
+>>> plt.show()
+```
+
+![SDSS DR16 Aitoff projection](../images/sdss_dr16.png)
