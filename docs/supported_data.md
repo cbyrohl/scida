@@ -27,6 +27,6 @@ A :material-database-check-outline: checkmark indicates support for converted HD
 
 As of now, two underlying file formats are supported: hdf5 and zarr. Multi-file hdf5 is supported, for which a directory is passed as *path*, which contains only hdf5 files of the pattern *prefix.XXX.hdf5*, where *prefix* will be determined automatically and *XXX* is a contiguous list of integers indicating the order of hdf5 files to be merged. Hdf5 files are expected to have the same structure and all fields, i.e. hdf5 datasets, will be concatenated along their first axis.
 
-Support for FITS is work-in-progress, also see [here](../tutorial/observations.md#fits-files) for a proof-of-concept.
+Support for FITS is work-in-progress, also see [here](tutorial/observations.md#fits-files) for a proof-of-concept.
 
 [^1]: The HDF5 version of GAIA DR3 is available [here](https://www.tng-project.org/data/obs/).
