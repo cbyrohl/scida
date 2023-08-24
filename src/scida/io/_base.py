@@ -188,6 +188,7 @@ class ChunkedHDF5Loader(Loader):
         self,
         overwrite=False,
         fileprefix="",
+        choose_prefix=False,
         token="",
         chunksize="auto",
         virtualcache=False,
@@ -212,6 +213,7 @@ class ChunkedHDF5Loader(Loader):
                 fileprefix=fileprefix,
                 virtualcache=virtualcache,
                 verbose=print_cachefile_creation,
+                choose_prefix=choose_prefix,
             )
 
         try:
@@ -247,7 +249,9 @@ class ChunkedHDF5Loader(Loader):
             self.path, fileprefix=fileprefix, choose_prefix=choose_prefix
         )
 
-    def create_cachefile(self, fileprefix="", virtualcache=False, verbose=None):
+    def create_cachefile(
+        self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False
+    ):
         config = get_config()
         print_msg = verbose
         if verbose is None:
@@ -255,7 +259,7 @@ class ChunkedHDF5Loader(Loader):
         if print_msg:
             print("Creating cache file, this may take a while...")
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
-        files = self.get_chunkedfiles(fileprefix)
+        files = self.get_chunkedfiles(fileprefix, choose_prefix=choose_prefix)
 
         self.location = cachefp
         if cachefp is None:

@@ -12,7 +12,9 @@ class MTNGArepoSnapshot(ArepoSnapshot):
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:
         tkwargs = dict(
-            fileprefix=self._fileprefix, fileprefix_catalog=self._fileprefix_catalog
+            fileprefix=self._fileprefix,
+            fileprefix_catalog=self._fileprefix_catalog,
+            catalog_cls=MTNGArepoCatalog,
         )
         tkwargs.update(**kwargs)
 
@@ -27,6 +29,7 @@ class MTNGArepoSnapshot(ArepoSnapshot):
         if tkwargs["fileprefix"] == "snapshot-prevmostboundonly_":
             # this is a mostbound snapshot, so we are done
             return
+
         # next, attempt to load mostbound snapshot. This is done by loading into sub-object.
         self.mostbound = None
         tkwargs.update(fileprefix="snapshot-prevmostboundonly_", catalog="none")
@@ -56,9 +59,17 @@ class MTNGArepoSnapshot(ArepoSnapshot):
         try:
             valid = super().validate_path(path, *args, **tkwargs)
         except ValueError:
-            # might be a partial snapshot
+            valid = CandidateStatus.NO
+            # might raise ValueError in case of partial snap
+
+        if valid == CandidateStatus.NO:
+            # check for partial snap
             tkwargs.update(fileprefix="snapshot-prevmostboundonly_")
-            valid = super().validate_path(path, *args, **tkwargs)
+            try:
+                valid = super().validate_path(path, *args, **tkwargs)
+            except ValueError:
+                valid = CandidateStatus.NO
+
         if valid == CandidateStatus.NO:
             return valid
         metadata_raw = load_metadata(path, **tkwargs)
@@ -66,10 +77,9 @@ class MTNGArepoSnapshot(ArepoSnapshot):
             return CandidateStatus.NO
         if "MTNG" not in metadata_raw["/Config"]:
             return CandidateStatus.NO
-
-        # if not all([k in metadata_raw for k in ["/Header", "/Config", "/Parameters"]]):
-        #    return CandidateStatus.NO
-        return CandidateStatus.MAYBE
+        if "Ngroups_Total" in metadata_raw["/Header"]:
+            return CandidateStatus.NO  # this is a catalog
+        return CandidateStatus.YES
 
 
 class MTNGArepoCatalog(ArepoCatalog):
@@ -79,6 +89,7 @@ class MTNGArepoCatalog(ArepoCatalog):
         kwargs["iscatalog"] = True
         if "fileprefix" not in kwargs:
             kwargs["fileprefix"] = "fof_subhalo_tab"
+        kwargs["choose_prefix"] = True
         super().__init__(*args, **kwargs)
 
     @classmethod
