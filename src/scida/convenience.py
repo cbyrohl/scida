@@ -212,10 +212,13 @@ def load(
 
     if "catalog" in kwargs:
         c = kwargs["catalog"]
-        if c is not None:
-            if not isinstance(c, list):
-                if c != "none":  # special keyword, do not attempt to resolve
-                    kwargs["catalog"] = find_path(c, overwrite=overwrite)
+        query_path = True
+        query_path &= c is not None
+        query_path &= not isinstance(c, bool)
+        query_path &= not isinstance(c, list)
+        query_path &= c != "none"
+        if query_path:
+            kwargs["catalog"] = find_path(c, overwrite=overwrite)
 
     # determine dataset class
     reg = dict()

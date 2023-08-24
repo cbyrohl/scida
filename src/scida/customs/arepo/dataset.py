@@ -133,7 +133,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 # try to discover group catalog in parent directories.
             if self.catalog == "none":
                 pass  # this string can be set to explicitly disable catalog
-            elif self.catalog is not None:
+            elif self.catalog:
                 self.load_catalog(kwargs)
 
         # add aliases

@@ -171,20 +171,15 @@ class TNGClusterSnapshot(ArepoSnapshot):
 
         matchingattrs = True
 
+        parameters = metadata_raw["/Parameters"]
+        if "InitCondFile" in parameters:
+            matchingattrs &= parameters["InitCondFile"] == "various"
+        else:
+            return CandidateStatus.NO
         header = metadata_raw["/Header"]
-        config = metadata_raw["/Config"]
-        # MTNG headers exactly have these 7 attributes:
-        headerattrs = [
-            "BoxSize",
-            "MassTable",
-            "NumFilesPerSnapshot",
-            "NumPart_Total",
-            "NumPart_ThisFile",
-            "Redshift",
-            "Time",
-        ]
-        matchingattrs &= set(headerattrs) == set(header.keys())
-        matchingattrs &= "MTNG" in config
+        matchingattrs &= header["BoxSize"] == 680000.0
+        matchingattrs &= header["NumPart_Total"][1] == 1944529344
+        matchingattrs &= header["NumPart_Total"][2] == 586952200
 
         if matchingattrs:
             valid = CandidateStatus.YES

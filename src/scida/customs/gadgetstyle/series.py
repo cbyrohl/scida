@@ -83,14 +83,10 @@ class GadgetStyleSimulation(DatasetSeries):
         cls = create_MixinDataset(cls, mixins)
 
         kwargs = {arg_dict.get(k, "catalog"): paths_dict[k] for k in paths_dict.keys()}
+        kwargs.update(**interface_kwargs)
 
         super().__init__(
-            paths,
-            datasetclass=cls,
-            lazy=lazy,
-            async_caching=async_caching,
-            **kwargs,
-            **interface_kwargs
+            paths, datasetclass=cls, lazy=lazy, async_caching=async_caching, **kwargs
         )
 
 

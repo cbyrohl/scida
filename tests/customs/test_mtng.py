@@ -1,3 +1,5 @@
+import pytest
+
 from scida import ArepoSimulation, MTNGArepoSnapshot
 from scida.convenience import load
 from tests.testdata_properties import require_testdata_path
@@ -5,11 +7,14 @@ from tests.testdata_properties import require_testdata_path
 
 @require_testdata_path("series", only=["MTNGarepo_270hydro_simulation"])
 def test_fullsimulation(testdatapath):
-    series = load(testdatapath)
+    series = load(
+        testdatapath, catalog=False
+    )  # catalog not working for minimal tesdata
     assert isinstance(series, ArepoSimulation)
-    ds = series.get_dataset(0)
+    ds = series.get_dataset(redshift=0.0)
     ds.evaluate_lazy()
     assert isinstance(ds, MTNGArepoSnapshot)
+    assert pytest.approx(ds.redshift) == 0.0
 
 
 @require_testdata_path("interface", only=["MTNGarepo_270hydro_snapshot_z2"])

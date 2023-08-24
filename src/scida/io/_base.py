@@ -174,7 +174,9 @@ class ChunkedHDF5Loader(Loader):
             path = cachefp
         else:
             # get data from first file in list
-            paths = self.get_chunkedfiles(fileprefix)
+            paths = self.get_chunkedfiles(
+                fileprefix, choose_prefix=kwargs.get("choose_prefix", False)
+            )
             if len(paths) == 0:
                 raise ValueError("No files for prefix '%s' found." % fileprefix)
             path = paths[0]
@@ -226,11 +228,14 @@ class ChunkedHDF5Loader(Loader):
             )
         return data, metadata
 
-    def get_chunkedfiles(self, fileprefix: Optional[str] = "") -> list:
+    def get_chunkedfiles(
+        self, fileprefix: Optional[str] = "", choose_prefix=False
+    ) -> list:
         """
         Get all files in directory with given prefix.
         Parameters
         ----------
+        choose_prefix
         fileprefix: Optional[str]
             Prefix of files to be loaded. If None, we take the first prefix.
 
@@ -238,7 +243,9 @@ class ChunkedHDF5Loader(Loader):
         -------
 
         """
-        return _get_chunkedfiles(self.path, fileprefix=fileprefix)
+        return _get_chunkedfiles(
+            self.path, fileprefix=fileprefix, choose_prefix=choose_prefix
+        )
 
     def create_cachefile(self, fileprefix="", virtualcache=False, verbose=None):
         config = get_config()
@@ -458,7 +465,22 @@ def load(path, **kwargs):
 def _cachefile_available_in_path(
     path: str, fileprefix: Optional[str] = "", **kwargs
 ) -> Union[bool, str]:
-    chnkfiles = _get_chunkedfiles(path, fileprefix=fileprefix)
+    """
+    Check whether a virtual merged HDF5 file is present in folder.
+    Parameters
+    ----------
+    path
+    fileprefix
+    kwargs
+
+    Returns
+    -------
+
+    """
+    try:
+        chnkfiles = _get_chunkedfiles(path, fileprefix=fileprefix)
+    except ValueError:
+        return False
     if len(chnkfiles) == 0:
         return False
     fn = chnkfiles[0]
@@ -526,11 +548,14 @@ def _add_hdf5arr_to_fieldcontainer(
     )(fnc)
 
 
-def _get_chunkedfiles(path, fileprefix: Optional[str] = "") -> list:
+def _get_chunkedfiles(
+    path, fileprefix: Optional[str] = "", choose_prefix=False
+) -> list:
     """
     Get all files in directory with given prefix.
     Parameters
     ----------
+    choose_prefix
     fileprefix: Optional[str]
         Prefix of files to be loaded. If None, we take the first prefix.
 
@@ -553,11 +578,17 @@ def _get_chunkedfiles(path, fileprefix: Optional[str] = "") -> list:
         prfxs = [prfx]
         files = np.array([f for f in files if f.startswith(prfx)])
     if len(set(prfxs)) > 1:
-        # print("Available prefixes:", set(prfxs))
-        msg = (
-            "More than one file prefix in directory '%s', specify 'fileprefix'." % path
-        )
-        raise ValueError(msg)
+        if choose_prefix:
+            # choose prefix that occurs more often
+            prfx = max(set(prfxs), key=prfxs.count)
+            files = np.array([f for f in files if f.startswith(prfx)])
+        else:
+            # print("Available prefixes:", set(prfxs))
+            msg = (
+                "More than one file prefix in directory '%s', specify 'fileprefix'."
+                % path
+            )
+            raise ValueError(msg)
     # determine numbers where possible
     numbers = []
     files_numbered = []

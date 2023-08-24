@@ -98,7 +98,7 @@ class DatasetSeries(object):
             for i, (path, d) in enumerate(
                 tqdm(zip(self.paths, self.datasets), total=len(self.paths))
             ):
-                rawmeta = load_metadata(path)
+                rawmeta = load_metadata(path, choose_prefix=True)
                 # class method does not initiate obj.
                 dct[i] = d._clean_metadata_from_raw(rawmeta)
             self.metadata = dct
