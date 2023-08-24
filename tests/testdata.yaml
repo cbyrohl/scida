@@ -132,6 +132,13 @@ testdata:
       - areposimulation
     fn: minimal_MTNG-arepo270hydro_simulation
 
+  MTNGarepo_1080hydro_simulation:
+    types:
+      - series
+      - areposimulation
+    fn: minimal_MTNG-arepo1080hydro_simulation
+
+
   FLAMINGO_snapshot_reduced:
     types:
       - interface

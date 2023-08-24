@@ -567,11 +567,19 @@ def _get_chunkedfiles(
     fns = [f for f in os.listdir(path)]
     files = [join(path, f) for f in fns]
     files = [
-        f for i, f in enumerate(files) if not fns[i].startswith(".")
+        f
+        for i, f in enumerate(files)
+        if not any(fns[i].startswith(start) for start in [".", "bak"])
     ]  # ignore hidden files
     files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
     if fileprefix is not None:
-        files = np.array([f for f in files if f.split("/")[-1].startswith(fileprefix)])
+        files = [f for f in files if f.split("/")[-1].startswith(fileprefix)]
+    # ignore backup files
+    files = [f for f in files if not f.endswith("~")]
+    files = [f for f in files if not f.endswith(".bak")]
+    files = [f for f in files if not f.endswith(".swp")]
+
+    files = np.array(files)
     prfxs = sorted([f.split(".")[0] for f in files])
     if fileprefix is None:
         prfx = prfxs[0]
