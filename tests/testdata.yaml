@@ -125,7 +125,8 @@ testdata:
       - interface
       - areposnapshot
       - areposnapshot_withcatalog|M10|1|2
-  MTNG-arepo270hydro_simulation:
+
+  MTNGarepo_270hydro_simulation:
     types:
       - series
       - areposimulation

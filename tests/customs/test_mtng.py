@@ -1,6 +1,15 @@
-from scida import MTNGArepoSnapshot
+from scida import ArepoSimulation, MTNGArepoSnapshot
 from scida.convenience import load
 from tests.testdata_properties import require_testdata_path
+
+
+@require_testdata_path("series", only=["MTNGarepo_270hydro_simulation"])
+def test_fullsimulation(testdatapath):
+    series = load(testdatapath)
+    assert isinstance(series, ArepoSimulation)
+    ds = series.get_dataset(0)
+    ds.evaluate_lazy()
+    assert isinstance(ds, MTNGArepoSnapshot)
 
 
 @require_testdata_path("interface", only=["MTNGarepo_270hydro_snapshot_z2"])
