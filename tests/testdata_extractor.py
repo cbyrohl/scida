@@ -11,6 +11,7 @@ import typer
 from typing_extensions import Annotated
 
 from scida import load
+from scida.helpers_hdf5 import get_dtype
 from scida.io import walk_hdf5file
 
 app = typer.Typer()
@@ -37,7 +38,7 @@ def create_hdf5_testfile(src: str, dst: str, length: int = 1, verbose: bool = Fa
                 shape_new = (length,)
                 tmpdata = None
                 # vlen HDF5 dataset
-                dt = g[path].dtype
+                dt = get_dtype(g[path])
                 if h5py.check_vlen_dtype(dt):
                     # do not know how to treat, so skip for now
                     dtype = np.int32
@@ -57,7 +58,7 @@ def create_hdf5_testfile(src: str, dst: str, length: int = 1, verbose: bool = Fa
                     elif len(shape) == 1:
                         shape_new = (length,)
                         if len(g[path]) > 0:
-                            tmpdata = g[path][0]
+                            tmpdata = g[path].astype(dt)[0]
                             if length > 1:
                                 np.random.seed(42)
                                 idx = np.random.choice(
@@ -116,6 +117,8 @@ def minimize_series_hdf5(
         # hdf5 files
         hdf5files = [f for f in files if f.endswith(".hdf5")]
         for fn in hdf5files:
+            if any([fn.endswith(k) for k in exclude]):
+                continue
             if not ps.resume_operation(fn):
                 continue
             srcfn = os.path.join(root, fn)
