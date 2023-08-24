@@ -55,6 +55,7 @@ jupyter = "^1.0.0"
 # https://github.com/Jupyter-contrib/jupyter_nbextensions_configurator/issues/165
 pytest-mock = "^3.11.1"
 notebook = "^6.4.12"
+mkdocs-glightbox = "^0.3.4"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
