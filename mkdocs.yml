@@ -63,7 +63,19 @@ markdown_extensions:
 
 
 plugins:
-  #- markdown-exec:
+  - glightbox:
+      touchNavigation: true
+      loop: true
+      effect: zoom
+      slide_effect: slide
+      width: 100%
+      height: auto
+      zoomable: true
+      draggable: true
+      skip_classes:
+        - custom-skip-class-name
+      auto_caption: true
+      caption_position: bottom
   - search:
   - mkdocs-video:
       css_style:
