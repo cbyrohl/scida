@@ -5,7 +5,7 @@ from scida.convenience import load
 from tests.testdata_properties import require_testdata_path
 
 
-@require_testdata_path("series", only=["MTNGarepo_270hydro_simulation"])
+@require_testdata_path("series", only=["MTNGarepo_1080hydro_simulation"])
 def test_fullsimulation(testdatapath):
     series = load(
         testdatapath, catalog=False
@@ -14,7 +14,10 @@ def test_fullsimulation(testdatapath):
     ds = series.get_dataset(redshift=0.0)
     ds.evaluate_lazy()
     assert isinstance(ds, MTNGArepoSnapshot)
+    print(ds)
     assert pytest.approx(ds.redshift) == 0.0
+    assert ds.cosmology is not None
+    print(ds.cosmology)
 
 
 @require_testdata_path("interface", only=["MTNGarepo_270hydro_snapshot_z2"])
