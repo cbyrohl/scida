@@ -13,7 +13,7 @@
     
     
       
-        <title>Dataset structure - scida</title>
+        <title>Visual impressions using scida - scida</title>
       
     
     
@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dataset-structure" class="md-skip">
+        <a href="#visual-impressions-using-scida" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Dataset structure
+              Visual impressions using scida
             
           </span>
         </div>
@@ -652,42 +652,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#supported-file-formats" class="md-nav__link">
-    Supported file formats
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#supported-file-structures" class="md-nav__link">
-    Supported file structures
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#supported-data-structures" class="md-nav__link">
-    Supported data structures
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples-of-supported-simulation-codes" class="md-nav__link">
-    Examples of supported simulation codes
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -700,39 +664,19 @@
                 
                   
 
-  <a href="https://github.com/cbyrohl/scida/edit/master/docs/dataset_structure.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/cbyrohl/scida/edit/master/docs/impressions.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<div><h1 id="dataset-structure">Dataset structure</h1>
-<p>Here, we discuss the requirements for easy extension/support of new datasets.</p>
-<h2 id="supported-file-formats">Supported file formats</h2>
-<p>Currently, input files need to have one of the following formats:</p>
-<ul>
-<li><a href="https://www.hdfgroup.org/solutions/hdf5/">hdf5</a></li>
-<li>multi-file hdf5</li>
-<li><a href="https://zarr.readthedocs.io/en/stable/">zarr</a></li>
-</ul>
-<h2 id="supported-file-structures">Supported file structures</h2>
-<p>Just like this package, above file formats use a hierarchical structure to store data with three fundamental objects:</p>
-<ul>
-<li><strong>Groups</strong> are containers for other groups or datasets.</li>
-<li><strong>Datasets</strong> are multidimensional arrays of a homogeneous type, usually bundled into some <em>Group</em>.</li>
-<li><strong>Attributes</strong> provide various metadata.</li>
-</ul>
-<h2 id="supported-data-structures">Supported data structures</h2>
-<p>At this point, we only support unstructured datasets, i.e. datasets that do not depend on the memory layout for their
-interpretation. For example, this implies that simulation codes utilizing uniform or adaptive grids are not supported.</p>
-<h2 id="examples-of-supported-simulation-codes">Examples of supported simulation codes</h2>
-<p>We explicitly support simulations run with the following codes:</p>
-<ul>
-<li><a href="https://wwwmpa.mpa-garching.mpg.de/gadget4/">Gadget</a></li>
-<li><a href="http://www.tapir.caltech.edu/~phopkins/Site/GIZMO.html">Gizmo</a></li>
-<li><a href="https://arepo-code.org/">Arepo</a></li>
-<li><a href="https://swift.strw.leidenuniv.nl/">Swift</a></li>
-</ul></div>
+<div><h1 id="visual-impressions-using-scida">Visual impressions using scida</h1>
+<p><a class="glightbox" href="../images/projection_SIMBA_Temperature.jpg" data-type="image" data-width="100%" data-height="auto" data-title="Projection from the SIMBA simulation at redshift 2." data-desc-position="bottom"><img alt="Projection from the SIMBA simulation at redshift 2." src="../images/projection_SIMBA_Temperature.jpg" style="height:300px"></a>
+<a class="glightbox" href="../images/projection_FLAMINGO_Density.jpg" data-type="image" data-width="100%" data-height="auto" data-title="Projection from the FLAMINGO simulation at redshift 2." data-desc-position="bottom"><img alt="Projection from the FLAMINGO simulation at redshift 2." src="../images/projection_FLAMINGO_Density.jpg" style="height:300px"></a>
+<a class="glightbox" href="../images/projection_TNG100_GFM_Metallicity.jpg" data-type="image" data-width="100%" data-height="auto" data-title="Projection from the TNG100 simulation at redshift 2." data-desc-position="bottom"><img alt="Projection from the TNG100 simulation at redshift 2." src="../images/projection_TNG100_GFM_Metallicity.jpg" style="height:300px"></a>
+<a class="glightbox" href="../images/projection_THESAN_NeutralHydrogenAbundance.jpg" data-type="image" data-width="100%" data-height="auto" data-title="Projection from the THESAN simulation at redshift 6." data-desc-position="bottom"><img alt="Projection from the THESAN simulation at redshift 6." src="../images/projection_THESAN_NeutralHydrogenAbundance.jpg" style="height:300px"></a>
+<a class="glightbox" href="../images/sdss_dr16.png" data-type="image" data-width="100%" data-height="auto" data-title="SDSS DR16 Aitoff projection" data-desc-position="bottom"><img alt="SDSS DR16 Aitoff projection" src="../images/sdss_dr16.png"></a>
+<a class="glightbox" href="../images/simple_hist2d_obs.png" data-type="image" data-width="100%" data-height="auto" data-title="Gaia DR3 sky projection" data-desc-position="bottom"><img alt="Gaia DR3 sky projection" src="../images/simple_hist2d_obs.png" style="height:350px"></a></p></div>
 
 
 

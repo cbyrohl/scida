@@ -13,7 +13,7 @@
     
     
       
-        <title>Dataset structure - scida</title>
+        <title>Configuration - scida</title>
       
     
     
@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dataset-structure" class="md-skip">
+        <a href="#configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Dataset structure
+              Configuration
             
           </span>
         </div>
@@ -593,11 +593,66 @@
 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Configuration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#main-configuration-file" class="md-nav__link">
+    Main configuration file
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simulation-configuration" class="md-nav__link">
+    Simulation configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-files" class="md-nav__link">
+    Unit files
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -659,29 +714,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#supported-file-formats" class="md-nav__link">
-    Supported file formats
+  <a href="#main-configuration-file" class="md-nav__link">
+    Main configuration file
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-file-structures" class="md-nav__link">
-    Supported file structures
+  <a href="#simulation-configuration" class="md-nav__link">
+    Simulation configuration
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-data-structures" class="md-nav__link">
-    Supported data structures
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples-of-supported-simulation-codes" class="md-nav__link">
-    Examples of supported simulation codes
+  <a href="#unit-files" class="md-nav__link">
+    Unit files
   </a>
   
 </li>
@@ -700,39 +748,133 @@
                 
                   
 
-  <a href="https://github.com/cbyrohl/scida/edit/master/docs/dataset_structure.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/cbyrohl/scida/edit/master/docs/configuration.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<div><h1 id="dataset-structure">Dataset structure</h1>
-<p>Here, we discuss the requirements for easy extension/support of new datasets.</p>
-<h2 id="supported-file-formats">Supported file formats</h2>
-<p>Currently, input files need to have one of the following formats:</p>
-<ul>
-<li><a href="https://www.hdfgroup.org/solutions/hdf5/">hdf5</a></li>
-<li>multi-file hdf5</li>
-<li><a href="https://zarr.readthedocs.io/en/stable/">zarr</a></li>
-</ul>
-<h2 id="supported-file-structures">Supported file structures</h2>
-<p>Just like this package, above file formats use a hierarchical structure to store data with three fundamental objects:</p>
-<ul>
-<li><strong>Groups</strong> are containers for other groups or datasets.</li>
-<li><strong>Datasets</strong> are multidimensional arrays of a homogeneous type, usually bundled into some <em>Group</em>.</li>
-<li><strong>Attributes</strong> provide various metadata.</li>
-</ul>
-<h2 id="supported-data-structures">Supported data structures</h2>
-<p>At this point, we only support unstructured datasets, i.e. datasets that do not depend on the memory layout for their
-interpretation. For example, this implies that simulation codes utilizing uniform or adaptive grids are not supported.</p>
-<h2 id="examples-of-supported-simulation-codes">Examples of supported simulation codes</h2>
-<p>We explicitly support simulations run with the following codes:</p>
-<ul>
-<li><a href="https://wwwmpa.mpa-garching.mpg.de/gadget4/">Gadget</a></li>
-<li><a href="http://www.tapir.caltech.edu/~phopkins/Site/GIZMO.html">Gizmo</a></li>
-<li><a href="https://arepo-code.org/">Arepo</a></li>
-<li><a href="https://swift.strw.leidenuniv.nl/">Swift</a></li>
-</ul></div>
+<div><h1 id="configuration">Configuration</h1>
+<h2 id="main-configuration-file">Main configuration file</h2>
+<p>The main configuration file is located at <code>~/.scida/config.yaml</code>. If this file does not exist, it is created with the
+first use of scida. The file is using the YAML format.
+The following options are available:</p>
+<dl>
+<dt><code>copied_default</code></dt>
+<dd>
+<p>If this option is set True, a warning is printed because the copied default config has not been adjusted by the user
+   yet. Once you have done so, remove this line.</p>
+</dd>
+<dt><code>cache_path</code></dt>
+<dd>
+<p>Sets the folder to use as a cache for scida. Recommended to be moved out of the home directory to a fast disk.</p>
+</dd>
+<dt><code>datafolders</code></dt>
+<dd>
+<p>A list of folders to scan for data specifiers when using <code>scida.load("specifier")</code>.</p>
+</dd>
+<dt><code>nthreads</code></dt>
+<dd>
+<p>scida itself might use multiple threads for some operations. This option sets the number of threads to use.
+  This is independent of any dask threading. Default: 8</p>
+</dd>
+<dt><code>missing_units</code></dt>
+<dd>
+<p>How to handle missing units. Can be "warn", "raise", or "ignore". "warn" will print a warning, "raise" will raise an
+  exception, and "ignore" will silently continue without the right units. Default: "warn"</p>
+</dd>
+</dl>
+<h2 id="simulation-configuration">Simulation configuration</h2>
+<p>By default, scida will load supported <a href="https://github.com/cbyrohl/scida/blob/main/src/scida/configfiles/simulations.yaml">simulation configurations from the package</a>.
+User configurations for simulations are loaded from <code>~/.config/scida/simulations.yaml</code>. This file is also in YAML format.</p>
+<p>The configuration has to have the following structure:
+</p><div class="highlight"><pre><span></span><code><span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">SIMNAME1</span><span class="p">:</span>
+
+<span class="w">  </span><span class="nt">SIMNAME2</span><span class="p">:</span>
+</code></pre></div>
+<p>Each simulation could look something like this:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">SIMNAME1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">aliases</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SIMNAME</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SMN1</span>
+<span class="w">    </span><span class="nt">identifiers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">SimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SIMNAME1</span>
+<span class="w">      </span><span class="nt">Config</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">SavePath</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/simname</span>
+<span class="w">          </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">substr</span>
+<span class="w">    </span><span class="nt">unitfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">units/simnameunits.yaml</span>
+<span class="w">    </span><span class="nt">dataset_type</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">series</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ArepoSimulation</span>
+<span class="w">      </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ArepoSnapshot</span>
+</code></pre></div>
+<dl>
+<dt><code>aliases</code></dt>
+<dd>
+<p>A list of aliases for the simulation. These can be used to load the simulation with <code>scida.load("alias")</code>.</p>
+</dd>
+<dt><code>identifiers</code></dt>
+<dd>
+<p>A dictionary of identifiers from the metadata of a given dataset to identify it as such.
+  In above example "/Parameters" is the path to an attribute "SimName" in the HDF5/zarr metadata
+  with the exact content as given. Multiple identifiers can be given, in which case all have to match.
+  Partial matches of a given key-value key are possible by passing a dictionary {"content": "valuesubstr", match: substring}
+  rather than a string.</p>
+</dd>
+<dt><code>unitfile</code></dt>
+<dd>
+<p>The path to the unitfile relative to the user/repository simulation configuration. user configurations
+  take precedence over the package configuration.</p>
+</dd>
+<dt><code>dataset_type</code></dt>
+<dd>
+<p>Can explicitly fix the dataset/series type for a simulation.</p>
+</dd>
+</dl>
+<h2 id="unit-files">Unit files</h2>
+<p>Unit files are used to determine the units of datasets, particularly for datasets that do not have metadata
+that can be used to infer units. Unit files are specified either explicitly via the <code>unitfile</code> option in <code>scida.load</code>
+or implicitly via the simulation configuration, see above. Relative paths, such as <code>units/simnameunits.yaml</code> are
+relative to the user/package simulation config folder. The former (<code>~/.config/scida/</code>) takes precedence.</p>
+<p>A unit file could look like this:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">metadata_unitsystem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cgs</span>
+<span class="nt">units</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">unit_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.0 * km</span>
+<span class="w">  </span><span class="nt">unit_mass</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">g</span>
+<span class="nt">fields</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">_all</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">CounterID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span>
+<span class="w">    </span><span class="nt">Coordinates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unit_length</span>
+<span class="w">  </span><span class="nt">InternalArrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span>
+<span class="w">  </span><span class="nt">PartType0</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">SubPartType0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">FurthestSubgroupDistance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unit_length</span>
+<span class="w">    </span><span class="nt">NearestNeighborDistance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unit_length</span>
+<span class="w">    </span><span class="nt">Energy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0 * erg</span>
+</code></pre></div>
+<dl>
+<dt><code>metadata_unitsystem</code></dt>
+<dd>
+<p>The unitsystem assumed when deducing units from metadata dimensions where available.
+  Only cgs supported right now.</p>
+</dd>
+<dt><code>units</code></dt>
+<dd>
+<p>unit definitions that are used in the following <code>fields</code> section. The units are defined as
+  <a href="https://pint.readthedocs.io/en/stable/">pint</a> expressions.</p>
+</dd>
+<dt><code>fields</code></dt>
+<dd>
+<p>A dictionary of fields and their units. The fields are specified as a path to the field in the dataset.
+  The special field <code>_all</code> can be used to set the default unit for all fields with a given name irrespective
+  of the path of the field. Other than that, entries represent the fields or containers of fields. The special
+  field <code>none</code> can be used to set the unit to None, i.e. no unit. This is differently handled than " "/"dimensionless" as
+  the field will be treated as array rather than dimensionless <a href="https://pint.readthedocs.io/en/stable/">pint</a> array.</p>
+</dd>
+</dl></div>
 
 
 
@@ -748,6 +890,42 @@ interpretation. For example, this implies that simulation codes utilizing unifor
       </main>
       
         <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../halocatalogs/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Halo Catalogs" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Halo Catalogs
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../faq/" class="md-footer__link md-footer__link--next" aria-label="Next: FAQ" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              FAQ
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
