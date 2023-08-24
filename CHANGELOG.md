@@ -8,8 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.2.4] - 2023-08-24
+
 ### Added
-* FLAMINGO support
+
+- FLAMINGO support
+- proof-of-concept support for FITS format
+- configuration documentation
+- py3.11 support
+- unit support for field recipes
+
+### Fixed
+
+- MTNG catalog detection
+- various minor bugs
+
 
 ## [0.2.3] - 2023-08-14
 
