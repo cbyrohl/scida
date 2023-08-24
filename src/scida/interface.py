@@ -78,6 +78,8 @@ class BaseDataset(metaclass=MixinMeta):
             token=self.__dask_tokenize__(),
             withunits=self.withunits,
         )
+        if "choose_prefix" in kwargs:
+            loadkwargs["choose_prefix"] = kwargs["choose_prefix"]
 
         res = scida.io.load(path, **loadkwargs)
         self.data = res[0]

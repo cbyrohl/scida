@@ -134,7 +134,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             if self.catalog == "none":
                 pass  # this string can be set to explicitly disable catalog
             elif self.catalog:
-                self.load_catalog(kwargs)
+                catalog_cls = kwargs.get("catalog_cls", None)
+                self.load_catalog(kwargs, catalog_cls=catalog_cls)
 
         # add aliases
         aliases = dict(
@@ -157,7 +158,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         # add some default fields
         self.data.merge(fielddefs)
 
-    def load_catalog(self, kwargs):
+    def load_catalog(self, kwargs, catalog_cls=None):
         virtualcache = False  # copy catalog for better performance
         catalog_kwargs = kwargs.get("catalog_kwargs", {})
         catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
@@ -166,7 +167,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         # explicitly need to create unitaware class for catalog as needed
         # TODO: should just be determined from mixins of parent?
-        cls = ArepoCatalog
+        if catalog_cls is None:
+            cls = ArepoCatalog
+        else:
+            cls = catalog_cls
         withunits = kwargs.get("units", False)
         mixins = []
         if withunits:
