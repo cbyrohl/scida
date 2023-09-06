@@ -27,6 +27,8 @@ scida can be installed via [PyPI](https://pypi.org/). scida requires a Python ve
     python -m ipykernel install --user --name scida --display-name "scida"
     ```
 
+    Now you can install scida as described below and use it in jupyter notebooks with the given kernel.
+
 ``` bash
 pip install scida
 ```
