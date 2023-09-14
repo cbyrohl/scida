@@ -11,6 +11,8 @@ from dask import delayed
 from numba import jit
 from numpy.typing import NDArray
 
+from scida.customs.arepo.helpers import grp_type_str, part_type_num
+from scida.customs.arepo.selector import ArepoSelector
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
@@ -21,91 +23,11 @@ from scida.helpers_misc import (
     map_blocks,
     parse_humansize,
 )
-from scida.interface import Selector, create_MixinDataset
+from scida.interface import create_MixinDataset
 from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
 from scida.io import load_metadata
 
 log = logging.getLogger(__name__)
-
-
-class ArepoSelector(Selector):
-    def __init__(self) -> None:
-        super().__init__()
-        self.keys = ["haloID", "subhaloID", "unbound"]
-
-    def prepare(self, *args, **kwargs) -> None:
-        if all([kwargs.get(k, None) is None for k in self.keys]):
-            return  # no specific selection, thus just return
-        snap: ArepoSnapshot = args[0]
-        halo_id = kwargs.get("haloID", None)
-        subhalo_id = kwargs.get("subhaloID", None)
-        unbound = kwargs.get("unbound", None)
-
-        if halo_id is not None and subhalo_id is not None:
-            raise ValueError("Cannot select for haloID and subhaloID at the same time.")
-
-        if unbound is True and (halo_id is not None or subhalo_id is not None):
-            raise ValueError(
-                "Cannot select haloID/subhaloID and unbound particles at the same time."
-            )
-
-        if snap.catalog is None:
-            raise ValueError("Cannot select for haloID without catalog loaded.")
-
-        # select for halo
-        idx = subhalo_id if subhalo_id is not None else halo_id
-        objtype = "subhalo" if subhalo_id is not None else "halo"
-        if idx is not None:
-            self.select_group(snap, idx, objtype=objtype)
-        elif unbound is True:
-            self.select_unbound(snap)
-
-    def select_unbound(self, snap):
-        lengths = self.data_backup["Group"]["GroupLenType"][-1, :].compute()
-        offsets = self.data_backup["Group"]["GroupOffsetsType"][-1, :].compute()
-        # for unbound gas, we start after the last halo particles
-        offsets = offsets + lengths
-        for p in self.data_backup:
-            splt = p.split("PartType")
-            if len(splt) == 1:
-                for k, v in self.data_backup[p].items():
-                    self.data[p][k] = v
-            else:
-                pnum = int(splt[1])
-                offset = offsets[pnum]
-                if hasattr(offset, "magnitude"):  # hack for issue 59
-                    offset = offset.magnitude
-                for k, v in self.data_backup[p].items():
-                    self.data[p][k] = v[offset:-1]
-        snap.data = self.data
-
-    def select_group(self, snap, idx, objtype="Group"):
-        objtype = grp_type_str(objtype)
-        if objtype == "halo":
-            lengths = self.data_backup["Group"]["GroupLenType"][idx, :].compute()
-            offsets = self.data_backup["Group"]["GroupOffsetsType"][idx, :].compute()
-        elif objtype == "subhalo":
-            lengths = {i: snap.get_subhalolengths(i)[idx] for i in range(6)}
-            offsets = {i: snap.get_subhalooffsets(i)[idx] for i in range(6)}
-        else:
-            raise ValueError("Unknown object type: %s" % objtype)
-
-        for p in self.data_backup:
-            splt = p.split("PartType")
-            if len(splt) == 1:
-                for k, v in self.data_backup[p].items():
-                    self.data[p][k] = v
-            else:
-                pnum = int(splt[1])
-                offset = offsets[pnum]
-                length = lengths[pnum]
-                if hasattr(offset, "magnitude"):  # hack for issue 59
-                    offset = offset.magnitude
-                if hasattr(length, "magnitude"):
-                    length = length.magnitude
-                for k, v in self.data_backup[p].items():
-                    self.data[p][k] = v[offset : offset + length]
-        snap.data = self.data
 
 
 class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
@@ -115,6 +37,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
         self.config = {}
+        self._defaultunitfiles: List[str] = ["units/gadget.yaml"]
         self.parameters = {}
         self._grouplengths = {}
         self._subhalolengths = {}
@@ -1069,38 +992,6 @@ def get_shcounts_shcells(SubhaloGrNr, hlength):
             hid_old = hid
         i += 1
     return shcounts, shnumber
-
-
-def grp_type_str(gtype):
-    if str(gtype).lower() in ["group", "groups", "halo", "halos"]:
-        return "halo"
-    if str(gtype).lower() in ["subgroup", "subgroups", "subhalo", "subhalos"]:
-        return "subhalo"
-    raise ValueError("Unknown group type: %s" % gtype)
-
-
-def part_type_num(ptype):
-    """Mapping between common names and numeric particle types."""
-    ptype = str(ptype).replace("PartType", "")
-    if ptype.isdigit():
-        return int(ptype)
-
-    if str(ptype).lower() in ["gas", "cells"]:
-        return 0
-    if str(ptype).lower() in ["dm", "darkmatter"]:
-        return 1
-    if str(ptype).lower() in ["dmlowres"]:
-        return 2  # only zoom simulations, not present in full periodic boxes
-    if str(ptype).lower() in ["tracer", "tracers", "tracermc", "trmc"]:
-        return 3
-    if str(ptype).lower() in ["star", "stars", "stellar"]:
-        return 4  # only those with GFM_StellarFormationTime>0
-    if str(ptype).lower() in ["wind"]:
-        return 4  # only those with GFM_StellarFormationTime<0
-    if str(ptype).lower() in ["bh", "bhs", "blackhole", "blackholes", "black"]:
-        return 5
-    if str(ptype).lower() in ["all"]:
-        return -1
 
 
 def memorycost_limiter(cost_memory, cost_cpu, list_chunkedges, cost_memory_max):

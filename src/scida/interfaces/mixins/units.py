@@ -6,7 +6,12 @@ import numpy as np
 import pint
 from pint import UnitRegistry
 
-from scida.config import get_config, get_config_fromfile, get_simulationconfig
+from scida.config import (
+    combine_configs,
+    get_config,
+    get_config_fromfile,
+    get_simulationconfig,
+)
 from scida.fields import FieldContainer, walk_container
 from scida.helpers_misc import sprint
 from scida.interfaces.mixins.base import Mixin
@@ -271,9 +276,13 @@ class UnitMixin(Mixin):
             unitfile = dsprops.get("unitfile", "")
         unitfile = kwargs.pop("unitfile", unitfile)  # passed kwarg takes precedence
         unitdefs = get_config_fromfile("units/general.yaml").get("units", {})
+        apply_defaultunitfiles = kwargs.get("apply_defaultunitfiles", True)
+        if apply_defaultunitfiles and hasattr(self, "_defaultunitfiles"):
+            for uf in self._defaultunitfiles:
+                unitdefs.update(get_config_fromfile(uf).get("units", {}))
+
         if unitfile != "":
-            unithints = get_config_fromfile(unitfile)
-            unitdefs.update(unithints.get("units", {}))
+            unitdefs.update(get_config_fromfile(unitfile).get("units", {}))
 
         units = kwargs.pop("units")
         if isinstance(units, bool):
@@ -288,7 +297,14 @@ class UnitMixin(Mixin):
         self.ureg.default_system = "cgs"
 
         # update fields with units
-        fwu = unithints.get("fields", {})
+        fieldudefs = []
+        if apply_defaultunitfiles and hasattr(self, "_defaultunitfiles"):
+            for uf in self._defaultunitfiles:
+                fieldudefs.append(get_config_fromfile(uf).get("fields", {}))
+
+        fieldudefs.append(unithints.get("fields", {}))
+
+        fwu = combine_configs(fieldudefs, mode="overwrite_keys")  # merge udefs
         mode_metadata = unithints.get("metadata_unitsystem", "cgs")
 
         def add_units(container: FieldContainer, basepath: str):
