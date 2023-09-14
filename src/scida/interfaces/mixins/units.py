@@ -282,7 +282,8 @@ class UnitMixin(Mixin):
                 unitdefs.update(get_config_fromfile(uf).get("units", {}))
 
         if unitfile != "":
-            unitdefs.update(get_config_fromfile(unitfile).get("units", {}))
+            unithints = get_config_fromfile(unitfile)
+            unitdefs.update(unithints.get("units", {}))
 
         units = kwargs.pop("units")
         if isinstance(units, bool):
