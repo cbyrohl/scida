@@ -281,7 +281,16 @@ class ChunkedHDF5Loader(Loader):
             hf.attrs["_cachingcomplete"] = True  # mark that caching complete
 
     def load_cachefile(self, location, token="", chunksize="auto", **kwargs):
-        self.file = h5py.File(location, "r")
+        try:
+            self.file = h5py.File(location, "r")
+        except (
+            OSError
+        ) as e:  # file potentially corrupted, raise InvalidCacheError and potentially recover
+            raise InvalidCacheError(
+                """Cache file '%s' might be invalid. An OSError '%s' was raised.
+                Delete file and try again."""
+                % (location, str(e))
+            )
         hf = self.file
         cache_valid = False
         if "_cachingcomplete" in hf.attrs:

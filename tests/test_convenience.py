@@ -162,7 +162,6 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
         with time_limit(dt_int):
             # signal just accepts integer seconds... so we work around it with sleep before
             time.sleep(dt_int - dt)
-
             load(testdatapath, **loadkwargs)
 
     # count total files by walking folders without counting those
@@ -191,3 +190,22 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
     # attempt load and recover.
     load(testdatapath, **loadkwargs)
     assert "Invalid cache file, attempting to create new one." in caplog.text
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_load_cachefail_oserror(cachedir, testdatapath, caplog):
+    """Test recovery from failure during cache creation. Do so by keeping the file is kept open."""
+
+    # explicitly disable catalog discovery
+    loadkwargs = dict(catalog="none")
+    ds = load(testdatapath, **loadkwargs)
+    filename = ds.file.filename
+    ds.file.close()
+
+    # Let's destroy the hdf5 header with random data
+    with open(filename, "r+b") as f:
+        f.seek(0)
+        f.write(b"destroyheader")
+
+    ds = load(testdatapath, **loadkwargs)
+    print(ds.info())
