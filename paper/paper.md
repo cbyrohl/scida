@@ -22,7 +22,22 @@ bibliography: paper.bib
 # Summary
 
 "scida" is a Python package for reading and processing large scientific data sets, utilizing the dask library
-for scalable, parallel and/or out-of-core computation. Unit support is provided by the pint package.
+for scalable, parallel and/or out-of-core computation. Unit support is provided by the pint package. Primary data
+formats are many-dimensional point clouds. Current file formats include zarr, multi-file HDF5, and FITS.
+
+Data access is provided in a hierarchical dictionary-like data attribute for datasets initialized via the load() function.
+See example below.
+From there, any available dask (array) operation can be performed for the analysis.
+
+```python
+import dask.array as da
+from scida import load
+
+ds = load("TNG50")
+pos = ds.data["PartType0"]["Coordinates"]
+res = da.histogram2d(pos[:, 0], pos[:, 1], bins=100)
+hist = res[0].compute()
+```
 
 # Statement of need
 Today, scientific datasets often span terabytes in size. Manual handling of such data on a chunk-by-chunk basis
