@@ -1,6 +1,7 @@
 ---
 # we expect a cgs conversion factor within each data set, thus we only specify the cgs units.
 fields:
+  HashTable: "no_units"
   PartType0:
     AExpMaximumTemperature:
       cgsunits:

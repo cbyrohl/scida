@@ -14,6 +14,7 @@ units:
   code_divdamp: code_magnetic * code_velocity
 fields:
   _all:
+    AGS-Softening: unknown
     Coordinates: code_length
     Velocities: a^0.5 * code_velocity
     ParticleIDs:
@@ -21,23 +22,43 @@ fields:
     ParticleIDGenerationNumber:
     Masses: code_mass
     Potential: (km / s)^2  # TODO: not in GIZMO manual, taken from https://bitbucket.org/awetzel/gizmo_analysis/src/master/gizmo_io.py
+    HaloID: none
+    ID_Generations: none
   PartType0:
-    InternalEnergy: code_energy
-    Density: code_density
-    SmoothingLength: code_length
-    ElectronAbundance:
-    NeutralHydrogenAbundance:
-    StarFormationRate: Msun / yr
-    Metallicity:
     ArtificialViscosity:
+    DelayTime: unknown
+    Density: code_density
+    Dust_Masses: code_mass  # guess
+    Dust_Metallicity:
+    ElectronAbundance:
+    FractionH2:
+    GrackleHI: unknown
+    GrackleHII: unknown
+    GrackleHM: unknown
+    GrackleHeI: unknown
+    GrackleHeII: unknown
+    GrackleHeIII: unknown
+    InternalEnergy: code_energy
+    Metallicity:
+    NeutralHydrogenAbundance:
+    PhotonEnergy: code_energy
+    Sigma: unknown
+    SmoothingLength: code_length
+    StarFormationRate: Msun / yr
+    StellarFormationTime: # guess
     MagneticField: code_magnetic
     MagneticFieldDivergence: code_divdamp
-    PhotonEnergy: code_energy
-    StellarFormationTime:
+    NWindLaunches: none
   PartType4:
+    Dust_Masses: code_mass  # guess
+    Dust_Metallicity:
     Metallicity:
-    StellarFormationTime:
+    StellarFormationTime: # guess
   PartType5:
+    BH_AccretionLength: code_length  # guess
+    BH_NProgs: none
     BH_Mass: code_mass
     BH_Mdot: code_mass / code_time
     BH_Mass_AlphaDisk: code_mass
+    BH_StellarFormationTime: # guess
+    StellarFormationTime: # guess

@@ -283,7 +283,10 @@ class UnitMixin(Mixin):
 
         if unitfile != "":
             unithints = get_config_fromfile(unitfile)
-            unitdefs.update(unithints.get("units", {}))
+            newdefs = unithints.get("units", {})
+            if newdefs is None:
+                newdefs = {}
+            unitdefs.update(**newdefs)
 
         units = kwargs.pop("units")
         if isinstance(units, bool):
@@ -305,7 +308,7 @@ class UnitMixin(Mixin):
 
         fieldudefs.append(unithints.get("fields", {}))
 
-        fwu = combine_configs(fieldudefs, mode="overwrite_keys")  # merge udefs
+        fwu = combine_configs(fieldudefs, mode="overwrite_values")  # merge udefs
         mode_metadata = unithints.get("metadata_unitsystem", "cgs")
 
         def add_units(container: FieldContainer, basepath: str):
