@@ -4,7 +4,7 @@ defs:
     dataset_type:
       series: ArepoSimulation
       dataset: ArepoSnapshot
-    unitfile: units/gadget.yaml
+    unitfile: units/gadget_cosmological.yaml
   tng_props: &tng_props
     code: arepo
     suite: TNG
@@ -12,7 +12,7 @@ defs:
   illustris_params: &illustris_params
     dataset_type:
       dataset: ArepoSnapshot
-    unitfile: units/gadget.yaml
+    unitfile: units/gadget_cosmological.yaml
 
 data:
   TNG50:
@@ -84,10 +84,16 @@ data:
             content: tngclust
             match: substring
 
+  # Some sims do not have config or header attributes for identification in hdf5 files
 
+  Auriga:
+    dataset_type:
+      series: ArepoSimulation
+      dataset: ArepoSnapshot
+    unitfile: units/auriga.yaml
+    identifiers:
+      name_contains: "AURIGA"  # can only rely on path
 
-
-  # Illustris does not have config or header attributes for identification in hdf5 files
   Illustris:
       <<: *illustris_params
       aliases:
@@ -95,6 +101,7 @@ data:
         - Illustris100
       identifiers:
         name_contains: "Illustris-1"  # can only rely on path name in lack of metadata...
+
   Illustris-2:
       <<: *illustris_params
       identifiers:

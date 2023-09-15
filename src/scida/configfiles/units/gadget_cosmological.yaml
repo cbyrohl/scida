@@ -55,6 +55,8 @@ fields:
     Temperature: K
     TimebinHydro:
     Volume: code_length^3
+  PartType1_mostbound:
+    Acceleration: unknown  # TODO: From MTNG
   PartType1:
     SubfindDMDensity: code_mass / code_length^3
   PartType3:
@@ -108,6 +110,7 @@ fields:
     GroupGasMetallicity:
     GroupLen: none
     GroupLenType: none
+    GroupLenPrevMostBnd: none
     GroupMass: code_mass
     GroupMassType: code_mass
     GroupNsubs: none
@@ -138,21 +141,25 @@ fields:
     SubhaloBfldHalo: (h / a^2) * code_pressure^(1/2)
     SubhaloCM: code_length
     SubhaloFlag: none
+    SubhaloGasMassSFR: code_mass
     SubhaloGasMetalFractions:
     SubhaloGasMetalFractionsHalfRad:
     SubhaloGasMetalFractionsMaxRad:
     SubhaloGasMetalFractionsSfr:
     SubhaloGasMetalFractionsSfrWeighted:
     SubhaloGasMetallicity:
+    SubhaloGasMetallicityWeighted:  # MTNG alias?
     SubhaloGasMetallicityHalfRad:
     SubhaloGasMetallicityMaxRad:
     SubhaloGasMetallicitySfr:
     SubhaloGasMetallicitySfrWeighted:
     SubhaloGrNr: none
+    SubhaloGroupNr: none  # MTNG alias
     SubhaloHalfmassRad: code_length
     SubhaloHalfmassRadType: code_length
     SubhaloIDMostbound: none
     SubhaloLen: none
+    SubhaloLenPrevMostBnd: none
     SubhaloLenType: none
     SubhaloMass: code_mass
     SubhaloMassInHalfRad: code_mass
@@ -165,11 +172,16 @@ fields:
     SubhaloOffsetType: none
     SubhaloOrigHaloID: none
     SubhaloParent: none
+    SubhaloParentRank: none
     SubhaloPos: code_length
+    SubhaloRankInGr: none
     SubhaloSFR: Msun / yr
     SubhaloSFRinHalfRad: Msun / yr
+    SubhaloSfrInHalfRad: Msun / yr  # MTNG alias
     SubhaloSFRinMaxRad: Msun / yr
+    SubhaloSfrInMaxRad: Msun / yr  # MTNG alias
     SubhaloSFRinRad: Msun / yr
+    SubhaloSfrInRad: Msun / yr  # MTNG alias
     SubhaloSpin: kpc / h * km / s
     SubhaloStarMetalFractions:
     SubhaloStarMetalFractionsHalfRad:
@@ -180,6 +192,7 @@ fields:
     SubhaloStellarPhotometrics: "1.0" # for now lets not add unit "mag" (TODO?)
     SubhaloStellarPhotometricsMassInRad: code_mass
     SubhaloStellarPhotometricsRad: code_length
+    SubhaloTidalTensor: unknown  # MTNG field, units not documented
     SubhaloVel: km / s
     SubhaloVelDisp: km / s
     SubhaloVmax: km / s

@@ -1,5 +1,5 @@
 import os
-from typing import Union
+from typing import List, Union
 
 from scida import GadgetStyleSnapshot
 from scida.convenience import load
@@ -16,6 +16,7 @@ class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.header = {}
         self.config = {}
         self.parameters = {}
+        self._defaultunitfiles: List[str] = ["units/gizmo.yaml"]
         self._grouplengths = {}
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:

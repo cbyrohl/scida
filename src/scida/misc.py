@@ -158,7 +158,7 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
                 # we only check the last three path elements
                 dirnames = [p.name, p.parents[0].name, p.parents[1].name]
                 substring = idtfrs["name_contains"]
-                if not any([substring in d for d in dirnames]):
+                if not any([substring.lower() in d.lower() for d in dirnames]):
                     possible_candidate = False
             if len(allkeys) == 0:
                 possible_candidate = False
