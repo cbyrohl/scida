@@ -1,9 +1,11 @@
 # tests for gh issues. to be cleaned up and moved to the right place eventually
 import pathlib
 
+import h5py
+import numpy as np
 import pytest
 
-from scida import ArepoSimulation, load
+from scida import ArepoSimulation, ArepoSnapshot, load
 from scida.convenience import find_path
 from tests.helpers import write_gadget_testfile
 from tests.testdata_properties import require_testdata_path
@@ -31,6 +33,7 @@ def test_issue_63(testdatapath, tmp_path):
 
     # check that units work for TNG100-3
     ds = load(testdatapath, units=True)
+    assert isinstance(ds, ArepoSnapshot)
     gas = ds.data["PartType0"]
     coords = gas["Coordinates"]
     assert coords.to_base_units().units == ds.ureg("centimeter")
@@ -44,8 +47,10 @@ def test_issue_63(testdatapath, tmp_path):
     # assert "unknown" units when no units known
     p = pathlib.Path(tmp_path) / "test.hdf5"
     write_gadget_testfile(p)
+    with h5py.File(p, "r+") as hf:
+        hf["PartType0"]["ExtraField"] = np.zeros((1,), dtype=float)
     ds = load(p, units=True)
-    assert ds.data["PartType0"]["Coordinates"].units == "unknown"
+    assert ds.data["PartType0"]["ExtraField"].units == "unknown"
 
 
 @require_testdata_path("series", only=["TNGvariation_simulation"])

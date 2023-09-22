@@ -1,0 +1,37 @@
+metadata_unitsystem: cgs  # this means we have a cgs conversion factor available
+units:
+fields:
+  _all:
+    Coordinates: Mpc
+    Masses: 10^10 Msun
+    Velocities: km / s
+    ParticleIDs: none
+    Softenings: Mpc  # guess
+  PartType0:
+    GFM_Metallicity: none
+    GFM_Metals: none
+    DivergenceOfMagneticField: unknown
+    HighResGasMass: 10^10 Msun  # guess
+  PartType4:
+    AccretedFlag: none
+    BirthPos: Mpc
+    BirthVel: km / s
+    GFM_StellarFormationTime: Gyr
+    GFM_Metallicity: none
+    GFM_Metals: none
+    GFM_StellarPhotometrics: # TODO: mag
+    GravForce: km / s^2 / Mpc
+    GravPotential: (km / s)^2
+  PartType5:
+    BH_HaloVvir: km / s  # guess
+    BH_HsmlDM: Mpc  # guess
+    BH_Mdot_Quasar: Msun / yr  # guess
+    BH_Mdot_Radio: Msun / yr  # guess
+    BH_RadioLuminosity: unknown
+    BH_RhoDM: unknown
+    BH_TimeStep: unknown
+    BH_VelDM: km / s  # guess
+    BH_XrayLuminosity: unknown
+  Group:
+    GroupRadioLuminosity: unknown
+    GroupXrayLuminosity: unknown
