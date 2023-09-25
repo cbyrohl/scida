@@ -14,7 +14,7 @@
    version="1.1"
    id="svg13690"
    inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
-   sodipodi:docname="sketch2.svg"
+   sodipodi:docname="sketch.svg"
    inkscape:export-filename="/home/cbyrohl/repos/scida/paper/sketch.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300">
@@ -273,9 +273,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="491.18576"
-     inkscape:cy="161.77831"
+     inkscape:zoom="2.8"
+     inkscape:cx="353.42681"
+     inkscape:cy="149.20784"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -304,7 +304,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -534,13 +534,13 @@
     <text
        xml:space="preserve"
        style="font-size:4.93889px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.132292;stroke-miterlimit:4;stroke-dasharray:none"
-       x="-36.480728"
+       x="-37.539062"
        y="83.683685"
        id="text17551"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan17549"
-         x="-36.480728"
+         x="-37.539062"
          y="83.683685"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.132292">ds.data</tspan></text>
     <rect
@@ -554,62 +554,51 @@
     <text
        xml:space="preserve"
        style="font-size:4.93889px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
-       x="90.752075"
-       y="46.302071"
+       x="80.697899"
+       y="46.831238"
        id="text15905-6"><tspan
          sodipodi:role="line"
          id="tspan15903-3"
-         x="90.752075"
-         y="46.302071"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93889px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583">graph creation</tspan></text>
+         x="80.697899"
+         y="46.831238"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93889px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583">graph representation</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:7.05556px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
-       x="86.518745"
+       x="90.752083"
        y="53.181244"
        id="text15961"><tspan
          sodipodi:role="line"
          id="tspan15959"
-         x="86.518745"
+         x="90.752083"
          y="53.181244"
          style="font-size:7.05556px;stroke-width:0.264583">A</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:7.05556px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
-       x="86.518745"
+       x="90.752083"
        y="61.647903"
        id="text15965"><tspan
          sodipodi:role="line"
          id="tspan15963"
-         x="86.518745"
+         x="90.752083"
          y="61.647903"
          style="font-size:7.05556px;stroke-width:0.264583">B</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 103.98127,51.593758 v 7.9375 H 93.397912"
+       d="m 108.21463,51.593758 v 7.9375 H 97.631248"
        id="path15967"
        sodipodi:nodetypes="ccc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 103.98127,51.593758 H 93.397912"
+       d="M 108.21463,51.593758 H 97.631248"
        id="path15969"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 103.98127,55.562508 h 10.58336"
+       d="m 108.21463,55.562508 h 10.58336"
        id="path15971"
        sodipodi:nodetypes="cc" />
-    <text
-       xml:space="preserve"
-       style="font-size:7.05556px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
-       x="114.99043"
-       y="58.182121"
-       id="text15975"><tspan
-         sodipodi:role="line"
-         id="tspan15973"
-         x="114.99043"
-         y="58.182121"
-         style="font-size:7.05556px;stroke-width:0.264583">H</tspan></text>
     <rect
        style="fill:none;stroke:#d9534f;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect14253-2-49"
@@ -622,76 +611,76 @@
        xml:space="preserve"
        style="font-size:4.93889px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
        x="81.227066"
-       y="23.01874"
+       y="23.547907"
        id="text15905-6-5"><tspan
          sodipodi:role="line"
          id="tspan15903-3-1"
          x="81.227066"
-         y="23.01874"
+         y="23.547907"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93889px;font-family:Carlito;-inkscape-font-specification:'Carlito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583">data representation</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.52778px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
        x="91.186737"
-       y="26.940252"
+       y="27.998587"
        id="text17569"><tspan
          sodipodi:role="line"
          id="tspan17567"
          x="91.186737"
-         y="26.940252"
+         y="27.998587"
          style="font-size:3.52778px;stroke-width:0.264583">field A</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.52778px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
        x="91.18409"
-       y="36.445686"
+       y="37.504021"
        id="text17569-4"><tspan
          sodipodi:role="line"
          id="tspan17567-1"
          x="91.18409"
-         y="36.445686"
+         y="37.504021"
          style="font-size:3.52778px;stroke-width:0.264583">field B</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 90.487501,30.956253 h -4.7625"
+       d="m 90.487501,32.014587 h -4.7625"
        id="path17595"
        sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-size:3.52778px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
        x="91.003273"
-       y="31.620247"
+       y="32.678581"
        id="text17601"><tspan
          sodipodi:role="line"
          id="tspan17599"
          x="91.003273"
-         y="31.620247"
+         y="32.678581"
          style="font-size:3.52778px;stroke-width:0.264583">group 1</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 103.71668,30.691676 5.29167,1.322916"
+       d="m 103.71668,31.75001 5.29167,1.322916"
        id="path17653" />
     <text
        xml:space="preserve"
        style="font-size:10.5833px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
        x="110.33121"
-       y="29.368761"
+       y="30.427095"
        id="text17657"><tspan
          sodipodi:role="line"
          id="tspan17655"
          x="110.33121"
-         y="29.368761"
+         y="30.427095"
          style="font-size:3.52778px;stroke-width:0.264583">field X</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:10.5833px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.264583"
        x="110.32085"
-       y="33.173573"
+       y="34.231907"
        id="text17657-4"><tspan
          sodipodi:role="line"
          id="tspan17655-3"
          x="110.32085"
-         y="33.173573"
+         y="34.231907"
          style="font-size:3.52778px;stroke-width:0.264583">field Y</tspan></text>
     <path
        style="fill:#000000;fill-opacity:1;stroke:#5bc0de;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -703,8 +692,8 @@
        id="path3085-9"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 78.583934,56.620835 h -5.55625"
+       style="fill:none;stroke:#000000;stroke-width:1.93482;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 78.227684,56.620835 h -5.2"
        id="path3107"
        sodipodi:nodetypes="cc" />
     <path
@@ -749,85 +738,143 @@
          x="-42.008293"
          y="191.95451"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:Carlito;-inkscape-font-specification:Carlito;stroke-width:0.264583">B</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:2.64033px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.0660083"
-       x="80.971413"
-       y="50.714203"
-       id="text5836"><tspan
-         sodipodi:role="line"
-         id="tspan5834"
-         x="80.971413"
-         y="50.714203"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.64033px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.0660083"></tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:2.64044px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.0660113"
-       x="80.967766"
-       y="53.371964"
-       id="text5836-1"
-       transform="scale(1.0000456,0.99995441)"><tspan
-         sodipodi:role="line"
-         id="tspan5834-5"
-         x="80.967766"
-         y="53.371964"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.64044px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.0660113"></tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:2.64033px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.0660083"
-       x="83.468391"
-       y="52.052147"
-       id="text5836-9"><tspan
-         sodipodi:role="line"
-         id="tspan5834-2"
-         x="83.468391"
-         y="52.052147"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.64033px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.0660083"></tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:2.64033px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.0660083"
-       x="80.994186"
-       y="57.294537"
-       id="text5836-3"><tspan
-         sodipodi:role="line"
-         id="tspan5834-1"
-         x="80.994186"
-         y="57.294537"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.64033px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.0660083"></tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:2.64044px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.0660113"
-       x="80.990509"
-       y="59.952572"
-       id="text5836-1-3"
-       transform="scale(1.0000456,0.99995441)"><tspan
-         sodipodi:role="line"
-         id="tspan5834-5-5"
-         x="80.990509"
-         y="59.952572"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.64044px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.0660113"></tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:2.64033px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.0660083"
-       x="83.491165"
-       y="58.632477"
-       id="text5836-9-1"><tspan
-         sodipodi:role="line"
-         id="tspan5834-2-3"
-         x="83.491165"
-         y="58.632477"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.64033px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.0660083"></tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 109.00835,28.310426 -5.29167,1.322916"
+       d="m 109.00835,29.36876 -5.29167,1.322916"
        id="path17653-6" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 90.752091,26.193758 -5.291667,1.322916"
+       d="m 90.752091,27.252092 -5.291667,1.322916"
        id="path17653-6-3" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 85.460419,33.866675 5.291667,1.322916"
+       d="m 85.460419,34.925009 5.291667,1.322916"
        id="path17653-4" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.01825px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.0754564"
+       x="-88.612839"
+       y="51.384331"
+       id="text1060"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan1058"
+         x="-88.612839"
+         y="51.384331"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.01825px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.0754564"></tspan></text>
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360106;stroke-linejoin:round;stroke-opacity:1"
+       d="m 86.723618,50.682102 v -0.747934 h 0.381113 0.381112 V 49.557819 49.18147 h 0.466864 0.466864 v 1.124283 1.124284 h -0.847977 -0.847976 z"
+       id="path1098" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360106;stroke-linejoin:round"
+       d="m 86.902856,49.574493 c 0.08933,-0.09302 0.209878,-0.216209 0.267893,-0.273763 l 0.105483,-0.104643 v 0.273762 0.273762 h -0.267894 -0.267893 z"
+       id="path1100" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.01825px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.0754564"
+       x="-88.987221"
+       y="51.866814"
+       id="text1060-4"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan1058-3"
+         x="-88.987221"
+         y="51.866814"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.01825px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.0754564"></tspan></text>
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round;stroke-opacity:1"
+       d="m 87.097996,51.164588 v -0.747934 h 0.381113 0.381112 v -0.376349 -0.376349 h 0.466864 0.466864 v 1.124284 1.124283 h -0.847977 -0.847976 z"
+       id="path1098-5" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round"
+       d="m 87.277234,50.056979 c 0.08933,-0.09302 0.209878,-0.216209 0.267893,-0.273763 l 0.105483,-0.104643 v 0.273762 0.273762 h -0.267893 -0.267893 z"
+       id="path1100-7" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.01825px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.0754564"
+       x="-89.442863"
+       y="52.44072"
+       id="text1060-5"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan1058-6"
+         x="-89.442863"
+         y="52.44072"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.01825px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.0754564"></tspan></text>
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round;stroke-opacity:1"
+       d="m 87.55364,51.738494 v -0.747935 h 0.381112 0.381114 v -0.376348 -0.376349 h 0.466863 0.466863 v 1.124283 1.124283 H 88.401616 87.55364 Z"
+       id="path1098-2" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round"
+       d="m 87.732878,50.630884 c 0.08933,-0.09301 0.209878,-0.216209 0.267893,-0.273763 l 0.105482,-0.104643 v 0.273763 0.273762 h -0.267892 -0.267893 z"
+       id="path1100-75" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.01825px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.0754564"
+       x="-88.615532"
+       y="59.628605"
+       id="text1060-47"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan1058-1"
+         x="-88.615532"
+         y="59.628605"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.01825px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.0754564"></tspan></text>
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360106;stroke-linejoin:round;stroke-opacity:1"
+       d="m 86.726306,58.926375 v -0.747934 h 0.381113 0.381112 v -0.376349 -0.376349 h 0.466864 0.466864 v 1.124283 1.124284 h -0.847977 -0.847976 z"
+       id="path1098-3" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360106;stroke-linejoin:round"
+       d="m 86.905544,57.818766 c 0.08933,-0.09302 0.209878,-0.216209 0.267893,-0.273763 L 87.27892,57.44036 v 0.273762 0.273762 h -0.267894 -0.267893 z"
+       id="path1100-9" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.01825px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.0754564"
+       x="-88.989914"
+       y="60.111088"
+       id="text1060-4-8"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan1058-3-1"
+         x="-88.989914"
+         y="60.111088"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.01825px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.0754564"></tspan></text>
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round;stroke-opacity:1"
+       d="m 87.100684,59.408861 v -0.747934 h 0.381113 0.381112 v -0.376349 -0.376349 h 0.466864 0.466864 v 1.124284 1.124283 H 87.94866 87.100684 Z"
+       id="path1098-5-7" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round"
+       d="m 87.279922,58.301252 c 0.08933,-0.09302 0.209878,-0.216209 0.267893,-0.273763 l 0.105483,-0.104643 v 0.273762 0.273762 h -0.267893 -0.267893 z"
+       id="path1100-7-4" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.01825px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke-width:0.0754564"
+       x="-89.445557"
+       y="60.684994"
+       id="text1060-5-2"
+       transform="scale(-1,1)"><tspan
+         sodipodi:role="line"
+         id="tspan1058-6-9"
+         x="-89.445557"
+         y="60.684994"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.01825px;font-family:'SauceCodePro Nerd Font';-inkscape-font-specification:'SauceCodePro Nerd Font, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.0754564"></tspan></text>
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round;stroke-opacity:1"
+       d="m 87.556328,59.982767 v -0.747935 h 0.381112 0.381114 v -0.376348 -0.376349 h 0.466863 0.466863 v 1.124283 1.124283 h -0.847976 -0.847976 z"
+       id="path1098-2-8" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.0360107;stroke-linejoin:round"
+       d="m 87.735566,58.875157 c 0.08933,-0.09301 0.209878,-0.216209 0.267893,-0.273763 l 0.105482,-0.104643 v 0.273763 0.273762 h -0.267892 -0.267893 z"
+       id="path1100-75-5" />
+    <circle
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.566929;stroke-linejoin:round;stroke-opacity:1"
+       id="path1300"
+       cx="119.05003"
+       cy="55.548939"
+       r="0.75" />
   </g>
 </svg>
