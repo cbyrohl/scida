@@ -73,7 +73,10 @@ def get_cosmology_from_rawmetadata(metadata_raw):
     # flamingo-swift
     if cparams["om0"] is not None and float(cparams["om0"]) <= 0.0:
         # sometimes -1.0, then need to query Om_cdm + OM_b
-        if "Cosmology:Omega_cdm" in metadata_raw["/Parameters"]:
+        if (
+            "/Parameters" in metadata_raw
+            and "Cosmology:Omega_cdm" in metadata_raw["/Parameters"]
+        ):
             omdm = float(metadata_raw["/Parameters"]["Cosmology:Omega_cdm"])
             omb = float(cparams["ob0"]) if cparams["ob0"] is not None else None
             if omb is not None:
