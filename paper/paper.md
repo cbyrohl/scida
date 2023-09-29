@@ -38,40 +38,41 @@ analysis/plotting. \label{fig:sketch}](sketch.pdf)
 # Features
 
 Scida begins by providing a clean, abstract, dictionary-like interface to the underlying data, regardless of its
-file format or structure on disk. Physical units are automatically inferred, when possible, and attached 
-to the dataset. Symbolic and automatic unit conversion is provided by the pint package [@Pint]. This metadata can 
-also be specified by the user via customizable configuration files. 
+file format or structure on disk. Physical units are automatically inferred, when possible, and attached
+to the dataset. Symbolic and automatic unit conversion is provided by the pint package [@Pint]. This metadata can
+also be specified by the user via customizable configuration files.
 
-Scida attempts to automatically determine the type of dataset loaded. At the file level, it currently supports 
+Scida attempts to automatically determine the type of dataset loaded. At the file level, it currently supports
 zarr, single/multi-file HDF5 and FITS files. The analysis functionality then available depends on the dataset type.
 For example:
 
-* Datasets which pair scattered pointsets with cataloged results of clustering algorithms have a 
-natural association between such groups and their member points. Cosmological simulations in astrophysics provide 
-one such motivating example, where halos and galaxies are identified in particle data. Scida then supports 
+* Datasets which pair scattered pointsets with cataloged results of clustering algorithms have a
+natural association between such groups and their member points. Cosmological simulations in astrophysics provide
+one such motivating example, where halos and galaxies are identified in particle data. Scida then supports
 broadcasting calculations over all groups.
 * Datasets containing spatial coordinates in one, two, or three dimensions can be queried for spatial subsets.
 
 The dataset-dependent functionality of scida is handled with a flexible and extensible mixin architecture.
+Furthermore, scida can handle series of datasets, e.g. for time evolution or parameter variations.
 
 # Statement of need
 
-Today, scientific "big data" is petabyte-scale. This makes traditional analysis by a researcher on their personal 
-computer prohibitive. Writing analysis code which is distributed or out-of-core is complex, and is not the main 
+Today, scientific "big data" is petabyte-scale. This makes traditional analysis by a researcher on their personal
+computer prohibitive. Writing analysis code which is distributed or out-of-core is complex, and is not the main
 focus of scientists. The need for significant data management creates (i) a barrier for new researchers,
 (ii) a substantial time commitment apart from the science itself, and (iii) an increased risk of errors and difficulties
 in reproducibility due to higher code complexity, while (iv) workflows are often not easily transferable to other
 datasets, nor (v) scalable and transferable to changing computing resources.
 
 scida solves these problems by providing a simple interface to large datasets, hiding the complexity of the underlying data format
-and file structures, and transparently handling the parallelization of analysis computations. This is handled by the dask 
+and file structures, and transparently handling the parallelization of analysis computations. This is handled by the dask
 library, which naturally separates the definition of a given computation from its execution.
 
 Initial support in scida is focused on astrophysical simulations and observations, but the package is
 designed to be easily extensible to other scientific domains. Existing analysis frameworks for astrophysical
 simulations include python packages such as yt [@yt], pynbody [@pynbody], tenet [@tenet], and swiftsimio [@Borrow2021].
-None utilize the graph-based distributed analysis framework of dask. Often, existing analysis packages rely on the 
-explicit loading of entire datasets into main memory. However, this approach is not transparently scalable to large data sets, 
+None utilize the graph-based distributed analysis framework of dask. Often, existing analysis packages rely on the
+explicit loading of entire datasets into main memory. However, this approach is not transparently scalable to large data sets,
 and requires the user to explicitly manage the data chunks in custom analysis routines.
 
 By providing a flexible interface to the dask library to handle large data sets in a scalable fashion,
@@ -81,7 +82,7 @@ users can also leverage dask functionality and dask-based libraries such as dask
 # Target Audience
 
 Scida aims to simplify access to large scientific data sets. It lowers the barrier of entry for researchers to ask complex questions of big data.
-As such, the scida package is targeted at researchers with large data analysis problems. Its clean interface is appropriate for users 
+As such, the scida package is targeted at researchers with large data analysis problems. Its clean interface is appropriate for users
 with no prior experience with big data or distributed data analysis, as well as those who specifically want to leverage dask to make their
 workflows easier to read and scalable.
 
