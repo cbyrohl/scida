@@ -23,16 +23,12 @@ bibliography: paper.bib
 
 **scida** is a Python package for reading and analyzing large scientific data sets.
 Data access is provided through a hierarchical dictionary-like data structure after a simple load() function.
-Using the dask library for scalable, parallel and out-of-core computation [@Dask], 
+Using the dask library for scalable, parallel and out-of-core computation [@Dask],
 all computation requests from a user session are first collected in a task graph.
 Arbitrary custom analysis, as well as all available dask (array) operations, can be performed.
 The subsequent computation is executed only upon request, on a target resource (e.g. a HPC cluster, see Figure \ref{fig:sketch}).
 
-![Schematic of the workflow. A dataset initialized with scida.load() holds virtual references to
- the underlying data. Operations are collected into a task graph via the dask library. Only upon issuing a compute()
-command, the computation takes place on a target resource, that can differ from the user session.
-Results are generally much smaller than the original data, and are sent back to the user session for further
-analysis/plotting. \label{fig:sketch}](sketch.pdf)
+![Schematic of the workflow. In a user session, a recipe (i.e. sequence of analysis operations) for desired data product can be built by consecutive chaining of operations, which are internally represented by dask task graphs. Calculation is triggered by the compute() command, evaluating the graph on a target resource. The result, much smaller than the original data, is sent back to the user session for further analysis/plotting. \label{fig:sketch}](sketch.pdf)
 
 # Features
 
@@ -47,8 +43,7 @@ For example:
 
 * Datasets which pair scattered pointsets with cataloged results of clustering algorithms have a
 natural association between such groups and their member points. Cosmological simulations in astrophysics provide
-one such motivating example, where halos and galaxies are identified in particle data. Scida then supports
-broadcasting calculations over all groups.
+one such motivating example, where halos and galaxies are identified in particle data. Scida then supports broadcasting of analysis and reduction operations over all groups for the associated particles.
 * Datasets containing spatial coordinates in one, two, or three dimensions can be queried for spatial subsets.
 * Datasets which are comprised of series, e.g. snapshots at different times, or parameter variation suites,
 are automatically inferred and supported.
@@ -78,6 +73,8 @@ and requires the user to explicitly manage the data chunks in custom analysis ro
 By providing a flexible interface to the dask library to handle large data sets in a scalable fashion,
 users can also leverage dask functionality and dask-based libraries such as dask-image [@dask-image] and datashader [@datashader].
 
+scida was first utilized in @Byrohl23 for the analysis of cosmological and radiative transfer simulations, particularly the reduced chi-squared analysis exploring thousands of terabyte-sized models.
+
 # Target Audience
 
 **scida** aims to simplify access to large scientific data sets. It lowers the barrier of entry for researchers to ask complex questions of big data.
@@ -87,5 +84,9 @@ workflows easier to read and scalable.
 
 Domain specific analysis routines can be implemented on top of scida. Initial "out of the box" data support is currently focused on astrophysical
 data sets, but scida aims to support other scientific domains as well, where similar solutions will be beneficial.
+
+# Acknowledgements
+CB and DN acknowledge funding from the Deutsche Forschungsgemeinschaft (DFG) through an Emmy Noether Research Group (grant number NE 2441/1-1).
+
 
 # References
