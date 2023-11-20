@@ -1220,8 +1220,21 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+        
           <li class="md-nav__item">
-  <a href="#scida.customs.arepo.dataset.part_type_num" class="md-nav__link">
+  <a href="#scida.customs.arepo.helpers" class="md-nav__link">
+    helpers
+  </a>
+  
+    <nav class="md-nav" aria-label="helpers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scida.customs.arepo.helpers.part_type_num" class="md-nav__link">
     part_type_num()
   </a>
   
@@ -2422,8 +2435,21 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+        
           <li class="md-nav__item">
-  <a href="#scida.customs.arepo.dataset.part_type_num" class="md-nav__link">
+  <a href="#scida.customs.arepo.helpers" class="md-nav__link">
+    helpers
+  </a>
+  
+    <nav class="md-nav" aria-label="helpers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scida.customs.arepo.helpers.part_type_num" class="md-nav__link">
     part_type_num()
   </a>
   
@@ -4676,7 +4702,6 @@ kwargs</p>
 
 
 
-
   <div class="doc doc-object doc-class">
 
 
@@ -4702,6 +4727,7 @@ ArepoSnapshot            (<span title="scida.interfaces.mixins.spatial.SpatialCa
         <span class="bp">self</span><span class="o">.</span><span class="n">iscatalog</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"iscatalog"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_defaultunitfiles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"units/gadget_cosmological.yaml"</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grouplengths</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_subhalolengths</span> <span class="o">=</span> <span class="p">{}</span>
@@ -6044,7 +6070,6 @@ The number of halos in the snapshot</p>
 
 
 
-
   <div class="doc doc-object doc-function">
 
 
@@ -6476,11 +6501,49 @@ chunksize_bytes</p>
 
 
 
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-module">
+
+
+
+<h4 id="scida.customs.arepo.helpers" class="doc doc-heading">
+        <code>helpers</code>
+
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
   <div class="doc doc-object doc-function">
 
 
 
-<h5 id="scida.customs.arepo.dataset.part_type_num" class="doc doc-heading">
+<h5 id="scida.customs.arepo.helpers.part_type_num" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">part_type_num</span><span class="p">(</span><span class="n">ptype</span><span class="p">)</span></code>
 
 
@@ -6491,7 +6554,7 @@ chunksize_bytes</p>
       <p>Mapping between common names and numeric particle types.</p>
 
         <details class="quote">
-          <summary>Source code in <code>scida/customs/arepo/dataset.py</code></summary>
+          <summary>Source code in <code>scida/customs/arepo/helpers.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">part_type_num</span><span class="p">(</span><span class="n">ptype</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Mapping between common names and numeric particle types."""</span>
     <span class="n">ptype</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ptype</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"PartType"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
@@ -6525,12 +6588,12 @@ chunksize_bytes</p>
 
 
 
-
   </div>
 
     </div>
 
   </div>
+
 
 
 
@@ -9644,7 +9707,7 @@ Parameters</p>
                 <span class="c1"># we only check the last three path elements</span>
                 <span class="n">dirnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
                 <span class="n">substring</span> <span class="o">=</span> <span class="n">idtfrs</span><span class="p">[</span><span class="s2">"name_contains"</span><span class="p">]</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">substring</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirnames</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">substring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirnames</span><span class="p">]):</span>
                     <span class="n">possible_candidate</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">allkeys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">possible_candidate</span> <span class="o">=</span> <span class="kc">False</span>
