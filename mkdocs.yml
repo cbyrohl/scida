@@ -36,6 +36,8 @@ nav:
   - api_docs.md
 
 markdown_extensions:
+  - markdown_include.include:
+      base_path: "docs/"
   - pymdownx.tabbed
   - def_list
   - pymdownx.tasklist:

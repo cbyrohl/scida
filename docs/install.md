@@ -34,4 +34,6 @@ pip install scida
 ```
 
 
-Next, get started with the [tutorial](tutorial/index.md).
+Next, get started with the [tutorial](tutorial/index.md) for either simulations or observations:
+
+{!tutorial/index.md!}
