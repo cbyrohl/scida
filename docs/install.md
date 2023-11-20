@@ -33,7 +33,7 @@ scida can be installed via [PyPI](https://pypi.org/). scida requires a Python ve
 pip install scida
 ```
 
-
+## Next steps
 Next, get started with the [tutorial](tutorial/index.md) for either simulations or observations:
 
 {!tutorial/index.md!}
