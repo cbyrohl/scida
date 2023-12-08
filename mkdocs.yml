@@ -4,6 +4,7 @@ theme:
   name: material
   features:
     - content.code.annotate
+    - content.code.copy
     - navigation.sections
     - navigation.indexes
 
