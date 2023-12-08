@@ -2,7 +2,7 @@
 
 This package is designed to aid in the efficient analysis of large datasets, such as GAIA DR3.
 
-!!! note "Tutorial dataset"
+!!! info "Tutorial dataset"
     In the following, we will subset from the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3). The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded [here](https://heibox.uni-heidelberg.de/f/3b05069b1b524c0fa57e/?dl=1).
     Check [Supported Datasets](../supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
@@ -148,21 +148,27 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 >>> x = ds.data["l"]
 >>> y = ds.data["b"]
 >>> nbins = (360, 180)
->>> xbins = np.linspace(0.0, 360.0, nbins[0] + 1)
->>> ybins = np.linspace(-90, 90.0, nbins[1] + 1)
+>>> extent = [0.0, 360.0, -90.0, 90.0]
+>>> xbins = np.linspace(*extent[:2], nbins[0] + 1)
+>>> ybins = np.linspace(*extent[-2:], nbins[1] + 1)
 >>> hist, xbins, ybins = da.histogram2d(x, y, bins=[xbins, ybins])
 >>> im2d = hist.compute() #(1)!
 >>> import matplotlib.pyplot as plt
 >>> from matplotlib.colors import LogNorm
->>> plt.imshow(im2d.T, norm=LogNorm(), extent=[0.0, 360.0, -90.0, 90.0])
->>> plt.xlabel("l (deg)")
->>> plt.ylabel("b (deg)")
+>>> plt.imshow(im2d.T, origin="lower", norm=LogNorm(), extent=extent, interpolation="none")
+>>> plt.xlabel("l [deg]")
+>>> plt.ylabel("b [deg]")
 >>> plt.show()
 ```
 
 1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
 
+
 ![2D histogram example](../images/simple_hist2d_obs.png)
+
+!!! info
+
+    Above image shows the histogram obtained for the full data set.
 
 
 ## FITS files
