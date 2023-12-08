@@ -87,16 +87,16 @@ plugins:
         width: 12.172vw
   - mkdocs-jupyter:
       execute: !ENV [JUPYTER_EXECUTE, true]
-      execute_ignore: "notebooks/static/*.ipynb"  # waiting for list support (https://github.com/danielfrg/mkdocs-jupyter/issues/119)
+      execute_ignore:
+        - "notebooks/static/*.ipynb"
       kernel_name: scida
   - mkdocstrings:
       default_handler: python
       handlers:
         python:
           options:
-            show_signature_annotations: true
-            show_source: true
             show_submodules: true
+            docstring_style: numpy
 watch:
   - src/scida
 
