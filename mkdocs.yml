@@ -48,6 +48,9 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      use_pygments: true
+      pygments_lang_class: true
   - admonition
   - pymdownx.details
   - pymdownx.superfences
@@ -107,3 +110,4 @@ extra_javascript:
 
 extra_css:
   - stylesheets/gridview.css
+  - stylesheets/code_select.css
