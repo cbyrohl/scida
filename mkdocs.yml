@@ -30,8 +30,6 @@ nav:
   - 'Advanced Topics':
     - 'Arepo Simulations':
       - 'Halo Catalogs': halocatalogs.md
-  # - 'Cookbook':
-  #   - 'Units': notebooks/cookbook/units.ipynb
   - 'Configuration': configuration.md
   - 'FAQ': faq.md
   - api_docs.md
