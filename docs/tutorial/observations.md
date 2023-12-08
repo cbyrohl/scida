@@ -19,8 +19,7 @@ It uses the [dask](https://dask.org/) library to perform computations, which has
 
 Here, we choose the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3) as an example.
 The dataset is obtained in HDF5 format as used at ITA Heidelberg. We intentionally select a small subset of the data to work with.
-Choosing a subset means that the data size in the snapshot is small and easy to work with.
-We demonstrate how to work with larger data sets at a later stage.
+Choosing a subset means that the data size is small and easy to work with. We demonstrate how to work with larger data sets at a later stage.
 
 First, we load the dataset using the convenience function `load()` that will determine the appropriate dataset class for us:
 
@@ -110,10 +109,10 @@ and dimensionality checks are performed. Importantly, the unit calculation is do
 to directly see the resulting units and any dimensionality mismatches.
 
 
-## Analyzing snapshot data
-### Computing a simple statistic on (all) particles
+## Analyzing the data
+### Computing a simple statistic on (all) objects
 
-The fields in our snapshot object behave similar to actual numpy arrays.
+The fields in our data object behave similar to actual numpy arrays.
 
 As a first simple example, let's calculate the mean declination of the stars. Just as in numpy we can write
 
