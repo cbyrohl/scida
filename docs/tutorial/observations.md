@@ -167,7 +167,7 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 
 ## FITS files
 
-Observations are often stored in [FITS](https://en.wikipedia.org/wiki/FITS) files. Support in scida work-in-progress
+Observations are often stored in [FITS](https://en.wikipedia.org/wiki/FITS) files. Support in scida is work-in-progress
 and requires the [astropy](https://www.astropy.org/) package.
 
 Here we show use of the SDSS DR16:
