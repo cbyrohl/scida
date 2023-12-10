@@ -13,6 +13,8 @@ ds = load("TNG50-1_snapshot")
 dens = ds.data["PartType0"]["Density"][:10000].compute()  # (1)!
 temp = ds.data["PartType0"]["Temperature"][:10000].compute()
 plt.plot(dens, temp, "o", markersize=0.1)
+plt.xscale("log")
+plt.yscale("log")
 plt.show()
 ```
 
@@ -22,16 +24,25 @@ Instead of subselection, we sometimes want to visualize all of the data. We can 
 
 ```python title="2D histograms"
 import dask.array as da
+import numpy as np
 from scida import load
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 
-ds = load("TNG50-1_snapshot")
-dens = ds.data["PartType0"]["Density"]
-temp = ds.data["PartType0"]["Temperature"]
-hist, xedges, yedges = da.histogram2d(dens, temp, bins=100)
-hist = hist.compute()
+sim = load("TNG50-4")
+ds = sim.get_dataset(redshift=3.0)
+dens10 = da.log10(ds.data["PartType0"]["Density"].to("Msun/kpc^3").magnitude)
+temp10 = da.log10(ds.data["PartType0"]["Temperature"].to("K").magnitude)
+
+bins = [np.linspace(1, 12, 44 + 1), np.linspace(3.5, 8, 45 + 1)]
+hist, xedges, yedges = da.histogram2d(dens10, temp10, bins=bins)
+hist, xedges, yedges = hist.compute(), xedges.compute(), yedges.compute()
 extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-plt.imshow(hist.T, origin="lower", extent=extent, aspect="auto")
+
+plt.imshow(hist.T, origin="lower", extent=extent, aspect="auto", cmap="Greys",
+          norm=LogNorm())
+plt.xlabel(r"$\log_{10}$(density/(M$_\odot$/kpc$^3$))")
+plt.ylabel(r"$\log_{10}$(temperature/K)")
 plt.show()
 ```
 
@@ -47,7 +58,8 @@ import holoviews.operation.datashader as hd
 import datashader as dshdr
 from scida import load
 
-ds = load("TNG50-1_snapshot")
+sim = load("TNG50-4")
+ds = sim.get_dataset(redshift=3.0)
 ddf = ds.data["PartType0"].get_dataframe(["Coordinates0", "Coordinates1", "Masses"])  # (1)!
 
 hv.extension("bokeh")
