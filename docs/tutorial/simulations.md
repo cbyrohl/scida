@@ -37,22 +37,20 @@ First, we load the dataset using the convenience function `load()` that will det
 >>> ds = load("TNG50-4_snapshot", units=True) #(1)!
 >>> ds.info() #(2)!
 class: ArepoSnapshotWithUnitMixinAndCosmologyMixin
-source: /home/cbyrohl/data/testdata-scida/TNG50-4_snapshot
+source: /vera/u/byrohlc/Downloads/snapdir_030
 === Cosmological Simulation ===
-z = 0.00
+z = 2.32
 cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3.04, m_nu=None, Ob0=0.0486)
 ===============================
 === Unit-aware Dataset ===
 ==========================
 === data ===
-+ root (containers: 7)
-++ Group (fields: 28, entries: 25257)
-++ PartType0 (fields: 30, entries: 18540104)
-++ PartType1 (fields: 11, entries: 19683000)
-++ PartType3 (fields: 5, entries: 19683000)
-++ PartType4 (fields: 21, entries: 605779)
-++ PartType5 (fields: 27, entries: 3486)
-++ Subhalo (fields: 54, entries: 22869)
++ root (containers: 5)
+++ PartType0 (fields: 10, entries: 19124236)
+++ PartType1 (fields: 3, entries: 19683000)
+++ PartType3 (fields: 2, entries: 19683000)
+++ PartType4 (fields: 9, entries: 161401)
+++ PartType5 (fields: 20, entries: 2673)
 ============
 ```
 
@@ -76,11 +74,16 @@ The available fields of the container "PartType0" are:
 
 ```pycon title="Available fields of a given container"
 >>> ds.data["PartType0"].keys() #(1)!
-['GFM_Metals',
-'SubfindDMDensity',
-...
-'GFM_WindDMVelDisp',
-'GFM_AGNRadiation']
+['Coordinates',
+ 'Density',
+ 'ElectronAbundance',
+ 'GFM_Metallicity',
+ 'InternalEnergy',
+ 'Masses',
+ 'ParticleIDs',
+ 'StarFormationRate',
+ 'Temperature',
+ 'Velocities']
 ```
 
 1. For many simulation types aliases exist, such that "gas" can be used instead of "PartType0", "stars" instead of "PartType4", etc.
@@ -89,8 +92,8 @@ Let's take a look at some field in this container:
 
 ```pycon title="Inspecting a field"
 >>> gas = ds.data["PartType0"]
->>> gas["GFM_AGNRadiation"]
-'dask.array<mul, shape=(18540104,), dtype=float32, chunksize=(18540104,), chunktype=numpy.ndarray> code_mass / code_length ** 3'
+>>> gas["StarFormationRate"]
+'dask.array<mul, shape=(19124236,), dtype=float32, chunksize=(19124236,), chunktype=numpy.ndarray> Msun / year'
 ```
 
 The field is a dask array, which is a lazy array that will only be evaluated when needed.
@@ -116,8 +119,8 @@ In general, fields can be also be stored in flat or more nested structures, depe
 We can trigger the evaluation of the dask array by calling `compute()` on it:
 
 ```pycon title="Evaluating a dask array"
->>> gas["GFM_AGNRadiation"].compute()
-array([0., 0., 0., ..., 0., 0., 0.], dtype=float32)
+>>> gas["StarFormationRate"].compute()
+'[0.017970681190490723 0.0 0.016353357583284378 ... 0.0 0.0 0.0] Msun / year'
 ```
 
 **However**, directly evaluating dask arrays is **strongly discouraged** for large datasets, as it will load the entire dataset into memory.
@@ -135,8 +138,10 @@ In short, each field, that is represented by a modified dask array, has a magnit
 These can be accessed via the `magnitude` and `units` attributes, respectively.
 
 ```pycon  title="Accessing the magnitude and units of a field"
->>> gas["Coordinates"][0].magnitude.compute(), gas["Coordinates"].units
-(dask.array<mul, shape=(18540104,), dtype=float32, chunksize=(18540104,), chunktype=numpy.ndarray>, <Unit('code_length')>)
+>>> gas["Coordinates"].magnitude
+'dask.array<mul, shape=(19124236, 3), dtype=float32, chunksize=(11184810, 3), chunktype=numpy.ndarray>'
+>>> gas["Coordinates"].units
+'code_length'
 ```
 
 When defining derived fields from dask arrays, the correct units are automatically propagated to the new field,
@@ -166,7 +171,7 @@ We can request a calculation of the actual operation(s) by applying the `.comput
 ```pycon
 >>> totmass = task.compute()
 >>> totmass
-'56507.4921875 code_mass'
+'57384.59375 code_mass'
 ```
 
 ??? tip "Converting units"
@@ -190,14 +195,14 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 >>> coords = ds.data["PartType0"]["Coordinates"]
 >>> x = coords[:,0]
 >>> y = coords[:,1]
->>> nbins = 256
+>>> nbins = 512
 >>> bins1d = np.linspace(0, ds.header["BoxSize"], nbins+1)
 >>> hist, xbins, ybins = da.histogram2d(x,y,bins=[bins1d,bins1d])
 >>> im2d = hist.compute() #(1)!
 >>> import matplotlib.pyplot as plt
 >>> from matplotlib.colors import LogNorm
 >>> fig = plt.figure(figsize=(6, 6))
->>> plt.imshow(im2d.T, norm=LogNorm(), extent=[0, ds.header["BoxSize"], 0, ds.header["BoxSize"]])
+>>> plt.imshow(im2d.T, norm=LogNorm(vmin=25, vmax=500), extent=[0, ds.header["BoxSize"], 0, ds.header["BoxSize"]], cmap="viridis")
 >>> plt.xlabel("x (ckpc/h)")
 >>> plt.ylabel("y (ckpc/h)")
 >>> plt.show()
