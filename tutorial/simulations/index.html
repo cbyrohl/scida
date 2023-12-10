@@ -8,8 +8,15 @@
       
       
       
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../observations/">
+      
+      
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.1">
     
     
       
@@ -17,15 +24,14 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
-      
-        
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
-        
+      <link rel="stylesheet" href="../../assets/stylesheets/main.45e1311d.min.css">
       
       
 
+
     
+    
+      
     
     
       
@@ -40,6 +46,8 @@
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../../stylesheets/gridview.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/code_select.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -62,14 +70,8 @@
             </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
   
   
-    
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+    <body dir="ltr">
   
-    
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -89,7 +91,9 @@
     
       
 
-<header class="md-header" data-md-component="header">
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="scida" class="md-header__button md-logo" aria-label="scida" data-md-component="logo">
       
@@ -98,6 +102,7 @@
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
+      
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
@@ -118,8 +123,12 @@
     </div>
     
     
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
     
       <label class="md-header__button md-icon" for="__search">
+        
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
       <div class="md-search" data-md-component="search" role="dialog">
@@ -128,12 +137,15 @@
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
+        
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
@@ -145,7 +157,7 @@
           <div class="md-search-result__meta">
             Initializing search
           </div>
-          <ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
         </div>
       </div>
     </div>
@@ -157,7 +169,7 @@
         <a href="https://github.com/cbyrohl/scida" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -187,6 +199,7 @@
                     
 
 
+
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="scida" class="md-nav__button md-logo" aria-label="scida" data-md-component="logo">
@@ -202,7 +215,7 @@
       <a href="https://github.com/cbyrohl/scida" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -214,14 +227,19 @@
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href="../.." class="md-nav__link">
-        Scida
+        
+  
+  <span class="md-ellipsis">
+    Scida
+  </span>
+  
+
       </a>
     </li>
   
@@ -229,122 +247,165 @@
     
       
       
+  
+  
+    
+  
+  
+  
+    
+    
       
-
-  
-  
+        
+      
+        
+      
     
-  
-  
     
+    
+    
+      
       
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
-      
-      
-      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_2">
-          Getting Started
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
-        <label class="md-nav__title" for="__nav_2">
-          <span class="md-nav__icon md-icon"></span>
-          Getting Started
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../install/" class="md-nav__link">
-        Installation
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
     
   
   
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" checked>
-      
-      
-      
-        
-          
-            
-          
-        
-          
-        
-          
-        
-      
-      
         
         
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../">Tutorial</a>
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
           
-            <label for="__nav_2_2">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
           
-        </div>
-      
-      <nav class="md-nav" aria-label="Tutorial" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_2">
-          <span class="md-nav__icon md-icon"></span>
-          Tutorial
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Tutorial
+  </span>
+  
+
+            </a>
             
               
+              <label class="md-nav__link " for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorial
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Simulations
+          
+  
+  <span class="md-ellipsis">
+    Simulations
+  </span>
+  
+
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Simulations
+        
+  
+  <span class="md-ellipsis">
+    Simulations
+  </span>
+  
+
       </a>
       
         
@@ -362,21 +423,27 @@
       
         <li class="md-nav__item">
   <a href="#getting-started" class="md-nav__link">
-    Getting started
+    <span class="md-ellipsis">
+      Getting started
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#loading-an-individual-dataset" class="md-nav__link">
-    Loading an individual dataset
+    <span class="md-ellipsis">
+      Loading an individual dataset
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#dask-arrays-and-units" class="md-nav__link">
-    Dask arrays and units
+    <span class="md-ellipsis">
+      Dask arrays and units
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Dask arrays and units">
@@ -384,14 +451,18 @@
         
           <li class="md-nav__item">
   <a href="#dask-arrays" class="md-nav__link">
-    Dask arrays
+    <span class="md-ellipsis">
+      Dask arrays
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#units" class="md-nav__link">
-    Units
+    <span class="md-ellipsis">
+      Units
+    </span>
   </a>
   
 </li>
@@ -403,7 +474,9 @@
       
         <li class="md-nav__item">
   <a href="#analyzing-snapshot-data" class="md-nav__link">
-    Analyzing snapshot data
+    <span class="md-ellipsis">
+      Analyzing snapshot data
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Analyzing snapshot data">
@@ -411,7 +484,9 @@
         
           <li class="md-nav__item">
   <a href="#computing-a-simple-statistic-on-all-particles" class="md-nav__link">
-    Computing a simple statistic on (all) particles
+    <span class="md-ellipsis">
+      Computing a simple statistic on (all) particles
+    </span>
   </a>
   
 </li>
@@ -423,7 +498,9 @@
       
         <li class="md-nav__item">
   <a href="#catalogs" class="md-nav__link">
-    Catalogs
+    <span class="md-ellipsis">
+      Catalogs
+    </span>
   </a>
   
 </li>
@@ -435,270 +512,367 @@
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../observations/" class="md-nav__link">
-        Observations
+        
+  
+  <span class="md-ellipsis">
+    Observations
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
+  
   
   
   
     
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
       
     
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
-      
-      
-      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_3">
-          Features
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Features" data-md-level="1">
-        <label class="md-nav__title" for="__nav_3">
-          <span class="md-nav__icon md-icon"></span>
-          Features
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Features
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../supported_data/" class="md-nav__link">
-        Supported datasets
+        
+  
+  <span class="md-ellipsis">
+    Supported datasets
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../visualization/" class="md-nav__link">
-        Visualization
+        
+  
+  <span class="md-ellipsis">
+    Visualization
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../units/" class="md-nav__link">
-        Units
+        
+  
+  <span class="md-ellipsis">
+    Units
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../derived_fields/" class="md-nav__link">
-        Derived fields
+        
+  
+  <span class="md-ellipsis">
+    Derived fields
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../series/" class="md-nav__link">
-        Data series
+        
+  
+  <span class="md-ellipsis">
+    Data series
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../largedatasets/" class="md-nav__link">
-        Large datasets
+        
+  
+  <span class="md-ellipsis">
+    Large datasets
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
+  
   
   
   
     
+    
+      
+        
+      
+    
+    
+    
+    
+      
       
     
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
-      
-      
-      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Advanced Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
-      
-      
-        <label class="md-nav__link" for="__nav_4">
-          Advanced Topics
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Advanced Topics" data-md-level="1">
-        <label class="md-nav__title" for="__nav_4">
-          <span class="md-nav__icon md-icon"></span>
-          Advanced Topics
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     
+    
+      
+        
+      
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" type="checkbox" id="__nav_4_1" >
-      
-      
-      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
         
           
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Arepo Simulations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
-      
-      
-        <label class="md-nav__link" for="__nav_4_1">
-          Arepo Simulations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Arepo Simulations" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_1">
-          <span class="md-nav__icon md-icon"></span>
-          Arepo Simulations
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            Arepo Simulations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../halocatalogs/" class="md-nav__link">
-        Halo Catalogs
+        
+  
+  <span class="md-ellipsis">
+    Halo Catalogs
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../configuration/" class="md-nav__link">
-        Configuration
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
       </a>
     </li>
   
@@ -706,14 +880,19 @@
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../faq/" class="md-nav__link">
-        FAQ
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
       </a>
     </li>
   
@@ -721,14 +900,19 @@
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../api_docs/" class="md-nav__link">
-        API documentation
+        
+  
+  <span class="md-ellipsis">
+    API documentation
+  </span>
+  
+
       </a>
     </li>
   
@@ -760,21 +944,27 @@
       
         <li class="md-nav__item">
   <a href="#getting-started" class="md-nav__link">
-    Getting started
+    <span class="md-ellipsis">
+      Getting started
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#loading-an-individual-dataset" class="md-nav__link">
-    Loading an individual dataset
+    <span class="md-ellipsis">
+      Loading an individual dataset
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#dask-arrays-and-units" class="md-nav__link">
-    Dask arrays and units
+    <span class="md-ellipsis">
+      Dask arrays and units
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Dask arrays and units">
@@ -782,14 +972,18 @@
         
           <li class="md-nav__item">
   <a href="#dask-arrays" class="md-nav__link">
-    Dask arrays
+    <span class="md-ellipsis">
+      Dask arrays
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#units" class="md-nav__link">
-    Units
+    <span class="md-ellipsis">
+      Units
+    </span>
   </a>
   
 </li>
@@ -801,7 +995,9 @@
       
         <li class="md-nav__item">
   <a href="#analyzing-snapshot-data" class="md-nav__link">
-    Analyzing snapshot data
+    <span class="md-ellipsis">
+      Analyzing snapshot data
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Analyzing snapshot data">
@@ -809,7 +1005,9 @@
         
           <li class="md-nav__item">
   <a href="#computing-a-simple-statistic-on-all-particles" class="md-nav__link">
-    Computing a simple statistic on (all) particles
+    <span class="md-ellipsis">
+      Computing a simple statistic on (all) particles
+    </span>
   </a>
   
 </li>
@@ -821,7 +1019,9 @@
       
         <li class="md-nav__item">
   <a href="#catalogs" class="md-nav__link">
-    Catalogs
+    <span class="md-ellipsis">
+      Catalogs
+    </span>
   </a>
   
 </li>
@@ -840,16 +1040,14 @@
                 
                   
 
-  <a href="https://github.com/cbyrohl/scida/edit/master/docs/tutorial/simulations.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+  
+  
 
 
   <h1>Simulations</h1>
 
 <div><h2 id="getting-started">Getting started</h2>
-<div class="admonition note">
+<div class="admonition info">
 <p class="admonition-title">Tutorial dataset</p>
 <p>In the following, we will use a small test dataset from the <a href="https://www.tng-project.org/">TNG50</a> simulation.
 This is a cosmological galaxy formation simulation. This dataset is still a gigabyte in size and can be downloaded <a href="https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/">here</a>.
@@ -876,7 +1074,7 @@ a suite for galaxy formation simulations in cosmological volumes.
 Choosing TNG50-4 means that the data size in the snapshot is small and easy to work with.
 We demonstrate how to work with larger data sets at a later stage.</p>
 <p>First, we load the dataset using the convenience function <code>load()</code> that will determine the appropriate dataset class for us:</p>
-<div class="highlight"><span class="filename">Loading a dataset</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
+<div class="language-pycon highlight"><span class="filename">Loading a dataset</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#(1)!</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="c1">#(2)!</span>
 <span class="go">class: ArepoSnapshotWithUnitMixinAndCosmologyMixin</span>
@@ -911,7 +1109,7 @@ The containers represent gas cells, dark matter particles, stars, black holes, g
 Each container contains fields that are specific to the container, such as the mass of the gas cells, the velocity of the dark matter particles, etc.
 The fields are described in the <a href="https://www.tng-project.org/data/docs/specifications/">TNG50 documentation</a>.</p>
 <p>The available fields of the container "PartType0" are:</p>
-<div class="highlight"><span class="filename">Available fields of a given container</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#(1)!</span>
+<div class="language-pycon highlight"><span class="filename">Available fields of a given container</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#(1)!</span>
 <span class="go">['GFM_Metals',</span>
 <span class="go">'SubfindDMDensity',</span>
 <span class="go">...</span>
@@ -922,7 +1120,7 @@ The fields are described in the <a href="https://www.tng-project.org/data/docs/s
 <li>For many simulation types aliases exist, such that "gas" can be used instead of "PartType0", "stars" instead of "PartType4", etc.</li>
 </ol>
 <p>Let's take a look at some field in this container:</p>
-<div class="highlight"><span class="filename">Inspecting a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span>
+<div class="language-pycon highlight"><span class="filename">Inspecting a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"GFM_AGNRadiation"</span><span class="p">]</span>
 <span class="go">'dask.array&lt;mul, shape=(18540104,), dtype=float32, chunksize=(18540104,), chunktype=numpy.ndarray&gt; code_mass / code_length ** 3'</span>
 </code></pre></div>
@@ -940,7 +1138,7 @@ and virtually combined into a single dask array. The user does not need to worry
 and the second level holds the different physical field arrays (such as density and ionization).</p>
 <p>In general, fields can be also be stored in flat or more nested structures, depending on the dataset.</p>
 <p>We can trigger the evaluation of the dask array by calling <code>compute()</code> on it:</p>
-<div class="highlight"><span class="filename">Evaluating a dask array</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"GFM_AGNRadiation"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<div class="language-pycon highlight"><span class="filename">Evaluating a dask array</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"GFM_AGNRadiation"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
 <span class="go">array([0., 0., 0., ..., 0., 0., 0.], dtype=float32)</span>
 </code></pre></div>
 <p><strong>However</strong>, directly evaluating dask arrays is <strong>strongly discouraged</strong> for large datasets, as it will load the entire dataset into memory.
@@ -950,10 +1148,10 @@ which we present in the next section.</p>
 <p>If passing <code>units=True</code> to <code>load()</code>, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
 See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information. Also check out the
-<a href="../../notebooks/cookbook/units/">units cookbook</a> for more examples.</p>
+<a href="../notebooks/cookbook/units.ipynb">units cookbook</a> for more examples.</p>
 <p>In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
 These can be accessed via the <code>magnitude</code> and <code>units</code> attributes, respectively.</p>
-<div class="highlight"><span class="filename">Accessing the magnitude and units of a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
+<div class="language-pycon highlight"><span class="filename">Accessing the magnitude and units of a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
 <span class="go">(dask.array&lt;mul, shape=(18540104,), dtype=float32, chunksize=(18540104,), chunktype=numpy.ndarray&gt;, &lt;Unit('code_length')&gt;)</span>
 </code></pre></div>
 <p>When defining derived fields from dask arrays, the correct units are automatically propagated to the new field,
@@ -963,7 +1161,7 @@ to directly see the resulting units and any dimensionality mismatches.</p>
 <h3 id="computing-a-simple-statistic-on-all-particles">Computing a simple statistic on (all) particles</h3>
 <p>The fields in our snapshot object behave similar to actual numpy arrays.</p>
 <p>As a first simple example, let's calculate the total mass of gas cells in the entire simulation. Just as in numpy we can write</p>
-<div class="highlight"><span class="filename">Calculating the total mass of gas cells</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">masses</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Masses"</span><span class="p">]</span>
+<div class="language-pycon highlight"><span class="filename">Calculating the total mass of gas cells</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">masses</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Masses"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">task</span> <span class="o">=</span> <span class="n">masses</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">task</span>
 <span class="go">'dask.array&lt;sum-aggregate, shape=(), dtype=float32, chunksize=(), chunktype=numpy.ndarray&gt; code_mass'</span>
@@ -971,14 +1169,14 @@ to directly see the resulting units and any dimensionality mismatches.</p>
 <p>Note that all objects remain 'virtual': they are not calculated or loaded from disk,
 but are merely the required instructions, encoded into tasks.</p>
 <p>We can request a calculation of the actual operation(s) by applying the <code>.compute()</code> method to the task.</p>
-<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">totmass</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">totmass</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">totmass</span>
 <span class="go">'56507.4921875 code_mass'</span>
 </code></pre></div>
 <details class="tip">
 <summary>Converting units</summary>
 <p>We can easily convert the code units to something physically meaningful by using the <code>.to()</code> method of the task or its computed result:</p>
-<div class="highlight"><span class="filename">Converting units</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">totmass</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"Msun"</span><span class="p">)</span>
+<div class="language-pycon highlight"><span class="filename">Converting units</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">totmass</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"Msun"</span><span class="p">)</span>
 <span class="go">'8.3e15 Msun'</span>
 </code></pre></div>
 </details>
@@ -987,7 +1185,7 @@ but are merely the required instructions, encoded into tasks.</p>
 which is analogous to <a href="https://numpy.org/doc/stable/reference/generated/numpy.histogram2d.html">numpy.histogram2d()</a>,
 except that it operates on a dask array.
 We discuss more advanced and interactive visualization methods <a href="../../visualization/">here</a>.</p>
-<div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
+<div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Coordinates"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
@@ -1009,8 +1207,15 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
 </ol>
 <p><a class="glightbox" href="../../images/simple_hist2d.png" data-type="image" data-width="100%" data-height="auto" data-title="2D histogram example" data-desc-position="bottom"><img alt="2D histogram example" src="../../images/simple_hist2d.png"></a></p>
 <h2 id="catalogs">Catalogs</h2>
-<p>Many cosmological simulations have a catalog of halos, subhalos, galaxies, etc. </p>
+<p>Many cosmological simulations have a catalog of halos, subhalos, galaxies, etc.</p>
 <p>For AREPO/Gadget based simulations, we support use of this information. Find more find more information on how to use catalogs <a href="../../halocatalogs/">here</a>.</p></div>
+
+
+
+
+
+
+
 
 
 
@@ -1021,47 +1226,12 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
             </div>
           
           
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tutorial" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Tutorial
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../observations/" class="md-footer__link md-footer__link--next" aria-label="Next: Observations" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Observations
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1084,10 +1254,11 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "navigation.sections", "navigation.indexes"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.sections", "navigation.indexes"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7c377c4.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
@@ -1095,7 +1266,6 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
-    
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": true, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
 </html>
