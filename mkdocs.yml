@@ -4,6 +4,7 @@ theme:
   name: material
   features:
     - content.code.annotate
+    - content.code.copy
     - navigation.sections
     - navigation.indexes
 
@@ -29,8 +30,6 @@ nav:
   - 'Advanced Topics':
     - 'Arepo Simulations':
       - 'Halo Catalogs': halocatalogs.md
-  # - 'Cookbook':
-  #   - 'Units': notebooks/cookbook/units.ipynb
   - 'Configuration': configuration.md
   - 'FAQ': faq.md
   - api_docs.md
@@ -49,6 +48,9 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      use_pygments: true
+      pygments_lang_class: true
   - admonition
   - pymdownx.details
   - pymdownx.superfences
@@ -57,8 +59,8 @@ markdown_extensions:
   - attr_list
   - footnotes
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.arithmatex:
       generic: true
   - md_in_html
@@ -87,16 +89,16 @@ plugins:
         width: 12.172vw
   - mkdocs-jupyter:
       execute: !ENV [JUPYTER_EXECUTE, true]
-      execute_ignore: "notebooks/static/*.ipynb"  # waiting for list support (https://github.com/danielfrg/mkdocs-jupyter/issues/119)
+      execute_ignore:
+        - "notebooks/static/*.ipynb"
       kernel_name: scida
   - mkdocstrings:
       default_handler: python
       handlers:
         python:
           options:
-            show_signature_annotations: true
-            show_source: true
             show_submodules: true
+            docstring_style: numpy
 watch:
   - src/scida
 
@@ -108,3 +110,4 @@ extra_javascript:
 
 extra_css:
   - stylesheets/gridview.css
+  - stylesheets/code_select.css

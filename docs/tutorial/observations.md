@@ -2,7 +2,7 @@
 
 This package is designed to aid in the efficient analysis of large datasets, such as GAIA DR3.
 
-!!! note "Tutorial dataset"
+!!! info "Tutorial dataset"
     In the following, we will subset from the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3). The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded [here](https://heibox.uni-heidelberg.de/f/3b05069b1b524c0fa57e/?dl=1).
     Check [Supported Datasets](../supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
@@ -19,8 +19,7 @@ It uses the [dask](https://dask.org/) library to perform computations, which has
 
 Here, we choose the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3) as an example.
 The dataset is obtained in HDF5 format as used at ITA Heidelberg. We intentionally select a small subset of the data to work with.
-Choosing a subset means that the data size in the snapshot is small and easy to work with.
-We demonstrate how to work with larger data sets at a later stage.
+Choosing a subset means that the data size is small and easy to work with. We demonstrate how to work with larger data sets at a later stage.
 
 First, we load the dataset using the convenience function `load()` that will determine the appropriate dataset class for us:
 
@@ -110,10 +109,10 @@ and dimensionality checks are performed. Importantly, the unit calculation is do
 to directly see the resulting units and any dimensionality mismatches.
 
 
-## Analyzing snapshot data
-### Computing a simple statistic on (all) particles
+## Analyzing the data
+### Computing a simple statistic on (all) objects
 
-The fields in our snapshot object behave similar to actual numpy arrays.
+The fields in our data object behave similar to actual numpy arrays.
 
 As a first simple example, let's calculate the mean declination of the stars. Just as in numpy we can write
 
@@ -148,26 +147,32 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 >>> x = ds.data["l"]
 >>> y = ds.data["b"]
 >>> nbins = (360, 180)
->>> xbins = np.linspace(0.0, 360.0, nbins[0] + 1)
->>> ybins = np.linspace(-90, 90.0, nbins[1] + 1)
+>>> extent = [0.0, 360.0, -90.0, 90.0]
+>>> xbins = np.linspace(*extent[:2], nbins[0] + 1)
+>>> ybins = np.linspace(*extent[-2:], nbins[1] + 1)
 >>> hist, xbins, ybins = da.histogram2d(x, y, bins=[xbins, ybins])
 >>> im2d = hist.compute() #(1)!
 >>> import matplotlib.pyplot as plt
 >>> from matplotlib.colors import LogNorm
->>> plt.imshow(im2d.T, norm=LogNorm(), extent=[0.0, 360.0, -90.0, 90.0])
->>> plt.xlabel("l (deg)")
->>> plt.ylabel("b (deg)")
+>>> plt.imshow(im2d.T, origin="lower", norm=LogNorm(), extent=extent, interpolation="none")
+>>> plt.xlabel("l [deg]")
+>>> plt.ylabel("b [deg]")
 >>> plt.show()
 ```
 
 1. The *compute()* on `im2d` results in a two-dimensional array which we can display.
 
+
 ![2D histogram example](../images/simple_hist2d_obs.png)
+
+!!! info
+
+    Above image shows the histogram obtained for the full data set.
 
 
 ## FITS files
 
-Observations are often stored in [FITS](https://en.wikipedia.org/wiki/FITS) files. Support in scida work-in-progress
+Observations are often stored in [FITS](https://en.wikipedia.org/wiki/FITS) files. Support in scida is work-in-progress
 and requires the [astropy](https://www.astropy.org/) package.
 
 Here we show use of the SDSS DR16:

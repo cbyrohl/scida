@@ -1,6 +1,6 @@
 ## Getting started
 
-!!! note "Tutorial dataset"
+!!! info "Tutorial dataset"
     In the following, we will use a small test dataset from the [TNG50](https://www.tng-project.org/) simulation.
     This is a cosmological galaxy formation simulation. This dataset is still a gigabyte in size and can be downloaded [here](https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/).
     Note that analysis is not limited to simulations, but also observational data.
@@ -208,6 +208,6 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 ![2D histogram example](../images/simple_hist2d.png)
 
 ## Catalogs
-Many cosmological simulations have a catalog of halos, subhalos, galaxies, etc. 
+Many cosmological simulations have a catalog of halos, subhalos, galaxies, etc.
 
 For AREPO/Gadget based simulations, we support use of this information. Find more find more information on how to use catalogs [here](../halocatalogs.md).
