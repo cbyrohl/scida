@@ -1,4 +1,12 @@
 # Frequently Asked Questions
+## Common warnings/exceptions
+### ">>> ds['stars']['VelMag']
+> I get the warning "UserWarning: Passing an object to dask.array.from_array which is already a Dask collection. This can lead to unexpected behavior.". What does this mean?
+
+In scida, this warning often occurs when passing a field with units to a dask.array function.
+Consider explicitly removing the units (e.g. using "arr.magnitude" for the field/array "arr") before the dask.array function call.
+Then attach the correct units afterwards again. This will be automatized in the future.
+
 ## Extending existing datasets
 > How do I add custom fields (that are not derived fields) to my existing dataset?
 
