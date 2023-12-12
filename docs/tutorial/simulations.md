@@ -128,8 +128,8 @@ which we present in the next section.
 
 If passing `units=True` to `load()`, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
-See the [pint documentation](https://pint.readthedocs.io/en/stable/) for more information. Also check out the
-[units cookbook](../notebooks/cookbook/units.ipynb) for more examples.
+See the [pint documentation](https://pint.readthedocs.io/en/stable/) for more information. Also check out [this page](../units.md) for more examples.
+
 
 In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
 These can be accessed via the `magnitude` and `units` attributes, respectively.
