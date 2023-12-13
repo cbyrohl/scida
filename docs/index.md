@@ -30,4 +30,19 @@ Find some visual impressions [here](./impressions.md).
         </div>
       </div>
     </div>
+    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./developer';">
+      <div class="card__image-container">
+        <img
+          src="images/terminal-solid.svg"
+        />
+      </div>
+      <div class="card__content">
+        <p class="card__title text--large">
+          Developer guide
+        </p>
+        <div class="card__info">
+          <p class="text--medium">How to modify and contribute to the package.</p>
+        </div>
+      </div>
+    </div>
 </section>
