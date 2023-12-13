@@ -1078,22 +1078,20 @@ We demonstrate how to work with larger data sets at a later stage.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#(1)!</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="c1">#(2)!</span>
 <span class="go">class: ArepoSnapshotWithUnitMixinAndCosmologyMixin</span>
-<span class="go">source: /home/cbyrohl/data/testdata-scida/TNG50-4_snapshot</span>
+<span class="go">source: /vera/u/byrohlc/Downloads/snapdir_030</span>
 <span class="go">=== Cosmological Simulation ===</span>
-<span class="go">z = 0.00</span>
+<span class="go">z = 2.32</span>
 <span class="go">cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3.04, m_nu=None, Ob0=0.0486)</span>
 <span class="go">===============================</span>
 <span class="go">=== Unit-aware Dataset ===</span>
 <span class="go">==========================</span>
 <span class="go">=== data ===</span>
-<span class="go">+ root (containers: 7)</span>
-<span class="go">++ Group (fields: 28, entries: 25257)</span>
-<span class="go">++ PartType0 (fields: 30, entries: 18540104)</span>
-<span class="go">++ PartType1 (fields: 11, entries: 19683000)</span>
-<span class="go">++ PartType3 (fields: 5, entries: 19683000)</span>
-<span class="go">++ PartType4 (fields: 21, entries: 605779)</span>
-<span class="go">++ PartType5 (fields: 27, entries: 3486)</span>
-<span class="go">++ Subhalo (fields: 54, entries: 22869)</span>
+<span class="go">+ root (containers: 5)</span>
+<span class="go">++ PartType0 (fields: 10, entries: 19124236)</span>
+<span class="go">++ PartType1 (fields: 3, entries: 19683000)</span>
+<span class="go">++ PartType3 (fields: 2, entries: 19683000)</span>
+<span class="go">++ PartType4 (fields: 9, entries: 161401)</span>
+<span class="go">++ PartType5 (fields: 20, entries: 2673)</span>
 <span class="go">============</span>
 </code></pre></div>
 <ol>
@@ -1110,19 +1108,24 @@ Each container contains fields that are specific to the container, such as the m
 The fields are described in the <a href="https://www.tng-project.org/data/docs/specifications/">TNG50 documentation</a>.</p>
 <p>The available fields of the container "PartType0" are:</p>
 <div class="language-pycon highlight"><span class="filename">Available fields of a given container</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1">#(1)!</span>
-<span class="go">['GFM_Metals',</span>
-<span class="go">'SubfindDMDensity',</span>
-<span class="go">...</span>
-<span class="go">'GFM_WindDMVelDisp',</span>
-<span class="go">'GFM_AGNRadiation']</span>
+<span class="go">['Coordinates',</span>
+<span class="go"> 'Density',</span>
+<span class="go"> 'ElectronAbundance',</span>
+<span class="go"> 'GFM_Metallicity',</span>
+<span class="go"> 'InternalEnergy',</span>
+<span class="go"> 'Masses',</span>
+<span class="go"> 'ParticleIDs',</span>
+<span class="go"> 'StarFormationRate',</span>
+<span class="go"> 'Temperature',</span>
+<span class="go"> 'Velocities']</span>
 </code></pre></div>
 <ol>
 <li>For many simulation types aliases exist, such that "gas" can be used instead of "PartType0", "stars" instead of "PartType4", etc.</li>
 </ol>
 <p>Let's take a look at some field in this container:</p>
 <div class="language-pycon highlight"><span class="filename">Inspecting a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"GFM_AGNRadiation"</span><span class="p">]</span>
-<span class="go">'dask.array&lt;mul, shape=(18540104,), dtype=float32, chunksize=(18540104,), chunktype=numpy.ndarray&gt; code_mass / code_length ** 3'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"StarFormationRate"</span><span class="p">]</span>
+<span class="go">'dask.array&lt;mul, shape=(19124236,), dtype=float32, chunksize=(19124236,), chunktype=numpy.ndarray&gt; Msun / year'</span>
 </code></pre></div>
 <p>The field is a dask array, which is a lazy array that will only be evaluated when needed.
 How these lazy arrays and their units work and are to be used will be explored in the next section.</p>
@@ -1138,8 +1141,8 @@ and virtually combined into a single dask array. The user does not need to worry
 and the second level holds the different physical field arrays (such as density and ionization).</p>
 <p>In general, fields can be also be stored in flat or more nested structures, depending on the dataset.</p>
 <p>We can trigger the evaluation of the dask array by calling <code>compute()</code> on it:</p>
-<div class="language-pycon highlight"><span class="filename">Evaluating a dask array</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"GFM_AGNRadiation"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-<span class="go">array([0., 0., 0., ..., 0., 0., 0.], dtype=float32)</span>
+<div class="language-pycon highlight"><span class="filename">Evaluating a dask array</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"StarFormationRate"</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="go">'[0.017970681190490723 0.0 0.016353357583284378 ... 0.0 0.0 0.0] Msun / year'</span>
 </code></pre></div>
 <p><strong>However</strong>, directly evaluating dask arrays is <strong>strongly discouraged</strong> for large datasets, as it will load the entire dataset into memory.
 Instead, we will reduce the datasize by running desired analysis/reduction within dask before calling <em>compute()</em>,
@@ -1147,12 +1150,14 @@ which we present in the next section.</p>
 <h3 id="units">Units</h3>
 <p>If passing <code>units=True</code> to <code>load()</code>, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
-See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information. Also check out the
-<a href="../notebooks/cookbook/units.ipynb">units cookbook</a> for more examples.</p>
+See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information.
+Also check out <a href="../../units/">this page</a> for more unit-related examples.</p>
 <p>In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
 These can be accessed via the <code>magnitude</code> and <code>units</code> attributes, respectively.</p>
-<div class="language-pycon highlight"><span class="filename">Accessing the magnitude and units of a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
-<span class="go">(dask.array&lt;mul, shape=(18540104,), dtype=float32, chunksize=(18540104,), chunktype=numpy.ndarray&gt;, &lt;Unit('code_length')&gt;)</span>
+<div class="language-pycon highlight"><span class="filename">Accessing the magnitude and units of a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span>
+<span class="go">'dask.array&lt;mul, shape=(19124236, 3), dtype=float32, chunksize=(11184810, 3), chunktype=numpy.ndarray&gt;'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
+<span class="go">'code_length'</span>
 </code></pre></div>
 <p>When defining derived fields from dask arrays, the correct units are automatically propagated to the new field,
 and dimensionality checks are performed. Importantly, the unit calculation is done immediately, thus allowing
@@ -1171,7 +1176,7 @@ but are merely the required instructions, encoded into tasks.</p>
 <p>We can request a calculation of the actual operation(s) by applying the <code>.compute()</code> method to the task.</p>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">totmass</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">totmass</span>
-<span class="go">'56507.4921875 code_mass'</span>
+<span class="go">'57384.59375 code_mass'</span>
 </code></pre></div>
 <details class="tip">
 <summary>Converting units</summary>
@@ -1190,14 +1195,14 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
 <span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Coordinates"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">nbins</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nbins</span> <span class="o">=</span> <span class="mi">512</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bins1d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">],</span> <span class="n">nbins</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span><span class="p">,</span> <span class="n">xbins</span><span class="p">,</span> <span class="n">ybins</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">histogram2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="n">bins1d</span><span class="p">,</span><span class="n">bins1d</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">im2d</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span> <span class="c1">#(1)!</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im2d</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">LogNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im2d</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">"BoxSize"</span><span class="p">]],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"viridis"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"x (ckpc/h)"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"y (ckpc/h)"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>

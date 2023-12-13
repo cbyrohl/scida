@@ -16,7 +16,7 @@
     
     
       
-        <title>Developer - scida</title>
+        <title>Developer Guide - scida</title>
       
     
     
@@ -74,6 +74,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#developer-guide" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -106,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Developer
+              Developer Guide
             
           </span>
         </div>
@@ -802,6 +807,100 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development environment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone the repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docstring-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docstring style
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -819,9 +918,51 @@
   
 
 
-  <h1>Developer</h1>
-
-<p>TODO</p>
+<div><h1 id="developer-guide">Developer Guide</h1>
+<p>We welcome contributions to scida, such as bug reports, feature requests, and design proposals.
+This page contains information on how to contribute to scida.</p>
+<h2 id="development-environment">Development environment</h2>
+<h3 id="clone-the-repository">Clone the repository</h3>
+<p>Make a fork of the <a href="https://github.com/cbyrohl/scida">repository</a>, then clone the repository to your local machine:</p>
+<div class="language-bash highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/YOURUSERNAME/scida
+<span class="nb">cd</span><span class="w"> </span>scida
+</code></pre></div>
+<h3 id="install">Install</h3>
+<p>We use <a href="https://python-poetry.org/">poetry</a> to manage dependencies and the development environment.
+After installing poetry, you can install scida and its dependencies with</p>
+<div class="language-bash highlight"><pre><span></span><code>poetry<span class="w"> </span>install
+</code></pre></div>
+<p>This will create a virtual environment and install scida and its dependencies,
+including development dependencies.
+All commands, such as <code>python</code> and <code>pytest</code> will be run in this environment
+by prepending <code>poetry run ...</code> to the command.</p>
+<p>While using poetry is recommended, you can also install scida with pip
+in a virtual environment of your choice:</p>
+<div class="language-bash highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>scida_venv
+<span class="nb">source</span><span class="w"> </span>scida_venv/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+<p>Note that in latter case, you will have to manage the dependencies yourself, including development dependencies.
+If choosing this path, remove any <code>poetry run</code> prefixes from the commands below accordingly.</p>
+<h3 id="run-tests">Run tests</h3>
+<p>To run the tests, use</p>
+<div class="language-bash highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest
+</code></pre></div>
+<p>Many tests require test data sets. These might not be available to you and lead to many tests being skipped.</p>
+<h2 id="contributing-code">Contributing code</h2>
+<h3 id="code-formatting">Code Formatting</h3>
+<p>We use the <a href="https://github.com/psf/black">black</a> code formatter to ensure a consistent code style.
+This style is ensured by the <a href="https://github.com/cbyrohl/scida/blob/main/.pre-commit-config.yaml">pre-commit hook config</a>.
+Make sure to have <a href="https://pre-commit.com/">pre-commit</a> installed and run</p>
+<div class="language-bash highlight"><pre><span></span><code>pre-commit<span class="w"> </span>install
+</code></pre></div>
+<p>in the repository to install the hook.</p>
+<h3 id="docstring-style">Docstring style</h3>
+<p>We use <a href="https://numpydoc.readthedocs.io/en/latest/format.html">numpydoc</a> to format docstrings.
+Please annotate all functions and classes with docstrings accordingly.</p>
+<h3 id="testing">Testing</h3>
+<p>We use <a href="https://docs.pytest.org/en/stable/">pytest</a> for testing. Add new tests for added functionality
+in a test file in the <code>tests</code> directory. Make sure to run the tests before submitting a pull request.</p></div>
 
 
 

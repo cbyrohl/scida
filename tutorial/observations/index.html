@@ -1102,8 +1102,8 @@ which we present in the next section.</p>
 <h3 id="units">Units</h3>
 <p>If passing <code>units=True</code> (default) to <code>load()</code>, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
-See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information. Also check out the
-<a href="../notebooks/cookbook/units.ipynb">units cookbook</a> for more examples.</p>
+See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information.
+Also check out <a href="../../units/">this page</a> for more unit-related examples.</p>
 <p>In short, each field, that is represented by a modified dask array, has a magnitude (the dask array without any units attached) and a unit.
 These can be accessed via the <code>magnitude</code> and <code>units</code> attributes, respectively.</p>
 <div class="language-pycon highlight"><span class="filename">Accessing the magnitude and units of a field</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
@@ -1162,7 +1162,16 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
 <h2 id="fits-files">FITS files</h2>
 <p>Observations are often stored in <a href="https://en.wikipedia.org/wiki/FITS">FITS</a> files. Support in scida is work-in-progress
 and requires the <a href="https://www.astropy.org/">astropy</a> package.</p>
-<p>Here we show use of the SDSS DR16:</p>
+<p>Here we show use of the SDSS DR16.</p>
+<p>https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/</p>
+<div class="admonition info">
+<p class="admonition-title">SDSS DR16</p>
+<p>The SDSS DR16 redshift and classification file "specObj-dr16.fits " can be found <a href="https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/">here</a>.</p>
+</div>
+<p>It uses the <a href="https://dask.org/">dask</a> library to perform computations, which has several key advantages:</p>
+<ol>
+<li>very large datasets which cannot normally fit into memory can be analyzed,</li>
+</ol>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
