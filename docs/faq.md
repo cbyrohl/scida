@@ -1,6 +1,5 @@
 # Frequently Asked Questions
 ## Common warnings/exceptions
-### ">>> ds['stars']['VelMag']
 > I get the warning "UserWarning: Passing an object to dask.array.from_array which is already a Dask collection. This can lead to unexpected behavior.". What does this mean?
 
 In scida, this warning often occurs when passing a field with units to a dask.array function.
