@@ -42,7 +42,8 @@ ds = load("TNG50-4_snapshot")
 def VelMag(arrs, **kwargs):
     import dask.array as da
     vel = arrs['Velocities']
-    return da.sqrt(vel[:,0]**2 + vel[:,1]**2 + vel[:,2]**2)
+    v, u = vel.magnitude, vel.units
+    return da.sqrt(v[:,0]**2 + v[:,1]**2 + v[:,2]**2) * u
 ```
 
 1.  Here, *stars* is the name of the **field container** the field should be added to. The field will now be available as ds\['stars'\]\['VelMag'\]
