@@ -807,6 +807,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#common-warningsexceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common warnings/exceptions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#extending-existing-datasets" class="md-nav__link">
     <span class="md-ellipsis">
       Extending existing datasets
@@ -879,6 +888,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#common-warningsexceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common warnings/exceptions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#extending-existing-datasets" class="md-nav__link">
     <span class="md-ellipsis">
       Extending existing datasets
@@ -915,6 +933,13 @@
 
 
 <div><h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+<h2 id="common-warningsexceptions">Common warnings/exceptions</h2>
+<blockquote>
+<p>I get the warning "UserWarning: Passing an object to dask.array.from_array which is already a Dask collection. This can lead to unexpected behavior.". What does this mean?</p>
+</blockquote>
+<p>In scida, this warning often occurs when passing a field with units to a dask.array function.
+Consider explicitly removing the units (e.g. using "arr.magnitude" for the field/array "arr") before the dask.array function call.
+Then attach the correct units afterwards again. This will be automatized in the future.</p>
 <h2 id="extending-existing-datasets">Extending existing datasets</h2>
 <blockquote>
 <p>How do I add custom fields (that are not derived fields) to my existing dataset?</p>

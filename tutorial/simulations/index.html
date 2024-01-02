@@ -1051,7 +1051,12 @@
 <p class="admonition-title">Tutorial dataset</p>
 <p>In the following, we will use a small test dataset from the <a href="https://www.tng-project.org/">TNG50</a> simulation.
 This is a cosmological galaxy formation simulation. This dataset is still a gigabyte in size and can be downloaded <a href="https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/">here</a>.
-Note that analysis is not limited to simulations, but also observational data.
+On the command line, you can download and extract the dataset with:</p>
+<p></p><div class="language-bash highlight"><pre><span></span><code>wget<span class="w"> </span>https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl<span class="o">=</span><span class="m">1</span><span class="w"> </span>-O<span class="w"> </span>snapshot.tar.gz
+tar<span class="w"> </span>-xvf<span class="w"> </span>snapshot.tar.gz
+</code></pre></div>
+The snapshot will be extracted into a folder called <em>snapdir_030</em>.
+<p>Note that analysis is not limited to simulations, but also observational data.
 Check <a href="../../supported_data/">Supported Datasets</a> for an incomplete list of supported datasets
 and requirements for support of new datasets.
 A shorter tutorial for an observational dataset can be found <a href="../observations/">here</a>.</p>
@@ -1075,8 +1080,8 @@ Choosing TNG50-4 means that the data size in the snapshot is small and easy to w
 We demonstrate how to work with larger data sets at a later stage.</p>
 <p>First, we load the dataset using the convenience function <code>load()</code> that will determine the appropriate dataset class for us:</p>
 <div class="language-pycon highlight"><span class="filename">Loading a dataset</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#(1)!</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="c1">#(2)!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"snapdir_030"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="c1">#(1)!</span>
 <span class="go">class: ArepoSnapshotWithUnitMixinAndCosmologyMixin</span>
 <span class="go">source: /vera/u/byrohlc/Downloads/snapdir_030</span>
 <span class="go">=== Cosmological Simulation ===</span>
@@ -1095,8 +1100,6 @@ We demonstrate how to work with larger data sets at a later stage.</p>
 <span class="go">============</span>
 </code></pre></div>
 <ol>
-<li>The <code>units=True</code> argument will attach code units to all fields. Alternative choices are <em>False</em> to go without units and <em>cgs</em> for cgs units.
-   The current default is <em>False</em>, which will change to <em>True</em> in the near future.</li>
 <li>Call to receive some information about the loaded dataset.</li>
 </ol>
 <p>The dataset is now loaded, and we can inspect its contents, specifically its container and fields loaded.
@@ -1148,7 +1151,7 @@ and the second level holds the different physical field arrays (such as density 
 Instead, we will reduce the datasize by running desired analysis/reduction within dask before calling <em>compute()</em>,
 which we present in the next section.</p>
 <h3 id="units">Units</h3>
-<p>If passing <code>units=True</code> to <code>load()</code>, the dataset will be loaded with code units attached to all fields.
+<p>If passing <code>units=True</code> (default) to <code>load()</code>, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
 See the <a href="https://pint.readthedocs.io/en/stable/">pint documentation</a> for more information.
 Also check out <a href="../../units/">this page</a> for more unit-related examples.</p>

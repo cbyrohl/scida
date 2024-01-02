@@ -1088,6 +1088,18 @@
 
 <div><h1 id="halo-and-galaxy-catalogs">Halo and galaxy catalogs</h1>
 <p>Cosmological simulations are often post-processed with a substructure identification algorithm in order to identify halos and galaxies. The resulting catalogs can be loaded and connect with the particle-level snapshot data.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>If you want to run the code below, you can download and extract snapshot and its group catalog from the TNG50-4 test data:</p>
+<p></p><div class="language-bash highlight"><pre><span></span><code>wget<span class="w"> </span>https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl<span class="o">=</span><span class="m">1</span><span class="w"> </span>-O<span class="w"> </span>snapshot.tar.gz
+tar<span class="w"> </span>-xvf<span class="w"> </span>snapshot.tar.gz
+wget<span class="w"> </span>https://heibox.uni-heidelberg.de/f/ff27fb6975fb4dc391ef/?dl<span class="o">=</span><span class="m">1</span><span class="w"> </span>-O<span class="w"> </span>catalog.tar.gz
+tar<span class="w"> </span>-xvf<span class="w"> </span>catalog.tar.gz
+</code></pre></div>
+The snapshot and group catalog should be placed in the same folder.
+Then you can load the snapshot with <code>ds = load("snapdir_030")</code>. The group catalog should automatically be detected,
+otherwise you can also pass the path to the catalog via the <code>catalog</code> keyword to <code>load()</code>.
+</div>
 <h2 id="adding-and-using-halogalaxy-catalog-information">Adding and using halo/galaxy catalog information</h2>
 <p>Currently, we support the usual FOF/Subfind combination and format. Their presence will be automatically detected and the catalogs will be loaded into <em>ds.data</em> as shown below.</p>
 <div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
@@ -1149,8 +1161,8 @@ as halos are ordered (in descending order) by their mass. For more fine-grained 
 you can also pass a list of halo IDs to evaluate via the "idxlist" keyword.
 These keywords should be passed to the "evaluate" call.</p>
 </details>
-<details class="note" open="open">
-<summary>Note</summary>
+<details class="info" open="open">
+<summary>Info</summary>
 <p>By default, operations are done on for halos. By passing <code>objtype="subhalo"</code> to the
 <code>grouped</code> call, the operation is done on subhalos instead.</p>
 </details>
@@ -1184,7 +1196,8 @@ These keywords should be passed to the "evaluate" call.</p>
 
 <span class="n">grp</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"Group"</span><span class="p">]</span>
 <span class="n">pos3</span> <span class="o">=</span> <span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span> <span class="o">-</span> <span class="n">grp</span><span class="p">[</span><span class="s2">"GroupPos"</span><span class="p">][</span><span class="n">gas</span><span class="p">[</span><span class="s2">"GroupID"</span><span class="p">]]</span>
-<span class="n">dist</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">pos3</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># (1)!</span>
+<span class="n">p</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">pos3</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">pos3</span><span class="o">.</span><span class="n">units</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">u</span> <span class="c1"># (1)!</span>
 
 <span class="k">def</span> <span class="nf">customfunc</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">volume</span><span class="p">):</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">binned_statistic</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s2">"sum"</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">10</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
@@ -1198,7 +1211,11 @@ These keywords should be passed to the "evaluate" call.</p>
 <ol>
 <li>We do not incorporate periodic boundary conditions in this example for brevity.</li>
 </ol>
-<p>Note that here we defined a custom function <em>customfunc</em> that will be applied to each halo respectively. The custom function accepts any inputs we feed to <em>ds.grouped()</em>. The <em>customfunc</em> receives numpy representation (rather than dask arrays) as inputs.</p></div>
+<p>Note that here we defined a custom function <em>customfunc</em> that will be applied to each halo respectively.
+The custom function accepts any inputs we feed to <em>ds.grouped()</em>.
+The <em>customfunc</em> receives numpy representation (rather than dask arrays) as inputs.
+As unit support with dask is still in development, unit-related warnings might occur.
+Units might not be passed, it can therefore be necessary to explicitly attach the expected units to the outputs again.</p></div>
 
 
 
