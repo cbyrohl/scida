@@ -86,18 +86,20 @@ def GroupDistance3D(arrs, snap=None):
         groupid = groupid.magnitude
         boxsize *= snap.ureg("code_length")
     pos_cat = snap.data["Group"]["GroupPos"][groupid]
-    dist3 = pos_part-pos_cat
+    dist3 = (pos_part-pos_cat)
+    dist3, u = dist3.magnitude, dist3.units
     dist3 = da.where(dist3>boxsize/2.0, boxsize-dist3, dist3)
     dist3 = da.where(dist3<=-boxsize/2.0, boxsize+dist3, dist3) # PBC
-    return dist3
+    return dist3 * u
 
 @fielddefs.register_field("all")
 def GroupDistance(arrs, snap=None):
     import dask.array as da
     dist3 = arrs["GroupDistance3D"]
+    dist3, u = dist3.magnitude, dist3.units
     dist = da.sqrt((dist3**2).sum(axis=1))
     dist = da.where(arrs["GroupID"]==-1, np.nan, dist) # set unbound gas to nan
-    return dist
+    return dist * u
 ```
 
 1. We define a list of field containers that we want to add particles to.
@@ -117,5 +119,4 @@ In above example, we now have the following fields available:
 gas = ds.data["PartType0"]
 print(gas["Volume"])
 print(gas["GroupDistance"])
-print(gas["Subhalo"])
 ```
