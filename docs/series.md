@@ -1,6 +1,12 @@
 # Series
-In the tutorial section, we have only considered individual data sets. 
-Often data sets are given in a series (e.g. multiple snapshots of a simulation, multiple exposures in a survey). 
+
+!!! info
+
+    If you want to run the code below, you will need to have an AREPO simulation available.
+    Specify the path in load() to the base directory of the simulation, which contains the "output" sub directory.
+
+In the tutorial section, we have only considered individual data sets.
+Often data sets are given in a series (e.g. multiple snapshots of a simulation, multiple exposures in a survey).
 Loading this as a series provides convenient access to all contained objects.
 
 ``` pycon
@@ -8,7 +14,7 @@ Loading this as a series provides convenient access to all contained objects.
 >>> series = load("TNGvariation_simulation") #(1)!
 ```
 
-1. Pass the base path of the simulation. 
+1. Pass the base path of the simulation.
 
 We can now access the individual data sets from the series object:
 
@@ -27,5 +33,3 @@ For example, cosmological simulations usually have information about their redsh
 >>> snp.header["Redshift"]
 2.0020281392528516
 ```
-
-

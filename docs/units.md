@@ -1,5 +1,11 @@
 # Units
 
+!!! info
+
+    If you want to run the code below, consider using the demo data
+    as described [here](supported_datasets/tng.md#demo-data).
+
+
 ## Loading data with units
 
 Loading data sets with

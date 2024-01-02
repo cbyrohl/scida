@@ -4,17 +4,9 @@ Cosmological simulations are often post-processed with a substructure identifica
 
 
 !!! info
-    If you want to run the code below, you can download and extract snapshot and its group catalog from the TNG50-4 test data:
 
-    ``` bash
-    wget https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl=1 -O snapshot.tar.gz
-    tar -xvf snapshot.tar.gz
-    wget https://heibox.uni-heidelberg.de/f/ff27fb6975fb4dc391ef/?dl=1 -O catalog.tar.gz
-    tar -xvf catalog.tar.gz
-    ```
-    The snapshot and group catalog should be placed in the same folder.
-    Then you can load the snapshot with `ds = load("snapdir_030")`. The group catalog should automatically be detected,
-    otherwise you can also pass the path to the catalog via the `catalog` keyword to `load()`.
+    If you want to run the code below, consider using the demo data
+    as described [here](supported_datasets/tng.md#demo-data).
 
 ## Adding and using halo/galaxy catalog information
 Currently, we support the usual FOF/Subfind combination and format. Their presence will be automatically detected and the catalogs will be loaded into *ds.data* as shown below.

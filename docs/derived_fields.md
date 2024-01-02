@@ -1,5 +1,10 @@
 # Derived fields
 
+!!! info
+
+    If you want to run the code below, consider using the demo data
+    as described [here](supported_datasets/tng.md#demo-data).
+
 Commonly during analysis, newly derived quantities/fields are to be synthesized from one or more snapshot fields into a new field. For example, while the temperature, pressure, or entropy of gas is not stored directly in the snapshots, they can be computed from fields which are present on disk.
 
 There are two ways to create new derived fields. For quick analysis, we can simply leverage dask arrays themselves.
