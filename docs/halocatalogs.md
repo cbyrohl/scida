@@ -2,6 +2,20 @@
 
 Cosmological simulations are often post-processed with a substructure identification algorithm in order to identify halos and galaxies. The resulting catalogs can be loaded and connect with the particle-level snapshot data.
 
+
+!!! info
+    If you want to run the code below, you can download and extract snapshot and its group catalog from the TNG50-4 test data:
+
+    ``` bash
+    wget https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl=1 -O snapshot.tar.gz
+    tar -xvf snapshot.tar.gz
+    wget https://heibox.uni-heidelberg.de/f/ff27fb6975fb4dc391ef/?dl=1 -O catalog.tar.gz
+    tar -xvf catalog.tar.gz
+    ```
+    The snapshot and group catalog should be placed in the same folder.
+    Then you can load the snapshot with `ds = load("snapdir_030")`. The group catalog should automatically be detected,
+    otherwise you can also pass the path to the catalog via the `catalog` keyword to `load()`.
+
 ## Adding and using halo/galaxy catalog information
 Currently, we support the usual FOF/Subfind combination and format. Their presence will be automatically detected and the catalogs will be loaded into *ds.data* as shown below.
 
@@ -87,7 +101,7 @@ In many cases, we do not want the particle data of an individual group, but we w
     you can also pass a list of halo IDs to evaluate via the "idxlist" keyword.
     These keywords should be passed to the "evaluate" call.
 
-???+ note
+???+ info
 
     By default, operations are done on for halos. By passing `objtype="subhalo"` to the
     `grouped` call, the operation is done on subhalos instead.
@@ -136,7 +150,8 @@ from scipy.stats import binned_statistic
 
 grp = ds.data["Group"]
 pos3 = gas["Coordinates"] - grp["GroupPos"][gas["GroupID"]]
-dist = da.sqrt(da.sum((pos3)**2, axis=1)) # (1)!
+p, u = pos3.magnitude, pos3.units
+dist = da.sqrt(da.sum(p**2, axis=1)) * u # (1)!
 
 def customfunc(dist, density, volume):
     a = binned_statistic(dist, density, statistic="sum", bins=np.linspace(0, 200, 10))[0]
@@ -151,4 +166,8 @@ s = g.apply(customfunc).evaluate()
 1. We do not incorporate periodic boundary conditions in this example for brevity.
 
 
-Note that here we defined a custom function *customfunc* that will be applied to each halo respectively. The custom function accepts any inputs we feed to *ds.grouped()*. The *customfunc* receives numpy representation (rather than dask arrays) as inputs.
+Note that here we defined a custom function *customfunc* that will be applied to each halo respectively.
+The custom function accepts any inputs we feed to *ds.grouped()*.
+The *customfunc* receives numpy representation (rather than dask arrays) as inputs.
+As unit support with dask is still in development, unit-related warnings might occur.
+Units might not be passed, it can therefore be necessary to explicitly attach the expected units to the outputs again.
