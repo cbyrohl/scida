@@ -1,4 +1,10 @@
 # Visualization
+
+!!! info
+
+    If you want to run the code below, consider using the demo data
+    as described [here](supported_datasets/tng.md#demo-data).
+
 ## Creating plots
 
 As we often use large datasets, we need to be careful with the amount of data we plot.

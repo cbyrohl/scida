@@ -14,8 +14,8 @@ If you want to use a dataset that is not listed here, read on [here](dataset_str
 | [LGalaxies](customs/lgalaxies.md)                     | :material-check-all:                  | Semi-analytical model for [Millenium](https://wwwmpa.mpa-garching.mpg.de/galform/virgo/millennium/) simulations |
 | [SDSS DR16](https://www.sdss.org/dr16/)               | :material-check:                      | *Observations* for millions of galaxies                                                                         |
 | [SIMBA](http://simba.roe.ac.uk/)                      | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
-| [TNG](https://www.tng-project.org/)                   | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
-| TNG-Cluster                                           | :material-check-all:                  | Cosmological zoom-in galaxy formation *simulations*                                                             |
+| [TNG](./supported_datasets/tng.md)                    | :material-check-all:                  | Cosmological galaxy formation *simulations*                                                                     |
+| [TNG-Cluster](https://www.tng-project.org/cluster/)   | :material-check-all:                  | Cosmological zoom-in galaxy formation *simulations*                                                             |
 
 
 
