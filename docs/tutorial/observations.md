@@ -26,7 +26,7 @@ First, we load the dataset using the convenience function `load()` that will det
 !!! info "Missing units"
     Below snippet will report missing units for some fields. This is expected.
     Those fields that cannot have their units determined automatically at this point and carry the unit **unknown**.
-    See [Units](../../units) for more information.
+    See [Units](../units.md) for more information.
 
 
 ```pycon title="Loading a dataset"
