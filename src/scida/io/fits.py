@@ -1,30 +1,33 @@
-"""
-FITS file reader for scida
-"""
-
-
 import dask
 import dask.array as da
 import numpy as np
 from dask import delayed
 
-from scida.misc import parse_size
+_sizeunits = {
+    "B": 1,
+    "KB": 10**3,
+    "MB": 10**6,
+    "GB": 10**9,
+    "TB": 10**12,
+    "KiB": 1024,
+    "MiB": 1024**2,
+    "GiB": 1024**3,
+}
+_sizeunits = {k.lower(): v for k, v in _sizeunits.items()}
+
+
+def parse_size(size):
+    idx = 0
+    for c in size:
+        if c.isnumeric():
+            continue
+        idx += 1
+    number = size[:idx]
+    unit = size[idx:]
+    return int(float(number) * _sizeunits[unit.lower().strip()])
 
 
 def fitsrecords_to_daskarrays(fitsrecords):
-    """
-    Convert a FITS record array to a dictionary of dask arrays.
-    Parameters
-    ----------
-    fitsrecords: np.ndarray
-        FITS record array
-
-    Returns
-    -------
-    dict
-        dictionary of dask arrays
-
-    """
     load_arr = delayed(lambda slc, field: fitsrecords[slc][field])
     shape = fitsrecords.shape
     darrdict = {}

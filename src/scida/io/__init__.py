@@ -1,7 +1,3 @@
-"""
-scida.io
-"""
-
 from scida.io._base import (
     ChunkedHDF5Loader,
     load,
