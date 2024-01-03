@@ -40,6 +40,16 @@ def test_areposimulation_load(testdatapath):
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
+def test_areposimulation_load_property_tolerance(testdatapath):
+    bs = ArepoSimulation(testdatapath)
+    bs.get_dataset(redshift=2.0)
+    with pytest.raises(ValueError):
+        # the next snapshot redshifts are 2.0 and 3.0, thus we should get an error
+        # for the default tolerance.
+        bs.get_dataset(redshift=2.5)
+
+
+@require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_asynccaching(cachedir, testdatapath):
     mstart = psutil.Process().memory_info().rss
     print(mstart)
