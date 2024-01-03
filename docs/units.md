@@ -16,10 +16,33 @@ ds = load("TNG50-4_snapshot")
 ```
 
 will automatically attach units to the data. This can be deactivated by passing "units=False" to the load function.
-By default, code units are used, alternatively, cgs conversions can be applied by passing "units='cgs'".
+By default, code units are used, alternatively, cgs conversions can be applied by passing "units='cgs'" (experimental).
 
 Units are introduced via the [pint](https://pint.readthedocs.io/en/stable/) package, see there for more details.
 
+Sometimes, the units cannot be inferred or parsed.
+This will be indicated in the output following the call to `load()`, e.g. as:
+
+``` pycon
+Missing units for 1 fields.
+Fields with missing units:
+  - /PartType0/FieldWithoutUnits (missing)
+```
+
+You can obtain more information on the cause by setting
+
+``` pycon
+>>> import logging
+>>> logging.getLogger().setLevel(logging.DEBUG)
+```
+
+before calling `load()`.
+
+Units for custom datasets can also be manually be specified using unit files, see [here](configuration.md#unit-files).
+
+
+
+## Using data with units
 
 ``` pycon
 >>> gas = ds.data["PartType0"]
