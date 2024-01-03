@@ -82,6 +82,19 @@ def test_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     assert "Cannot determine units" in caplog.text
 
 
+def test_check_missingunits(monkeypatch, gadgetfile_dummy, caplog):
+    p = gadgetfile_dummy.path
+    with h5py.File(p, "r+") as f:
+        f["PartType0"]["FieldWithoutUnits"] = np.ones(1)
+
+    ds = load(str(p), units=True)
+    assert ds.missing_units(), "Expected missing units"
+
+    # print the log entries
+
+    print(ds)
+
+
 def test_misc():
     ureg = UnitRegistry()
     print(ureg("dimensionless"))
