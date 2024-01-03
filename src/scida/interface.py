@@ -1,3 +1,7 @@
+"""
+Base dataset class and its handling.
+"""
+
 import abc
 import hashlib
 import logging
@@ -19,27 +23,22 @@ from scida.registries import dataset_type_registry
 log = logging.getLogger(__name__)
 
 
-def create_MixinDataset(cls, mixins):
-    newcls = cls
-    # print("mixins", mixins, cls)
-    if isinstance(mixins, list) and len(mixins) > 0:
-        name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
-        # adjust entry point if __init__ available in some mixin
-        nms = dict(cls.__dict__)
-        # need to make sure first mixin init is called over cls init
-        nms["__init__"] = mixins[0].__init__
-        newcls = type(name, (*mixins, cls), nms)
-    return newcls
-
-
 class MixinMeta(type):
+    """
+    Metaclass for Mixin classes.
+    """
+
     def __call__(cls, *args, **kwargs):
         mixins = kwargs.pop("mixins", None)
-        newcls = create_MixinDataset(cls, mixins)
+        newcls = create_datasetclass_with_mixins(cls, mixins)
         return type.__call__(newcls, *args, **kwargs)
 
 
 class BaseDataset(metaclass=MixinMeta):
+    """
+    Base class for all datasets.
+    """
+
     def __init__(
         self,
         path,
@@ -171,6 +170,17 @@ class BaseDataset(metaclass=MixinMeta):
         p.text(rpr)
 
     def __init_subclass__(cls, *args, **kwargs):
+        """
+        Register subclasses in the dataset type registry.
+        Parameters
+        ----------
+        args: list
+        kwargs: dict
+
+        Returns
+        -------
+        None
+        """
         super().__init_subclass__(*args, **kwargs)
         if cls.__name__ == "Delay":
             return  # nothing to register for Delay objects
@@ -391,5 +401,26 @@ class Selector(object):
         args[0].data = self.data_backup
 
 
-def hello():
-    print("hello")
+def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
+    """
+    Create a new class from a given class and a list of mixins.
+    Parameters
+    ----------
+    cls:
+        dataset class to be extended
+    mixins:
+        list of mixin classes to be added
+    Returns
+    -------
+    Type[BaseDataset]
+        new class with mixins
+    """
+    newcls = cls
+    if isinstance(mixins, list) and len(mixins) > 0:
+        name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
+        # adjust entry point if __init__ available in some mixin
+        nms = dict(cls.__dict__)
+        # need to make sure first mixin init is called over cls init
+        nms["__init__"] = mixins[0].__init__
+        newcls = type(name, (*mixins, cls), nms)
+    return newcls

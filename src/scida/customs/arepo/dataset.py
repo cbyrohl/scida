@@ -23,7 +23,7 @@ from scida.helpers_misc import (
     map_blocks,
     parse_humansize,
 )
-from scida.interface import create_MixinDataset
+from scida.interface import create_datasetclass_with_mixins
 from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
 from scida.io import load_metadata
 
@@ -101,7 +101,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         other_mixins = _determine_mixins(path=self.path)
         mixins += other_mixins
-        cls = create_MixinDataset(cls, mixins)
+        cls = create_datasetclass_with_mixins(cls, mixins)
 
         ureg = None
         if hasattr(self, "ureg"):

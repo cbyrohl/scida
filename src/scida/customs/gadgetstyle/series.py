@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from scida.discovertypes import _determine_mixins, _determine_type
-from scida.interface import create_MixinDataset
+from scida.interface import create_datasetclass_with_mixins
 from scida.series import DatasetSeries
 
 
@@ -80,7 +80,7 @@ class GadgetStyleSimulation(DatasetSeries):
         cls = _determine_type(p)[1][0]
 
         mixins = _determine_mixins(path=p)
-        cls = create_MixinDataset(cls, mixins)
+        cls = create_datasetclass_with_mixins(cls, mixins)
 
         kwargs = {arg_dict.get(k, "catalog"): paths_dict[k] for k in paths_dict.keys()}
         kwargs.update(**interface_kwargs)

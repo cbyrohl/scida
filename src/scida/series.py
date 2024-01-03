@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 from scida.discovertypes import CandidateStatus
 from scida.helpers_misc import hash_path, sprint
-from scida.interface import create_MixinDataset
+from scida.interface import create_datasetclass_with_mixins
 from scida.io import load_metadata
 from scida.misc import map_interface_args, return_cachefile_path
 from scida.registries import dataseries_type_registry
@@ -144,7 +144,7 @@ class DatasetSeries(object):
 
         # Catch Mixins and create type:
         mixins = interface_kwargs.pop("mixins", [])
-        datasetclass = create_MixinDataset(datasetclass, mixins)
+        datasetclass = create_datasetclass_with_mixins(datasetclass, mixins)
         self._dataset_cls = datasetclass
 
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
