@@ -47,8 +47,8 @@ class DocFile:
         # evaluate all at once (for now)
         code = "\n".join(self.codeblocks)
         print("Evaluating code:")
-        print(code)
-        exec(code)
+        print('"""' + code + '"""')
+        exec(code, globals())  # need to use global() to allow using imports
 
 
 def get_docfiles():
