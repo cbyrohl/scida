@@ -23,6 +23,11 @@ Choosing a subset means that the data size is small and easy to work with. We de
 
 First, we load the dataset using the convenience function `load()` that will determine the appropriate dataset class for us:
 
+!!! info "Missing units"
+    Below snippet will report missing units for some fields. This is expected.
+    Those fields that cannot have their units determined automatically at this point and carry the unit **unknown**.
+    See [Units](../../units) for more information.
+
 
 ```pycon title="Loading a dataset"
 >>> from scida import load

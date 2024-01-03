@@ -1,5 +1,6 @@
 import contextlib
 import logging
+from enum import Enum
 from typing import Optional, Union
 
 import numpy as np
@@ -17,6 +18,11 @@ from scida.helpers_misc import sprint
 from scida.interfaces.mixins.base import Mixin
 
 log = logging.getLogger(__name__)
+
+# enum for unit state
+UnitState = Enum(
+    "UnitState", ["success", "success_none", "missing", "mismatch", "parse_error"]
+)
 
 
 def str_to_unit(
@@ -39,8 +45,53 @@ def str_to_unit(
     if unitstr is not None:
         unitstr = unitstr.replace("dex", "decade")
         if unitstr.lower() == "none":
+            # should not get any units attached (-> no pint decorated object)
+            # this is different from unitless.
             return "none"
-    return ureg(unitstr)
+    unit = None
+    try:
+        unit = ureg(unitstr)
+    except pint.errors.UndefinedUnitError as e:
+        log.debug(
+            "Cannot parse unit string '%s' from metadata description. Skipping."
+            % unitstr
+        )
+        raise e
+    return unit
+
+
+def get_unitstr_from_attrs(attrs: dict) -> Optional[str]:
+    unitstr = None
+
+    # like a) generic SWIFT or b) FLAMINGO-SWIFT
+    swiftkeys = ["Conversion factor", "Expression for physical CGS units"]
+    swiftkeymatches = [k in attrs.keys() for k in swiftkeys]
+    if any(swiftkeymatches):
+        swiftkey = swiftkeys[np.where(swiftkeymatches)[0][0]]
+        unitstr = str(attrs[swiftkey])
+        unitstr = unitstr.split("[")[-1].split("]")[0]
+        if unitstr.strip() == "-":  # no units, done
+            unitstr = ""
+    elif "cgsunits" in attrs.keys():
+        # like EAGLE simulation
+        if attrs["cgsunits"] is not None:  # otherwise, this field has no units
+            unitstr = attrs["cgsunits"]
+        return unitstr
+    elif "description" in attrs.keys():
+        # see whether we have units in the description key
+        desc = attrs["description"]
+        try:
+            unitstr = desc.split("[")[1].split("]")[0]
+        except IndexError:
+            try:
+                unitstr = desc.split("(")[1].split(")")[0]
+            except IndexError:
+                pass
+        if unitstr is not None and unitstr != desc and unitstr != "None":
+            unitstr = unitstr.strip("'")
+        unitstr = unitstr.lower()
+
+    return unitstr
 
 
 def extract_units_from_attrs(
@@ -103,47 +154,15 @@ def extract_units_from_attrs(
             aname = k + "_scaling"
             unit *= udict[k] ** attrs.get(aname, 0.0)
         return unit
-    # like a) generic SWIFT or b) FLAMINGO-SWIFT
-    swiftkeys = ["Conversion factor", "Expression for physical CGS units"]
-    swiftkeymatches = [k in attrs.keys() for k in swiftkeys]
-    if any(swiftkeymatches):  # like SWIFT
-        swiftkey = swiftkeys[np.where(swiftkeymatches)[0][0]]
-        ustr = str(attrs[swiftkey])
-        ustr = ustr.split("[")[-1].split("]")[0]
-        if ustr.strip() == "-":  # no units, done
-            return unit
-        unit *= str_to_unit(ustr, ureg)
+
+    unitstr = get_unitstr_from_attrs(attrs)
+    if unitstr == "none":
+        return "none"
+    if unitstr is not None:
+        has_expl_units = True
+        unit *= str_to_unit(unitstr, ureg)
         return unit
 
-    if "cgsunits" in attrs.keys():  # like EAGLE
-        if attrs["cgsunits"] is not None:  # otherwise, this field has no units
-            unitstr = attrs["cgsunits"]
-            unit *= str_to_unit(unitstr, ureg)
-        return unit
-    if (
-        "description" in attrs.keys()
-    ):  # see whether we have units in the description key
-        unitstr = None
-        desc = attrs["description"]
-        try:
-            unitstr = desc.split("[")[1].split("]")[0]
-        except IndexError:
-            try:
-                unitstr = desc.split("(")[1].split(")")[0]
-            except IndexError:
-                pass
-        if unitstr is not None and unitstr != desc and unitstr != "None":
-            unitstr = unitstr.strip("'")
-            # parsing from the description is usually messy and not guaranteed to work. We thus allow failure here.
-            try:
-                unit *= str_to_unit(unitstr, ureg)
-                has_expl_units = True
-            except pint.errors.UndefinedUnitError:
-                log.info(
-                    "Cannot parse unit string '%s' from metadata description. Skipping."
-                    % unitstr
-                )
-            return unit
     if not has_expl_units and not has_convfactor:
         if require:
             raise ValueError("Could not find explicit units nor cgs-factor.")
@@ -254,6 +273,8 @@ class UnitMixin(Mixin):
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
+        self._logger_missingunits = log.getChild("missing_units")
+        self._unitstates = dict()
 
         ureg = kwargs.pop("ureg", None)
         if ureg is None:
@@ -376,46 +397,41 @@ class UnitMixin(Mixin):
                             mode=mode_metadata,
                             ureg=self.unitregistry,
                         )
+                    except pint.errors.UndefinedUnitError:
+                        self._unitstates[path] = UnitState.parse_error
                     except ValueError as e:
                         if str(e) != "Could not find units.":
                             raise e
                         print("Hint: Did you pass a unit file? Is it complete?")
                         raise ValueError("Could not find units for '%s'" % path)
-                without_units = isinstance(unit, str) and unit == "none"
-                if (
-                    unit is not None and not without_units
-                ) and unit_metadata is not None:
-                    # check whether both metadata and unit file agree
-                    val_cgs_uf = unit.to_base_units().magnitude
-                    val_cgs_md = unit_metadata.to_base_units().magnitude
-                    if not override and not np.isclose(
-                        val_cgs_uf, val_cgs_md, rtol=1e-3
-                    ):
-                        # print("(units were checked against each other in cgs units.)")
-                        msg = (
-                            "Unit mismatch for '%s': '%s' (unit file) vs. %s (metadata)"
-                            % (path, unit, unit_metadata)
-                        )
-                        msg += " [cgs-factors %.5e (unitfile) != %.5e (metadata)]" % (
-                            val_cgs_uf,
-                            val_cgs_md,
-                        )
-                        log.warning(msg)
+
+                    # we do not want any pint decorated objects for index fields
+                    # hardcoded for now
+                    index_fields = ["ParticleIDs", "FOFGroupIDs", "SOIDs"]
+                    if k in index_fields:
+                        unit_metadata = "none"
+
+                umatch = check_unit_mismatch(
+                    unit,
+                    unit_metadata,
+                    override=override,
+                    path=path,
+                    logger=self._logger_missingunits,
+                )
+                if not umatch and path not in self._unitstates.keys():
+                    self._unitstates[path] = UnitState.mismatch
 
                 if unit is None:
                     unit = unit_metadata
 
-                # if we still don't have a unit, we raise/warn as needed
+                uexist = check_missing_units(
+                    unit, missing_units, path, logger=self._logger_missingunits
+                )
+                if not uexist and path not in self._unitstates.keys():
+                    self._unitstates[path] = UnitState.missing
+
                 if unit is None:
                     unit = ureg("unknown")
-                    msg = (
-                        "Cannot determine units from neither unit file nor metadata for '%s'."
-                        % path
-                    )
-                    if missing_units == "raise":
-                        raise ValueError(msg)
-                    elif missing_units == "warn":
-                        log.warning(msg)
 
                 udict = self.units
                 for p in basepath.split("/"):
@@ -425,6 +441,12 @@ class UnitMixin(Mixin):
                         udict[p] = {}
                     udict = udict[p]
                 without_units = isinstance(unit, str) and unit == "none"
+
+                if without_units and path not in self._unitstates.keys():
+                    self._unitstates[path] = UnitState.success_none
+                if unit is not None and path not in self._unitstates.keys():
+                    self._unitstates[path] = UnitState.success
+
                 if not without_units:
                     udict[k] = unit
                     # redefine dask arrays with units
@@ -444,14 +466,6 @@ class UnitMixin(Mixin):
                         if units == "cgs" and isinstance(container[k], pint.Quantity):
                             container[k] = container[k].to_base_units()
 
-        # fwu = unithints.get("fields", {})
-        # for ptype in sorted(self.data):
-        #    self.units[ptype] = {}
-        #    pfields = self.data[ptype]
-        #    if fwu.get(ptype, "") == "no_units":
-        #        continue  # no units for any field in this group
-        #    for k in sorted(pfields.keys(withrecipes=True)):
-
         # manually run for "/" rest will be handled in walk_container
         add_units(self.data, "/")
         walk_container(self.data, handler_group=add_units)
@@ -463,6 +477,8 @@ class UnitMixin(Mixin):
         self.data.set_ureg(self.ureg)
         walk_container(self.data, handler_group=add_ureg)
 
+        self.missing_units()
+
     def _info_custom(self):
         rep = ""
         if hasattr(super(), "_info_custom"):
@@ -471,6 +487,33 @@ class UnitMixin(Mixin):
         rep += sprint("=== Unit-aware Dataset ===")
         rep += sprint("==========================")
         return rep
+
+    def missing_units(self, verbose=True):
+        """
+        Print information about fields with missing units.
+        Parameters
+        ----------
+        verbose
+
+        Returns
+        -------
+        bool:
+            Whether there are any missing units.
+        """
+        success_states = [UnitState.success, UnitState.success_none]
+        count = len([k for k, v in self._unitstates.items() if v not in success_states])
+        if count > 0:
+            print("Missing units for %d fields." % count)
+            if verbose:
+                print("Fields with missing units:")
+                for k, v in self._unitstates.items():
+                    if v not in success_states:
+                        print("  - %s (%s)" % (k, v.name))
+            print(
+                "Re-run with\n\t>>> import logging\n\t>>> logging.getLogger().setLevel(logging.DEBUG)\n"
+                "to learn more."
+            )
+        return count > 0
 
     # def save(self, *args, fields: Union[str, Dict[str, Union[List[str], Dict[str, da.Array]]]] = "all", **kwargs):
     #    print("Wrapping save call with UnitMixin")
@@ -495,3 +538,86 @@ def ignore_warn_redef(ureg):
         yield
     finally:
         ureg._on_redefinition = backupval
+
+
+def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log):
+    """
+    Check whether the units in the unit file and the metadata agree.
+
+    Parameters
+    ----------
+    logger: logging.Logger
+        The logger to use.
+    unit: Union[pint.Unit, str]
+        The unit from the unit file.
+    unit_metadata: Union[pint.Unit, str]
+        The unit from the metadata.
+    override: bool
+        Whether to override the metadata units.
+    path: str
+        Location of the field in the dataset (for logging purposes).
+
+    Returns
+    -------
+    bool:
+        Whether the units agree.
+    """
+    without_units = unit == "none" or unit_metadata == "none"  # explicitly no units
+    if unit is not None and unit_metadata is not None:
+        msg = None
+        if without_units and unit == unit_metadata:
+            # all good
+            return True
+        elif without_units and unit != unit_metadata:
+            msg = "Unit mismatch for '%s': '%s' (unit file) vs. %s (metadata)" % (
+                path,
+                unit,
+                unit_metadata,
+            )
+        else:
+            # check whether both metadata and unit file agree
+            val_cgs_uf = unit.to_base_units().magnitude
+            val_cgs_md = unit_metadata.to_base_units().magnitude
+            if not override and not np.isclose(val_cgs_uf, val_cgs_md, rtol=1e-3):
+                msg = "Unit mismatch for '%s': '%s' (unit file) vs. %s (metadata)" % (
+                    path,
+                    unit,
+                    unit_metadata,
+                )
+                msg += " [cgs-factors %.5e (unitfile) != %.5e (metadata)]" % (
+                    val_cgs_uf,
+                    val_cgs_md,
+                )
+        if msg is not None:
+            logger.info(msg)
+        return False
+    return True
+
+
+def check_missing_units(unit, missing_units, path, logger=log):
+    """
+    Check whether units are missing and raise/warn as needed.
+    Parameters
+    ----------
+    unit: Union[pint.Unit, str]
+    missing_units: str
+    path: str
+
+    Returns
+    -------
+    bool:
+        Whether the units exist
+
+    """
+    # if we still don't have a unit, we raise/warn as needed
+    if unit is None:
+        msg = (
+            "Cannot determine units from neither unit file nor metadata for '%s'."
+            % path
+        )
+        if missing_units == "raise":
+            raise ValueError(msg)
+        elif missing_units == "warn":
+            logger.info(msg)
+        return False
+    return True

@@ -1,5 +1,10 @@
 # Derived fields
 
+!!! info
+
+    If you want to run the code below, consider using the demo data
+    as described [here](supported_datasets/tng.md#demo-data).
+
 Commonly during analysis, newly derived quantities/fields are to be synthesized from one or more snapshot fields into a new field. For example, while the temperature, pressure, or entropy of gas is not stored directly in the snapshots, they can be computed from fields which are present on disk.
 
 There are two ways to create new derived fields. For quick analysis, we can simply leverage dask arrays themselves.
@@ -42,7 +47,8 @@ ds = load("TNG50-4_snapshot")
 def VelMag(arrs, **kwargs):
     import dask.array as da
     vel = arrs['Velocities']
-    return da.sqrt(vel[:,0]**2 + vel[:,1]**2 + vel[:,2]**2)
+    v, u = vel.magnitude, vel.units
+    return da.sqrt(v[:,0]**2 + v[:,1]**2 + v[:,2]**2) * u
 ```
 
 1.  Here, *stars* is the name of the **field container** the field should be added to. The field will now be available as ds\['stars'\]\['VelMag'\]
@@ -80,18 +86,20 @@ def GroupDistance3D(arrs, snap=None):
         groupid = groupid.magnitude
         boxsize *= snap.ureg("code_length")
     pos_cat = snap.data["Group"]["GroupPos"][groupid]
-    dist3 = pos_part-pos_cat
+    dist3 = (pos_part-pos_cat)
+    dist3, u = dist3.magnitude, dist3.units
     dist3 = da.where(dist3>boxsize/2.0, boxsize-dist3, dist3)
     dist3 = da.where(dist3<=-boxsize/2.0, boxsize+dist3, dist3) # PBC
-    return dist3
+    return dist3 * u
 
 @fielddefs.register_field("all")
 def GroupDistance(arrs, snap=None):
     import dask.array as da
     dist3 = arrs["GroupDistance3D"]
+    dist3, u = dist3.magnitude, dist3.units
     dist = da.sqrt((dist3**2).sum(axis=1))
     dist = da.where(arrs["GroupID"]==-1, np.nan, dist) # set unbound gas to nan
-    return dist
+    return dist * u
 ```
 
 1. We define a list of field containers that we want to add particles to.
@@ -111,5 +119,4 @@ In above example, we now have the following fields available:
 gas = ds.data["PartType0"]
 print(gas["Volume"])
 print(gas["GroupDistance"])
-print(gas["Subhalo"])
 ```

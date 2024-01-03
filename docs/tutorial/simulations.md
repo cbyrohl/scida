@@ -3,6 +3,14 @@
 !!! info "Tutorial dataset"
     In the following, we will use a small test dataset from the [TNG50](https://www.tng-project.org/) simulation.
     This is a cosmological galaxy formation simulation. This dataset is still a gigabyte in size and can be downloaded [here](https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/).
+    On the command line, you can download and extract the dataset with:
+
+    ``` bash
+    wget https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl=1 -O snapshot.tar.gz
+    tar -xvf snapshot.tar.gz
+    ```
+    The snapshot will be extracted into a folder called *snapdir_030*.
+
     Note that analysis is not limited to simulations, but also observational data.
     Check [Supported Datasets](../supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
@@ -34,8 +42,8 @@ First, we load the dataset using the convenience function `load()` that will det
 
 ```pycon title="Loading a dataset"
 >>> from scida import load
->>> ds = load("TNG50-4_snapshot", units=True) #(1)!
->>> ds.info() #(2)!
+>>> ds = load("snapdir_030")
+>>> ds.info() #(1)!
 class: ArepoSnapshotWithUnitMixinAndCosmologyMixin
 source: /vera/u/byrohlc/Downloads/snapdir_030
 === Cosmological Simulation ===
@@ -54,9 +62,7 @@ cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3
 ============
 ```
 
-1. The `units=True` argument will attach code units to all fields. Alternative choices are *False* to go without units and *cgs* for cgs units.
-   The current default is *False*, which will change to *True* in the near future.
-2. Call to receive some information about the loaded dataset.
+1. Call to receive some information about the loaded dataset.
 
 
 
@@ -129,7 +135,7 @@ which we present in the next section.
 
 ### Units
 
-If passing `units=True` to `load()`, the dataset will be loaded with code units attached to all fields.
+If passing `units=True` (default) to `load()`, the dataset will be loaded with code units attached to all fields.
 These units are attached to each field / dask array. Units are provided via the pint package.
 See the [pint documentation](https://pint.readthedocs.io/en/stable/) for more information.
 Also check out [this page](../units.md) for more unit-related examples.

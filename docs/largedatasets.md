@@ -1,4 +1,10 @@
 # Handling Large Data Sets
+
+
+!!! info
+
+    If you want to run the code below, you need access to the full [TNG](https://www.tng-project.org) simulation dataset.
+
 Until now, we have applied our framework to a very small simulation.
 However, what if we are working with a very large data set
 (like the TNG50-1 cosmological simulation, which has $2160^3$ particles, $512$ times more than TNG50-4)?

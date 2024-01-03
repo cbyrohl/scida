@@ -292,7 +292,12 @@ class FieldContainer(MutableMapping):
                         dss[k + str(i)] = v[:, i]
             else:
                 dss[k] = v
-        dfs = [dd.from_dask_array(v, columns=[k]) for k, v in dss.items()]
+        dfs = []
+        for k, v in dss.items():
+            if isinstance(v, pint.Quantity):
+                # pint quantities not supported yet in dd, so remove for now
+                v = v.magnitude
+            dfs.append(dd.from_dask_array(v, columns=[k]))
         ddf = dd.concat(dfs, axis=1)
         return ddf
 
