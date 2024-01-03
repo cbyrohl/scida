@@ -25,6 +25,9 @@ class MTNGArepoSnapshot(ArepoSnapshot):
 
         # attempt to load regular snapshot
         super().__init__(path, chunksize=chunksize, catalog=catalog, **tkwargs)
+        # need to add mtng unit peculiarities
+        # later unit file takes precedence
+        self._defaultunitfiles += ["units/mtng.yaml"]
 
         if tkwargs["fileprefix"] == "snapshot-prevmostboundonly_":
             # this is a mostbound snapshot, so we are done

@@ -43,11 +43,14 @@ fields:
     GFM_MetalsTagged:
     GFM_WindDMVelDisp: km / s
     GFM_WindHostHaloMass: code_mass
+    HighResGasMass: code_mass
     InternalEnergy: (km / s) ^ 2
     InternalEnergyOld: (km / s)^2
     Machnumber:
     MagneticField: (h / a^2) * (code_pressure)^(1/2)
     MagneticFieldDivergence: (h^3 / a^2) * code_mass^(1/2) * (km/s) * (ckpc)^(-5/2)
+    # we guess the alternative has the same units as the original field...
+    MagneticFieldDivergenceAlternative: (h^3 / a^2) * code_mass^(1/2) * (km/s) * (ckpc)^(-5/2)
     NeutralHydrogenAbundance:
     # TODO: Pressure?
     SmoothingLength: code_length
