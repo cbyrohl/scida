@@ -25,6 +25,47 @@ class MTNGArepoSnapshot(ArepoSnapshot):
 
         # attempt to load regular snapshot
         super().__init__(path, chunksize=chunksize, catalog=catalog, **tkwargs)
+        # later unit file takes precedence
+        self._defaultunitfiles += ["units/mtng.yaml"]
+        self.parameters = {}
+        self._grouplengths = {}
+        self._subhalolengths = {}
+        # not needed for group catalogs as entries are back-to-back there, we will provide a property for this
+        self._subhalooffsets = {}
+        self.misc = {}  # for storing misc info
+        prfx = kwargs.pop("fileprefix", None)
+        if prfx is None:
+            prfx = self._get_fileprefix(path)
+        super().__init__(path, chunksize=chunksize, fileprefix=prfx, **kwargs)
+
+        self.catalog = catalog
+        if not self.iscatalog:
+            if self.catalog is None:
+                self.discover_catalog()
+                # try to discover group catalog in parent directories.
+            if self.catalog == "none":
+                pass  # this string can be set to explicitly disable catalog
+            elif self.catalog:
+                catalog_cls = kwargs.get("catalog_cls", None)
+                self.load_catalog(kwargs, catalog_cls=catalog_cls)
+
+        # add aliases
+        aliases = dict(
+            PartType0=["gas", "baryons"],
+            PartType1=["dm", "dark matter"],
+            PartType2=["lowres", "lowres dm"],
+            PartType3=["tracer", "tracers"],
+            PartType4=["stars"],
+            PartType5=["bh", "black holes"],
+        )
+        for k, lst in aliases.items():
+            if k not in self.data:
+                continue
+            for v in lst:
+                self.data.add_alias(v, k)
+
+        # set metadata
+        self._set_metadata()
 
         if tkwargs["fileprefix"] == "snapshot-prevmostboundonly_":
             # this is a mostbound snapshot, so we are done

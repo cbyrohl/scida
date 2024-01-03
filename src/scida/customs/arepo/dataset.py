@@ -37,11 +37,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
         self.config = {}
-        # later unit file takes precedence
-        self._defaultunitfiles: List[str] = [
-            "units/gadget_cosmological.yaml",
-            "units/mtng.yaml",
-        ]
+        self._defaultunitfiles: List[str] = ["units/gadget_cosmological.yaml"]
         self.parameters = {}
         self._grouplengths = {}
         self._subhalolengths = {}
