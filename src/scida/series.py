@@ -33,7 +33,6 @@ def delay_init(cls):
     Returns
     -------
     Delay
-
     """
 
     class Delay(cls):
@@ -177,7 +176,7 @@ class DatasetSeries(object):
             (unused)
         Returns
         -------
-
+        None
         """
         super().__init_subclass__(*args, **kwargs)
         dataseries_type_registry[cls.__name__] = cls
@@ -200,6 +199,7 @@ class DatasetSeries(object):
 
         Returns
         -------
+        Dataset
 
         """
         return self.datasets[key]
@@ -252,6 +252,7 @@ class DatasetSeries(object):
         Dummy property to make user aware this is not a Dataset instance.
         Returns
         -------
+        None
 
         """
         raise AttributeError(
@@ -261,6 +262,7 @@ class DatasetSeries(object):
     def _repr_dict(self) -> Dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
+
         Returns
         -------
         dict
@@ -274,6 +276,7 @@ class DatasetSeries(object):
     def __repr__(self) -> str:
         """
         Return a string representation of the datasetseries object.
+
         Returns
         -------
         str
@@ -431,9 +434,11 @@ class DatasetSeries(object):
     def metadata(self):
         """
         Return metadata dictionary for this series.
+
         Returns
         -------
-
+        Optional[dict]
+            metadata dictionary
         """
         if self._metadata is not None:
             return self._metadata

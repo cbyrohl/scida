@@ -98,15 +98,17 @@ class BaseDataset(metaclass=MixinMeta):
     def _info_custom(self):
         """
         Custom information to be printed by info() method.
+
         Returns
         -------
-
+        None
         """
         return None
 
     def info(self, listfields: bool = False):
         """
         Print information about the dataset.
+
         Parameters
         ----------
         listfields: bool
@@ -114,7 +116,7 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
-
+        None
         """
         rep = ""
         rep += "class: " + sprint(self.__class__.__name__)
@@ -131,6 +133,7 @@ class BaseDataset(metaclass=MixinMeta):
     def _repr_dict(self) -> Dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
+
         Returns
         -------
         dict
@@ -142,6 +145,7 @@ class BaseDataset(metaclass=MixinMeta):
     def __repr__(self) -> str:
         """
         Return a string representation of the object.
+
         Returns
         -------
         str
@@ -164,7 +168,7 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
-
+        None
         """
         rpr = self.__repr__()
         p.text(rpr)
@@ -201,6 +205,7 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
+        bool
 
         """
         return False
@@ -226,6 +231,7 @@ class BaseDataset(metaclass=MixinMeta):
     def __dask_tokenize__(self) -> int:
         """
         Token for dask to be derived -- naively from the file location.
+
         Returns
         -------
         int
@@ -235,9 +241,10 @@ class BaseDataset(metaclass=MixinMeta):
     def return_data(self) -> FieldContainer:
         """
         Return the data container.
+
         Returns
         -------
-
+        FieldContainer
         """
         return self.data
 
@@ -256,6 +263,8 @@ class BaseDataset(metaclass=MixinMeta):
         Save the dataset to a file using the 'zarr' format.
         Parameters
         ----------
+        extra_attrs: dict
+            additional attributes to save in the root group
         fname: str
             Filename to save to.
         fields: str or dict
@@ -269,7 +278,7 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
-
+        None
         """
         # We use zarr, as this way we have support to directly write into the file by the workers
         # (rather than passing back the data chunk over the scheduler to the interface)
@@ -339,6 +348,7 @@ class Dataset(BaseDataset):
     def validate_path(cls, path, *args, **kwargs):
         """
         Validate whether the given path is a valid path for this dataset.
+
         Parameters
         ----------
         path
@@ -347,7 +357,7 @@ class Dataset(BaseDataset):
 
         Returns
         -------
-
+        bool
         """
         return True
 
@@ -404,12 +414,14 @@ class Selector(object):
 def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
     """
     Create a new class from a given class and a list of mixins.
+
     Parameters
     ----------
     cls:
         dataset class to be extended
     mixins:
         list of mixin classes to be added
+
     Returns
     -------
     Type[BaseDataset]

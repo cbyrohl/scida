@@ -8,6 +8,7 @@ from .interface import Dataset
 def copy_to_zarr(fp_in, fp_out, compressor=None):
     """
     Reads and converts a scida Dataset to a zarr object on disk
+
     Parameters
     ----------
     fp_in: str
@@ -19,7 +20,7 @@ def copy_to_zarr(fp_in, fp_out, compressor=None):
 
     Returns
     -------
-
+    None
     """
     ds = Dataset(fp_in)
     compressor_dflt = zarr.storage.default_compressor

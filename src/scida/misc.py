@@ -52,6 +52,7 @@ def get_container_from_path(
 def return_hdf5cachepath(path, fileprefix: Optional[str] = None) -> str:
     """
     Returns the path to the cache file for a given path.
+
     Parameters
     ----------
     path: str
@@ -94,6 +95,7 @@ def path_hdf5cachefile_exists(path, **kwargs) -> bool:
 def return_cachefile_path(fname: str) -> Optional[str]:
     """
     Return the path to the cache file, return None if path cannot be generated.
+
     Parameters
     ----------
     fname: str
@@ -101,6 +103,7 @@ def return_cachefile_path(fname: str) -> Optional[str]:
 
     Returns
     -------
+    str or None
 
     """
     config = get_config()
@@ -129,6 +132,8 @@ def map_interface_args(paths: list, *args, **kwargs):
 
     Returns
     -------
+    generator
+        yields path, args, kwargs
 
     """
     n = len(paths)
@@ -224,6 +229,7 @@ def rectangular_cutout_mask(
 def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool = True):
     """
     Check whether the given dataset can be identified to be a certain simulation (type) by its metadata.
+
     Parameters
     ----------
     metadata: dict
@@ -235,6 +241,8 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
 
     Returns
     -------
+    list
+        candidates
 
     """
     c = get_simulationconfig()
@@ -310,7 +318,7 @@ def deepdictkeycopy(olddict: object, newdict: object) -> None:
 
     Returns
     -------
-
+    None
     """
     cls = olddict.__class__
     for k, v in olddict.items():
@@ -344,7 +352,6 @@ def parse_size(size):
     -------
     int
         size in bytes
-
     """
     idx = 0
     for c in size:

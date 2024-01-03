@@ -161,18 +161,20 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     def return_data(self):
         """
         Return data.
+
         Returns
         -------
-
+        None
         """
         return super().return_data()
 
     def discover_catalog(self):
         """
         Discover the group catalog given the current path
+
         Returns
         -------
-
+        None
         """
         p = str(self.path)
         # order of candidates matters. For Illustris "groups" must precede "fof_subhalo_tab"
@@ -204,7 +206,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         Returns
         -------
-
+        None
         """
         num = part_type_num(parttype)
         if construct:  # TODO: introduce (immediate) construct option later
@@ -221,9 +223,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     def add_catalogIDs(self) -> None:
         """
         Add field for halo and subgroup IDs for all particle types.
+
         Returns
         -------
-
+        None
         """
         # TODO: make these delayed objects and properly pass into (delayed?) numba functions:
         # https://docs.dask.org/en/stable/delayed-best-practices.html#avoid-repeatedly-putting-large-inputs-into-delayed-calls
@@ -384,9 +387,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         chunksize_bytes: Optional[int]
         nmax: Optional[int]
             Only process the first nmax halos.
+
         Returns
         -------
-
+        None
         """
         dfltkwargs = get_kwargs(func)
         fieldnames = dfltkwargs.get("fieldnames", None)
@@ -857,7 +861,7 @@ def get_localshidx(
 
     Returns
     -------
-
+    None
     """
     dtype = np.int32
     if index_unbound is None:
@@ -967,16 +971,20 @@ def compute_localsubhaloindex(
 def get_shcounts_shcells(SubhaloGrNr, hlength):
     """
     Returns the id of the first subhalo and count of subhalos per halo.
+
     Parameters
     ----------
     SubhaloGrNr: np.ndarray
-    The group identifier that each subhalo belongs to respectively
+        The group identifier that each subhalo belongs to respectively
     hlength: int
-    The number of halos in the snapshot
+        The number of halos in the snapshot
 
     Returns
     -------
-
+    shcounts: np.ndarray
+        The number of subhalos per halo
+    shnumber: np.ndarray
+        The index of the first subhalo per halo
     """
     shcounts = np.zeros(hlength, dtype=np.int32)  # number of subhalos per halo
     shnumber = np.zeros(hlength, dtype=np.int32)  # index of first subhalo per halo
@@ -1046,7 +1054,7 @@ def map_group_operation_get_chunkedges(
 
     Returns
     -------
-
+    None
     """
     cpucost_particle = 1.0  # we only care about ratio, so keep particle cost fixed.
     cost = cpucost_particle * lengths + cpucost_halo
@@ -1126,7 +1134,7 @@ def map_group_operation(
 
     Returns
     -------
-
+    None
     """
     if isinstance(func, ChainOps):
         dfltkwargs = func.kwargs

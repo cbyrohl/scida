@@ -180,7 +180,7 @@ def copy_defaultconfig(overwrite=False) -> None:
 
     Returns
     -------
-
+    None
     """
 
     path_user = os.path.expanduser("~")
@@ -207,7 +207,7 @@ def get_config_fromfile(resource: str) -> Dict:
 
     Returns
     -------
-
+    None
     """
     if resource == "":
         raise ValueError("Config name cannot be empty.")
@@ -304,7 +304,7 @@ def get_config_fromfiles(paths: List[str], subconf_keys: Optional[List[str]] = N
 
     Returns
     -------
-
+    None
     """
     confs = []
     for path in paths:

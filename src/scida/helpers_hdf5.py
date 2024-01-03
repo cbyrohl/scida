@@ -68,15 +68,20 @@ def create_mergedhdf5file(
 
     Parameters
     ----------
-    fn: file to write to
-    files: files to merge
-    max_workers: parallel workers to process files
-    virtual: whether to create linked ("virtual") dataset on disk (otherwise copy)
-    groupwise_shape: Require shapes to be the same within a group
+    fn: str
+        file to write to
+    files: list
+        files to merge
+    max_workers: int
+        parallel workers to process files
+    virtual: bool
+        whether to create linked ("virtual") dataset on disk (otherwise copy)
+    groupwise_shape: bool
+        whether to require shapes to be the same within a group
 
     Returns
     -------
-
+    None
     """
     if max_workers is None:
         # read from config
