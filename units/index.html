@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.1">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.45e1311d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
       
       
 
@@ -586,6 +586,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#using-data-with-units" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using data with units
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#unit-conversions" class="md-nav__link">
     <span class="md-ellipsis">
       Unit conversions
@@ -890,6 +899,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#using-data-with-units" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using data with units
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#unit-conversions" class="md-nav__link">
     <span class="md-ellipsis">
       Unit conversions
@@ -917,14 +935,32 @@
 
 
 <div><h1 id="units">Units</h1>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>If you want to run the code below, consider using the demo data
+as described <a href="../supported_datasets/tng/#demo-data">here</a>.</p>
+</div>
 <h2 id="loading-data-with-units">Loading data with units</h2>
 <p>Loading data sets with</p>
 <div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">)</span>
 </code></pre></div>
 <p>will automatically attach units to the data. This can be deactivated by passing "units=False" to the load function.
-By default, code units are used, alternatively, cgs conversions can be applied by passing "units='cgs'".</p>
+By default, code units are used, alternatively, cgs conversions can be applied by passing "units='cgs'" (experimental).</p>
 <p>Units are introduced via the <a href="https://pint.readthedocs.io/en/stable/">pint</a> package, see there for more details.</p>
+<p>Sometimes, the units cannot be inferred or parsed.
+This will be indicated in the output following the call to <code>load()</code>, e.g. as:</p>
+<div class="language-pycon highlight"><pre><span></span><code><span class="go">Missing units for 1 fields.</span>
+<span class="go">Fields with missing units:</span>
+<span class="go">  - /PartType0/FieldWithoutUnits (missing)</span>
+</code></pre></div>
+<p>You can obtain more information on the cause by setting</p>
+<div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</code></pre></div>
+<p>before calling <code>load()</code>.</p>
+<p>Units for custom datasets can also be manually be specified using unit files, see <a href="../configuration/#unit-files">here</a>.</p>
+<h2 id="using-data-with-units">Using data with units</h2>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span><span class="p">[</span><span class="s2">"Coordinates"</span><span class="p">]</span>
 <span class="go">dask.array&lt;mul, shape=(18540104, 3), dtype=float64, chunksize=(5592405, 3), chunktype=numpy.ndarray&gt; &lt;Unit('code_length')&gt;</span>

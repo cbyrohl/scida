@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.1">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.45e1311d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.50c56a3b.min.css">
       
       
 
@@ -1090,15 +1090,8 @@
 <p>Cosmological simulations are often post-processed with a substructure identification algorithm in order to identify halos and galaxies. The resulting catalogs can be loaded and connect with the particle-level snapshot data.</p>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If you want to run the code below, you can download and extract snapshot and its group catalog from the TNG50-4 test data:</p>
-<p></p><div class="language-bash highlight"><pre><span></span><code>wget<span class="w"> </span>https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl<span class="o">=</span><span class="m">1</span><span class="w"> </span>-O<span class="w"> </span>snapshot.tar.gz
-tar<span class="w"> </span>-xvf<span class="w"> </span>snapshot.tar.gz
-wget<span class="w"> </span>https://heibox.uni-heidelberg.de/f/ff27fb6975fb4dc391ef/?dl<span class="o">=</span><span class="m">1</span><span class="w"> </span>-O<span class="w"> </span>catalog.tar.gz
-tar<span class="w"> </span>-xvf<span class="w"> </span>catalog.tar.gz
-</code></pre></div>
-The snapshot and group catalog should be placed in the same folder.
-Then you can load the snapshot with <code>ds = load("snapdir_030")</code>. The group catalog should automatically be detected,
-otherwise you can also pass the path to the catalog via the <code>catalog</code> keyword to <code>load()</code>.
+<p>If you want to run the code below, consider using the demo data
+as described <a href="../supported_datasets/tng/#demo-data">here</a>.</p>
 </div>
 <h2 id="adding-and-using-halogalaxy-catalog-information">Adding and using halo/galaxy catalog information</h2>
 <p>Currently, we support the usual FOF/Subfind combination and format. Their presence will be automatically detected and the catalogs will be loaded into <em>ds.data</em> as shown below.</p>

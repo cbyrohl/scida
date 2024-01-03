@@ -12,7 +12,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.1">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -20,7 +20,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.45e1311d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
       
       
 
@@ -1338,7 +1338,83 @@ snp.header["Redshift"]</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>WARNING:scida.interfaces.mixins.units:Cannot determine units from neither unit file nor metadata for '/PartType0/MagneticFieldDivergenceAlternative'.
+<pre>INFO:scida.interfaces.mixins.units.missing_units:Cannot determine units from neither unit file nor metadata for '/PartType0/MagneticFieldDivergenceAlternative'.
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Missing units for 64 fields.
+Fields with missing units:
+  - /PartType0/Coordinates (mismatch)
+  - /PartType0/Density (mismatch)
+  - /PartType0/ElectronAbundance (mismatch)
+  - /PartType0/GFM_AGNRadiation (mismatch)
+  - /PartType0/GFM_CoolingRate (mismatch)
+  - /PartType0/GFM_Metallicity (mismatch)
+  - /PartType0/GFM_Metals (mismatch)
+  - /PartType0/GFM_WindDMVelDisp (mismatch)
+  - /PartType0/GFM_WindHostHaloMass (mismatch)
+  - /PartType0/InternalEnergy (mismatch)
+  - /PartType0/MagneticFieldDivergenceAlternative (missing)
+  - /PartType0/Masses (mismatch)
+  - /PartType0/NeutralHydrogenAbundance (mismatch)
+  - /PartType0/Potential (mismatch)
+  - /PartType0/StarFormationRate (mismatch)
+  - /PartType0/SubfindDMDensity (mismatch)
+  - /PartType0/SubfindDensity (mismatch)
+  - /PartType0/SubfindHsml (mismatch)
+  - /PartType0/SubfindVelDisp (mismatch)
+  - /PartType0/Velocities (mismatch)
+  - /PartType0/CenterOfMass (mismatch)
+  - /PartType1/Coordinates (mismatch)
+  - /PartType1/Potential (mismatch)
+  - /PartType1/SubfindDMDensity (mismatch)
+  - /PartType1/SubfindDensity (mismatch)
+  - /PartType1/SubfindHsml (mismatch)
+  - /PartType1/SubfindVelDisp (mismatch)
+  - /PartType1/Velocities (mismatch)
+  - /PartType4/BirthPos (mismatch)
+  - /PartType4/BirthVel (mismatch)
+  - /PartType4/Coordinates (mismatch)
+  - /PartType4/GFM_InitialMass (mismatch)
+  - /PartType4/GFM_Metallicity (mismatch)
+  - /PartType4/GFM_Metals (mismatch)
+  - /PartType4/GFM_StellarFormationTime (mismatch)
+  - /PartType4/GFM_StellarPhotometrics (mismatch)
+  - /PartType4/Masses (mismatch)
+  - /PartType4/Potential (mismatch)
+  - /PartType4/SubfindDMDensity (mismatch)
+  - /PartType4/SubfindDensity (mismatch)
+  - /PartType4/SubfindHsml (mismatch)
+  - /PartType4/SubfindVelDisp (mismatch)
+  - /PartType4/Velocities (mismatch)
+  - /PartType5/BH_CumEgyInjection_QM (mismatch)
+  - /PartType5/BH_CumEgyInjection_RM (mismatch)
+  - /PartType5/BH_CumMassGrowth_QM (mismatch)
+  - /PartType5/BH_CumMassGrowth_RM (mismatch)
+  - /PartType5/BH_Density (mismatch)
+  - /PartType5/BH_Hsml (mismatch)
+  - /PartType5/BH_Mass (mismatch)
+  - /PartType5/BH_Mdot (mismatch)
+  - /PartType5/BH_MdotBondi (mismatch)
+  - /PartType5/BH_MdotEddington (mismatch)
+  - /PartType5/BH_Pressure (mismatch)
+  - /PartType5/BH_Progs (mismatch)
+  - /PartType5/BH_U (mismatch)
+  - /PartType5/Coordinates (mismatch)
+  - /PartType5/Masses (mismatch)
+  - /PartType5/Potential (mismatch)
+  - /PartType5/SubfindDMDensity (mismatch)
+  - /PartType5/SubfindDensity (mismatch)
+  - /PartType5/SubfindHsml (mismatch)
+  - /PartType5/SubfindVelDisp (mismatch)
+  - /PartType5/Velocities (mismatch)
+Re-run with
+	&gt;&gt;&gt; import logging
+	&gt;&gt;&gt; logging.getLogger().setLevel(logging.DEBUG)
+to learn more.
 </pre>
 </div>
 </div>
