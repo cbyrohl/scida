@@ -9,17 +9,13 @@ theme:
     - navigation.indexes
 
 nav:
-  - 'Scida': index.md
+  - 'Scida': moduleindex.md
   - 'Getting Started':
     - "Installation": install.md
     - 'Tutorial':
-      - 'Tutorial': tutorial/index.md
+      - 'Tutorial': tutorial/moduleindex.md
       - 'Simulations': tutorial/simulations.md
       - 'Observations': tutorial/observations.md
-    #    - 'Getting Started': notebooks/gettingstarted.ipynb
-    #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
-    #    - 'Series': notebooks/series.ipynb
-    #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
   - 'Features':
     - 'Supported datasets': supported_data.md
     - 'Visualization': visualization.md
@@ -32,7 +28,9 @@ nav:
       - 'Halo Catalogs': halocatalogs.md
   - 'Configuration': configuration.md
   - 'FAQ': faq.md
-  - api_docs.md
+  - 'API':
+    - 'Basic': api/base_api.md
+    - 'Index': api/moduleindex.md
 
 markdown_extensions:
   - markdown_include.include:
@@ -87,11 +85,11 @@ plugins:
         vertical-align: top
         height: 12.172vw
         width: 12.172vw
-  - mkdocs-jupyter:
-      execute: !ENV [JUPYTER_EXECUTE, true]
-      execute_ignore:
-        - "notebooks/static/*.ipynb"
-      kernel_name: scida
+  #- mkdocs-jupyter:
+  #    execute: !ENV [JUPYTER_EXECUTE, true]
+  #    execute_ignore:
+  #      - "notebooks/static/*.ipynb"
+  #    kernel_name: scida
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -111,3 +109,4 @@ extra_javascript:
 extra_css:
   - stylesheets/gridview.css
   - stylesheets/code_select.css
+  - stylesheets/mkdocstrings.css

@@ -208,6 +208,32 @@ def load(
     force_class: Optional[object] = None,
     **kwargs
 ):
+    """
+    Load a dataset or dataset series from a given path.
+    This function will automatically determine the best-matching
+    class to use and return the initialized instance.
+
+    Parameters
+    ----------
+    path: str
+        Path to dataset or dataset series.
+    units: bool
+        Whether to load units.
+    unitfile: str
+        Can explicitly pass path to a unitfile to use.
+    overwrite: bool
+        Whether to overwrite an existing cache.
+    force_class: object
+        Force a specific class to be used.
+    kwargs: dict
+        Additional keyword arguments to pass to the class.
+
+    Returns
+    -------
+    Union[Dataset, DatasetSeries]:
+        Initialized dataset or dataset series.
+    """
+
     path = find_path(path, overwrite=overwrite)
 
     if "catalog" in kwargs:
