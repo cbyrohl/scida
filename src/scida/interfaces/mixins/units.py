@@ -590,7 +590,7 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
                 )
         if msg is not None:
             logger.info(msg)
-        return False
+            return False
     return True
 
 
