@@ -45,7 +45,11 @@ def check_flamingosnap(obj: SwiftSnapshot, obj_wu: SwiftSnapshot):
         assert pytest.approx(uq) == uq_ref
         assert v.units == cgs_units[k]
 
-    assert not hasattr(pdata["ParticleIDs"], "units")  # we do not want units for IDs
+    for d in obj.data.values():
+        for k in d.keys():
+            if not k.endswith("IDs"):
+                continue
+            assert not hasattr(d[k], "units")  # we do not want units for IDs
 
 
 @require_testdata_path(
