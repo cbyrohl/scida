@@ -1,3 +1,8 @@
+"""
+Miscellaneous helper functions.
+"""
+
+
 import logging
 import os
 import pathlib
@@ -17,6 +22,20 @@ log = logging.getLogger(__name__)
 def get_container_from_path(
     element: str, container: FieldContainer = None, create_missing: bool = False
 ) -> FieldContainer:
+    """
+    Get a container from a path.
+    Parameters
+    ----------
+    element: str
+    container: FieldContainer
+    create_missing: bool
+
+    Returns
+    -------
+    FieldContainer:
+        container specified by path
+
+    """
     keys = element.split("/")
     rv = container
     for key in keys:
@@ -30,8 +49,21 @@ def get_container_from_path(
     return rv
 
 
-def return_hdf5cachepath(path_original, fileprefix=None) -> str:
-    path = path_original
+def return_hdf5cachepath(path, fileprefix: Optional[str] = None) -> str:
+    """
+    Returns the path to the cache file for a given path.
+    Parameters
+    ----------
+    path: str
+        path to the dataset
+    fileprefix: Optional[str]
+        Can be used to specify the fileprefix used for the dataset.
+
+    Returns
+    -------
+    str
+
+    """
     if fileprefix is not None:
         path = os.path.join(path, fileprefix)
     hsh = hash_path(path)
@@ -40,7 +72,19 @@ def return_hdf5cachepath(path_original, fileprefix=None) -> str:
 
 
 def path_hdf5cachefile_exists(path, **kwargs) -> bool:
-    """Checks whether a cache file exists for given path."""
+    """
+    Checks whether a cache file exists for given path.
+    Parameters
+    ----------
+    path:
+        path to the dataset
+    kwargs:
+        passed to return_hdf5cachepath
+    Returns
+    -------
+    bool
+
+    """
     fp = return_hdf5cachepath(path, **kwargs)
     if os.path.isfile(fp):
         return True
@@ -48,7 +92,17 @@ def path_hdf5cachefile_exists(path, **kwargs) -> bool:
 
 
 def return_cachefile_path(fname: str) -> Optional[str]:
-    """If path cannot be generated, return None"""
+    """
+    Return the path to the cache file, return None if path cannot be generated.
+    Parameters
+    ----------
+    fname: str
+        filename of cache file
+
+    Returns
+    -------
+
+    """
     config = get_config()
     if "cache_path" not in config:
         return None
@@ -64,8 +118,19 @@ def return_cachefile_path(fname: str) -> Optional[str]:
     return fp
 
 
-def map_interface_args(paths, *args, **kwargs):
-    """Map arguments for interface if they are not lists"""
+def map_interface_args(paths: list, *args, **kwargs):
+    """
+    Map arguments for interface if they are not lists.
+    Parameters
+    ----------
+    paths
+    args
+    kwargs
+
+    Returns
+    -------
+
+    """
     n = len(paths)
     for i, path in enumerate(paths):
         targs = []
@@ -84,6 +149,18 @@ def map_interface_args(paths, *args, **kwargs):
 
 
 def str_is_float(element: str) -> bool:
+    """
+    Check whether a string can be converted to a float.
+    Parameters
+    ----------
+    element: str
+        string to check
+
+    Returns
+    -------
+    bool
+
+    """
     try:
         float(element)
         return True
@@ -94,6 +171,31 @@ def str_is_float(element: str) -> bool:
 def rectangular_cutout_mask(
     center, width, coords, pbc=True, boxsize=None, backend="dask", chunksize="auto"
 ):
+    """
+    Create a rectangular mask for a given set of coordinates.
+    Parameters
+    ----------
+    center: list
+        center of the rectangle
+    width: list
+        widths of the rectangle
+    coords: ndarray
+        coordinates to mask
+    pbc: bool
+        whether to apply PBC
+    boxsize:
+        boxsize for PBC
+    backend: str
+        backend to use (dask or numpy)
+    chunksize: str
+        chunksize for dask
+
+    Returns
+    -------
+    ndarray:
+        mask
+
+    """
     center = np.array(center)
     width = np.array(width)
     if backend == "dask":
@@ -215,3 +317,40 @@ def deepdictkeycopy(olddict: object, newdict: object) -> None:
         if isinstance(v, MutableMapping):
             newdict[k] = cls()
             deepdictkeycopy(v, newdict[k])
+
+
+_sizeunits = {
+    "B": 1,
+    "KB": 10**3,
+    "MB": 10**6,
+    "GB": 10**9,
+    "TB": 10**12,
+    "KiB": 1024,
+    "MiB": 1024**2,
+    "GiB": 1024**3,
+}
+
+_sizeunits = {k.lower(): v for k, v in _sizeunits.items()}
+
+
+def parse_size(size):
+    """
+    Parse a size string to a number in bytes.
+    Parameters
+    ----------
+    size: str
+
+    Returns
+    -------
+    int
+        size in bytes
+
+    """
+    idx = 0
+    for c in size:
+        if c.isnumeric():
+            continue
+        idx += 1
+    number = size[:idx]
+    unit = size[idx:]
+    return int(float(number) * _sizeunits[unit.lower().strip()])
