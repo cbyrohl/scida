@@ -1,0 +1,12 @@
+# all other configuration fetched from gadget_cosmological.yaml
+units:
+  cMpc: a * Mpc
+fields:
+  # explicit overwrite needed, thus not using "_all"
+  PartType0:
+    Coordinates: cMpc/h  # rather than code_length=ckpc/h according to hdf5 cgs-factor attribute
+    CenterOfMass: cMpc/h  # rather than code_length=ckpc/h according to hdf5 cgs-factor attribute
+  PartType1:
+    Coordinates: cMpc/h  # rather than code_length=ckpc/h according to hdf5 cgs-factor attribute
+  PartType4:
+    Coordinates: cMpc/h  # rather than code_length=ckpc/h according to hdf5 cgs-factor attribute
