@@ -56,14 +56,32 @@ class FieldContainer(MutableMapping):
         withunits=False,
         ureg=None,
         parent: Optional[FieldContainer] = None,
+        name: Optional[str] = None,
         **kwargs,
     ):
+        """
+
+        Parameters
+        ----------
+        args
+        fieldrecipes_kwargs: dict
+            default kwargs used for field recipes
+        containers: List[FieldContainer, str]
+            list of containers to add. FieldContainers in the list will be deep copied.
+            If a list element is a string, a new FieldContainer with the given name will be created.
+        aliases
+        withunits
+        ureg
+        parent: Optional[FieldContainer]
+            parent container
+        kwargs
+        """
         if aliases is None:
             aliases = {}
         if fieldrecipes_kwargs is None:
             fieldrecipes_kwargs = {}
         self.aliases = aliases
-        self.name = kwargs.pop("name", None)
+        self.name = name
         self._fields: Dict[str, da.Array] = {}
         self._fields.update(*args, **kwargs)
         self._fieldrecipes = {}
@@ -76,7 +94,7 @@ class FieldContainer(MutableMapping):
         ] = dict()  # other containers as subgroups
         if containers is not None:
             for k in containers:
-                self.add_container(k)
+                self.add_container(k, deep=True)
         self.internals = ["uid"]  # names of internal fields/groups
         self.parent = parent
 
@@ -304,17 +322,55 @@ class FieldContainer(MutableMapping):
     def add_alias(self, alias, name):
         self.aliases[alias] = name
 
-    def add_container(self, key, **kwargs):
-        tkwargs = dict(**kwargs)
-        if "name" not in tkwargs:
-            tkwargs["name"] = key
-        self._containers[key] = FieldContainer(
-            fieldrecipes_kwargs=self.fieldrecipes_kwargs,
-            withunits=self.withunits,
-            parent=self,
-            **tkwargs,
-        )
-        self._containers[key].set_ureg(self.get_ureg())
+    def remove_container(self, key):
+        if key in self._containers:
+            del self._containers[key]
+        else:
+            raise KeyError("Unknown container '%s'" % key)
+
+    def add_container(self, key, deep=False, **kwargs):
+        if isinstance(key, str):
+            # create a new container with given name
+            tkwargs = dict(**kwargs)
+            if "name" not in tkwargs:
+                tkwargs["name"] = key
+            self._containers[key] = FieldContainer(
+                fieldrecipes_kwargs=self.fieldrecipes_kwargs,
+                withunits=self.withunits,
+                ureg=self.get_ureg(),
+                parent=self,
+                **tkwargs,
+            )
+        elif isinstance(key, FieldContainer):
+            # now we do a shallow or deep copy
+            name = kwargs.pop("name", key.name)
+            if deep:
+                self._containers[name] = key.copy()
+            else:
+                self._containers[name] = key
+        else:
+            raise ValueError("Unknown type.")
+
+    def copy(self):
+        """
+        Perform a deep (?) copy of the FieldContainer.
+        Returns
+        -------
+        FieldContainer
+        """
+        instance = self.__class__()
+        instance._fields = self._fields.copy()
+        instance._fieldrecipes = self._fieldrecipes.copy()
+        instance.aliases = self.aliases.copy()
+        instance.fieldrecipes_kwargs = self.fieldrecipes_kwargs.copy()
+        instance.withunits = self.withunits
+        instance._ureg = self._ureg
+        instance.internals = self.internals.copy()
+        instance.parent = self.parent
+        for k, v in self._containers.items():
+            instance.add_container(v.copy(), deep=True, name=k)
+
+        return instance
 
     def _getitem(
         self, key, force_derived=False, update_dict=True, evaluate_recipe=True

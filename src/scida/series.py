@@ -226,9 +226,9 @@ class DatasetSeries(object):
         for a in aliases_given:
             if kwargs.get(a) is not None:
                 index = kwargs.pop(a)
-
         if index is not None:
             return self.datasets[index]
+
         if name is not None:
             if self.names is None:
                 raise ValueError("No names specified for members of this series.")
@@ -241,6 +241,8 @@ class DatasetSeries(object):
                     "Cannot select by given keys before dataset evaluation."
                 )
             raise ValueError("Unknown error.")  # should not happen?
+
+        # find candidates from metadata
         candidates = []
         candidates_props = {}
         props_compare = set()  # save names of fields we want to compare
@@ -264,7 +266,10 @@ class DatasetSeries(object):
                 for lst in candidates_props.values():
                     if len(lst) > len(candidates):
                         lst.pop()
+
         # find candidate closest to request
+        if len(candidates) == 0:
+            raise ValueError("No candidate found for given metadata.")
         idxlist = []
         for k in props_compare:
             idx = np.argmin(np.abs(np.array(candidates_props[k]) - kwargs[k]))
