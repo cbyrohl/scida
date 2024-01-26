@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 from collections.abc import MutableMapping
 from enum import Enum
 from typing import Dict, Optional
@@ -10,6 +11,8 @@ import dask.dataframe as dd
 import pint
 
 from scida.helpers_misc import get_kwargs, sprint
+
+log = logging.getLogger(__name__)
 
 
 class FieldType(Enum):
@@ -368,18 +371,32 @@ class FieldContainer(MutableMapping):
             if not hasattr(field, "units"):
                 field = field * units
             else:
-                if field.units != units:
-                    # if unit is present, but unit from metadata is unknown,
-                    # we stick with the former
-                    if not (hasattr(units, "units") and str(units.units) == "unknown"):
-                        try:
-                            field = field.to(units)
-                        except pint.errors.DimensionalityError as e:
-                            print(e)
-                            raise ValueError(
-                                "Field '%s' units '%s' do not match '%s'"
-                                % (key, field.units, units)
-                            )
+                has_reg1 = hasattr(field.units, "_REGISTRY")
+                has_reg2 = hasattr(units, "_REGISTRY")
+                has_regs = has_reg1 and has_reg2
+                if has_regs:
+                    if field.units._REGISTRY == units._REGISTRY:
+                        if field.units != units:
+                            # if unit is present, but unit from metadata is unknown,
+                            # we stick with the former
+                            if not (
+                                hasattr(units, "units")
+                                and str(units.units) == "unknown"
+                            ):
+                                try:
+                                    field = field.to(units)
+                                except pint.errors.DimensionalityError as e:
+                                    print(e)
+                                    raise ValueError(
+                                        "Field '%s' units '%s' do not match '%s'"
+                                        % (key, field.units, units)
+                                    )
+                    else:
+                        # this should not happen. TODO: figure out when this happens
+                        logging.warning(
+                            "Unit registries of field '%s' do not match. container registry."
+                            % key
+                        )
         return field
 
     def __delitem__(self, key):
