@@ -218,7 +218,7 @@ def load(
     Parameters
     ----------
     path: str
-        Path to dataset or dataset series.
+        Path to dataset or dataset series. Usually the base folder containing all files of a given dataset/series.
     units: bool
         Whether to load units.
     unitfile: str
