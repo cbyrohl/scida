@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -49,6 +49,8 @@
     
       <link rel="stylesheet" href="../../stylesheets/code_select.css">
     
+      <link rel="stylesheet" href="../../stylesheets/mkdocstrings.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -57,17 +59,15 @@
     
     
    <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
-        html.glightbox-open { overflow: initial; height: 100%; }
-        .gslide-title { margin-top: 0px; user-select: text; }
-        .gslide-desc { color: #666; user-select: text; }
-        .gslide-image img { background: white; }
-        
-            .gscrollbar-fixer { padding-right: 15px; }
-            .gdesc-inner { font-size: 0.75rem; }
-            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
-            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
-            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
-            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
   
   
     <body dir="ltr">
@@ -899,16 +899,91 @@
   
   
   
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../api_docs/" class="md-nav__link">
+      <a href="../../api/base_api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    API documentation
+    Basic
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/moduleindex/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Index
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1056,7 +1131,7 @@ Choosing a subset means that the data size is small and easy to work with. We de
 <p class="admonition-title">Missing units</p>
 <p>Below snippet will report missing units for some fields. This is expected.
 Those fields that cannot have their units determined automatically at this point and carry the unit <strong>unknown</strong>.
-See <a href="../../units">Units</a> for more information.</p>
+See <a href="../../units/">Units</a> for more information.</p>
 </div>
 <div class="language-pycon highlight"><span class="filename">Loading a dataset</span><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"gaia_dr3_subset100000.hdf5"</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#(1)!</span>
@@ -1167,17 +1242,11 @@ We discuss more advanced and interactive visualization methods <a href="../../vi
 </div>
 <h2 id="fits-files">FITS files</h2>
 <p>Observations are often stored in <a href="https://en.wikipedia.org/wiki/FITS">FITS</a> files. Support in scida is work-in-progress
-and requires the <a href="https://www.astropy.org/">astropy</a> package.</p>
-<p>Here we show use of the SDSS DR16.</p>
-<p>https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/</p>
+and requires the <a href="https://www.astropy.org/">astropy</a> package.  Here we show use of the SDSS DR16.</p>
 <div class="admonition info">
 <p class="admonition-title">SDSS DR16</p>
-<p>The SDSS DR16 redshift and classification file "specObj-dr16.fits " can be found <a href="https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/">here</a>.</p>
+<p>The SDSS DR16 redshift and classification file "specObj-dr16.fits" can be found <a href="https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/">here</a>.</p>
 </div>
-<p>It uses the <a href="https://dask.org/">dask</a> library to perform computations, which has several key advantages:</p>
-<ol>
-<li>very large datasets which cannot normally fit into memory can be analyzed,</li>
-</ol>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1255,10 +1324,10 @@ and requires the <a href="https://www.astropy.org/">astropy</a> package.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.sections", "navigation.indexes"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.sections", "navigation.indexes"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
