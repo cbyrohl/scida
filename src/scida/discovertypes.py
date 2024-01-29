@@ -1,3 +1,7 @@
+"""
+Functionality to determine the dataset or dataseries type of a given path.
+"""
+
 import logging
 import os
 from collections import Counter
@@ -16,12 +20,33 @@ log = logging.getLogger(__name__)
 
 
 class CandidateStatus(Enum):
+    """
+    Enum to indicate our confidence in a candidate.
+    """
+
+    # TODO: Rethink how tu use MAYBE/YES information.
     NO = 0  # definitely not a candidate
     MAYBE = 1  # not sure yet
     YES = 2  # yes, this is a candidate
 
 
 def _determine_mixins(path=None, metadata_raw=None):
+    """
+    Determine mixins for a given path or metadata_raw.
+    Parameters
+    ----------
+    path: str or os.PathLike
+        Path to dataset to load metadata from.
+    metadata_raw: dict
+        Raw metadata to use instead of loading from path.
+
+    Returns
+    -------
+    List[Mixin]
+        List of mixins to use for this dataset.
+
+
+    """
     mixins = []
     assert not (path is None and metadata_raw is None)
     if metadata_raw is None:
@@ -33,6 +58,24 @@ def _determine_mixins(path=None, metadata_raw=None):
 
 
 def _determine_type_from_simconfig(path, classtype="dataset", reg=None):
+    """
+    Determine type from simulation config.
+
+    Parameters
+    ----------
+    path: str or os.PathLike
+        Path to dataset to load metadata from.
+    classtype: str
+        Type of class to determine. Either 'dataset' or 'series'.
+    reg: dict
+        Registry to use. If None, use the default registry.
+
+    Returns
+    -------
+    type
+        Type of dataset or series to use for this dataset.
+
+    """
     if reg is None:
         reg = dict()
         reg.update(**dataset_type_registry)
@@ -73,6 +116,32 @@ def _determine_type(
     catch_exception: bool = True,
     **kwargs
 ):
+    """
+    Determine type of dataset or dataseries.
+
+    Parameters
+    ----------
+    path: str or os.PathLike
+        Path to dataset.
+    test_datasets: bool
+        Whether to test dataset types.
+    test_dataseries: bool
+        Whether to test dataseries types.
+    strict: bool
+        Whether to raise an error if multiple candidates are found.
+    catch_exception: bool
+        Whether to catch exceptions during validation of types.
+    kwargs: dict
+        Additional keyword arguments to pass to validate_path.
+
+    Returns
+    -------
+    names: List[str]
+        List of names of types that are candidates.
+    types: List[type]
+        List of classes that are candidates.
+
+    """
     available_dtypes: List[str] = []
     dtypes_status: List[CandidateStatus] = []
     reg = dict()
@@ -84,7 +153,18 @@ def _determine_type(
     for k, dtype in reg.items():
         valid = CandidateStatus.NO
 
-        def is_valid(val):  # map mix of old bool and new Candidate Status enum to bool
+        def is_valid(val):
+            """
+            Map mix of old bool and new Candidate Status enum to bool.
+            Parameters
+            ----------
+            val: bool or CandidateStatus
+                Value to map.
+
+            Returns
+            -------
+            CandidateStatus
+            """
             if isinstance(val, bool):
                 if val:
                     return CandidateStatus.MAYBE
