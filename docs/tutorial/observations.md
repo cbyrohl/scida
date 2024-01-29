@@ -178,18 +178,10 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 ## FITS files
 
 Observations are often stored in [FITS](https://en.wikipedia.org/wiki/FITS) files. Support in scida is work-in-progress
-and requires the [astropy](https://www.astropy.org/) package.
-
-Here we show use of the SDSS DR16.
-
-https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/
+and requires the [astropy](https://www.astropy.org/) package.  Here we show use of the SDSS DR16.
 
 !!! info "SDSS DR16"
-    The SDSS DR16 redshift and classification file "specObj-dr16.fits " can be found [here](https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/).
-
-It uses the [dask](https://dask.org/) library to perform computations, which has several key advantages:
-
-1. very large datasets which cannot normally fit into memory can be analyzed,
+    The SDSS DR16 redshift and classification file "specObj-dr16.fits" can be found [here](https://live-sdss4org-dr16.pantheonsite.io/spectro/spectro_access/).
 
 ```pycon
 >>> from scida import load
