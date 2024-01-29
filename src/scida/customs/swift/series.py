@@ -6,7 +6,7 @@ from scida.discovertypes import CandidateStatus
 
 class SwiftSimulation(GadgetStyleSimulation):
     def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
-        """A series representing a swift simulation."""
+        """A dataseries representing a SWIFT simulation."""
         subpath_dict = dict(paths="snapshots")
         super().__init__(
             path,

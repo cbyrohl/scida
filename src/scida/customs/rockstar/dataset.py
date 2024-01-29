@@ -7,6 +7,8 @@ from scida.io import load_metadata_all
 
 
 class RockstarCatalog(CosmologyMixin, Dataset):
+    """Rockstar catalog dataset."""
+
     _unitfile = "units/rockstar.yaml"
 
     def __init__(self, path, **kwargs) -> None:

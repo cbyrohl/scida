@@ -6,6 +6,8 @@ from scida.io import load_metadata
 
 
 class SwiftSnapshot(GadgetStyleSnapshot):
+    """SWIFT snapshot dataset."""
+
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 

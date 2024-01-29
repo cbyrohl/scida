@@ -31,6 +31,10 @@ log = logging.getLogger(__name__)
 
 
 class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
+    """
+    Arepo snapshot dataset.
+    """
+
     _fileprefix_catalog = "groups"
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:

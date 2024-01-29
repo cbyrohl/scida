@@ -13,6 +13,8 @@ log = logging.getLogger(__name__)
 
 
 class GadgetStyleSnapshot(Dataset):
+    """A dataset representing a Gadget-style snapshot."""
+
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
         """We define gadget-style snapshots as nbody/hydrodynamical simulation snapshots that follow
         the common /PartType0, /PartType1 grouping scheme."""

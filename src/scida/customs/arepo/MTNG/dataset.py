@@ -7,6 +7,10 @@ from scida.io import load_metadata
 
 
 class MTNGArepoSnapshot(ArepoSnapshot):
+    """
+    A dataset representing a MTNG-Arepo snapshot.
+    """
+
     _fileprefix_catalog = "fof_subhalo_tab"
     _fileprefix = "snapshot_"  # underscore is important!
 
@@ -86,6 +90,10 @@ class MTNGArepoSnapshot(ArepoSnapshot):
 
 
 class MTNGArepoCatalog(ArepoCatalog):
+    """
+    A dataset representing a MTNG-Arepo catalog.
+    """
+
     _fileprefix = "fof_subhalo_tab"
 
     def __init__(self, *args, **kwargs):

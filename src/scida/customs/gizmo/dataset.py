@@ -9,6 +9,8 @@ from scida.io import load_metadata
 
 
 class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
+    """Gizmo snapshot dataset."""
+
     _fileprefix_catalog = "groups"
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:

@@ -7,7 +7,7 @@ from scida.discovertypes import CandidateStatus
 
 
 class ArepoSimulation(GadgetStyleSimulation):
-    """A series representing an arepo simulation."""
+    """A series representing an Arepo simulation."""
 
     def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
         # choose parent folder as path if we are passed "output" dir

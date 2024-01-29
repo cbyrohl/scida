@@ -9,7 +9,7 @@ from scida.series import DatasetSeries
 
 
 class GadgetStyleSimulation(DatasetSeries):
-    """A series representing a gadgetstyle simulation."""
+    """A series representing a Gadget-style simulation."""
 
     def __init__(
         self,
