@@ -105,16 +105,16 @@ class FieldContainer(MutableMapping):
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
         self._ureg: Optional[pint.UnitRegistry] = ureg
-        self._containers: Dict[
-            str, FieldContainer
-        ] = dict()  # other containers as subgroups
+        self._containers: Dict[str, FieldContainer] = (
+            dict()
+        )  # other containers as subgroups
         if containers is not None:
             for k in containers:
                 self.add_container(k)
         self.internals = ["uid"]  # names of internal fields/groups
         self.parent = parent
 
-    def set_ureg(self, ureg=None, discover=False):
+    def set_ureg(self, ureg=None, discover=True):
         """
         Set the unit registry.
 
