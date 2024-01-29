@@ -9,28 +9,28 @@ theme:
     - navigation.indexes
 
 nav:
-  - 'Scida': moduleindex.md
+  - 'Scida': index.md
   - 'Getting Started':
-    - "Installation": install.md
-    - 'Tutorial':
-      - 'Tutorial': tutorial/moduleindex.md
-      - 'Simulations': tutorial/simulations.md
-      - 'Observations': tutorial/observations.md
+      - "Installation": install.md
+      - 'Tutorial':
+          - 'Tutorial': tutorial/index.md
+          - 'Simulations': tutorial/simulations.md
+          - 'Observations': tutorial/observations.md
   - 'Features':
-    - 'Supported datasets': supported_data.md
-    - 'Visualization': visualization.md
-    - 'Units': units.md
-    - 'Derived fields': derived_fields.md
-    - 'Data series': series.md
-    - 'Large datasets': largedatasets.md
+      - 'Supported datasets': supported_data.md
+      - 'Visualization': visualization.md
+      - 'Units': units.md
+      - 'Derived fields': derived_fields.md
+      - 'Data series': series.md
+      - 'Large datasets': largedatasets.md
   - 'Advanced Topics':
-    - 'Arepo Simulations':
-      - 'Halo Catalogs': halocatalogs.md
+      - 'Arepo Simulations':
+          - 'Halo Catalogs': halocatalogs.md
   - 'Configuration': configuration.md
   - 'FAQ': faq.md
   - 'API':
-    - 'Basic': api/base_api.md
-    - 'Index': api/moduleindex.md
+      - 'Basic': api/base_api.md
+      - 'Index': api/moduleindex.md
 
 markdown_extensions:
   - markdown_include.include:
