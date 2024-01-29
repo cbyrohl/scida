@@ -427,7 +427,18 @@ class DatasetSeries(object):
         elif len(idxlist) == 0:
             raise ValueError("No candidate found.")
         index = candidates[idxlist[0]]
-        # TODO: reintroduce tolerance check
+        # tolerance check
+        for k in props_compare:
+            if not np.isclose(kwargs[k], self.metadata[index][k], rtol=reltol):
+                msg = (
+                    "Candidate does not match tolerance for %s (%s vs %s requested)"
+                    % (
+                        k,
+                        self.metadata[index][k],
+                        kwargs[k],
+                    )
+                )
+                raise ValueError(msg)
         return self.get_dataset(index=index)
 
     @property
