@@ -8,7 +8,7 @@ from scida.io import load_metadata
 
 class MTNGArepoSnapshot(ArepoSnapshot):
     """
-    A dataset representing a MTNG-Arepo snapshot.
+    MTNGArepoSnapshot is a snapshot class for the MTNG project.
     """
 
     _fileprefix_catalog = "fof_subhalo_tab"

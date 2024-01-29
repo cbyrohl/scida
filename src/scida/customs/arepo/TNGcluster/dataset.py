@@ -111,6 +111,10 @@ class TNGClusterSelector(Selector):
 
 
 class TNGClusterSnapshot(ArepoSnapshot):
+    """
+    Dataset class for the TNG-Cluster simulation.
+    """
+
     _fileprefix_catalog = "fof_subhalo_tab_"
     _fileprefix = "snap_"
     ntargets = 352

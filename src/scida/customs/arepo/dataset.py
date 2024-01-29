@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     """
-    Arepo snapshot dataset.
+    Dataset class for Arepo snapshots.
     """
 
     _fileprefix_catalog = "groups"
