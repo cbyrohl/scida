@@ -1,3 +1,29 @@
+# here, only test data with small file size can be downloaded.
+# larger files for local testing are available on the MPCDF HPC clusters.
+# In particular, this includes the following links for data sets in the testdata_path:
+#  specObj-dr16.fits -> /virgotng/mpia/obs/SDSS/specObj-dr16.fits
+#  TNG100-3_snapshot -> /virgotng/universe/IllustrisTNG/TNG100-3/output/snapdir_099
+#  TNG100-2_snapshot -> /virgotng/universe/IllustrisTNG/TNG100-2/output/snapdir_099
+#  TNG100-2_group -> /virgotng/universe/IllustrisTNG/TNG100-2/output/groups_099
+#  TNG100-3_group -> /virgotng/universe/IllustrisTNG/TNG100-3/output/groups_099
+#  TNG100_group -> /virgotng/universe/IllustrisTNG/TNG100-1/output/groups_099
+#  TNG100_snapshot -> /virgotng/universe/IllustrisTNG/TNG100-1/output/snapdir_099
+#  MTNGarepo_270hydro_snapshot_z10 -> /virgotng/mpa/MTNG/Hydro-Arepo/MTNG-L62.5-540-A/output/snapdir_031
+#  MTNGarepo_270hydro_group_z10 -> /virgotng/mpa/MTNG/Hydro-Arepo/MTNG-L62.5-540-A/output/groups_031
+#  MTNGarepo_270hydro_group_z2 -> /virgotng/mpa/MTNG/Hydro-Arepo/MTNG-L62.5-540-A/output/groups_129
+#  MTNGarepo_270hydro_snapshot_z2 -> /virgotng/mpa/MTNG/Hydro-Arepo/MTNG-L62.5-540-A/output/snapdir_129
+#  EAGLE -> /virgotng/universe/Eagle/RecalL0025N0752
+#  Millenium_snapshot -> /virgotng/universe/Millennium-1/output/snapdir_063/snap_063.hdf5
+#  TNG300_group -> /virgotng/universe/IllustrisTNG/TNG300-1/output/groups_099
+#  TNG300_snapshot -> /virgotng/universe/IllustrisTNG/TNG300-1/output/snapdir_099
+#  TNG50_snapshot -> /virgotng/universe/IllustrisTNG/TNG50-1/output/snapdir_099
+#  TNG50_group -> /virgotng/universe/IllustrisTNG/TNG50-1/output/groups_099
+#  TNG50-4_group -> /virgotng/universe/IllustrisTNG/TNG50-4/output/groups_099
+#  TNG50-4_snapshot -> /virgotng/universe/IllustrisTNG/TNG50-4/output/snapdir_099
+#  TNG50 -> /virgotng/universe/IllustrisTNG/TNG50-1
+#  TNGcluster -> /virgotng/mpia/TNG-Cluster/L680n8192TNG
+
+
 name: 'get-testdata'
 description: 'download test data'
 inputs:
