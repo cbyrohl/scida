@@ -28,6 +28,9 @@ The following options are available:
 : How to handle missing units. Can be "warn", "raise", or "ignore". "warn" will print a warning, "raise" will raise an
   exception, and "ignore" will silently continue without the right units. Default: "warn"
 
+`testdata_path`
+: The base path to the test data sets defined in "tests/testdata.yaml".
+
 ## Simulation configuration
 By default, scida will load supported [simulation configurations from the package](https://github.com/cbyrohl/scida/blob/main/src/scida/configfiles/simulations.yaml).
 User configurations for simulations are loaded from `~/.config/scida/simulations.yaml`. This file is also in YAML format.

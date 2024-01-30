@@ -75,3 +75,12 @@ Please annotate all functions and classes with docstrings accordingly.
 
 We use [pytest](https://docs.pytest.org/en/stable/) for testing. Add new tests for added functionality
 in a test file in the `tests` directory. Make sure to run the tests before submitting a pull request.
+
+Many tests require test data sets. These data sets are not included in the repository.
+Scida will check for the existence of these data sets and skip the tests if they are not available.
+The metadata for the test data sets is defined in "tests/testdata.yaml".
+The paths are evaluated relative to the "testdata_path" entry in the configuration,
+see [configuration](configuration.md).
+A subset of smaller test data sets can be downloaded for the data sets described in
+".github/actions/get-testdata-all/action.yaml" in the scida repository.
+The
