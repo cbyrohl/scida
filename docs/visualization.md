@@ -15,7 +15,7 @@ For example, we can select a subset of particles by applying a cut on a given fi
 from scida import load
 import matplotlib.pyplot as plt
 
-ds = load("TNG50-1_snapshot")
+ds = load("TNG50-4_snapshot")
 dens = ds.data["PartType0"]["Density"][:10000].compute()  # (1)!
 temp = ds.data["PartType0"]["Temperature"][:10000].compute()
 plt.plot(dens, temp, "o", markersize=0.1)
