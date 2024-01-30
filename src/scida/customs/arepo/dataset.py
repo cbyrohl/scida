@@ -38,6 +38,20 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     _fileprefix_catalog = "groups"
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:
+        """
+        Initialize an ArepoSnapshot object.
+
+        Parameters
+        ----------
+        path: str or pathlib.Path
+            Path to snapshot, typically a directory containing multiple hdf5 files.
+        chunksize:
+            Chunksize to use for dask arrays. Can be "auto" to automatically determine chunksize.
+        catalog:
+            Path to group catalog. If None, the catalog is searched for in the parent directories.
+        kwargs:
+            Additional keyword arguments.
+        """
         self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
         self.config = {}
@@ -86,6 +100,20 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.data.merge(fielddefs)
 
     def load_catalog(self, kwargs, catalog_cls=None):
+        """
+        Load the group catalog.
+
+        Parameters
+        ----------
+        kwargs: dict
+            Keyword arguments passed to the catalog class.
+        catalog_cls: type
+            Class to use for the catalog. If None, the default catalog class is used.
+
+        Returns
+        -------
+        None
+        """
         virtualcache = False  # copy catalog for better performance
         catalog_kwargs = kwargs.get("catalog_kwargs", {})
         catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
@@ -143,6 +171,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, **kwargs
     ) -> CandidateStatus:
+        """
+        Validate a path to use for instantiation of this class.
+
+        Parameters
+        ----------
+        path: str or pathlib.Path
+        args:
+        kwargs:
+
+        Returns
+        -------
+        CandidateStatus
+        """
         valid = super().validate_path(path, *args, **kwargs)
         if valid.value > CandidateStatus.MAYBE.value:
             valid = CandidateStatus.MAYBE
@@ -164,7 +205,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     @ArepoSelector()
     def return_data(self):
         """
-        Return data.
+        Return data object of this snapshot.
 
         Returns
         -------
@@ -426,6 +467,20 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         )
 
     def add_groupquantity_to_particles(self, name, parttype="PartType0"):
+        """
+        Map a quantity from the group catalog to the particles based on a particle's group index.
+
+        Parameters
+        ----------
+        name: str
+            Name of quantity to map
+        parttype: str
+            Name of particle type
+
+        Returns
+        -------
+        None
+        """
         pdata = self.data[parttype]
         assert (
             name not in pdata
@@ -448,7 +503,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         pdata[name] = hquantity
 
     def get_grouplengths(self, parttype="PartType0"):
-        """Get the total number of particles of a given type in all halos."""
+        """
+        Get the lengths, i.e. the total number of particles, of a given type in all halos.
+
+        Parameters
+        ----------
+        parttype: str
+            Name of particle type
+
+        Returns
+        -------
+        np.ndarray
+        """
         pnum = part_type_num(parttype)
         ptype = "PartType%i" % pnum
         if ptype not in self._grouplengths:
@@ -459,6 +525,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         return self._grouplengths[ptype]
 
     def get_groupoffsets(self, parttype="PartType0"):
+        """
+        Get the array index offset of the first particle of a given type in each halo.
+
+        Parameters
+        ----------
+        parttype: str
+            Name of particle type
+
+        Returns
+        -------
+        np.ndarray
+        """
         if parttype not in self._grouplengths:
             # need to calculate group lengths first
             self.get_grouplengths(parttype=parttype)
@@ -473,7 +551,17 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         return offsets
 
     def get_subhalolengths(self, parttype="PartType0"):
-        """Get the total number of particles of a given type in all halos."""
+        """
+        Get the lengths, i.e. the total number of particles, of a given type in all subhalos.
+
+        Parameters
+        ----------
+        parttype: str
+
+        Returns
+        -------
+        np.ndarray
+        """
         pnum = part_type_num(parttype)
         ptype = "PartType%i" % pnum
         if ptype in self._subhalolengths:
@@ -485,6 +573,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         return self._subhalolengths[ptype]
 
     def get_subhalooffsets(self, parttype="PartType0"):
+        """
+        Get the array index offset of the first particle of a given type in each subhalo.
+
+        Parameters
+        ----------
+        parttype: str
+
+        Returns
+        -------
+        np.ndarray
+        """
+
         pnum = part_type_num(parttype)
         ptype = "PartType%i" % pnum
         if ptype in self._subhalooffsets:
@@ -517,6 +617,22 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         parttype="PartType0",
         objtype="halo",
     ):
+        """
+        Create a GroupAwareOperation object for applying operations to groups.
+
+        Parameters
+        ----------
+        fields: Union[str, da.Array, List[str], Dict[str, da.Array]]
+            Fields to pass to the operation. Can be a string, a dask array, a list of strings or a dictionary of dask arrays.
+        parttype: str
+            Particle type to operate on.
+        objtype: str
+            Type of object to operate on. Can be "halo" or "subhalo". Default: "halo"
+
+        Returns
+        -------
+        GroupAwareOperation
+        """
         inputfields = None
         if isinstance(fields, str):
             if fields == "":  # if nothing is specified, we pass all we have.
@@ -556,7 +672,19 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
 
 class ArepoCatalog(ArepoSnapshot):
+    """
+    Dataset class for Arepo group catalogs.
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+        Initialize an ArepoCatalog object.
+
+        Parameters
+        ----------
+        args
+        kwargs
+        """
         kwargs["iscatalog"] = True
         if "fileprefix" not in kwargs:
             kwargs["fileprefix"] = "groups"
@@ -566,13 +694,38 @@ class ArepoCatalog(ArepoSnapshot):
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, **kwargs
     ) -> CandidateStatus:
+        """
+        Validate a path to use for instantiation of this class.
+
+        Parameters
+        ----------
+        path: str or pathlib.Path
+        args:
+        kwargs:
+
+        Returns
+        -------
+        CandidateStatus
+        """
         kwargs["fileprefix"] = cls._get_fileprefix(path)
         valid = super().validate_path(path, *args, expect_grp=True, **kwargs)
         return valid
 
 
 class ChainOps:
+    """
+    Chain operations together.
+    """
+
     def __init__(self, *funcs):
+        """
+        Initialize a ChainOps object.
+
+        Parameters
+        ----------
+        funcs: List[function]
+            Functions to chain together.
+        """
         self.funcs = funcs
         self.kwargs = get_kwargs(
             funcs[-1]
@@ -597,6 +750,10 @@ class ChainOps:
 
 
 class GroupAwareOperation:
+    """
+    Class for applying operations to groups.
+    """
+
     opfuncs = dict(min=np.min, max=np.max, sum=np.sum, half=lambda x: x[::2])
     finalops = {"min", "max", "sum"}
     __slots__ = (
@@ -629,6 +786,20 @@ class GroupAwareOperation:
             self.ops = ops
 
     def chain(self, add_op=None, final=False):
+        """
+        Chain another operation to this one.
+
+        Parameters
+        ----------
+        add_op: str or function
+            Operation to add. Can be a string (e.g. "min", "max", "sum") or a function.
+        final: bool
+            Whether this is the final operation in the chain.
+
+        Returns
+        -------
+        GroupAwareOperation
+        """
         if self.final:
             raise ValueError("Cannot chain any additional operation.")
         c = copy.copy(self)
@@ -646,6 +817,9 @@ class GroupAwareOperation:
         return c
 
     def min(self, field=None):
+        """
+        Get the minimum value for each group member.
+        """
         if field is not None:
             if self.inputfields is not None:
                 raise ValueError("Cannot change input field anymore.")
@@ -653,6 +827,9 @@ class GroupAwareOperation:
         return self.chain(add_op="min", final=True)
 
     def max(self, field=None):
+        """
+        Get the maximum value for each group member.
+        """
         if field is not None:
             if self.inputfields is not None:
                 raise ValueError("Cannot change input field anymore.")
@@ -660,16 +837,40 @@ class GroupAwareOperation:
         return self.chain(add_op="max", final=True)
 
     def sum(self, field=None):
+        """
+        Sum the values for each group member.
+        """
         if field is not None:
             if self.inputfields is not None:
                 raise ValueError("Cannot change input field anymore.")
             self.inputfields = [field]
         return self.chain(add_op="sum", final=True)
 
-    def half(self):  # dummy operation for testing halfing particle count.
+    def half(self):
+        """
+        Half the number of particles in each group member. For testing purposes.
+
+        Returns
+        -------
+        GroupAwareOperation
+        """
         return self.chain(add_op="half", final=False)
 
     def apply(self, func, final=False):
+        """
+        Apply a passed function.
+
+        Parameters
+        ----------
+        func: function
+            Function to apply.
+        final: bool
+            Whether this is the final operation in the chain.
+
+        Returns
+        -------
+        GroupAwareOperation
+        """
         return self.chain(add_op=func, final=final)
 
     def __copy__(self):
@@ -684,6 +885,23 @@ class GroupAwareOperation:
         return c
 
     def evaluate(self, nmax=None, idxlist=None, compute=True):
+        """
+        Evaluate the operation.
+
+        Parameters
+        ----------
+        nmax: Optional[int]
+            Maximum number of halos to process.
+        idxlist: Optional[np.ndarray]
+            List of halo indices to process. If not provided, (and nmax not set) all halos are processed.
+        compute: bool
+            Whether to compute the result immediately or return a dask object to compute later.
+
+        Returns
+        -------
+
+        """
+        # TODO: figure out return type
         # final operations: those that can only be at end of chain
         # intermediate operations: those that can only be prior to end of chain
         funcdict = dict()
@@ -735,6 +953,24 @@ def wrap_func_scalar(
     func_output_dtype="float64",
     fill_value=0,
 ):
+    """
+    Wrapper for applying a function to each halo in the passed chunk.
+    Parameters
+    ----------
+    func
+    offsets_in_chunks
+    lengths_in_chunks
+    arrs
+    block_info
+    block_id
+    func_output_shape
+    func_output_dtype
+    fill_value
+
+    Returns
+    -------
+
+    """
     offsets = offsets_in_chunks[block_id[0]]
     lengths = lengths_in_chunks[block_id[0]]
 
@@ -865,7 +1101,7 @@ def get_localshidx(
 
     Returns
     -------
-    None
+    np.ndarray
     """
     dtype = np.int32
     if index_unbound is None:
@@ -941,7 +1177,7 @@ def get_local_shidx_daskwrap(
     shcellcounts,
     index_unbound=None,
 ) -> np.ndarray:
-    gidx_start = gidx[0]
+    gidx_start = int(gidx[0])
     gidx_count = gidx.shape[0]
     res = get_localshidx(
         gidx_start,
@@ -958,6 +1194,24 @@ def get_local_shidx_daskwrap(
 def compute_localsubhaloindex(
     gidx, halocelloffsets, shnumber, shcounts, shcellcounts, index_unbound=None
 ) -> da.Array:
+    """
+    Compute the local subhalo index for each particle with dask.
+    The local subhalo index is the index of the subhalo within each halo,
+    starting at 0 for the central subhalo.
+
+    Parameters
+    ----------
+    gidx
+    halocelloffsets
+    shnumber
+    shcounts
+    shcellcounts
+    index_unbound
+
+    Returns
+    -------
+
+    """
     res = da.map_blocks(
         get_local_shidx_daskwrap,
         gidx,

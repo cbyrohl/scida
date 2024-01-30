@@ -1,3 +1,7 @@
+"""
+Helper functions for hdf5 and zarr file processing.
+"""
+
 import logging
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
@@ -12,6 +16,19 @@ log = logging.getLogger(__name__)
 
 
 def get_dtype(obj):
+    """
+    Get the data type of given h5py.Dataset or zarr.Array object
+
+    Parameters
+    ----------
+    obj: h5py.Dataset or zarr.Array
+        object to get dtype from
+
+    Returns
+    -------
+    dtype: numpy.dtype
+        dtype of the object
+    """
     if isinstance(obj, h5py.Dataset):
         try:
             dtype = obj.dtype
@@ -33,6 +50,25 @@ def get_dtype(obj):
 
 
 def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
+    """
+    Walks through a h5py.Group or zarr.Group object and fills the tree dictionary with
+    information about the datasets and groups.
+
+    Parameters
+    ----------
+    obj: h5py.Group or zarr.Group
+        object to walk through
+    tree: dict
+        dictionary to fill recursively
+    get_attrs: bool
+        whether to get attributes of each object
+    scalar_to_attr: bool
+        whether to convert scalar datasets to attributes
+
+    Returns
+    -------
+
+    """
     if len(tree) == 0:
         tree.update(**dict(attrs={}, groups=[], datasets=[]))
     if get_attrs and len(obj.attrs) > 0:
@@ -49,12 +85,48 @@ def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
 
 
 def walk_zarrfile(fn, tree, get_attrs=True):
+    """
+    Walks through a zarr file and fills the tree dictionary with
+    information about the datasets and groups.
+
+    Parameters
+    ----------
+    fn: str
+        file path to zarr file to walk through
+    tree: dict
+        dictionary to fill recursively
+    get_attrs: bool
+        whether to get attributes of each object
+
+    Returns
+    -------
+    tree: dict
+        filled dictionary
+    """
     with zarr.open(fn) as z:
         walk_group(z, tree, get_attrs=get_attrs)
     return tree
 
 
 def walk_hdf5file(fn, tree, get_attrs=True):
+    """
+    Walks through a hdf5 file and fills the tree dictionary with
+    information about the datasets and groups.
+
+    Parameters
+    ----------
+    fn: str
+        file path to hdf5 file to walk through
+    tree: dict
+        dictionary to fill recursively
+    get_attrs: bool
+        whether to get attributes of each object
+
+    Returns
+    -------
+    tree: dict
+        filled dictionary
+    """
     with h5py.File(fn, "r") as hf:
         walk_group(hf, tree, get_attrs=get_attrs)
     return tree
@@ -98,18 +170,21 @@ def create_mergedhdf5file(
     datasets = set([item[0] for r in result for item in r["datasets"]])
 
     def todct(lst):
+        """helper func"""
         return {item[0]: (item[1], item[2]) for item in lst["datasets"]}
 
     dcts = [todct(lst) for lst in result]
     shapes = OrderedDict((d, {}) for d in datasets)
 
     def shps(i, k, s):
+        """helper func"""
         return shapes[k].update({i: s[0]}) if s is not None else None
 
     [shps(i, k, dct.get(k)) for k in datasets for i, dct in enumerate(dcts)]
     dtypes = {}
 
     def dtps(k, s):
+        """helper func"""
         return dtypes.update({k: s[1]}) if s is not None else None
 
     [dtps(k, dct.get(k)) for k in datasets for i, dct in enumerate(dcts)]

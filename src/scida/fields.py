@@ -1,3 +1,7 @@
+"""
+
+"""
+
 from __future__ import annotations
 
 import inspect
@@ -124,9 +128,9 @@ class FieldContainer(MutableMapping):
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
         self._ureg: Optional[pint.UnitRegistry] = ureg
-        self._containers: Dict[str, FieldContainer] = (
-            dict()
-        )  # other containers as subgroups
+        self._containers: Dict[
+            str, FieldContainer
+        ] = dict()  # other containers as subgroups
         if containers is not None:
             for k in containers:
                 self.add_container(k, deep=True)
@@ -540,14 +544,40 @@ class FieldContainer(MutableMapping):
         """
         self.aliases[alias] = name
 
-
     def remove_container(self, key):
+        """
+        Remove a sub-container.
+
+        Parameters
+        ----------
+        key: str
+            Name of the sub-container.
+
+        Returns
+        -------
+        None
+        """
         if key in self._containers:
             del self._containers[key]
         else:
             raise KeyError("Unknown container '%s'" % key)
 
     def add_container(self, key, deep=False, **kwargs):
+        """
+        Add a sub-container.
+
+        Parameters
+        ----------
+        key: str, FieldContainer
+        deep: bool
+            If True, make a deep copy of the container.
+        kwargs: dict
+            keyword arguments for the FieldContainer constructor.
+
+        Returns
+        -------
+        None
+        """
         if isinstance(key, str):
             # create a new container with given name
             tkwargs = dict(**kwargs)
@@ -573,6 +603,7 @@ class FieldContainer(MutableMapping):
     def copy(self):
         """
         Perform a deep (?) copy of the FieldContainer.
+
         Returns
         -------
         FieldContainer

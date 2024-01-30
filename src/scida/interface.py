@@ -49,6 +49,26 @@ class BaseDataset(metaclass=MixinMeta):
         hints=None,
         **kwargs
     ):
+        """
+        Initialize a dataset object.
+
+        Parameters
+        ----------
+        path: str
+            Path to the dataset.
+        chunksize: int or str
+            Chunksize for dask arrays.
+        virtualcache: bool
+            Whether to use virtual caching.
+        overwritecache: bool
+            Whether to overwrite existing cache.
+        fileprefix: str
+            Prefix for files to scan for.
+        hints: dict
+            Hints for the dataset.
+        kwargs: dict
+            Additional keyword arguments.
+        """
         super().__init__()
         self.hints = hints if hints is not None else {}
         self.path = path
@@ -344,6 +364,10 @@ class BaseDataset(metaclass=MixinMeta):
 
 
 class Dataset(BaseDataset):
+    """
+    Base class for datasets with some functions to be overwritten by subclass.
+    """
+
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
         """
@@ -351,9 +375,10 @@ class Dataset(BaseDataset):
 
         Parameters
         ----------
-        path
-        args
-        kwargs
+        path: str
+            Path to the dataset.
+        args: list
+        kwargs: dict
 
         Returns
         -------
@@ -363,11 +388,18 @@ class Dataset(BaseDataset):
 
     @classmethod
     def _clean_metadata_from_raw(cls, rawmetadata):
+        """Clean metadata from raw metadata"""
         return {}
 
 
+# TODO: remove this class (?), should be dynamically created in load() where needed
 class DatasetWithUnitMixin(UnitMixin, Dataset):
+    """
+    Dataset with units.
+    """
+
     def __init__(self, *args, **kwargs):
+        """Initialize dataset with units."""
         super().__init__(*args, **kwargs)
 
 
@@ -375,6 +407,9 @@ class Selector(object):
     """Base Class for data selection decorator factory"""
 
     def __init__(self):
+        """
+        Initialize the selector.
+        """
         self.keys = None  # the keys we check for.
         # holds a copy of the species' fields
         self.data_backup = FieldContainer()
@@ -382,6 +417,23 @@ class Selector(object):
         self.data: FieldContainer = FieldContainer()
 
     def __call__(self, fn, *args, **kwargs):
+        """
+        Call the selector.
+
+        Parameters
+        ----------
+        fn: function
+            Function to be decorated.
+        args: list
+        kwargs: dict
+
+        Returns
+        -------
+        function
+            Decorated function.
+
+        """
+
         def newfn(*args, **kwargs):
             # TODO: Add graceful exit/restore after exception in self.prepare
             self.data_backup = args[0].data
@@ -405,9 +457,33 @@ class Selector(object):
         return newfn
 
     def prepare(self, *args, **kwargs) -> None:
+        """
+        Prepare the data for selection. To be implemented in subclasses.
+
+        Parameters
+        ----------
+        args
+        kwargs
+
+        Returns
+        -------
+
+        """
         raise NotImplementedError("Subclass implementation needed!")
 
     def finalize(self, *args, **kwargs) -> None:
+        """
+        Finalize the data after selection. To be implemented in subclasses.
+
+        Parameters
+        ----------
+        args
+        kwargs
+
+        Returns
+        -------
+
+        """
         args[0].data = self.data_backup
 
 
