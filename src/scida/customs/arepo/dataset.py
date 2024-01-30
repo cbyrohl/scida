@@ -203,7 +203,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         return valid
 
     @ArepoSelector()
-    def return_data(self):
+    def return_data(self) -> FieldContainer:
         """
         Return data object of this snapshot.
 

@@ -1,4 +1,8 @@
+"""Helper functions for arepo snapshots/simulations."""
+
+
 def grp_type_str(gtype):
+    """Mapping between common group names and numeric group types."""
     if str(gtype).lower() in ["group", "groups", "halo", "halos"]:
         return "halo"
     if str(gtype).lower() in ["subgroup", "subgroups", "subhalo", "subhalos"]:
@@ -7,7 +11,7 @@ def grp_type_str(gtype):
 
 
 def part_type_num(ptype):
-    """Mapping between common names and numeric particle types."""
+    """Mapping between common particle names and numeric particle types."""
     ptype = str(ptype).replace("PartType", "")
     if ptype.isdigit():
         return int(ptype)

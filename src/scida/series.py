@@ -103,7 +103,6 @@ class DatasetSeries(object):
         datasetclass=None,
         overwrite_cache=False,
         lazy=True,  # lazy will only initialize data sets on demand.
-        async_caching=False,
         names=None,
         **interface_kwargs
     ):
@@ -121,8 +120,6 @@ class DatasetSeries(object):
             whether to overwrite existing cache
         lazy:
             whether to initialize datasets lazily
-        async_caching:
-            whether to cache datasets asynchronously. TODO: not used; delete?
         names:
             names for datasets
         interface_kwargs:
@@ -159,11 +156,6 @@ class DatasetSeries(object):
                 # class method does not initiate obj.
                 dct[i] = d._clean_metadata_from_raw(rawmeta)
             self.metadata = dct
-        elif async_caching:
-            # hacky and should not be here this explicitly, just a proof of concept
-            # for p in paths:
-            #     loader = scida.io.determine_loader(p)
-            pass
 
     def __init_subclass__(cls, *args, **kwargs):
         """

@@ -1,3 +1,6 @@
+"""
+Defines the GizmoSnapshot class. Code information: http://www.tapir.caltech.edu/~phopkins/Site/GIZMO.html
+"""
 import os
 from typing import List, Union
 
@@ -9,11 +12,27 @@ from scida.io import load_metadata
 
 
 class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
-    """Gizmo snapshot dataset."""
+    """
+    Gizmo snapshot dataset.
+    """
 
     _fileprefix_catalog = "groups"
 
     def __init__(self, path, chunksize="auto", catalog=None, **kwargs) -> None:
+        """
+        Initialize a GizmoSnapshot object.
+
+        Parameters
+        ----------
+        path: str
+            Path to the snapshot folder.
+        chunksize: int
+            Chunksize for the data.
+        catalog: str
+            Explicitly state catalog path to use.
+        kwargs:
+            Additional keyword arguments.
+        """
         self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
         self.config = {}
@@ -40,6 +59,21 @@ class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, **kwargs
     ) -> CandidateStatus:
+        """
+        Validate a path as a candidate for Gizmo snapshot class.
+
+        Parameters
+        ----------
+        path: str
+            Path to validate.
+        args: list
+        kwargs: dict
+
+        Returns
+        -------
+        CandidateStatus
+            Whether the path is a candidate for this dataset class.
+        """
         valid = super().validate_path(path, *args, **kwargs)
         if valid == CandidateStatus.NO:
             return valid

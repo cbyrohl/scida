@@ -1,3 +1,6 @@
+"""
+Defines a series representing a Gadget-style simulation.
+"""
 import os
 import pathlib
 from pathlib import Path
@@ -18,9 +21,21 @@ class GadgetStyleSimulation(DatasetSeries):
         subpath_dict: Optional[Dict] = None,
         arg_dict: Optional[Dict] = None,
         lazy=True,
-        async_caching=False,
         **interface_kwargs
     ):
+        """
+        Initialize a GadgetStyleSimulation object.
+
+        Parameters
+        ----------
+        path: str
+            Path to the simulation folder, should contain "output" folder.
+        prefix_dict: dict
+        subpath_dict: dict
+        arg_dict: dict
+        lazy: bool
+        interface_kwargs: dict
+        """
         self.path = path
         self.name = os.path.basename(path)
         if prefix_dict is None:
@@ -85,9 +100,7 @@ class GadgetStyleSimulation(DatasetSeries):
         kwargs = {arg_dict.get(k, "catalog"): paths_dict[k] for k in paths_dict.keys()}
         kwargs.update(**interface_kwargs)
 
-        super().__init__(
-            paths, datasetclass=cls, lazy=lazy, async_caching=async_caching, **kwargs
-        )
+        super().__init__(paths, datasetclass=cls, lazy=lazy, **kwargs)
 
 
 def _get_snapshotfolder_prefix(path) -> str:

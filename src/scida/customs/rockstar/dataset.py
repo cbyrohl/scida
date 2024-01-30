@@ -1,3 +1,6 @@
+"""
+Defines the RockstarCatalog class.
+"""
 import os
 from typing import Union
 
@@ -12,6 +15,16 @@ class RockstarCatalog(CosmologyMixin, Dataset):
     _unitfile = "units/rockstar.yaml"
 
     def __init__(self, path, **kwargs) -> None:
+        """
+        Initialize a RockstarCatalog object.
+
+        Parameters
+        ----------
+        path: str
+            Path to the catalog.
+        kwargs: dict
+            Additional keyword arguments.
+        """
         super().__init__(path, **kwargs)
 
     @classmethod
