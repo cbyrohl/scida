@@ -31,5 +31,5 @@ For example, AREPO snapshots are defined by the [ArepoSnapshot](moduleindex.md#s
 The [load](#scida.convenience.load) function will select a class based on the following criteria (descending priority):
 
 1. The class is passed to load as the force_class argument.
-2. The class is specified in the simulation configuration, see [here](configuration/#simulation-configuration).
+2. The class is specified in the simulation configuration, see [here](../configuration.md#simulation-configuration).
 3. The class implements validate_path() returning True for the given path if the class is applicable.
