@@ -2,10 +2,10 @@ import pathlib
 
 import pytest
 
-# unfortunately cannot use existing solution, so have to write our own
+# unfortunately cannot use existing solution for pycon code blocks, so have to write our own
 # (https://github.com/nschloe/pytest-codeblocks/issues/77)
 
-ignore_files = ["largedatasets.md", "visualization.md"]
+ignore_files = ["largedatasets.md"]  # , "visualization.md"]
 
 
 class DocFile:
