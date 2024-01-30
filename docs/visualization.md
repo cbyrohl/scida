@@ -56,6 +56,11 @@ plt.show()
 
 ## Interactive visualization
 
+!!! info
+    This example requires the `holoviews`, `datashader` and `bokeh` packages installed.
+    Make sure that these [holoviews examples](https://holoviews.org/getting_started/index.html) work before continuing.
+
+
 We can do interactive visualization with holoviews. For example, we can create a scatter plot of the particle positions.
 
 ```python

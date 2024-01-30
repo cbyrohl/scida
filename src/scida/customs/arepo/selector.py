@@ -1,3 +1,7 @@
+"""
+Selector for ArepoSnapshot
+"""
+
 from typing import TYPE_CHECKING
 
 from scida.customs.arepo.helpers import grp_type_str
@@ -8,7 +12,13 @@ if TYPE_CHECKING:
 
 
 class ArepoSelector(Selector):
+    """Selector for ArepoSnapshot.
+    Can select for haloID, subhaloID, and unbound particles."""
+
     def __init__(self) -> None:
+        """
+        Initialize the selector.
+        """
         super().__init__()
         self.keys = ["haloID", "subhaloID", "unbound"]
 
@@ -40,6 +50,17 @@ class ArepoSelector(Selector):
             self.select_unbound(snap)
 
     def select_unbound(self, snap):
+        """
+        Select unbound particles.
+
+        Parameters
+        ----------
+        snap: ArepoSnapshot
+
+        Returns
+        -------
+        None
+        """
         lengths = self.data_backup["Group"]["GroupLenType"][-1, :].compute()
         offsets = self.data_backup["Group"]["GroupOffsetsType"][-1, :].compute()
         # for unbound gas, we start after the last halo particles
@@ -59,6 +80,20 @@ class ArepoSelector(Selector):
         snap.data = self.data
 
     def select_group(self, snap, idx, objtype="Group"):
+        """
+        Select particles for given group/subhalo index.
+
+        Parameters
+        ----------
+        snap: ArepoSnapshot
+        idx: int
+        objtype: str
+
+        Returns
+        -------
+        None
+        """
+        # TODO: test whether works for multiple groups via idx list
         objtype = grp_type_str(objtype)
         if objtype == "halo":
             lengths = self.data_backup["Group"]["GroupLenType"][idx, :].compute()

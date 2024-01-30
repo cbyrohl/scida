@@ -1,3 +1,7 @@
+"""
+
+"""
+
 from __future__ import annotations
 
 import inspect
@@ -16,15 +20,41 @@ log = logging.getLogger(__name__)
 
 
 class FieldType(Enum):
-    INTERNAL = 1
-    IO = 2
-    DERIVED = 3
+    """
+    Enum for field types.
+    """
+
+    INTERNAL = 1  # for internal use only
+    IO = 2  # from disk
+    DERIVED = 3  # derived from other fields
 
 
 class FieldRecipe(object):
+    """
+    Recipe for a field.
+    """
+
     def __init__(
         self, name, func=None, arr=None, description="", units=None, ftype=FieldType.IO
     ):
+        """
+        Recipes for a field. Either specify a function or an array.
+
+        Parameters
+        ----------
+        name: str
+            Name of the field.
+        func: Optional[callable]
+            Function to construct array of the field.
+        arr: Optional[da.Array]
+            Array to construct the field.
+        description: str
+            Description of the field.
+        units: Optional[Union[pint.Unit, str]]
+            Units of the field.
+        ftype: FieldType
+            Type of the field.
+        """
         if func is None and arr is None:
             raise ValueError("Need to specify either func or arr.")
         self.type = ftype
@@ -36,7 +66,12 @@ class FieldRecipe(object):
 
 
 class DerivedFieldRecipe(FieldRecipe):
+    """
+    Recipe for a derived field.
+    """
+
     def __init__(self, name, func, description="", units=None):
+        """See FieldRecipe for parameters."""
         super().__init__(
             name,
             func=func,
@@ -63,6 +98,7 @@ class FieldContainer(MutableMapping):
         **kwargs,
     ):
         """
+        Construct a FieldContainer.
 
         Parameters
         ----------
@@ -101,26 +137,71 @@ class FieldContainer(MutableMapping):
         self.internals = ["uid"]  # names of internal fields/groups
         self.parent = parent
 
-    def set_ureg(self, ureg):
+    def set_ureg(self, ureg=None, discover=True):
+        """
+        Set the unit registry.
+
+        Parameters
+        ----------
+        ureg: pint.UnitRegistry
+            Unit registry.
+        discover: bool
+            Attempt to discover unit registry from fields.
+
+        Returns
+        -------
+
+        """
+        if ureg is None and not discover:
+            raise ValueError("Need to specify ureg or set discover=True.")
+        if ureg is None and discover:
+            keys = self.keys(withgroups=False, withrecipes=False, withinternal=True)
+            for k in keys:
+                if hasattr(self[k], "units"):
+                    if isinstance(self[k].units, pint.Unit):
+                        ureg = self[k].units._REGISTRY
         self._ureg = ureg
 
-    def get_ureg(self):
-        keys = self.keys(withgroups=False, withrecipes=False, withinternal=True)
-        for k in keys:
-            if hasattr(self[k], "units"):
-                if isinstance(self[k].units, pint.Unit):
-                    self._ureg = self[k].units._REGISTRY
-        if self._ureg is not None:
-            return self._ureg
-        return None
+    def get_ureg(self, discover=True):
+        """
+        Get the unit registry.
+
+        Returns
+        -------
+
+        """
+        if self._ureg is None and discover:
+            self.set_ureg(discover=True)
+        return self._ureg
 
     def copy_skeleton(self) -> FieldContainer:
+        """
+        Copy the skeleton of the container (i.e., only the containers, not the fields).
+
+        Returns
+        -------
+        FieldContainer
+        """
         res = FieldContainer()
         for k, cntr in self._containers.items():
             res[k] = cntr.copy_skeleton()
         return res
 
     def info(self, level=0, name: Optional[str] = None) -> str:
+        """
+        Return a string representation of the object.
+
+        Parameters
+        ----------
+        level: int
+            Level in case of nested containers.
+        name:
+            Name of the container.
+
+        Returns
+        -------
+        str
+        """
         rep = ""
         length = self.fieldlength
         count = self.fieldcount
@@ -141,7 +222,21 @@ class FieldContainer(MutableMapping):
             rep += v.info(level=level + 1)
         return rep
 
-    def merge(self, collection, overwrite=True):
+    def merge(self, collection: FieldContainer, overwrite: bool = True):
+        """
+        Merge another FieldContainer into this one.
+
+        Parameters
+        ----------
+        collection: FieldContainer
+            Container to merge.
+        overwrite: bool
+            Overwrite existing fields if true.
+
+        Returns
+        -------
+
+        """
         if not isinstance(collection, FieldContainer):
             raise TypeError("Can only merge FieldContainers.")
         # TODO: support nested containers
@@ -159,6 +254,13 @@ class FieldContainer(MutableMapping):
 
     @property
     def fieldcount(self):
+        """
+        Return the number of fields.
+
+        Returns
+        -------
+        int
+        """
         rcps = set(self._fieldrecipes)
         flds = set([k for k in self._fields if k not in self.internals])
         ntot = len(rcps | flds)
@@ -166,6 +268,14 @@ class FieldContainer(MutableMapping):
 
     @property
     def fieldlength(self):
+        """
+        Try to infer the number of entries for the fields in this container.
+        If all fields have the same length, return this length. Otherwise, return None.
+
+        Returns
+        -------
+        Optional[int]
+        """
         if self._fieldlength is not None:
             return self._fieldlength
         fvals = self._fields.values()
@@ -187,8 +297,30 @@ class FieldContainer(MutableMapping):
             return None
 
     def keys(
-        self, withgroups=True, withrecipes=True, withinternal=False, withfields=True
+        self,
+        withgroups: bool = True,
+        withrecipes: bool = True,
+        withinternal: bool = False,
+        withfields: bool = True,
     ):
+        """
+        Return a list of keys in the container.
+
+        Parameters
+        ----------
+        withgroups: bool
+            Include sub-containers.
+        withrecipes: bool
+            Include recipes (i.e. not yet instantiated fields).
+        withinternal: bool
+            Include internal fields.
+        withfields: bool
+            Include fields.
+
+        Returns
+        -------
+
+        """
         fieldkeys = []
         recipekeys = []
         if withfields:
@@ -206,12 +338,42 @@ class FieldContainer(MutableMapping):
         return sorted(fieldkeys)
 
     def items(self, withrecipes=True, withfields=True, evaluate=True):
+        """
+        Return a list of tuples for keys/values in the container.
+
+        Parameters
+        ----------
+        withrecipes: bool
+            Whether to include recipes.
+        withfields: bool
+            Whether to include fields.
+        evaluate: bool
+            Whether to evaluate recipes.
+
+        Returns
+        -------
+        list
+
+        """
         return (
             (k, self._getitem(k, evaluate_recipe=evaluate))
             for k in self.keys(withrecipes=withrecipes, withfields=withfields)
         )
 
     def values(self, evaluate=True):
+        """
+        Return fields/recipes the container.
+
+        Parameters
+        ----------
+        evaluate: bool
+            Whether to evaluate recipes.
+
+        Returns
+        -------
+        list
+
+        """
         return (self._getitem(k, evaluate_recipe=evaluate) for k in self.keys())
 
     def register_field(
@@ -221,6 +383,25 @@ class FieldContainer(MutableMapping):
         description="",
         units=None,
     ):
+        """
+        Decorator to register a field recipe.
+
+        Parameters
+        ----------
+        containernames: Optional[Union[str, List[str]]]
+            Name of the sub-container(s) to register to, or "all" for all, or None for self.
+        name: Optional[str]
+            Name of the field. If None, the function name is used.
+        description: str
+            Description of the field.
+        units: Optional[Union[pint.Unit, str]]
+            Units of the field.
+
+        Returns
+        -------
+        callable
+
+        """
         # we only construct field upon first call to it (default)
         # if to_containers, we register to the respective children containers
         containers = []
@@ -236,6 +417,9 @@ class FieldContainer(MutableMapping):
             raise ValueError("Unknown type.")
 
         def decorator(func, name=name, description=description, units=units):
+            """
+            Decorator to register a field recipe.
+            """
             if name is None:
                 name = func.__name__
             for container in containers:
@@ -279,9 +463,29 @@ class FieldContainer(MutableMapping):
 
     @property
     def dataframe(self):
+        """
+        Return a dask dataframe of the fields in this container.
+
+        Returns
+        -------
+        dd.DataFrame
+
+        """
         return self.get_dataframe()
 
     def get_dataframe(self, fields=None):
+        """
+        Return a dask dataframe of the fields in this container.
+
+        Parameters
+        ----------
+        fields: Optional[List[str]]
+            List of fields to include. If None, include all.
+
+        Returns
+        -------
+        dd.DataFrame
+        """
         dss = {}
         if fields is None:
             fields = self.keys()
@@ -323,15 +527,57 @@ class FieldContainer(MutableMapping):
         return ddf
 
     def add_alias(self, alias, name):
+        """
+        Add an alias for a field.
+
+        Parameters
+        ----------
+        alias: str
+            Alias name
+        name: str
+            Field name
+
+        Returns
+        -------
+        None
+
+        """
         self.aliases[alias] = name
 
     def remove_container(self, key):
+        """
+        Remove a sub-container.
+
+        Parameters
+        ----------
+        key: str
+            Name of the sub-container.
+
+        Returns
+        -------
+        None
+        """
         if key in self._containers:
             del self._containers[key]
         else:
             raise KeyError("Unknown container '%s'" % key)
 
     def add_container(self, key, deep=False, **kwargs):
+        """
+        Add a sub-container.
+
+        Parameters
+        ----------
+        key: str, FieldContainer
+        deep: bool
+            If True, make a deep copy of the container.
+        kwargs: dict
+            keyword arguments for the FieldContainer constructor.
+
+        Returns
+        -------
+        None
+        """
         if isinstance(key, str):
             # create a new container with given name
             tkwargs = dict(**kwargs)
@@ -357,6 +603,7 @@ class FieldContainer(MutableMapping):
     def copy(self):
         """
         Perform a deep (?) copy of the FieldContainer.
+
         Returns
         -------
         FieldContainer
@@ -378,6 +625,24 @@ class FieldContainer(MutableMapping):
     def _getitem(
         self, key, force_derived=False, update_dict=True, evaluate_recipe=True
     ):
+        """
+        Get an item from the container.
+
+        Parameters
+        ----------
+        key: str
+        force_derived: bool
+            Use the derived field description over instantiated fields.
+        update_dict: bool
+            Update the dictionary of instantiated fields.
+        evaluate_recipe: bool
+            Evaluate the recipe.
+
+        Returns
+        -------
+        da.Array
+
+        """
         if key in self.aliases:
             key = self.aliases[key]
         if key in self._containers:
@@ -396,6 +661,18 @@ class FieldContainer(MutableMapping):
                 raise KeyError("Unknown field '%s'" % key)
 
     def _instantiate_field(self, key):
+        """
+        Instantiate a field from a recipe, i.e. create its dask array.
+
+        Parameters
+        ----------
+        key: str
+            Name of the field.
+
+        Returns
+        -------
+        da.Array
+        """
         func = self._fieldrecipes[key].func
         units = self._fieldrecipes[key].units
         accept_kwargs = inspect.getfullargspec(func).varkw is not None
@@ -469,6 +746,22 @@ class FieldContainer(MutableMapping):
         return len(self.keys())
 
     def get(self, key, value=None, allow_derived=True, force_derived=False):
+        """
+        Get a field.
+
+        Parameters
+        ----------
+        key: str
+        value: da.Array
+        allow_derived: bool
+            Allow derived fields.
+        force_derived: bool
+            Use the derived field description over instantiated fields.
+
+        Returns
+        -------
+        da.Array
+        """
         if key in self._fieldrecipes and not allow_derived:
             raise KeyError("Field '%s' is derived (allow_derived=False)" % key)
         else:
@@ -483,6 +776,26 @@ class FieldContainer(MutableMapping):
 def walk_container(
     cntr, path="", handler_field=None, handler_group=None, withrecipes=False
 ):
+    """
+    Recursively walk a container and call handlers on fields and groups.
+
+    Parameters
+    ----------
+    cntr: FieldContainer
+        Container to walk.
+    path: str
+        relative path in hierarchy to this container
+    handler_field: callable
+        Function to call on fields.
+    handler_group: callable
+        Function to call on subcontainers.
+    withrecipes: bool
+        Include recipes.
+
+    Returns
+    -------
+    None
+    """
     keykwargs = dict(withgroups=True, withrecipes=withrecipes)
     for ck in cntr.keys(**keykwargs):
         # we do not want to instantiate entry from recipe by calling cntr[ck] here

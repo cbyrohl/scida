@@ -1,3 +1,7 @@
+"""
+Defines the GadgetStyleSnapshot class, mostly used for deriving subclasses for related codes/simulations.
+"""
+
 import logging
 import os
 import re
@@ -13,6 +17,8 @@ log = logging.getLogger(__name__)
 
 
 class GadgetStyleSnapshot(Dataset):
+    """A dataset representing a Gadget-style snapshot."""
+
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
         """We define gadget-style snapshots as nbody/hydrodynamical simulation snapshots that follow
         the common /PartType0, /PartType1 grouping scheme."""
@@ -135,12 +141,43 @@ class GadgetStyleSnapshot(Dataset):
         return CandidateStatus.NO
 
     def register_field(self, parttype, name=None, description=""):
+        """
+        Register a field for a given particle type by returning through decorator.
+
+        Parameters
+        ----------
+        parttype: Optional[Union[str, List[str]]]
+            Particle type name to register with. If None, register for the base field container.
+        name: Optional[str]
+            Name of the field to register.
+        description: Optional[str]
+            Description of the field to register.
+
+        Returns
+        -------
+        callable
+
+        """
         res = self.data.register_field(parttype, name=name, description=description)
         return res
 
     def merge_data(
         self, secondobj, fieldname_suffix="", root_group: Optional[str] = None
     ):
+        """
+        Merge data from other snapshot into self.data.
+
+        Parameters
+        ----------
+        secondobj: GadgetStyleSnapshot
+        fieldname_suffix: str
+        root_group: Optional[str]
+
+        Returns
+        -------
+        None
+
+        """
         data = self.data
         if root_group is not None:
             if root_group not in data._containers:
@@ -155,6 +192,18 @@ class GadgetStyleSnapshot(Dataset):
             secondobj.data.fieldrecipes_kwargs["snap"] = self
 
     def merge_hints(self, secondobj):
+        """
+        Merge hints from other snapshot into self.hints.
+
+        Parameters
+        ----------
+        secondobj: GadgetStyleSnapshot
+            Other snapshot to merge hints from.
+
+        Returns
+        -------
+        None
+        """
         # merge hints from snap and catalog
         for h in secondobj.hints:
             if h not in self.hints:

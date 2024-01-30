@@ -1,3 +1,7 @@
+"""
+Basic IO functionality for scida.
+"""
+
 import abc
 import logging
 import os
@@ -22,22 +26,54 @@ log = logging.getLogger(__name__)
 
 
 class InvalidCacheError(Exception):
+    """
+    Raised if a cache file is invalid.
+    """
+
     pass
 
 
 class Loader(abc.ABC):
+    """
+    Base class for loaders.
+    """
+
     def __init__(self, path):
+        """
+        Initialize loader by passing target path.
+        Parameters
+        ----------
+        path: str
+            path to the dataset
+        """
         self.path = path
         self.file = None  # open file handle if available
         self.tempfile = None  # reference to tempfile where needed
 
     @abc.abstractmethod
     def load(self):
+        """
+        Load data from file.
+        Returns
+        -------
+
+        """
         pass
 
 
 class FITSLoader(Loader):
+    """
+    FITS file loader.
+    """
+
     def __init__(self, path):
+        """
+        Initialize loader by passing target path.
+        Parameters
+        ----------
+        path: str
+           path to resource
+        """
         super().__init__(path)
         self.location = self.path
 
@@ -50,6 +86,27 @@ class FITSLoader(Loader):
         virtualcache=False,
         **kwargs
     ):
+        """
+        Load data from FITS file.
+        Parameters
+        ----------
+        overwrite: bool
+            Overwrite cache file if it exists.
+        fileprefix: str
+            Prefix of files to be loaded. If None, we take the first prefix.
+        token: str
+            Token to be used for dask arrays.
+        chunksize: str
+            Chunksize for dask arrays.
+        virtualcache: bool
+            Whether to use virtual caching.
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+
+        """
         log.warning("FITS file support is work-in-progress.")
         self.location = self.path
         from astropy.io import fits
@@ -72,7 +129,18 @@ class FITSLoader(Loader):
         return rootcontainer, metadata
 
     def load_metadata(self, **kwargs):
-        """Take a quick glance at the metadata, only attributes."""
+        """
+        Take a quick glance at the metadata, only attributes.
+        Parameters
+        ----------
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        dict
+            Dictionary of attributes.
+        """
         from astropy.io import fits
 
         ext = 0
@@ -80,7 +148,17 @@ class FITSLoader(Loader):
             return hdulist[ext].header
 
     def load_metadata_all(self, **kwargs):
-        """Take a quick glance at metadata."""
+        """
+        Parameters
+        ----------
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        dict
+            Dictionary of attributes.
+        """
         from astropy.io import fits
 
         ext = 1
@@ -90,7 +168,18 @@ class FITSLoader(Loader):
 
 
 class HDF5Loader(Loader):
+    """
+    HDF5 file loader.
+    """
+
     def __init__(self, path):
+        """
+        Initialize loader by passing target path.
+        Parameters
+        ----------
+        path: str
+            path to resource
+        """
         super().__init__(path)
         self.location = ""
 
@@ -103,6 +192,29 @@ class HDF5Loader(Loader):
         virtualcache=False,
         **kwargs
     ):
+        """
+        Load data from HDF5 file.
+        Parameters
+        ----------
+        overwrite: bool
+            Overwrite cache file if it exists.
+        fileprefix: str
+            Prefix of files to be loaded. If None, we take the first prefix.
+        token: str
+            Token to be used for dask arrays.
+        chunksize: str
+            Chunksize for dask arrays.
+        virtualcache: bool
+            Whether to use virtual caching.
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        tuple
+            Tuple of data and metadata.
+
+        """
         self.location = self.path
         tree = {}
         walk_hdf5file(self.location, tree=tree)
@@ -114,20 +226,54 @@ class HDF5Loader(Loader):
         return data, metadata
 
     def load_metadata(self, **kwargs):
-        """Take a quick glance at the metadata, only attributes."""
+        """
+        Take a quick glance at the metadata.
+        Parameters
+        ----------
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        dict
+            Dictionary of attributes.
+
+        """
         tree = {}
         walk_hdf5file(self.path, tree)
         return tree["attrs"]
 
     def load_metadata_all(self, **kwargs):
-        """Take a quick glance at metadata."""
+        """
+        Take a quick glance at the metadata.
+        Parameters
+        ----------
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        dict
+            Dictionary of attributes.
+        """
         tree = {}
         walk_hdf5file(self.path, tree)
         return tree
 
 
 class ZarrLoader(Loader):
+    """
+    Zarr file loader.
+    """
+
     def __init__(self, path):
+        """
+        Initialize loader by passing target path.
+        Parameters
+        ----------
+        path: str
+            path to resource
+        """
         super().__init__(path)
         self.location = ""
 
@@ -140,6 +286,29 @@ class ZarrLoader(Loader):
         virtualcache=False,
         **kwargs
     ):
+        """
+        Load data from Zarr file.
+
+        Parameters
+        ----------
+        overwrite: bool
+            Overwrite cache file if it exists.
+        fileprefix: str
+            Prefix of files to be loaded. If None, we take the first prefix.
+        token: str
+            Token to be used for dask arrays.
+        chunksize: str
+            Chunksize for dask arrays.
+        virtualcache: bool
+            Whether to use virtual caching.
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        tuple
+            Tuple of data and metadata.
+        """
         self.location = self.path
         tree = {}
         walk_zarrfile(self.location, tree=tree)
@@ -155,20 +324,57 @@ class ZarrLoader(Loader):
         return data, metadata
 
     def load_metadata(self, **kwargs):
-        """Take a quick glance at the metadata."""
+        """
+        Take a quick glance at the metadata.
+        Parameters
+        ----------
+        kwargs: dict
+
+        Returns
+        -------
+        dict
+            Dictionary of attributes.
+
+        """
         tree = {}
         walk_zarrfile(self.path, tree)
         return tree["attrs"]
 
 
 class ChunkedHDF5Loader(Loader):
+    """
+    Chunked HDF5 file loader.
+    """
+
     def __init__(self, path):
+        """
+        Initialize loader by passing target path.
+
+        Parameters
+        ----------
+        path: str
+            path to resource
+        """
         super().__init__(path)
         self.tempfile = ""
         self.location = ""
 
     def load_metadata(self, fileprefix="", **kwargs):
-        """Take a quick glance at the metadata."""
+        """
+        Take a quick glance at the metadata.
+
+        Parameters
+        ----------
+        fileprefix: str
+            Prefix of files to be loaded. If None, we take the first prefix.
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        dict
+            Dictionary of attributes.
+        """
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         if cachefp is not None and os.path.isfile(cachefp):
             path = cachefp
@@ -194,6 +400,32 @@ class ChunkedHDF5Loader(Loader):
         virtualcache=False,
         **kwargs
     ):
+        """
+        Load data from chunked HDF5 file.
+
+        Parameters
+        ----------
+        overwrite: bool
+            Overwrite cache file if it exists.
+        fileprefix: str
+            Prefix of files to be loaded. If None, we take the first prefix.
+        choose_prefix: bool
+            Whether to choose the prefix if multiple are available.
+        token: str
+            Token to be used for dask arrays.
+        chunksize: str
+            Chunksize for dask arrays.
+        virtualcache: bool
+            Whether to use virtual caching.
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        tuple
+            Tuple of data and metadata.
+
+        """
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         # three cases we need to cache:
         create = False
@@ -252,6 +484,23 @@ class ChunkedHDF5Loader(Loader):
     def create_cachefile(
         self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False
     ):
+        """
+        Create a cache file from the chunked HDF5 files.
+        Parameters
+        ----------
+        fileprefix: str
+            Prefix of files to be loaded. If None, we take the first prefix.
+        virtualcache: bool
+            Whether to use virtual caching.
+        verbose: bool
+            Whether to print messages.
+        choose_prefix: bool
+            Whether to choose the prefix if multiple are available.
+
+        Returns
+        -------
+        None
+        """
         config = get_config()
         print_msg = verbose
         if verbose is None:
@@ -281,6 +530,25 @@ class ChunkedHDF5Loader(Loader):
             hf.attrs["_cachingcomplete"] = True  # mark that caching complete
 
     def load_cachefile(self, location, token="", chunksize="auto", **kwargs):
+        """
+        Load data from cache file.
+
+        Parameters
+        ----------
+        location: str
+            Location of cache file.
+        token: str
+            Token to be used for dask arrays.
+        chunksize: str
+            Chunksize for dask arrays.
+        kwargs: dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        tuple
+            Tuple of data and metadata.
+        """
         try:
             self.file = h5py.File(location, "r")
         except (
@@ -317,8 +585,36 @@ def load_datadict_old(
     filetype="hdf5",
     withunits=False,
 ):
-    """groups_load: list of groups to load; all groups with datasets are loaded if groups_load==None"""
-    # TODO: Refactor and rename
+    """
+    Load data from HDF5/Zarr resource into a dictionary of dask arrays.
+    Parameters
+    ----------
+    location: str
+        Location of resource.
+    file: Union[h5py.File, zarr.hierarchy.Group]
+        File handle.
+    groups_load: list
+        List of groups to load.
+    token: str
+        Token to be used for dask arrays.
+    chunksize: str
+        Chunksize for dask arrays.
+    derivedfields_kwargs: dict
+        Keyword arguments for derived fields.
+    lazy: bool
+        Whether to load data lazily.
+    filetype: str
+        Filetype of resource.
+    withunits: bool
+        Whether to load units.
+
+    Returns
+    -------
+    dict
+        Dictionary of dask arrays.
+
+    """
+    # TODO: Refactor and rename function
     inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
     if isinstance(file, h5py.File):
         inline_array = False
@@ -411,6 +707,9 @@ def load_datadict_old(
 
     # create uids fields for all containers
     def create_uids(container: FieldContainer, path: str):
+        """
+        helper function to create unique ids for each container
+        """
         nparts = -1
         keys = container.keys(withgroups=False, withrecipes=True)
         for k in keys:
@@ -431,6 +730,19 @@ def load_datadict_old(
 
 
 def determine_loader(path, **kwargs):
+    """
+    Determine loader from path.
+    Parameters
+    ----------
+    path: str
+        Path to resource.
+    kwargs: dict
+        Additional keyword arguments.
+
+    Returns
+    -------
+    Loader
+    """
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, ".zgroup")):
             # object is a zarr object
@@ -455,19 +767,61 @@ def determine_loader(path, **kwargs):
 
 
 def load_metadata(path, **kwargs):
-    """only returns attributes"""
+    """
+    Take a quick glance at the metadata.
+    Parameters
+    ----------
+    path: str
+        Path to resource.
+    kwargs: dict
+        Additional keyword arguments.
+
+    Returns
+    -------
+    dict
+        Dictionary of attributes.
+    """
     loader = determine_loader(path, **kwargs)
     metadata = loader.load_metadata(**kwargs)
     return metadata
 
 
 def load_metadata_all(path, **kwargs):
+    """
+    Take a quick glance at the metadata.
+    Parameters
+    ----------
+    path: str
+        Path to resource.
+    kwargs: dict
+        Additional keyword arguments.
+
+    Returns
+    -------
+    dict
+        Dictionary of attributes.
+
+    """
     loader = determine_loader(path, **kwargs)
     metadata = loader.load_metadata_all(**kwargs)
     return metadata
 
 
 def load(path, **kwargs):
+    """
+    Load data from resource.
+    Parameters
+    ----------
+    path: str
+        Path to resource.
+    kwargs: dict
+        Additional keyword arguments.
+
+    Returns
+    -------
+    tuple
+        Tuple of data and metadata.
+    """
     loader = determine_loader(path, **kwargs)
     data, metadata = loader.load(**kwargs)
     file = loader.file
@@ -482,12 +836,15 @@ def _cachefile_available_in_path(
     Check whether a virtual merged HDF5 file is present in folder.
     Parameters
     ----------
-    path
-    fileprefix
-    kwargs
+    path: str
+    fileprefix: Optional[str]
+    kwargs: dict
+        Additional keyword arguments.
 
     Returns
     -------
+    Union[bool, str]
+        False if no cache file is available, otherwise the path to the cache file.
 
     """
     try:
@@ -518,6 +875,31 @@ def _add_hdf5arr_to_fieldcontainer(
     inline_array=False,
     lazy=True,
 ):
+    """
+    Add HDF5 array to field container.
+    Parameters
+    ----------
+    file: h5py.File
+        file handle
+    container: FieldContainer
+        container to add field to
+    fieldpath: str
+        path to field in file
+    fieldname: str
+        name of field
+    name: str
+        name of dask array
+    chunksize: str
+        chunksize for dask array
+    inline_array: bool
+        whether to inline array in dask
+    lazy: bool
+        whether to load array lazily
+
+    Returns
+    -------
+    None
+    """
     if not lazy:
         hds = file[fieldpath]
         ds = da.from_array(
@@ -539,6 +921,9 @@ def _add_hdf5arr_to_fieldcontainer(
         file=None,
         **kwargs
     ):
+        """
+        helper function to load resource field into dask array
+        """
         hds = file[h5path]
         arr = da.from_array(
             hds,

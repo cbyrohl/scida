@@ -15,7 +15,7 @@ Find some visual impressions [here](./impressions.md).
         </div>
       </div>
     </div>
-    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./api_docs';">
+    <div class="card" style="cursor: pointer;" style="cursor: pointer;" onclick="window.location='./api/base_api';">
       <div class="card__image-container">
         <img
           src="images/code-solid.svg"

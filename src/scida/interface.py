@@ -1,3 +1,7 @@
+"""
+Base dataset class and its handling.
+"""
+
 import abc
 import hashlib
 import logging
@@ -19,27 +23,22 @@ from scida.registries import dataset_type_registry
 log = logging.getLogger(__name__)
 
 
-def create_MixinDataset(cls, mixins):
-    newcls = cls
-    # print("mixins", mixins, cls)
-    if isinstance(mixins, list) and len(mixins) > 0:
-        name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
-        # adjust entry point if __init__ available in some mixin
-        nms = dict(cls.__dict__)
-        # need to make sure first mixin init is called over cls init
-        nms["__init__"] = mixins[0].__init__
-        newcls = type(name, (*mixins, cls), nms)
-    return newcls
-
-
 class MixinMeta(type):
+    """
+    Metaclass for Mixin classes.
+    """
+
     def __call__(cls, *args, **kwargs):
         mixins = kwargs.pop("mixins", None)
-        newcls = create_MixinDataset(cls, mixins)
+        newcls = create_datasetclass_with_mixins(cls, mixins)
         return type.__call__(newcls, *args, **kwargs)
 
 
 class BaseDataset(metaclass=MixinMeta):
+    """
+    Base class for all datasets.
+    """
+
     def __init__(
         self,
         path,
@@ -50,6 +49,26 @@ class BaseDataset(metaclass=MixinMeta):
         hints=None,
         **kwargs
     ):
+        """
+        Initialize a dataset object.
+
+        Parameters
+        ----------
+        path: str
+            Path to the dataset.
+        chunksize: int or str
+            Chunksize for dask arrays.
+        virtualcache: bool
+            Whether to use virtual caching.
+        overwritecache: bool
+            Whether to overwrite existing cache.
+        fileprefix: str
+            Prefix for files to scan for.
+        hints: dict
+            Hints for the dataset.
+        kwargs: dict
+            Additional keyword arguments.
+        """
         super().__init__()
         self.hints = hints if hints is not None else {}
         self.path = path
@@ -99,15 +118,17 @@ class BaseDataset(metaclass=MixinMeta):
     def _info_custom(self):
         """
         Custom information to be printed by info() method.
+
         Returns
         -------
-
+        None
         """
         return None
 
     def info(self, listfields: bool = False):
         """
         Print information about the dataset.
+
         Parameters
         ----------
         listfields: bool
@@ -115,7 +136,7 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
-
+        None
         """
         rep = ""
         rep += "class: " + sprint(self.__class__.__name__)
@@ -132,6 +153,7 @@ class BaseDataset(metaclass=MixinMeta):
     def _repr_dict(self) -> Dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
+
         Returns
         -------
         dict
@@ -143,6 +165,7 @@ class BaseDataset(metaclass=MixinMeta):
     def __repr__(self) -> str:
         """
         Return a string representation of the object.
+
         Returns
         -------
         str
@@ -165,12 +188,23 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
-
+        None
         """
         rpr = self.__repr__()
         p.text(rpr)
 
     def __init_subclass__(cls, *args, **kwargs):
+        """
+        Register subclasses in the dataset type registry.
+        Parameters
+        ----------
+        args: list
+        kwargs: dict
+
+        Returns
+        -------
+        None
+        """
         super().__init_subclass__(*args, **kwargs)
         if cls.__name__ == "Delay":
             return  # nothing to register for Delay objects
@@ -191,6 +225,7 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
+        bool
 
         """
         return False
@@ -216,6 +251,7 @@ class BaseDataset(metaclass=MixinMeta):
     def __dask_tokenize__(self) -> int:
         """
         Token for dask to be derived -- naively from the file location.
+
         Returns
         -------
         int
@@ -225,9 +261,10 @@ class BaseDataset(metaclass=MixinMeta):
     def return_data(self) -> FieldContainer:
         """
         Return the data container.
+
         Returns
         -------
-
+        FieldContainer
         """
         return self.data
 
@@ -246,6 +283,8 @@ class BaseDataset(metaclass=MixinMeta):
         Save the dataset to a file using the 'zarr' format.
         Parameters
         ----------
+        extra_attrs: dict
+            additional attributes to save in the root group
         fname: str
             Filename to save to.
         fields: str or dict
@@ -259,7 +298,7 @@ class BaseDataset(metaclass=MixinMeta):
 
         Returns
         -------
-
+        None
         """
         # We use zarr, as this way we have support to directly write into the file by the workers
         # (rather than passing back the data chunk over the scheduler to the interface)
@@ -325,29 +364,42 @@ class BaseDataset(metaclass=MixinMeta):
 
 
 class Dataset(BaseDataset):
+    """
+    Base class for datasets with some functions to be overwritten by subclass.
+    """
+
     @classmethod
     def validate_path(cls, path, *args, **kwargs):
         """
         Validate whether the given path is a valid path for this dataset.
+
         Parameters
         ----------
-        path
-        args
-        kwargs
+        path: str
+            Path to the dataset.
+        args: list
+        kwargs: dict
 
         Returns
         -------
-
+        bool
         """
         return True
 
     @classmethod
     def _clean_metadata_from_raw(cls, rawmetadata):
+        """Clean metadata from raw metadata"""
         return {}
 
 
+# TODO: remove this class (?), should be dynamically created in load() where needed
 class DatasetWithUnitMixin(UnitMixin, Dataset):
+    """
+    Dataset with units.
+    """
+
     def __init__(self, *args, **kwargs):
+        """Initialize dataset with units."""
         super().__init__(*args, **kwargs)
 
 
@@ -355,6 +407,9 @@ class Selector(object):
     """Base Class for data selection decorator factory"""
 
     def __init__(self):
+        """
+        Initialize the selector.
+        """
         self.keys = None  # the keys we check for.
         # holds a copy of the species' fields
         self.data_backup = FieldContainer()
@@ -362,6 +417,23 @@ class Selector(object):
         self.data: FieldContainer = FieldContainer()
 
     def __call__(self, fn, *args, **kwargs):
+        """
+        Call the selector.
+
+        Parameters
+        ----------
+        fn: function
+            Function to be decorated.
+        args: list
+        kwargs: dict
+
+        Returns
+        -------
+        function
+            Decorated function.
+
+        """
+
         def newfn(*args, **kwargs):
             # TODO: Add graceful exit/restore after exception in self.prepare
             self.data_backup = args[0].data
@@ -385,11 +457,58 @@ class Selector(object):
         return newfn
 
     def prepare(self, *args, **kwargs) -> None:
+        """
+        Prepare the data for selection. To be implemented in subclasses.
+
+        Parameters
+        ----------
+        args
+        kwargs
+
+        Returns
+        -------
+
+        """
         raise NotImplementedError("Subclass implementation needed!")
 
     def finalize(self, *args, **kwargs) -> None:
+        """
+        Finalize the data after selection. To be implemented in subclasses.
+
+        Parameters
+        ----------
+        args
+        kwargs
+
+        Returns
+        -------
+
+        """
         args[0].data = self.data_backup
 
 
-def hello():
-    print("hello")
+def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
+    """
+    Create a new class from a given class and a list of mixins.
+
+    Parameters
+    ----------
+    cls:
+        dataset class to be extended
+    mixins:
+        list of mixin classes to be added
+
+    Returns
+    -------
+    Type[BaseDataset]
+        new class with mixins
+    """
+    newcls = cls
+    if isinstance(mixins, list) and len(mixins) > 0:
+        name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
+        # adjust entry point if __init__ available in some mixin
+        nms = dict(cls.__dict__)
+        # need to make sure first mixin init is called over cls init
+        nms["__init__"] = mixins[0].__init__
+        newcls = type(name, (*mixins, cls), nms)
+    return newcls

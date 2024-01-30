@@ -11,28 +11,26 @@ theme:
 nav:
   - 'Scida': index.md
   - 'Getting Started':
-    - "Installation": install.md
-    - 'Tutorial':
-      - 'Tutorial': tutorial/index.md
-      - 'Simulations': tutorial/simulations.md
-      - 'Observations': tutorial/observations.md
-    #    - 'Getting Started': notebooks/gettingstarted.ipynb
-    #    - 'Processing Large Data Sets': notebooks/static/largedatasets.ipynb
-    #    - 'Series': notebooks/series.ipynb
-    #    - 'Interactive Visualization': notebooks/static/visualization.ipynb
+      - "Installation": install.md
+      - 'Tutorial':
+          - 'Tutorial': tutorial/index.md
+          - 'Simulations': tutorial/simulations.md
+          - 'Observations': tutorial/observations.md
   - 'Features':
-    - 'Supported datasets': supported_data.md
-    - 'Visualization': visualization.md
-    - 'Units': units.md
-    - 'Derived fields': derived_fields.md
-    - 'Data series': series.md
-    - 'Large datasets': largedatasets.md
+      - 'Supported datasets': supported_data.md
+      - 'Visualization': visualization.md
+      - 'Units': units.md
+      - 'Derived fields': derived_fields.md
+      - 'Data series': series.md
+      - 'Large datasets': largedatasets.md
   - 'Advanced Topics':
-    - 'Arepo Simulations':
-      - 'Halo Catalogs': halocatalogs.md
+      - 'Arepo Simulations':
+          - 'Halo Catalogs': halocatalogs.md
   - 'Configuration': configuration.md
   - 'FAQ': faq.md
-  - api_docs.md
+  - 'API':
+      - 'Basic': api/base_api.md
+      - 'Index': api/moduleindex.md
 
 markdown_extensions:
   - markdown_include.include:
@@ -87,11 +85,11 @@ plugins:
         vertical-align: top
         height: 12.172vw
         width: 12.172vw
-  - mkdocs-jupyter:
-      execute: !ENV [JUPYTER_EXECUTE, true]
-      execute_ignore:
-        - "notebooks/static/*.ipynb"
-      kernel_name: scida
+  #- mkdocs-jupyter:
+  #    execute: !ENV [JUPYTER_EXECUTE, true]
+  #    execute_ignore:
+  #      - "notebooks/static/*.ipynb"
+  #    kernel_name: scida
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -111,3 +109,4 @@ extra_javascript:
 extra_css:
   - stylesheets/gridview.css
   - stylesheets/code_select.css
+  - stylesheets/mkdocstrings.css

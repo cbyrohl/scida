@@ -64,8 +64,12 @@ cosmology = FlatLambdaCDM(H0=67.74 km / (Mpc s), Om0=0.3089, Tcmb0=0.0 K, Neff=3
 
 1. Call to receive some information about the loaded dataset.
 
-
-
+!!! info "Specifying the load path"
+    Here, we passed the directory "snapdir_030" as the path to `load()`.
+    In detail, it will depend on the desired dataset type to be loaded which path to pass to `load()`,
+    but generally this is the base folder containing all relevant data.
+    In above example, you could also use path="snapdir_030/snap_030.0.hdf5",
+    however this would only load this file's content, a fraction of all data.
 
 The dataset is now loaded, and we can inspect its contents, specifically its container and fields loaded.
 We can access the data in the dataset by using the `data` attribute, which is a dictionary of containers and fields.

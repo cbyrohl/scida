@@ -1,3 +1,7 @@
+"""
+Configuration handling.
+"""
+
 import importlib.resources
 import os
 import pathlib
@@ -12,6 +16,7 @@ def _access_confdir() -> str:
     """
     Get the path to the configuration directory.
     Create it and copy the default configuration if it does not exist yet.
+
     Returns
     -------
     str
@@ -28,6 +33,7 @@ def _access_confdir() -> str:
 def get_config(reload: bool = False, update_global=True) -> dict:
     """
     Load the configuration from the default path.
+
     Parameters
     ----------
     reload: bool
@@ -39,7 +45,6 @@ def get_config(reload: bool = False, update_global=True) -> dict:
     -------
     dict
         The configuration dictionary.
-
     """
     global _conf
     prefix = "SCIDA_"
@@ -73,25 +78,42 @@ def get_config(reload: bool = False, update_global=True) -> dict:
 
 
 def combine_configs(configs: List[Dict], mode="overwrite_keys") -> Dict:
-    # this mode will merge dictionaries recursively and replace node entries in a with b
+    """
+    Combine multiple configurations recursively.
+    Replacing entries in the first config with entries from the latter
+
+    Parameters
+    ----------
+    configs: list
+        The list of configurations to combine.
+    mode: str
+        The mode for combining the configurations.
+        "overwrite_keys": overwrite keys in the first config with keys from the latter (default).
+        "overwrite_values": overwrite values in the first config with values from the latter.
+
+    Returns
+    -------
+    dict
+        The combined configuration.
+    """
     if mode == "overwrite_values":
 
         def mergefunc_values(a, b):
+            """merge values"""
             if b is None:
                 return a
             return b  # just overwrite by latter entry
 
         mergefunc_keys = None
-
     elif mode == "overwrite_keys":
 
         def mergefunc_keys(a, b):
+            """merge keys"""
             if b is None:
                 return a
             return b
 
         mergefunc_values = None
-
     else:
         raise ValueError("Unknown mode '%s'" % mode)
     conf = configs[0]
@@ -102,7 +124,14 @@ def combine_configs(configs: List[Dict], mode="overwrite_keys") -> Dict:
     return conf
 
 
-def _get_simulationconfig_user():
+def _get_simulationconfig_user() -> Optional[dict]:
+    """
+    Get the user's simulation configuration.
+    Returns
+    -------
+    dict
+        The user's simulation configuration.
+    """
     conf_sims_user = None
     path_confdir = _access_confdir()
     p = pathlib.Path(path_confdir) / "simulations.yaml"
@@ -113,6 +142,15 @@ def _get_simulationconfig_user():
 
 
 def get_simulationconfig():
+    """
+    Get the simulation configuration.
+    Search regular user config file, scida simulation config file, and user's simulation config file.
+
+    Returns
+    -------
+    dict
+        The simulation configuration.
+    """
     conf_user = get_config()
     conf_sims = get_config_fromfile("simulations.yaml")
     conf_sims_user = _get_simulationconfig_user()
@@ -142,7 +180,7 @@ def copy_defaultconfig(overwrite=False) -> None:
 
     Returns
     -------
-
+    None
     """
 
     path_user = os.path.expanduser("~")
@@ -169,7 +207,7 @@ def get_config_fromfile(resource: str) -> Dict:
 
     Returns
     -------
-
+    None
     """
     if resource == "":
         raise ValueError("Config name cannot be empty.")
@@ -218,9 +256,11 @@ def merge_dicts_recursively(
     path
         The path to the current node.
     mergefunc_keys: callable
-        The function to use for merging. If None, we recursively enter the dictionary.
+        The function to use for merging dict keys.
+        If None, we recursively enter the dictionary.
     mergefunc_values: callable
-        The function to use for merging. If None, collisions will raise an exception.
+        The function to use for merging dict values.
+        If None, collisions will raise an exception.
 
     Returns
     -------
@@ -264,7 +304,7 @@ def get_config_fromfiles(paths: List[str], subconf_keys: Optional[List[str]] = N
 
     Returns
     -------
-
+    None
     """
     confs = []
     for path in paths:

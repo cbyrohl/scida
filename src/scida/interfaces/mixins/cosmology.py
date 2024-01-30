@@ -10,7 +10,14 @@ log = logging.getLogger(__name__)
 
 
 class CosmologyMixin(Mixin):
+    """
+    Mixin class for cosmological simulations. Adds cosmology and redshift attributes.
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+        Initialize a CosmologyMixin object. Requires _metadata_raw to be filled.
+        """
         self.metadata = {}
         super().__init__(*args, **kwargs)
         metadata_raw = self._metadata_raw
@@ -29,6 +36,14 @@ class CosmologyMixin(Mixin):
                     ureg.define("a = %s" % str(float(a)))
 
     def _info_custom(self):
+        """
+        Return a custom info string for this mixin object.
+
+        Returns
+        -------
+        str
+            Custom info string for the mixin.
+        """
         rep = sprint("=== Cosmological Simulation ===")
         if self.redshift is not None:
             rep += sprint("z = %.2f" % self.redshift)
@@ -39,12 +54,39 @@ class CosmologyMixin(Mixin):
 
 
 def get_redshift_from_rawmetadata(metadata_raw):
+    """
+    Get the redshift from the raw metadata.
+
+    Parameters
+    ----------
+    metadata_raw: dict
+        Raw metadata.
+
+    Returns
+    -------
+    float
+        Redshift.
+    """
     z = metadata_raw.get("/Header", {}).get("Redshift", np.nan)
     z = float(z)
     return z
 
 
 def get_cosmology_from_rawmetadata(metadata_raw):
+    """
+    Get the cosmology from the raw metadata.
+
+    Parameters
+    ----------
+    metadata_raw: dict
+        Raw metadata.
+
+    Returns
+    -------
+    astropy.cosmology.Cosmology
+        Defines a Flat Lambda CDM cosmology.
+
+    """
     import astropy.units as u
     from astropy.cosmology import FlatLambdaCDM
 

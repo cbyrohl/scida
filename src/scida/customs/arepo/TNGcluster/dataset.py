@@ -5,17 +5,38 @@ import numpy as np
 
 from scida import ArepoSnapshot
 from scida.discovertypes import CandidateStatus
-from scida.fields import DerivedFieldRecipe, FieldRecipe
+from scida.fields import DerivedFieldRecipe, FieldContainer, FieldRecipe
 from scida.interface import Selector
 from scida.io import load_metadata
 
 
 class TNGClusterSelector(Selector):
+    """
+    Selector for TNGClusterSnapshot.  Can select for zoomID, which selects a given zoom target.
+    Can specify withfuzz=True to include the "fuzz" particles for a given zoom target.
+    Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom target.
+    """
+
     def __init__(self) -> None:
+        """
+        Initialize the selector.
+        """
         super().__init__()
-        self.keys = ["zoomID", "withfuzz", "onylfuzz"]
+        self.keys = ["zoomID", "withfuzz", "onlyfuzz"]
 
     def prepare(self, *args, **kwargs) -> None:
+        """
+        Prepare the selector.
+
+        Parameters
+        ----------
+        args: list
+        kwargs: dict
+
+        Returns
+        -------
+        None
+        """
         snap: TNGClusterSnapshot = args[0]
         zoom_id = kwargs.get("zoomID", None)
         fuzz = kwargs.get("withfuzz", None)
@@ -60,6 +81,26 @@ class TNGClusterSelector(Selector):
             def get_slicedarr(
                 v, offset, length, offset_fuzz, length_fuzz, key, fuzz=False
             ):
+                """
+                Get a sliced dask array for a given (length, offset) and (length_fuzz, offset_fuzz).
+
+                Parameters
+                ----------
+                v: da.Array
+                    The array to slice.
+                offset: int
+                length: int
+                offset_fuzz: int
+                length_fuzz: int
+                key: str
+                    ?
+                fuzz: bool
+
+                Returns
+                -------
+                da.Array
+                    The sliced array.
+                """
                 arr = v[offset : offset + length]
                 if offset_fuzz is not None:
                     arr_fuzz = v[offset_fuzz : offset_fuzz + length_fuzz]
@@ -72,6 +113,25 @@ class TNGClusterSelector(Selector):
             def get_slicedfunc(
                 func, offset, length, offset_fuzz, length_fuzz, key, fuzz=False
             ):
+                """
+                Slice a functions output for a given (length, offset) and (length_fuzz, offset_fuzz).
+
+                Parameters
+                ----------
+                func: callable
+                offset: int
+                length: int
+                offset_fuzz: int
+                length_fuzz: int
+                key: str
+                fuzz: bool
+
+                Returns
+                -------
+                callable
+                    The sliced function.
+                """
+
                 def newfunc(
                     arrs, o=offset, ln=length, of=offset_fuzz, lnf=length_fuzz, **kwargs
                 ):
@@ -111,11 +171,23 @@ class TNGClusterSelector(Selector):
 
 
 class TNGClusterSnapshot(ArepoSnapshot):
+    """
+    Dataset class for the TNG-Cluster simulation.
+    """
+
     _fileprefix_catalog = "fof_subhalo_tab_"
     _fileprefix = "snap_"
     ntargets = 352
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize a TNGClusterSnapshot object.
+
+        Parameters
+        ----------
+        args
+        kwargs
+        """
         super().__init__(*args, **kwargs)
 
         # we can get the offsets from the header as our load routine concats the various values from different files
@@ -125,6 +197,17 @@ class TNGClusterSnapshot(ArepoSnapshot):
         # the first file contains the particles that were contained in the original low-res run
         # the second file contains all other remaining particles in a given zoom target
         def len_to_offsets(lengths):
+            """
+            From the particle count (field length), get the offset of all zoom targets.
+
+            Parameters
+            ----------
+            lengths
+
+            Returns
+            -------
+            np.ndarray
+            """
             lengths = np.array(lengths)
             shp = len(lengths.shape)
             n = lengths.shape[-1]
@@ -153,13 +236,37 @@ class TNGClusterSnapshot(ArepoSnapshot):
             )
 
     @TNGClusterSelector()
-    def return_data(self):
+    def return_data(self) -> FieldContainer:
+        """
+        Return the data object.
+
+        Returns
+        -------
+        FieldContainer
+            The data object.
+        """
         return super().return_data()
 
     @classmethod
     def validate_path(
         cls, path: Union[str, os.PathLike], *args, **kwargs
     ) -> CandidateStatus:
+        """
+        Validate a path as a candidate for TNG-Cluster snapshot class.
+
+        Parameters
+        ----------
+        path: str
+            Path to validate.
+        args: list
+        kwargs: dict
+
+        Returns
+        -------
+        CandidateStatus
+            Whether the path is a candidate for this simulation class.
+        """
+
         tkwargs = dict(
             fileprefix=cls._fileprefix, fileprefix_catalog=cls._fileprefix_catalog
         )

@@ -1,3 +1,7 @@
+"""
+Functionality to handle units.
+"""
+
 import contextlib
 import logging
 from enum import Enum
@@ -61,6 +65,19 @@ def str_to_unit(
 
 
 def get_unitstr_from_attrs(attrs: dict) -> Optional[str]:
+    """
+    Get the unit string from the given attributes.
+
+    Parameters
+    ----------
+    attrs: dict
+
+    Returns
+    -------
+    Optional[str]
+        The unit string.
+    """
+
     unitstr = None
 
     # like a) generic SWIFT or b) FLAMINGO-SWIFT
@@ -102,6 +119,7 @@ def extract_units_from_attrs(
 ) -> pint.Quantity:
     """
     Extract units from given attributes.
+
     Parameters
     ----------
     attrs
@@ -115,7 +133,8 @@ def extract_units_from_attrs(
 
     Returns
     -------
-
+    pint.Unit
+        The extracted units.
     """
     # initialize unit dictionary and registry to chosen mode
     if mode not in ["code", "mks", "cgs"]:
@@ -258,18 +277,52 @@ def update_unitregistry_fromdict(udict: dict, ureg: UnitRegistry, warn_redef=Fal
 
 
 def new_unitregistry() -> UnitRegistry:
+    """
+    Create a new base unit registry.
+
+    Returns
+    -------
+    UnitRegistry
+        The new unit registry.
+    """
     ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
     ureg.define("unknown = 1.0")
     return ureg
 
 
 def update_unitregistry(filepath: str, ureg: UnitRegistry):
+    """
+    Update the given unit registry with the units from the given file.
+
+    Parameters
+    ----------
+    filepath: str
+        The path to the unit file.
+    ureg: UnitRegistry
+        The unit registry to update.
+
+    Returns
+    -------
+    None
+    """
     conf = get_config_fromfile(filepath).get("units", {})
     update_unitregistry_fromdict(conf, ureg)
 
 
 class UnitMixin(Mixin):
+    """
+    Mixin class for unit-aware datasets.
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+        Initialize a UnitMixin object.
+
+        Parameters
+        ----------
+        args
+        kwargs
+        """
         self.units = {}
         self.data = {}
         self._metadata_raw = {}
@@ -333,6 +386,21 @@ class UnitMixin(Mixin):
         mode_metadata = unithints.get("metadata_unitsystem", "cgs")
 
         def add_units(container: FieldContainer, basepath: str):
+            """
+            Add units to the given container.
+
+            Parameters
+            ----------
+            container: FieldContainer
+                The container to add units to.
+            basepath: str
+                The base path of the container.
+
+            Returns
+            -------
+            None
+            """
+            # TODO: This function is a mess; unclear what it does/how generic it is.
             # first we check whether we are explicitly given a unit by a unit file
             override = False  # whether to override the metadata units
             gfwu = dict(**fwu)
@@ -480,6 +548,14 @@ class UnitMixin(Mixin):
         self.missing_units()
 
     def _info_custom(self):
+        """
+        Return a custom info string for this mixin object.
+
+        Returns
+        -------
+        str
+            Custom info string for the mixin.
+        """
         rep = ""
         if hasattr(super(), "_info_custom"):
             if super()._info_custom() is not None:
@@ -532,6 +608,18 @@ class UnitMixin(Mixin):
 
 @contextlib.contextmanager
 def ignore_warn_redef(ureg):
+    """
+    Context manager to ignore warnings about redefinitions of units.
+
+    Parameters
+    ----------
+    ureg: pint.UnitRegistry
+        The unit registry to temporarily ignore redefinition warnings for.
+
+    Returns
+    -------
+    None
+    """
     backupval = ureg._on_redefinition
     ureg._on_redefinition = "ignore"
     try:

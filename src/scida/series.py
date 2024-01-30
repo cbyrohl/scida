@@ -1,3 +1,8 @@
+"""
+This module contains the base class for DataSeries, which is a container for collections of dataset instances.
+"""
+
+
 import inspect
 import json
 import os
@@ -11,15 +16,33 @@ from tqdm import tqdm
 
 from scida.discovertypes import CandidateStatus
 from scida.helpers_misc import hash_path, sprint
-from scida.interface import create_MixinDataset
+from scida.interface import create_datasetclass_with_mixins
 from scida.io import load_metadata
 from scida.misc import map_interface_args, return_cachefile_path
 from scida.registries import dataseries_type_registry
 
 
 def delay_init(cls):
+    """
+    Decorate class to delay initialization until an attribute is requested.
+    Parameters
+    ----------
+    cls:
+        class to decorate
+
+    Returns
+    -------
+    Delay
+    """
+
     class Delay(cls):
+        """
+        Delayed initialization of a class. The class is replaced by the actual class
+        when an attribute is requested.
+        """
+
         def __init__(self, *args, **kwargs):
+            """Store arguments for later initialization."""
             self._args = args
             self._kwargs = kwargs
 
@@ -52,13 +75,26 @@ def delay_init(cls):
             return getattr(self, name)
 
         def __repr__(self):
+            """Return a string representation of the lazy class."""
             return "<Lazy %s>" % cls.__name__
 
     return Delay
 
 
 class DatasetSeries(object):
-    """A container for collection of interface instances"""
+    """A container for collections of dataset instances
+
+    Attributes
+    ----------
+    datasets: list
+        list of dataset instances
+    paths: list
+        list of paths to data
+    names: list
+        list of names for datasets
+    hash: str
+        hash of the object, constructed from dataset paths.
+    """
 
     def __init__(
         self,
@@ -67,10 +103,28 @@ class DatasetSeries(object):
         datasetclass=None,
         overwrite_cache=False,
         lazy=True,  # lazy will only initialize data sets on demand.
-        async_caching=False,
         names=None,
         **interface_kwargs
     ):
+        """
+
+        Parameters
+        ----------
+        paths: list
+            list of paths to data
+        interface_args:
+            arguments to pass to interface class
+        datasetclass:
+            class to use for dataset instances
+        overwrite_cache:
+            whether to overwrite existing cache
+        lazy:
+            whether to initialize datasets lazily
+        names:
+            names for datasets
+        interface_kwargs:
+            keyword arguments to pass to interface class
+        """
         self.paths = paths
         self.names = names
         self.hash = hash_path("".join([str(p) for p in paths]))
@@ -86,7 +140,7 @@ class DatasetSeries(object):
 
         # Catch Mixins and create type:
         mixins = interface_kwargs.pop("mixins", [])
-        datasetclass = create_MixinDataset(datasetclass, mixins)
+        datasetclass = create_datasetclass_with_mixins(datasetclass, mixins)
         self._dataset_cls = datasetclass
 
         gen = map_interface_args(paths, *interface_args, **interface_kwargs)
@@ -102,23 +156,54 @@ class DatasetSeries(object):
                 # class method does not initiate obj.
                 dct[i] = d._clean_metadata_from_raw(rawmeta)
             self.metadata = dct
-        elif async_caching:
-            # hacky and should not be here this explicitly, just a proof of concept
-            # for p in paths:
-            #     loader = scida.io.determine_loader(p)
-            pass
 
     def __init_subclass__(cls, *args, **kwargs):
+        """
+        Register datasetseries subclass in registry.
+        Parameters
+        ----------
+        args:
+            (unused)
+        kwargs:
+            (unused)
+        Returns
+        -------
+        None
+        """
         super().__init_subclass__(*args, **kwargs)
         dataseries_type_registry[cls.__name__] = cls
 
     def __len__(self):
+        """Return number of datasets in series.
+
+        Returns
+        -------
+        int
+        """
         return len(self.datasets)
 
     def __getitem__(self, key):
+        """
+        Return dataset by index.
+        Parameters
+        ----------
+        key
+
+        Returns
+        -------
+        Dataset
+
+        """
         return self.datasets[key]
 
     def info(self):
+        """
+        Print information about this datasetseries.
+
+        Returns
+        -------
+        None
+        """
         rep = ""
         rep += "class: " + sprint(self.__class__.__name__)
         props = self._repr_dict()
@@ -154,7 +239,14 @@ class DatasetSeries(object):
         print(rep)
 
     @property
-    def data(self):
+    def data(self) -> None:
+        """
+        Dummy property to make user aware this is not a Dataset instance.
+        Returns
+        -------
+        None
+
+        """
         raise AttributeError(
             "Series do not have 'data' attribute. Load a dataset from series.get_dataset()."
         )
@@ -162,6 +254,7 @@ class DatasetSeries(object):
     def _repr_dict(self) -> Dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
+
         Returns
         -------
         dict
@@ -174,7 +267,8 @@ class DatasetSeries(object):
 
     def __repr__(self) -> str:
         """
-        Return a string representation of the object.
+        Return a string representation of the datasetseries object.
+
         Returns
         -------
         str
@@ -189,13 +283,46 @@ class DatasetSeries(object):
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs) -> CandidateStatus:
-        # estimate whether we have a valid path for this dataseries
-        return CandidateStatus.NO
+        """
+        Check whether a given path is a valid path for this dataseries class.
+        Parameters
+        ----------
+        path: str
+            path to check
+        args:
+            (unused)
+        kwargs:
+            (unused)
+
+        Returns
+        -------
+        CandidateStatus
+        """
+        return CandidateStatus.NO  # base class dummy
 
     @classmethod
     def from_directory(
         cls, path, *interface_args, datasetclass=None, pattern=None, **interface_kwargs
-    ):
+    ) -> "DatasetSeries":
+        """
+        Create a datasetseries instance from a directory.
+        Parameters
+        ----------
+        path: str
+            path to directory
+        interface_args:
+            arguments to pass to interface class
+        datasetclass: Optional[Dataset]
+            force class to use for dataset instances
+        pattern:
+            pattern to match files in directory
+        interface_kwargs:
+            keyword arguments to pass to interface class
+        Returns
+        -------
+        DatasetSeries
+
+        """
         p = Path(path)
         if not (p.exists()):
             raise ValueError("Specified path does not exist.")
@@ -213,7 +340,25 @@ class DatasetSeries(object):
         reltol=1e-2,
         **kwargs
     ):
-        """Get dataset by some metadata property. In the base class, we go by list index."""
+        """
+        Get dataset by some metadata property. In the base class, we go by list index.
+
+        Parameters
+        ----------
+        index: int
+            index of dataset to get
+        name: str
+            name of dataset to get
+        reltol:
+            relative tolerance for metadata comparison
+        kwargs:
+            metadata properties to compare for selection
+
+        Returns
+        -------
+        Dataset
+
+        """
         if index is None and name is None and len(kwargs) == 0:
             raise ValueError("Specify index/name or some parameter to select for.")
         # aliases for index:
@@ -295,6 +440,14 @@ class DatasetSeries(object):
 
     @property
     def metadata(self):
+        """
+        Return metadata dictionary for this series.
+
+        Returns
+        -------
+        Optional[dict]
+            metadata dictionary
+        """
         if self._metadata is not None:
             return self._metadata
         fp = self._metadatafile
@@ -310,8 +463,37 @@ class DatasetSeries(object):
 
     @metadata.setter
     def metadata(self, dct):
+        """
+        Set metadata dictionary for this series, and save to disk.
+        Parameters
+        ----------
+        dct: dict
+            metadata dictionary
+
+        Returns
+        -------
+        None
+
+        """
+
         class ComplexEncoder(json.JSONEncoder):
+            """
+            JSON encoder that can handle numpy arrays and bytes.
+            """
+
             def default(self, obj):
+                """
+                Default recipe for encoding objects.
+                Parameters
+                ----------
+                obj: object
+                    object to encode
+
+                Returns
+                -------
+                object
+
+                """
                 if isinstance(obj, np.int64):
                     return int(obj)
                 if isinstance(obj, np.int32):
@@ -321,7 +503,7 @@ class DatasetSeries(object):
                 if isinstance(obj, bytes):
                     return obj.decode("utf-8")
                 if isinstance(obj, np.ndarray):
-                    assert len(obj) < 1000  # dont want large obs here...
+                    assert len(obj) < 1000  # do not want large obs here...
                     return list(obj)
                 try:
                     return json.JSONEncoder.default(self, obj)
@@ -329,13 +511,8 @@ class DatasetSeries(object):
                     print("obj failing json encoding:", obj)
                     raise e
 
-        # def serialize_numpy(obj):
-        #    if isinstance(obj, np.int64): return int(obj)
-        #    if isinstance(obj, np.int32): return int(obj)
-        #    return json.JSONEncoder.default(self, obj)
         self._metadata = dct
         fp = self._metadatafile
-        # print(dct)
         if not os.path.exists(fp):
             json.dump(dct, open(fp, "w"), cls=ComplexEncoder)
 
@@ -344,6 +521,14 @@ class DirectoryCatalog(object):
     """A catalog consisting of interface instances contained in a directory."""
 
     def __init__(self, path):
+        """
+        Initialize a directory catalog.
+
+        Parameters
+        ----------
+        path: str
+            path to directory
+        """
         self.path = path
 
 
@@ -351,5 +536,13 @@ class HomogeneousSeries(DatasetSeries):
     """Series consisting of same-type data sets."""
 
     def __init__(self, path, **interface_kwargs):
-        # TODO
+        """
+        Initialize a homogeneous series.
+        Parameters
+        ----------
+        path:
+            path to data
+        interface_kwargs:
+            keyword arguments to pass to interface class
+        """
         super().__init__()

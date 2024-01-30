@@ -86,6 +86,7 @@ def download_and_extract(
 def get_testdata(name: str) -> str:
     """
     Get path to test data identifier.
+
     Parameters
     ----------
     name: str
@@ -95,7 +96,7 @@ def get_testdata(name: str) -> str:
     str
     """
     config = get_config()
-    tdpath = config.get("testdata_path", None)
+    tdpath: Optional[str] = config.get("testdata_path", None)
     if tdpath is None:
         raise ValueError("Test data directory not specified in configuration")
     if not os.path.isdir(tdpath):
@@ -109,6 +110,7 @@ def get_testdata(name: str) -> str:
 def find_path(path, overwrite=False) -> str:
     """
     Find path to dataset.
+
     Parameters
     ----------
     path: str
@@ -208,6 +210,32 @@ def load(
     force_class: Optional[object] = None,
     **kwargs
 ):
+    """
+    Load a dataset or dataset series from a given path.
+    This function will automatically determine the best-matching
+    class to use and return the initialized instance.
+
+    Parameters
+    ----------
+    path: str
+        Path to dataset or dataset series. Usually the base folder containing all files of a given dataset/series.
+    units: bool
+        Whether to load units.
+    unitfile: str
+        Can explicitly pass path to a unitfile to use.
+    overwrite: bool
+        Whether to overwrite an existing cache.
+    force_class: object
+        Force a specific class to be used.
+    kwargs: dict
+        Additional keyword arguments to pass to the class.
+
+    Returns
+    -------
+    Union[Dataset, DatasetSeries]:
+        Initialized dataset or dataset series.
+    """
+
     path = find_path(path, overwrite=overwrite)
 
     if "catalog" in kwargs:
@@ -287,6 +315,7 @@ def load(
 def get_dataset_by_name(name: str) -> Optional[str]:
     """
     Get dataset name from alias or name found in the configuration files.
+
     Parameters
     ----------
     name: str
@@ -315,6 +344,19 @@ def get_dataset_by_name(name: str) -> Optional[str]:
 
 
 def get_datasets_by_props(**kwargs):
+    """
+    Get dataset names by properties.
+
+    Parameters
+    ----------
+    kwargs: dict
+        Properties to match.
+
+    Returns
+    -------
+    list[str]:
+        List of dataset names.
+    """
     dnames = []
     c = get_config()
     if "datasets" not in c:
@@ -336,6 +378,22 @@ def get_datasets_by_props(**kwargs):
 
 
 def get_dataset_candidates(name=None, props=None):
+    """
+    Get dataset candidates by name or properties.
+
+    Parameters
+    ----------
+    name: Optional[str]
+        Name or alias of dataset.
+    props: Optional[dict]
+        Properties to match.
+
+    Returns
+    -------
+    list[str]:
+        List of candidate dataset names.
+
+    """
     if name is not None:
         dnames = [get_dataset_by_name(name)]
         return dnames
@@ -346,6 +404,21 @@ def get_dataset_candidates(name=None, props=None):
 
 
 def get_dataset(name=None, props=None):
+    """
+    Get dataset by name or properties.
+    Parameters
+    ----------
+    name: Optional[str]
+        Name or alias of dataset.
+    props: Optional[dict]
+        Properties to match.
+
+    Returns
+    -------
+    str:
+        Dataset name.
+
+    """
     dnames = get_dataset_candidates(name=name, props=props)
     if len(dnames) > 1:
         raise ValueError("Too many dataset candidates.")

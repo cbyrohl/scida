@@ -12,20 +12,37 @@ log = logging.getLogger(__name__)
 
 
 def hash_path(path):
+    """
+    Hash a path to a fixed length string.
+
+    Parameters
+    ----------
+    path: str or pathlib.Path
+
+    Returns
+    -------
+    str
+    """
     sha = hashlib.sha256()
     sha.update(str(path).strip("/ ").encode())
     return sha.hexdigest()[:16]
 
 
+# see https://stackoverflow.com/questions/2597278/python-load-variables-in-a-dict-into-namespace
 class RecursiveNamespace(types.SimpleNamespace):
-    # see https://stackoverflow.com/questions/2597278/python-load-variables-in-a-dict-into-namespace
+    """A SimpleNamespace that can be created recursively from a dict"""
+
     def __init__(self, **kwargs):
-        """Create a SimpleNamespace recursively"""
+        """
+        Create a SimpleNamespace recursively
+        """
         super().__init__(**kwargs)
         self.__dict__.update({k: self.__elt(v) for k, v in kwargs.items()})
 
     def __elt(self, elt):
-        """Recurse into elt to create leaf namespace objects"""
+        """
+        Recurse into elt to create leaf namespace objects.
+        """
         if isinstance(elt, dict):
             return type(self)(**elt)
         if type(elt) in (list, tuple):
@@ -34,6 +51,20 @@ class RecursiveNamespace(types.SimpleNamespace):
 
 
 def make_serializable(v):
+    """
+    Make a value JSON serializable.
+
+    Parameters
+    ----------
+    v: any
+        Object to make JSON serializable
+
+    Returns
+    -------
+    any
+        JSON serializable object
+    """
+
     # Attributes need to be JSON serializable. No numpy types allowed.
     if isinstance(v, np.ndarray):
         v = v.tolist()
@@ -45,6 +76,19 @@ def make_serializable(v):
 
 
 def get_kwargs(func):
+    """
+    Get the keyword arguments of a function.
+
+    Parameters
+    ----------
+    func: callable
+        Function to get keyword arguments from
+
+    Returns
+    -------
+    dict
+        Keyword arguments of the function
+    """
     signature = inspect.signature(func)
     return {
         k: v.default
@@ -54,6 +98,18 @@ def get_kwargs(func):
 
 
 def get_args(func):
+    """
+    Get the positional arguments of a function.
+
+    Parameters
+    ----------
+    func: callable
+
+    Returns
+    -------
+    list
+        Positional arguments of the function
+    """
     signature = inspect.signature(func)
     return [
         k
@@ -63,6 +119,20 @@ def get_args(func):
 
 
 def computedecorator(func):
+    """
+    Decorator introducing compute keyword to evalute dask array returns.
+
+    Parameters
+    ----------
+    func: callable
+        Function to decorate
+
+    Returns
+    -------
+    callable
+        Decorated function
+    """
+
     def wrapper(*args, compute=False, **kwargs):
         res = func(*args, **kwargs)
         if compute:
@@ -77,7 +147,21 @@ def computedecorator(func):
 units = {"B": 1, "KIB": 2**10, "MIB": 2**20, "GIB": 2**30, "TIB": 2**40}
 
 
+# needed for processing dask arrays
 def parse_humansize(size):
+    """
+    Parse a human-readable size string to bytes.
+
+    Parameters
+    ----------
+    size: str
+        Human readable size string, e.g. 1.5GiB
+
+    Returns
+    -------
+    int
+        Size in bytes
+    """
     size = size.upper()
     if not re.match(r" ", size):
         size = re.sub(r"([KMGT]?I*B)", r" \1", size)
@@ -86,7 +170,23 @@ def parse_humansize(size):
 
 
 def sprint(*args, end="\n", **kwargs):
-    """print to string"""
+    """
+    Print to a string.
+
+    Parameters
+    ----------
+    args: any
+        Arguments to print
+    end: str
+        String to append at the end
+    kwargs: any
+        Keyword arguments to pass to print
+
+    Returns
+    -------
+    str
+       String to print
+    """
     output = io.StringIO()
     print(*args, file=output, end=end, **kwargs)
     contents = output.getvalue()
