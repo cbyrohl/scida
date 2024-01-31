@@ -83,4 +83,5 @@ The paths are evaluated relative to the "testdata_path" entry in the configurati
 see [configuration](configuration.md).
 A subset of smaller test data sets can be downloaded for the data sets described in
 ".github/actions/get-testdata-all/action.yaml" in the scida repository.
-The
+This file also contains the symbolic links to larger data sets, which are only available
+through access to the /virgotng file system on [MPCDF](https://www.mpcdf.mpg.de/) resources.
