@@ -31,7 +31,7 @@ It uses the [dask](https://dask.org/) library to perform computations, which has
 ## Loading an individual dataset
 
 The first step is to choose an existing snapshot of a simulation.
-To start, we will intentionally select the output of TNG50-4 at redshift 0,
+To start, we will intentionally select the output of TNG50-4 at redshift z=2.32,
 which is the lowest resolution version of [TNG50](https://www.tng-project.org/),
 a suite for galaxy formation simulations in cosmological volumes.
 Choosing TNG50-4 means that the data size in the snapshot is small and easy to work with.
