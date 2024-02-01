@@ -43,6 +43,30 @@ class DocFile:
                 raise ValueError("Unknown codeblock type: %s" % blocktype)
         self.codeblocks = ["".join(cbl) for cbl in cblines]
 
+    def replace_line(self, str, newstr, searchmode="match", replacemode="line"):
+        codeblocks_new = []
+        for codeblock in self.codeblocks:
+            lines = codeblock.split("\n")
+            if searchmode == "match":
+                idx = [i for i, k in enumerate(lines) if k == str]
+            elif searchmode == "startswith":
+                idx = [i for i, k in enumerate(lines) if k.startswith(str)]
+            elif searchmode == "contains":
+                idx = [i for i, k in enumerate(lines) if str in k]
+            else:
+                raise ValueError("Unknown searchmode: %s" % searchmode)
+            # now replace
+            for i in idx:
+                if replacemode == "line":
+                    lines[i] = newstr
+                elif replacemode == "onlystring":
+                    lines[i] = lines[i].replace(str, newstr)
+                else:
+                    raise ValueError("Unknown replacemode: %s" % replacemode)
+            codeblock = "\n".join(lines)
+            codeblocks_new.append(codeblock)
+        self.codeblocks = codeblocks_new
+
     def evaluate(self):
         # evaluate all at once (for now)
         code = "\n".join(self.codeblocks)
@@ -76,4 +100,10 @@ def get_docfiles():
 @pytest.mark.xfail
 @get_docfiles()
 def test_docs(mddocfile):
+    mddocfile.replace_line(
+        'load("./snapdir_030")',
+        'load("TNG50-4_snapshot")',
+        searchmode="contains",
+        replacemode="onlystring",
+    )  # workaround
     mddocfile.evaluate()
