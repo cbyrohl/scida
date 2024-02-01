@@ -5,18 +5,17 @@ Cosmological simulations are often post-processed with a substructure identifica
 
 !!! info
 
-    If you want to run the code below, consider using the demo data
-    as described [here](supported_datasets/tng.md#demo-data).
+    If you want to run the code below, consider downloading the [demo data](supported_datasets/tng.md#demo-data) or use the [TNGLab](supported_datasets/tng.md#tnglab) online.
 
 ## Adding and using halo/galaxy catalog information
 Currently, we support the usual FOF/Subfind combination and format. Their presence will be automatically detected and the catalogs will be loaded into *ds.data* as shown below.
 
 ``` py
 from scida import load
-ds = load("TNG50-4_snapshot") # (1)!
+ds = load("./snapdir_030")  # (1)!
 ```
 
-1.  In this example, we assume a dataset, such as the 'TNG50\_snapshot' test data set, that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
+1.  In this example, we assume a dataset, such as the [demo data set](supported_datasets/tng.md#demo-data), that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
 
 The dataset itself passed to load does not possess information about the FoF/Subfind outputs as they are commonly saved in a separate folder or hdf5 file. For typical folder structures of GADGET/AREPO style simulations, an attempt is made to automatically discover and add such information. The path to the catalog can otherwise explicitly be passed to *load()* via the *catalog=...* keyword.
 

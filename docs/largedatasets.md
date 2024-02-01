@@ -3,7 +3,8 @@
 
 !!! info
 
-    If you want to run the code below, you need access to the full [TNG](https://www.tng-project.org) simulation dataset.
+    If you want to run the code below, you need access to or download the full [TNG](https://www.tng-project.org) simulation dataset.
+    The easiest way to access all TNG data sets is to use the [TNGLab](https://www.tng-project.org/data/lab/), which supports [scida](https://www.tng-project.org/data/forum/topic/742/scida-analysis-toolkit-example-within-tng-lab/).
 
 Until now, we have applied our framework to a very small simulation.
 However, what if we are working with a very large data set
@@ -22,7 +23,8 @@ the `mass.sum().compute()` will chunk the operation up in a way that the task ca
 
 ```pycon
 >>> from scida import load
->>> ds = load("TNG50_snapshot")
+>>> sim = load("TNG50-1")
+>>> ds = sim.get_dataset(99)
 ```
 
 Before we start, let's enable a progress indicator from dask
@@ -33,7 +35,7 @@ Before we start, let's enable a progress indicator from dask
 >>> ProgressBar().register()
 ```
 
-Let's benchmark this operation on our location machine.
+Let's benchmark this operation on our local machine.
 
 ```pycon
 >>> %time ds.data["PartType0"]["Masses"].sum().compute()
@@ -108,7 +110,8 @@ We configure the job and node resources before submitting the job via the `scale
 >>> client = Client(cluster)
 
 >>> from scida import load
->>> ds = load("TNG50_snapshot")
+>>> sim = load("TNG50-1")
+>>> ds = sim.get_dataset(99)
 >>> %time ds.data["PartType0"]["Masses"].sum().compute()
 CPU times: user 1.27 s, sys: 152 ms, total: 1.43 s
 Wall time: 21.4 s

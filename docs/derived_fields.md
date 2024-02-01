@@ -2,8 +2,7 @@
 
 !!! info
 
-    If you want to run the code below, consider using the demo data
-    as described [here](supported_datasets/tng.md#demo-data).
+    If you want to run the code below, consider downloading the [demo data](supported_datasets/tng.md#demo-data) or use the [TNGLab](supported_datasets/tng.md#tnglab) online.
 
 Commonly during analysis, newly derived quantities/fields are to be synthesized from one or more snapshot fields into a new field. For example, while the temperature, pressure, or entropy of gas is not stored directly in the snapshots, they can be computed from fields which are present on disk.
 
@@ -14,14 +13,14 @@ There are two ways to create new derived fields. For quick analysis, we can simp
 
 ``` py
 from scida import load
-ds = load("TNG50-4_snapshot") # (1)!
+ds = load("./snapdir_030") # (1)!
 gas = ds.data['gas']
 kineticenergy = 0.5*gas['Masses']*(gas['Velocities']**2).sum(axis=1)
 ```
 
-1.  In this example, we assume a dataset, such as the 'TNG50\_snapshot' test data set, that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
+1. In this example, we assume a dataset, such as the [demo data set](supported_datasets/tng.md#demo-data), that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
 
-In the example above, we define a new dask array called kineticenergy. Note that just like all other dask arrays and dataset fields, these fields are "virtual", i.e. only the graph of their construction is held in memory, which can be instantiated by applying the *.compute()* method.
+In the example above, we define a new dask array called "kineticenergy". Note that just like all other dask arrays and dataset fields, these fields are "virtual", i.e. only the graph of their construction is held in memory, which can be instantiated by applying the *.compute()* method.
 
 We can also add this field from above example to the existing ones in the dataset.
 
@@ -41,7 +40,7 @@ For this purpose, **field recipes** are available. An example of such recipe is 
 import numpy as np
 
 from scida import load
-ds = load("TNG50-4_snapshot")
+ds = load("./snapdir_030")
 
 @ds.register_field("stars")  # (1)!
 def VelMag(arrs, **kwargs):
@@ -109,7 +108,7 @@ def GroupDistance(arrs, snap=None):
 Finally, we just need to import the *fielddefs* object (if we have defined it in another file) and merge them with a dataset that we loaded:
 
 ``` py
-ds = load("TNG50-4_snapshot")
+ds = load("./snapdir_030")
 ds.data.merge(fielddefs)
 ```
 

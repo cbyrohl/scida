@@ -3,7 +3,7 @@
 This package is designed to aid in the efficient analysis of large datasets, such as GAIA DR3.
 
 !!! info "Tutorial dataset"
-    In the following, we will subset from the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3). The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded [here](https://heibox.uni-heidelberg.de/f/3b05069b1b524c0fa57e/?dl=1).
+    In the following, we will subset from the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3). The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded [here](https://www.tng-project.org/files/obs/GAIA/gaia_dr3_mini.hdf5).
     Check [Supported Datasets](../supported_data.md) for an incomplete list of supported datasets
     and requirements for support of new datasets.
     A tutorial for a cosmological simulation can be found [here](simulations.md).
@@ -17,7 +17,9 @@ It uses the [dask](https://dask.org/) library to perform computations, which has
 
 ## Loading an individual dataset
 
-Here, we choose the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3) as an example.
+Here we use the [GAIA data release 3](https://www.cosmos.esa.int/web/gaia/dr3) as an example.
+In particular, we support the [single HDF5 version of DR3](https://www.tng-project.org/data/obs/).
+
 The dataset is obtained in HDF5 format as used at ITA Heidelberg. We intentionally select a small subset of the data to work with.
 Choosing a subset means that the data size is small and easy to work with. We demonstrate how to work with larger data sets at a later stage.
 
