@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../configuration/">
+        <link rel="prev" href="../halocatalogs/">
       
       
-        <link rel="next" href="../api/base_api/">
+        <link rel="next" href="../configuration/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -449,6 +449,8 @@
       
         
       
+        
+      
     
     
     
@@ -608,57 +610,6 @@
 
               
             
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-    
-    
-      
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
-            
-  
-  <span class="md-ellipsis">
-    Advanced Topics
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Advanced Topics
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
               
                 
   
@@ -691,24 +642,56 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+  
+    
+    
+      
         
-  
-  <span class="md-ellipsis">
-    Configuration
-  </span>
-  
-
-      </a>
-    </li>
-  
-
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       
       
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Further Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Further Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
     
@@ -793,6 +776,77 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../impressions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visual Impressions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
@@ -819,10 +873,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -833,8 +887,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             API
           </label>
@@ -968,20 +1022,38 @@
 <p>In scida, this warning often occurs when passing a field with units to a dask.array function.
 Consider explicitly removing the units (e.g. using "arr.magnitude" for the field/array "arr") before the dask.array function call.
 Then attach the correct units afterwards again. This will be automatized in the future.</p>
+<blockquote>
+<p>"ValueError: Cannot operate with Quantity and Quantity of different registries."</p>
+</blockquote>
+<p>Likely, you are trying to combine fields using different unit registries, e.g. when comparing fields from different datasets. This is not allowed with <a href="https://pint.readthedocs.io/en/stable">pint</a>.</p>
+<p>If you can assure that the definitions of the units for a given field are the same between registries,
+you could use the following workaround:</p>
+<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
+<span class="n">ds2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
+<span class="hll"><span class="n">unitregistry</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">ureg</span>
+</span><span class="hll"><span class="n">field</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"Masses"</span><span class="p">]</span>
+</span><span class="hll"><span class="n">units</span> <span class="o">=</span> <span class="n">unitregistry</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">units</span><span class="p">))</span>
+</span><span class="hll"><span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">magnitude</span> <span class="o">*</span> <span class="n">units</span>
+</span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"Masses2"</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span>
+</code></pre></div>
 <h2 id="extending-existing-datasets">Extending existing datasets</h2>
 <blockquote>
 <p>How do I add custom fields (that are not derived fields) to my existing dataset?</p>
 </blockquote>
-<p><em>Please also see how to add <a href="../derived_fields/">derived fields</a>.</em></p>
-<p>After loading some dataset, you can add custom fields to a given container, here called <em>PartType0</em> by simply assigning a dask array under the desired key to it.</p>
-<p>Please note that all fields within a container are expected to have the same shape in their first axis.</p>
-<div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
+<p>While <a href="../derived_fields/">derived fields</a> are the preferred way to add fields, you can also add custom dask arrays to a dataset.</p>
+<p>After loading some dataset, you can add custom fields to a given container, here called <em>PartType0</em> by simply assigning a dask array under the desired field name:</p>
+<div class="language-py highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
 <span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">array</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">])</span>
-<span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"zerofield"</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span>
+<span class="n">unitregistry</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">ureg</span>
+<span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"zerofield"</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span> <span class="o">*</span> <span class="n">unitregistry</span><span class="p">(</span><span class="s2">"m"</span><span class="p">)</span>
 </code></pre></div>
-<p>As we operate with dask, make sure to cast your array accordingly. For example, if your field is just a numpy array or a hdf5 memmap, you can use <code>da.from_array</code> to cast it to a dask array.
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Please note that all fields within a container are expected to have the same shape in their first axis. When attaching units, it is important to use the dataset's unit registry <code>ds.ureg</code>.</p>
+</div>
+<p>As scida expects dask arrays, make sure to cast your array accordingly. For example, if your field is just a numpy array or a hdf5 memmap, you can use <code>da.from_array</code> to cast it to a dask array.
 Alternatively, if you have another dataset loaded, you can assign fields from one to another:</p>
 <div class="language-py highlight"><pre><span></span><code><span class="n">ds2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"NewDensity"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">]</span>

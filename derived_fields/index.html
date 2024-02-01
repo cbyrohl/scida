@@ -451,6 +451,8 @@
       
         
       
+        
+      
     
     
     
@@ -677,57 +679,6 @@
 
               
             
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-    
-    
-      
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
-            
-  
-  <span class="md-ellipsis">
-    Advanced Topics
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Advanced Topics
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
               
                 
   
@@ -762,22 +713,52 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+    
+    
+      
         
-  
-  <span class="md-ellipsis">
-    Configuration
-  </span>
-  
-
-      </a>
-    </li>
-  
-
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       
       
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Further Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Further Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -792,6 +773,77 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../impressions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visual Impressions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -821,10 +873,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -835,8 +887,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             API
           </label>
@@ -965,7 +1017,7 @@
 <div><h1 id="derived-fields">Derived fields</h1>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If you want to run the code below, consider downloading the <a href="../supported_datasets/tng/#demo-data">demo data</a> or use the <a href="../supported_datasets/tng/#tnglab">TNGLab</a> online.</p>
+<p>If you want to run the code below, consider downloading the <a href="../supported_data/#demo-data">demo data</a> or use the <a href="../supported_data/#tnglab">TNGLab</a> online.</p>
 </div>
 <p>Commonly during analysis, newly derived quantities/fields are to be synthesized from one or more snapshot fields into a new field. For example, while the temperature, pressure, or entropy of gas is not stored directly in the snapshots, they can be computed from fields which are present on disk.</p>
 <p>There are two ways to create new derived fields. For quick analysis, we can simply leverage dask arrays themselves.</p>
@@ -976,7 +1028,7 @@
 <span class="n">kineticenergy</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">gas</span><span class="p">[</span><span class="s1">'Masses'</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">gas</span><span class="p">[</span><span class="s1">'Velocities'</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <ol>
-<li>In this example, we assume a dataset, such as the <a href="../supported_datasets/tng/#demo-data">demo data set</a>, that has its fields (<em>Masses</em>, <em>Velocities</em>) nested by particle type (<em>gas</em>)</li>
+<li>In this example, we assume a dataset, such as the <a href="../supported_data/#demo-data">demo data set</a>, that has its fields (<em>Masses</em>, <em>Velocities</em>) nested by particle type (<em>gas</em>)</li>
 </ol>
 <p>In the example above, we define a new dask array called "kineticenergy". Note that just like all other dask arrays and dataset fields, these fields are "virtual", i.e. only the graph of their construction is held in memory, which can be instantiated by applying the <em>.compute()</em> method.</p>
 <p>We can also add this field from above example to the existing ones in the dataset.</p>
