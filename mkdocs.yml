@@ -24,8 +24,7 @@ nav:
       - 'Data series': series.md
       - 'Large datasets': largedatasets.md
   - 'Advanced Topics':
-      - 'Arepo Simulations':
-          - 'Halo Catalogs': halocatalogs.md
+      - 'Halo/Galaxy Catalogs': halocatalogs.md
   - 'Configuration': configuration.md
   - 'FAQ': faq.md
   - 'API':

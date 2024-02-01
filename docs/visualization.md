@@ -2,8 +2,7 @@
 
 !!! info
 
-    If you want to run the code below, consider using the demo data
-    as described [here](supported_datasets/tng.md#demo-data).
+    If you want to run the code below, consider downloading the [demo data](supported_datasets/tng.md#demo-data) or use the [TNGLab](supported_datasets/tng.md#tnglab) online.
 
 ## Creating plots
 
@@ -15,7 +14,7 @@ For example, we can select a subset of particles by applying a cut on a given fi
 from scida import load
 import matplotlib.pyplot as plt
 
-ds = load("TNG50-4_snapshot")
+ds = load("./snapdir_030")
 dens = ds.data["PartType0"]["Density"][:10000].compute()  # (1)!
 temp = ds.data["PartType0"]["Temperature"][:10000].compute()
 plt.plot(dens, temp, "o", markersize=0.1)
@@ -35,8 +34,7 @@ from scida import load
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
-sim = load("TNG50-4")
-ds = sim.get_dataset(redshift=3.0)
+ds = load("./snapdir_030")
 dens10 = da.log10(ds.data["PartType0"]["Density"].to("Msun/kpc^3").magnitude)
 temp10 = da.log10(ds.data["PartType0"]["Temperature"].to("K").magnitude)
 
@@ -69,8 +67,7 @@ import holoviews.operation.datashader as hd
 import datashader as dshdr
 from scida import load
 
-sim = load("TNG50-4")
-ds = sim.get_dataset(redshift=3.0)
+ds = load("./snapdir_030")
 ddf = ds.data["PartType0"].get_dataframe(["Coordinates0", "Coordinates1", "Masses"])  # (1)!
 
 hv.extension("bokeh")

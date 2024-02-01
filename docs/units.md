@@ -2,9 +2,7 @@
 
 !!! info
 
-    If you want to run the code below, consider using the demo data
-    as described [here](supported_datasets/tng.md#demo-data).
-
+    If you want to run the code below, consider downloading the [demo data](supported_datasets/tng.md#demo-data) or use the [TNGLab](supported_datasets/tng.md#tnglab) online.
 
 ## Loading data with units
 
@@ -12,7 +10,7 @@ Loading data sets with
 
 ``` py
 from scida import load
-ds = load("TNG50-4_snapshot")
+ds = load("./snapdir_030")
 ```
 
 will automatically attach units to the data. This can be deactivated by passing "units=False" to the load function.

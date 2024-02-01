@@ -42,7 +42,7 @@ First, we load the dataset using the convenience function `load()` that will det
 
 ```pycon title="Loading a dataset"
 >>> from scida import load
->>> ds = load("snapdir_030")
+>>> ds = load("./snapdir_030")
 >>> ds.info() #(1)!
 class: ArepoSnapshotWithUnitMixinAndCosmologyMixin
 source: /vera/u/byrohlc/Downloads/snapdir_030
