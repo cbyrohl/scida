@@ -734,65 +734,16 @@
   
   
   
-    
-    
-      
-        
-      
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Arepo Simulations
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_1">
-            <span class="md-nav__icon md-icon"></span>
-            Arepo Simulations
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../halocatalogs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Halo Catalogs
+    Halo/Galaxy Catalogs
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -1014,13 +965,12 @@
 <div><h1 id="units">Units</h1>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If you want to run the code below, consider using the demo data
-as described <a href="../supported_datasets/tng/#demo-data">here</a>.</p>
+<p>If you want to run the code below, consider downloading the <a href="../supported_datasets/tng/#demo-data">demo data</a> or use the <a href="../supported_datasets/tng/#tnglab">TNGLab</a> online.</p>
 </div>
 <h2 id="loading-data-with-units">Loading data with units</h2>
 <p>Loading data sets with</p>
 <div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 </code></pre></div>
 <p>will automatically attach units to the data. This can be deactivated by passing "units=False" to the load function.
 By default, code units are used, alternatively, cgs conversions can be applied by passing "units='cgs'" (experimental).</p>

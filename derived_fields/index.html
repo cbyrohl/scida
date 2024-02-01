@@ -734,65 +734,16 @@
   
   
   
-    
-    
-      
-        
-      
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Arepo Simulations
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_1">
-            <span class="md-nav__icon md-icon"></span>
-            Arepo Simulations
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../halocatalogs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Halo Catalogs
+    Halo/Galaxy Catalogs
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -1014,21 +965,20 @@
 <div><h1 id="derived-fields">Derived fields</h1>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If you want to run the code below, consider using the demo data
-as described <a href="../supported_datasets/tng/#demo-data">here</a>.</p>
+<p>If you want to run the code below, consider downloading the <a href="../supported_datasets/tng/#demo-data">demo data</a> or use the <a href="../supported_datasets/tng/#tnglab">TNGLab</a> online.</p>
 </div>
 <p>Commonly during analysis, newly derived quantities/fields are to be synthesized from one or more snapshot fields into a new field. For example, while the temperature, pressure, or entropy of gas is not stored directly in the snapshots, they can be computed from fields which are present on disk.</p>
 <p>There are two ways to create new derived fields. For quick analysis, we can simply leverage dask arrays themselves.</p>
 <h2 id="defining-new-quantities-with-dask-arrays">Defining new quantities with dask arrays</h2>
 <div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">)</span> <span class="c1"># (1)!</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span> <span class="c1"># (1)!</span>
 <span class="n">gas</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'gas'</span><span class="p">]</span>
 <span class="n">kineticenergy</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">gas</span><span class="p">[</span><span class="s1">'Masses'</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">gas</span><span class="p">[</span><span class="s1">'Velocities'</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <ol>
-<li>In this example, we assume a dataset, such as the 'TNG50_snapshot' test data set, that has its fields (<em>Masses</em>, <em>Velocities</em>) nested by particle type (<em>gas</em>)</li>
+<li>In this example, we assume a dataset, such as the <a href="../supported_datasets/tng/#demo-data">demo data set</a>, that has its fields (<em>Masses</em>, <em>Velocities</em>) nested by particle type (<em>gas</em>)</li>
 </ol>
-<p>In the example above, we define a new dask array called kineticenergy. Note that just like all other dask arrays and dataset fields, these fields are "virtual", i.e. only the graph of their construction is held in memory, which can be instantiated by applying the <em>.compute()</em> method.</p>
+<p>In the example above, we define a new dask array called "kineticenergy". Note that just like all other dask arrays and dataset fields, these fields are "virtual", i.e. only the graph of their construction is held in memory, which can be instantiated by applying the <em>.compute()</em> method.</p>
 <p>We can also add this field from above example to the existing ones in the dataset.</p>
 <div class="language-py highlight"><pre><span></span><code><span class="n">gas</span><span class="p">[</span><span class="s1">'kineticenergy'</span><span class="p">]</span> <span class="o">=</span> <span class="n">kineticenergy</span>
 </code></pre></div>
@@ -1038,7 +988,7 @@ as described <a href="../supported_datasets/tng/#demo-data">here</a>.</p>
 <div class="language-py highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 
 <span class="nd">@ds</span><span class="o">.</span><span class="n">register_field</span><span class="p">(</span><span class="s2">"stars"</span><span class="p">)</span>  <span class="c1"># (1)!</span>
 <span class="k">def</span> <span class="nf">VelMag</span><span class="p">(</span><span class="n">arrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1096,7 +1046,7 @@ as described <a href="../supported_datasets/tng/#demo-data">here</a>.</p>
 <li>Using the "all" identifier, we can also attempt to add this field to all containers we have specified.</li>
 </ol>
 <p>Finally, we just need to import the <em>fielddefs</em> object (if we have defined it in another file) and merge them with a dataset that we loaded:</p>
-<div class="language-py highlight"><pre><span></span><code><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">)</span>
+<div class="language-py highlight"><pre><span></span><code><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fielddefs</span><span class="p">)</span>
 </code></pre></div>
 <p>In above example, we now have the following fields available:</p>

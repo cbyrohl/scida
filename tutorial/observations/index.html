@@ -784,65 +784,16 @@
   
   
   
-    
-    
-      
-        
-      
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Arepo Simulations
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_1">
-            <span class="md-nav__icon md-icon"></span>
-            Arepo Simulations
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../../halocatalogs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Halo Catalogs
+    Halo/Galaxy Catalogs
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -1113,7 +1064,7 @@
 <p>This package is designed to aid in the efficient analysis of large datasets, such as GAIA DR3.</p>
 <div class="admonition info">
 <p class="admonition-title">Tutorial dataset</p>
-<p>In the following, we will subset from the <a href="https://www.cosmos.esa.int/web/gaia/dr3">GAIA data release 3</a>. The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded <a href="https://heibox.uni-heidelberg.de/f/3b05069b1b524c0fa57e/?dl=1">here</a>.
+<p>In the following, we will subset from the <a href="https://www.cosmos.esa.int/web/gaia/dr3">GAIA data release 3</a>. The reduced dataset contains 100000 randomly selected entries only. The reduced dataset can be downloaded <a href="https://www.tng-project.org/files/obs/GAIA/gaia_dr3_mini.hdf5">here</a>.
 Check <a href="../../supported_data/">Supported Datasets</a> for an incomplete list of supported datasets
 and requirements for support of new datasets.
 A tutorial for a cosmological simulation can be found <a href="../simulations/">here</a>.</p>
@@ -1125,8 +1076,9 @@ A tutorial for a cosmological simulation can be found <a href="../simulations/">
 <li>we can create abstract graphs ("recipes", such as for derived quantities) and only evaluate on actual demand.</li>
 </ol>
 <h2 id="loading-an-individual-dataset">Loading an individual dataset</h2>
-<p>Here, we choose the <a href="https://www.cosmos.esa.int/web/gaia/dr3">GAIA data release 3</a> as an example.
-The dataset is obtained in HDF5 format as used at ITA Heidelberg. We intentionally select a small subset of the data to work with.
+<p>Here we use the <a href="https://www.cosmos.esa.int/web/gaia/dr3">GAIA data release 3</a> as an example.
+In particular, we support the <a href="https://www.tng-project.org/data/obs/">single HDF5 version of DR3</a>.</p>
+<p>The dataset is obtained in HDF5 format as used at ITA Heidelberg. We intentionally select a small subset of the data to work with.
 Choosing a subset means that the data size is small and easy to work with. We demonstrate how to work with larger data sets at a later stage.</p>
 <p>First, we load the dataset using the convenience function <code>load()</code> that will determine the appropriate dataset class for us:</p>
 <div class="admonition info">

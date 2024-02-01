@@ -665,65 +665,16 @@
   
   
   
-    
-    
-      
-        
-      
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Arepo Simulations
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_1">
-            <span class="md-nav__icon md-icon"></span>
-            Arepo Simulations
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../halocatalogs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Halo Catalogs
+    Halo/Galaxy Catalogs
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -1026,13 +977,13 @@ Then attach the correct units afterwards again. This will be automatized in the 
 <p>Please note that all fields within a container are expected to have the same shape in their first axis.</p>
 <div class="language-py highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="kn">import</span> <span class="nn">dask.array</span> <span class="k">as</span> <span class="nn">da</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'TNG50-4_snapshot'</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">array</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">])</span>
 <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"zerofield"</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span>
 </code></pre></div>
 <p>As we operate with dask, make sure to cast your array accordingly. For example, if your field is just a numpy array or a hdf5 memmap, you can use <code>da.from_array</code> to cast it to a dask array.
 Alternatively, if you have another dataset loaded, you can assign fields from one to another:</p>
-<div class="language-py highlight"><pre><span></span><code><span class="n">ds2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'TNG50-4_snapshot'</span><span class="p">)</span>
+<div class="language-py highlight"><pre><span></span><code><span class="n">ds2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"NewDensity"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">]</span>
 </code></pre></div>
 <h2 id="misc">Misc</h2>

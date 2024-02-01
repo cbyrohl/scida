@@ -749,65 +749,16 @@
   
   
   
-    
-    
-      
-        
-      
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Arepo Simulations
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_1">
-            <span class="md-nav__icon md-icon"></span>
-            Arepo Simulations
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../halocatalogs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Halo Catalogs
+    Halo/Galaxy Catalogs
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -1044,7 +995,8 @@
 <div><h1 id="handling-large-data-sets">Handling Large Data Sets</h1>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If you want to run the code below, you need access to the full <a href="https://www.tng-project.org">TNG</a> simulation dataset.</p>
+<p>If you want to run the code below, you need access to or download the full <a href="https://www.tng-project.org">TNG</a> simulation dataset.
+The easiest way to access all TNG data sets is to use the <a href="https://www.tng-project.org/data/lab/">TNGLab</a>, which supports <a href="https://www.tng-project.org/data/forum/topic/742/scida-analysis-toolkit-example-within-tng-lab/">scida</a>.</p>
 </div>
 <p>Until now, we have applied our framework to a very small simulation.
 However, what if we are working with a very large data set
@@ -1057,14 +1009,15 @@ Work is needed on each chunk, after which the final answer is assembled.</p>
 <p>Importantly, in our case above, even if the <code>mass</code> array above does not fit into memory,
 the <code>mass.sum().compute()</code> will chunk the operation up in a way that the task can be calculated.</p>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50_snapshot"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sim</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-1"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="mi">99</span><span class="p">)</span>
 </code></pre></div>
 <p>Before we start, let's enable a progress indicator from dask
 (note that this will only work for local schedulers, see next section):</p>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dask.diagnostics</span> <span class="kn">import</span> <span class="n">ProgressBar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ProgressBar</span><span class="p">()</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
 </code></pre></div>
-<p>Let's benchmark this operation on our location machine.</p>
+<p>Let's benchmark this operation on our local machine.</p>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="o">%</span><span class="n">time</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Masses"</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
 <span class="go">[########################################] | 100% Completed | 194.28 s</span>
 <span class="go">CPU times: user 12 s, sys: 16.2 s, total: 28.2 s</span>
@@ -1117,7 +1070,8 @@ We configure the job and node resources before submitting the job via the <code>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50_snapshot"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sim</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-1"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="mi">99</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="o">%</span><span class="n">time</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Masses"</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
 <span class="go">CPU times: user 1.27 s, sys: 152 ms, total: 1.43 s</span>
 <span class="go">Wall time: 21.4 s</span>

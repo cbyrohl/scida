@@ -725,65 +725,16 @@
   
   
   
-    
-    
-      
-        
-      
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Arepo Simulations
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_1">
-            <span class="md-nav__icon md-icon"></span>
-            Arepo Simulations
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../halocatalogs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Halo Catalogs
+    Halo/Galaxy Catalogs
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -996,8 +947,7 @@
 <div><h1 id="visualization">Visualization</h1>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If you want to run the code below, consider using the demo data
-as described <a href="../supported_datasets/tng/#demo-data">here</a>.</p>
+<p>If you want to run the code below, consider downloading the <a href="../supported_datasets/tng/#demo-data">demo data</a> or use the <a href="../supported_datasets/tng/#tnglab">TNGLab</a> online.</p>
 </div>
 <h2 id="creating-plots">Creating plots</h2>
 <p>As we often use large datasets, we need to be careful with the amount of data we plot.
@@ -1006,7 +956,7 @@ For example, we can select a subset of particles by applying a cut on a given fi
 <div class="language-python highlight"><span class="filename">Selecting a subset of particles</span><pre><span></span><code><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4_snapshot"</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">dens</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">][:</span><span class="mi">10000</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>  <span class="c1"># (1)!</span>
 <span class="n">temp</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Temperature"</span><span class="p">][:</span><span class="mi">10000</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
@@ -1024,8 +974,7 @@ For example, we can select a subset of particles by applying a cut on a given fi
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
 
-<span class="n">sim</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4"</span><span class="p">)</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">redshift</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">dens10</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Density"</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"Msun/kpc^3"</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
 <span class="n">temp10</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">][</span><span class="s2">"Temperature"</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"K"</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
 
@@ -1052,8 +1001,7 @@ Make sure that these <a href="https://holoviews.org/getting_started/index.html">
 <span class="kn">import</span> <span class="nn">datashader</span> <span class="k">as</span> <span class="nn">dshdr</span>
 <span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
 
-<span class="n">sim</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4"</span><span class="p">)</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">redshift</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"./snapdir_030"</span><span class="p">)</span>
 <span class="n">ddf</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"PartType0"</span><span class="p">]</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">([</span><span class="s2">"Coordinates0"</span><span class="p">,</span> <span class="s2">"Coordinates1"</span><span class="p">,</span> <span class="s2">"Masses"</span><span class="p">])</span>  <span class="c1"># (1)!</span>
 
 <span class="n">hv</span><span class="o">.</span><span class="n">extension</span><span class="p">(</span><span class="s2">"bokeh"</span><span class="p">)</span>

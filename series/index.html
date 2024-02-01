@@ -677,65 +677,16 @@
   
   
   
-    
-    
-      
-        
-      
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Arepo Simulations
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_1">
-            <span class="md-nav__icon md-icon"></span>
-            Arepo Simulations
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../halocatalogs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Halo Catalogs
+    Halo/Galaxy Catalogs
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -922,14 +873,17 @@
 <div><h1 id="series">Series</h1>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>If you want to run the code below, you will need to have an AREPO simulation available.
-Specify the path in load() to the base directory of the simulation, which contains the "output" sub directory.</p>
+<p>If you want to run the code below, you need a folder containing multiple scida datasets as subfolders.
+Specify the path in load() to the base directory of the series.
+The example below uses an AREPO simulation, the TNG50-4 simulation, as a series of snapshots.
+This simulation can be downloaded from the <a href="https://www.tng-project.org/data/">TNG website</a>
+or directly accessed online in the <a href="https://www.tng-project.org/data/lab/">TNGLab</a>.</p>
 </div>
 <p>In the tutorial section, we have only considered individual data sets.
 Often data sets are given in a series (e.g. multiple snapshots of a simulation, multiple exposures in a survey).
 Loading this as a series provides convenient access to all contained objects.</p>
 <div class="language-pycon highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scida</span> <span class="kn">import</span> <span class="n">load</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">series</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNGvariation_simulation"</span><span class="p">)</span> <span class="c1">#(1)!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">series</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"TNG50-4"</span><span class="p">)</span> <span class="c1">#(1)!</span>
 </code></pre></div>
 <ol>
 <li>Pass the base path of the simulation.</li>
