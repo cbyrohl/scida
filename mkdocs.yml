@@ -23,10 +23,11 @@ nav:
       - 'Derived fields': derived_fields.md
       - 'Data series': series.md
       - 'Large datasets': largedatasets.md
-  - 'Advanced Topics':
       - 'Halo/Galaxy Catalogs': halocatalogs.md
-  - 'Configuration': configuration.md
-  - 'FAQ': faq.md
+  - 'Further Topics':
+      - 'FAQ': faq.md
+      - 'Configuration': configuration.md
+      - 'Development': developer.md
   - 'API':
       - 'Basic': api/base_api.md
       - 'Index': api/moduleindex.md
