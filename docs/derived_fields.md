@@ -2,7 +2,7 @@
 
 !!! info
 
-    If you want to run the code below, consider downloading the [demo data](supported_datasets/tng.md#demo-data) or use the [TNGLab](supported_datasets/tng.md#tnglab) online.
+    If you want to run the code below, consider downloading the [demo data](supported_data.md#demo-data) or use the [TNGLab](supported_data.md#tnglab) online.
 
 Commonly during analysis, newly derived quantities/fields are to be synthesized from one or more snapshot fields into a new field. For example, while the temperature, pressure, or entropy of gas is not stored directly in the snapshots, they can be computed from fields which are present on disk.
 
@@ -18,7 +18,7 @@ gas = ds.data['gas']
 kineticenergy = 0.5*gas['Masses']*(gas['Velocities']**2).sum(axis=1)
 ```
 
-1. In this example, we assume a dataset, such as the [demo data set](supported_datasets/tng.md#demo-data), that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
+1. In this example, we assume a dataset, such as the [demo data set](supported_data.md#demo-data), that has its fields (*Masses*, *Velocities*) nested by particle type (*gas*)
 
 In the example above, we define a new dask array called "kineticenergy". Note that just like all other dask arrays and dataset fields, these fields are "virtual", i.e. only the graph of their construction is held in memory, which can be instantiated by applying the *.compute()* method.
 

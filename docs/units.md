@@ -2,7 +2,7 @@
 
 !!! info
 
-    If you want to run the code below, consider downloading the [demo data](supported_datasets/tng.md#demo-data) or use the [TNGLab](supported_datasets/tng.md#tnglab) online.
+    If you want to run the code below, consider downloading the [demo data](supported_data.md#demo-data) or use the [TNGLab](supported_data.md#tnglab) online.
 
 ## Loading data with units
 

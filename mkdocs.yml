@@ -28,6 +28,7 @@ nav:
       - 'FAQ': faq.md
       - 'Configuration': configuration.md
       - 'Development': developer.md
+      - 'Visual Impressions': impressions.md
   - 'API':
       - 'Basic': api/base_api.md
       - 'Index': api/moduleindex.md
