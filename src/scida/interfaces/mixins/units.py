@@ -690,6 +690,8 @@ def check_missing_units(unit, missing_units, path, logger=log):
     unit: Union[pint.Unit, str]
     missing_units: str
     path: str
+    logger: logging.Logger
+        The logger to use.
 
     Returns
     -------
@@ -707,5 +709,9 @@ def check_missing_units(unit, missing_units, path, logger=log):
             raise ValueError(msg)
         elif missing_units == "warn":
             logger.info(msg)
+        elif missing_units == "ignore":
+            pass
+        else:
+            raise ValueError("Unknown missing_units setting '%s'." % missing_units)
         return False
     return True
