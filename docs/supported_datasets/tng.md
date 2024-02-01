@@ -42,8 +42,16 @@ ds = load("./snapdir_030")
 with
 
 ``` py
+ds = load("/home/tnguser/sims.TNG/TNG50-4/output/snapdir_030")
+```
+
+for these examples.
+
+Alternatively, you can use
+
+``` py
 sim = load("TNG50-4")
 ds = sim.get_dataset(30)
 ```
 
-for these examples.
+where "TNG50-4" is a pre-defined shortcut to the TNG50-4 simulation path on TNGLab. After having loaded the simulation, we request the snapshot "30" as used in the demo data. Custom shortcuts can be defined in the [simulation configuration](../configuration.md#simulation-configuration).
