@@ -15,15 +15,28 @@ from scida import load
 import matplotlib.pyplot as plt
 
 ds = load("./snapdir_030")
-dens = ds.data["PartType0"]["Density"][:10000].compute()  # (1)!
-temp = ds.data["PartType0"]["Temperature"][:10000].compute()
-plt.plot(dens, temp, "o", markersize=0.1)
-plt.xscale("log")
-plt.yscale("log")
+dens = ds.data["PartType0"]["Density"][:10000].to("Msun/kpc^3").magnitude.compute()  # (1)!
+temp = ds.data["PartType0"]["Temperature"][:10000].to("K").magnitude.compute()
+
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.plot(dens, temp, "o", markersize=0.5)
+ax.set_xscale("log")
+ax.set_yscale("log")
+ax.set_xlabel(r"$\rho$ (M$_\odot$/kpc$^3$))")
+ax.set_ylabel(r"T (K)")
+ax.xaxis.tick_top()
+ax.xaxis.set_label_position('top')
 plt.show()
 ```
 
 1. Note the subselection of the first 10000 particles and conversion to a numpy array. Replace this operation with a meaninguful selection operation (e.g. a certain spatial region selection).
+
+
+<figure markdown>
+  ![TNG50-4 scatter plot](images/scatter.png)
+  <figcaption>Simple scatter plot.</figcaption>
+</figure>
+
 
 Instead of subselection, we sometimes want to visualize all of the data. We can do so by first applying reduction operations using dask. A common example would be a 2D histogram.
 
@@ -38,18 +51,25 @@ ds = load("./snapdir_030")
 dens10 = da.log10(ds.data["PartType0"]["Density"].to("Msun/kpc^3").magnitude)
 temp10 = da.log10(ds.data["PartType0"]["Temperature"].to("K").magnitude)
 
-bins = [np.linspace(1, 12, 44 + 1), np.linspace(3.5, 8, 45 + 1)]
+bins = [np.linspace(1, 9, 256 + 1), np.linspace(3.5, 8, 128 + 1)]
 hist, xedges, yedges = da.histogram2d(dens10, temp10, bins=bins)
 hist, xedges, yedges = hist.compute(), xedges.compute(), yedges.compute()
 extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
-plt.imshow(hist.T, origin="lower", extent=extent, aspect="auto", cmap="Greys",
-          norm=LogNorm())
-plt.xlabel(r"$\log_{10}$(density/(M$_\odot$/kpc$^3$))")
-plt.ylabel(r"$\log_{10}$(temperature/K)")
+fig, ax = plt.subplots(figsize=(6,3))
+ax.imshow(hist.T, origin="lower", extent=extent, aspect="auto", cmap="viridis",
+          norm=LogNorm(), interpolation="none")
+ax.set_xlabel(r"$\log_{10}$($\rho$/(M$_\odot$/kpc$^3$))")
+ax.set_ylabel(r"$\log_{10}$(T/K)")
+ax.xaxis.tick_top()
+ax.xaxis.set_label_position('top')
 plt.show()
 ```
 
+<figure markdown>
+  ![TNG50-4 phase-space diagram](images/phasespace.png)
+  <figcaption>Density-temperature phase-space diagram for TNG50-4</figcaption>
+</figure>
 
 
 ## Interactive visualization

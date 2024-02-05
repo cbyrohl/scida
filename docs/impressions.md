@@ -16,5 +16,5 @@ Plots from the SIMBA, FLAMINGO, TNG100 and THESAN simulations.
 Plots from the SDSS DR16, eROSITA-DE DR1 and Gaia DR3.
 
 ![SDSS DR16 Aitoff projection](images/sdss_dr16.png)
-![Data from eROSITA-DE DR1](images/eFEDS.png){: style="height:350px"}
+![Data from eROSITA-DE DR1. Mean photon energy.](images/eFEDS.png){: style="height:350px"}
 ![Gaia DR3 sky projection](images/simple_hist2d_obs.png){: style="height:350px"}
