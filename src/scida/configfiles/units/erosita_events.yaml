@@ -1,0 +1,22 @@
+metadata_unitsystem: code
+units:
+  adu: "[energy]" # analogue digital unit; some conversion to eV?
+fields:
+  RA: deg
+  DEC: deg
+  X: arcsec
+  Y: arcsec
+  TIME: s
+  FRAMETIME: s
+  RECORDTIME: s
+  PI: eV
+  EV_WEIGHT: none
+  RAWX: none
+  RAWY: none
+  SUBX: none
+  SUBY: none
+  PHA: adu
+  PAT_TYP: none
+  PAT_INF: none
+  TM_NR: none
+  FLAG: none
