@@ -359,12 +359,14 @@ class ChunkedHDF5Loader(Loader):
         self.tempfile = ""
         self.location = ""
 
-    def load_metadata(self, fileprefix="", **kwargs):
+    def load_metadata(self, fileprefix="", use_cachefile=True, **kwargs):
         """
         Take a quick glance at the metadata.
 
         Parameters
         ----------
+        use_cachefile: bool
+            Whether to use cache file (if present).
         fileprefix: str
             Prefix of files to be loaded. If None, we take the first prefix.
         kwargs: dict
@@ -376,7 +378,7 @@ class ChunkedHDF5Loader(Loader):
             Dictionary of attributes.
         """
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
-        if cachefp is not None and os.path.isfile(cachefp):
+        if cachefp is not None and os.path.isfile(cachefp) and use_cachefile:
             path = cachefp
         else:
             # get data from first file in list

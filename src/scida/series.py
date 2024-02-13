@@ -131,6 +131,8 @@ class DatasetSeries(object):
         self._metadata = None
         self._metadatafile = return_cachefile_path(os.path.join(self.hash, "data.json"))
         self.lazy = lazy
+        if overwrite_cache and os.path.exists(self._metadatafile):
+            os.remove(self._metadatafile)
         for p in paths:
             if not (isinstance(p, Path)):
                 p = Path(p)
@@ -139,11 +141,13 @@ class DatasetSeries(object):
         dec = delay_init  # lazy loading
 
         # Catch Mixins and create type:
-        mixins = interface_kwargs.pop("mixins", [])
+        ikw = dict(overwrite_cache=overwrite_cache)
+        ikw.update(**interface_kwargs)
+        mixins = ikw.pop("mixins", [])
         datasetclass = create_datasetclass_with_mixins(datasetclass, mixins)
         self._dataset_cls = datasetclass
 
-        gen = map_interface_args(paths, *interface_args, **interface_kwargs)
+        gen = map_interface_args(paths, *interface_args, **ikw)
         self.datasets = [dec(datasetclass)(p, *a, **kw) for p, a, kw in gen]
 
         if self.metadata is None:
@@ -152,7 +156,9 @@ class DatasetSeries(object):
             for i, (path, d) in enumerate(
                 tqdm(zip(self.paths, self.datasets), total=len(self.paths))
             ):
-                rawmeta = load_metadata(path, choose_prefix=True)
+                rawmeta = load_metadata(
+                    path, choose_prefix=True, use_cachefile=not (overwrite_cache)
+                )
                 # class method does not initiate obj.
                 dct[i] = d._clean_metadata_from_raw(rawmeta)
             self.metadata = dct
