@@ -291,7 +291,9 @@ def load(
         mixins.append(UnitMixin)
         kwargs["units"] = units
 
-    kwargs["overwritecache"] = overwrite
+    msg = "Inconsistent overwrite_cache, please only use 'overwrite' in load()."
+    assert kwargs.get("overwrite_cache", overwrite) == overwrite, msg
+    kwargs["overwrite_cache"] = overwrite
 
     # we append since unit mixin is added outside of this func right now
     metadata_raw = dict()
