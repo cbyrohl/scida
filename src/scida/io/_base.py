@@ -79,7 +79,7 @@ class FITSLoader(Loader):
 
     def load(
         self,
-        overwrite=False,
+        overwrite_cache=False,
         fileprefix="",
         token="",
         chunksize="auto",
@@ -90,7 +90,7 @@ class FITSLoader(Loader):
         Load data from FITS file.
         Parameters
         ----------
-        overwrite: bool
+        overwrite_cache: bool
             Overwrite cache file if it exists.
         fileprefix: str
             Prefix of files to be loaded. If None, we take the first prefix.
@@ -185,7 +185,7 @@ class HDF5Loader(Loader):
 
     def load(
         self,
-        overwrite=False,
+        overwrite_overwrite=False,
         fileprefix="",
         token="",
         chunksize="auto",
@@ -196,7 +196,7 @@ class HDF5Loader(Loader):
         Load data from HDF5 file.
         Parameters
         ----------
-        overwrite: bool
+        overwrite_overwrite: bool
             Overwrite cache file if it exists.
         fileprefix: str
             Prefix of files to be loaded. If None, we take the first prefix.
@@ -279,7 +279,7 @@ class ZarrLoader(Loader):
 
     def load(
         self,
-        overwrite=False,
+        overwrite_cache=False,
         fileprefix="",
         token="",
         chunksize="auto",
@@ -291,7 +291,7 @@ class ZarrLoader(Loader):
 
         Parameters
         ----------
-        overwrite: bool
+        overwrite_cache: bool
             Overwrite cache file if it exists.
         fileprefix: str
             Prefix of files to be loaded. If None, we take the first prefix.
@@ -394,7 +394,7 @@ class ChunkedHDF5Loader(Loader):
 
     def load(
         self,
-        overwrite=False,
+        overwrite_cache=False,
         fileprefix="",
         choose_prefix=False,
         token="",
@@ -407,7 +407,7 @@ class ChunkedHDF5Loader(Loader):
 
         Parameters
         ----------
-        overwrite: bool
+        overwrite_cache: bool
             Overwrite cache file if it exists.
         fileprefix: str
             Prefix of files to be loaded. If None, we take the first prefix.
@@ -437,7 +437,7 @@ class ChunkedHDF5Loader(Loader):
         elif not os.path.isfile(cachefp):
             # 2. no cachefile exists
             create = True
-        elif overwrite:
+        elif overwrite_cache:
             # 3. cachefile exists, but overwrite=True
             create = True
 

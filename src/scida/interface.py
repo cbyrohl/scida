@@ -90,7 +90,7 @@ class BaseDataset(metaclass=MixinMeta):
             raise Exception("Specified path '%s' does not exist." % self.path)
 
         loadkwargs = dict(
-            overwrite=self.overwrite_cache,
+            overwrite_cache=self.overwrite_cache,
             fileprefix=fileprefix,
             virtualcache=virtualcache,
             derivedfields_kwargs=dict(snap=self),

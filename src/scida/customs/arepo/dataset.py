@@ -80,7 +80,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 if hasattr(self, "_mixins") and "cosmology" in self._mixins:
                     cosmological = True
                 self.load_catalog(
-                    kwargs,
+                    overwrite_cache=kwargs.get("overwrite_cache", False),
                     catalog_cls=catalog_cls,
                     units=self.withunits,
                     cosmological=cosmological,
