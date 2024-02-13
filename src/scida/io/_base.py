@@ -185,7 +185,7 @@ class HDF5Loader(Loader):
 
     def load(
         self,
-        overwrite_overwrite=False,
+        overwrite_cache=False,
         fileprefix="",
         token="",
         chunksize="auto",
@@ -196,7 +196,7 @@ class HDF5Loader(Loader):
         Load data from HDF5 file.
         Parameters
         ----------
-        overwrite_overwrite: bool
+        overwrite_cache: bool
             Overwrite cache file if it exists.
         fileprefix: str
             Prefix of files to be loaded. If None, we take the first prefix.
