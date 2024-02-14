@@ -14,11 +14,17 @@ class CosmologyMixin(Mixin):
     Mixin class for cosmological simulations. Adds cosmology and redshift attributes.
     """
 
+    _mixin_name = "cosmology"
+
     def __init__(self, *args, **kwargs):
         """
         Initialize a CosmologyMixin object. Requires _metadata_raw to be filled.
         """
         self.metadata = {}
+        if hasattr(self, "_mixins"):
+            self._mixins.append(self._mixin_name)
+        else:
+            self._mixins = [self._mixin_name]
         super().__init__(*args, **kwargs)
         metadata_raw = self._metadata_raw
         c = get_cosmology_from_rawmetadata(metadata_raw)

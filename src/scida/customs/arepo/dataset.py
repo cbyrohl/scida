@@ -24,7 +24,7 @@ from scida.helpers_misc import (
     parse_humansize,
 )
 from scida.interface import create_datasetclass_with_mixins
-from scida.interfaces.mixins import SpatialCartesian3DMixin, UnitMixin
+from scida.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin, UnitMixin
 from scida.io import load_metadata
 
 log = logging.getLogger(__name__)
@@ -76,7 +76,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 pass  # this string can be set to explicitly disable catalog
             elif self.catalog:
                 catalog_cls = kwargs.get("catalog_cls", None)
-                self.load_catalog(kwargs, catalog_cls=catalog_cls)
+                cosmological = False
+                if hasattr(self, "_mixins") and "cosmology" in self._mixins:
+                    cosmological = True
+                self.load_catalog(
+                    overwrite_cache=kwargs.get("overwrite_cache", False),
+                    catalog_cls=catalog_cls,
+                    units=self.withunits,
+                    cosmological=cosmological,
+                )
 
         # add aliases
         aliases = dict(
@@ -99,7 +107,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         # add some default fields
         self.data.merge(fielddefs)
 
-    def load_catalog(self, kwargs, catalog_cls=None):
+    def load_catalog(
+        self, overwrite_cache=False, units=False, cosmological=False, catalog_cls=None
+    ):
         """
         Load the group catalog.
 
@@ -115,8 +125,6 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         None
         """
         virtualcache = False  # copy catalog for better performance
-        catalog_kwargs = kwargs.get("catalog_kwargs", {})
-        catalog_kwargs["overwritecache"] = kwargs.get("overwritecache", False)
         # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
         prfx = self._get_fileprefix(self.catalog)
 
@@ -126,13 +134,16 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             cls = ArepoCatalog
         else:
             cls = catalog_cls
-        withunits = kwargs.get("units", False)
+        withunits = units
         mixins = []
         if withunits:
             mixins += [UnitMixin]
 
         other_mixins = _determine_mixins(path=self.path)
         mixins += other_mixins
+        if cosmological and CosmologyMixin not in mixins:
+            mixins.append(CosmologyMixin)
+
         cls = create_datasetclass_with_mixins(cls, mixins)
 
         ureg = None
@@ -141,6 +152,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         self.catalog = cls(
             self.catalog,
+            overwrite_cache=overwrite_cache,
             virtualcache=virtualcache,
             fileprefix=prfx,
             units=self.withunits,

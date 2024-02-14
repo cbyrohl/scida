@@ -44,7 +44,7 @@ class BaseDataset(metaclass=MixinMeta):
         path,
         chunksize="auto",
         virtualcache=True,
-        overwritecache=False,
+        overwrite_cache=False,
         fileprefix="",
         hints=None,
         **kwargs
@@ -60,7 +60,7 @@ class BaseDataset(metaclass=MixinMeta):
             Chunksize for dask arrays.
         virtualcache: bool
             Whether to use virtual caching.
-        overwritecache: bool
+        overwrite_cache: bool
             Whether to overwrite existing cache.
         fileprefix: str
             Prefix for files to scan for.
@@ -78,7 +78,7 @@ class BaseDataset(metaclass=MixinMeta):
         self.location = str(path)
         self.chunksize = chunksize
         self.virtualcache = virtualcache
-        self.overwritecache = overwritecache
+        self.overwrite_cache = overwrite_cache
         self.withunits = kwargs.get("units", False)
 
         # Let's find the data and metadata for the object at 'path'
@@ -90,7 +90,7 @@ class BaseDataset(metaclass=MixinMeta):
             raise Exception("Specified path '%s' does not exist." % self.path)
 
         loadkwargs = dict(
-            overwrite=self.overwritecache,
+            overwrite_cache=self.overwrite_cache,
             fileprefix=fileprefix,
             virtualcache=virtualcache,
             derivedfields_kwargs=dict(snap=self),
