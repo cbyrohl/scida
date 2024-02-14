@@ -29,6 +29,9 @@ nav:
       - 'Configuration': configuration.md
       - 'Development': developer.md
       - 'Visual Impressions': impressions.md
+  - 'Cookbooks':
+      - 'Cookbooks': cookbooks/index.md
+      #- 'TNG-Cluster': cookbooks/TNG-Cluster/basic.ipynb
   - 'API':
       - 'Basic': api/base_api.md
       - 'Index': api/moduleindex.md
@@ -86,11 +89,14 @@ plugins:
         vertical-align: top
         height: 12.172vw
         width: 12.172vw
-  #- mkdocs-jupyter:
-  #    execute: !ENV [JUPYTER_EXECUTE, true]
-  #    execute_ignore:
-  #      - "notebooks/static/*.ipynb"
-  #    kernel_name: scida
+  - mkdocs-jupyter:
+      execute: !ENV [JUPYTER_EXECUTE, false]
+      execute_ignore:
+        - "notebooks/static/*.ipynb"
+        - "cookbooks/*/*.ipynb"
+      include: [ "*.ipynb" ]
+      ignore: [ ".ipynb_checkpoints/*.ipynb", "notebooks/static/*.ipynb", "notebooks/*.ipynb" ]
+      include_source: True
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -111,3 +117,6 @@ extra_css:
   - stylesheets/gridview.css
   - stylesheets/code_select.css
   - stylesheets/mkdocstrings.css
+
+not_in_nav: |
+  /cookbooks/*/*.ipynb
