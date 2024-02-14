@@ -781,6 +781,64 @@
       
   
   
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../cookbooks/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Cookbooks
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Cookbooks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -804,10 +862,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -818,8 +876,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             API
           </label>
@@ -6807,9 +6865,7 @@ If None, collisions will raise an exception.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/convenience.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">408</span>
 <span class="normal">409</span>
 <span class="normal">410</span>
 <span class="normal">411</span>
@@ -6828,7 +6884,9 @@ If None, collisions will raise an exception.</p>
 <span class="normal">424</span>
 <span class="normal">425</span>
 <span class="normal">426</span>
-<span class="normal">427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get dataset by name or properties.</span>
 <span class="sd">    Parameters</span>
@@ -6928,9 +6986,7 @@ If None, collisions will raise an exception.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/convenience.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
 <span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
@@ -6956,7 +7012,9 @@ If None, collisions will raise an exception.</p>
 <span class="normal">340</span>
 <span class="normal">341</span>
 <span class="normal">342</span>
-<span class="normal">343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get dataset name from alias or name found in the configuration files.</span>
 
@@ -7075,9 +7133,7 @@ If None, collisions will raise an exception.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/convenience.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">382</span>
 <span class="normal">383</span>
 <span class="normal">384</span>
 <span class="normal">385</span>
@@ -7098,7 +7154,9 @@ If None, collisions will raise an exception.</p>
 <span class="normal">400</span>
 <span class="normal">401</span>
 <span class="normal">402</span>
-<span class="normal">403</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset_candidates</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset_candidates</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get dataset candidates by name or properties.</span>
 
@@ -7199,9 +7257,7 @@ If None, collisions will raise an exception.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/convenience.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
@@ -7230,7 +7286,9 @@ If None, collisions will raise an exception.</p>
 <span class="normal">374</span>
 <span class="normal">375</span>
 <span class="normal">376</span>
-<span class="normal">377</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_datasets_by_props</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_datasets_by_props</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get dataset names by properties.</span>
 
@@ -7639,7 +7697,9 @@ class to use and return the initialized instance.</p>
 <span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
-<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load</span><span class="p">(</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load</span><span class="p">(</span>
     <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">units</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">unitfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
@@ -7728,7 +7788,9 @@ class to use and return the initialized instance.</p>
         <span class="n">mixins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">UnitMixin</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">"units"</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
 
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"overwritecache"</span><span class="p">]</span> <span class="o">=</span> <span class="n">overwrite</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Inconsistent overwrite_cache, please only use 'overwrite' in load()."</span>
+    <span class="k">assert</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"overwrite_cache"</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">)</span> <span class="o">==</span> <span class="n">overwrite</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"overwrite_cache"</span><span class="p">]</span> <span class="o">=</span> <span class="n">overwrite</span>
 
     <span class="c1"># we append since unit mixin is added outside of this func right now</span>
     <span class="n">metadata_raw</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -10571,19 +10633,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
             <details class="quote">
               <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">674</span>
-<span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span>
-<span class="normal">678</span>
-<span class="normal">679</span>
-<span class="normal">680</span>
-<span class="normal">681</span>
-<span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">686</span>
 <span class="normal">687</span>
 <span class="normal">688</span>
 <span class="normal">689</span>
@@ -10609,7 +10659,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">709</span>
 <span class="normal">710</span>
 <span class="normal">711</span>
-<span class="normal">712</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ArepoCatalog</span><span class="p">(</span><span class="n">ArepoSnapshot</span><span class="p">):</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ArepoCatalog</span><span class="p">(</span><span class="n">ArepoSnapshot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Dataset class for Arepo group catalogs.</span>
 <span class="sd">    """</span>
@@ -10723,19 +10785,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">679</span>
-<span class="normal">680</span>
-<span class="normal">681</span>
-<span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span>
-<span class="normal">689</span>
-<span class="normal">690</span>
-<span class="normal">691</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialize an ArepoCatalog object.</span>
 
@@ -10856,26 +10918,26 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
-<span class="normal">701</span>
-<span class="normal">702</span>
-<span class="normal">703</span>
-<span class="normal">704</span>
-<span class="normal">705</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">705</span>
 <span class="normal">706</span>
 <span class="normal">707</span>
 <span class="normal">708</span>
 <span class="normal">709</span>
 <span class="normal">710</span>
 <span class="normal">711</span>
-<span class="normal">712</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">validate_path</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CandidateStatus</span><span class="p">:</span>
@@ -11568,7 +11630,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">668</span>
 <span class="normal">669</span>
 <span class="normal">670</span>
-<span class="normal">671</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ArepoSnapshot</span><span class="p">(</span><span class="n">SpatialCartesian3DMixin</span><span class="p">,</span> <span class="n">GadgetStyleSnapshot</span><span class="p">):</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ArepoSnapshot</span><span class="p">(</span><span class="n">SpatialCartesian3DMixin</span><span class="p">,</span> <span class="n">GadgetStyleSnapshot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Dataset class for Arepo snapshots.</span>
 <span class="sd">    """</span>
@@ -11614,7 +11688,15 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
                 <span class="k">pass</span>  <span class="c1"># this string can be set to explicitly disable catalog</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">:</span>
                 <span class="n">catalog_cls</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"catalog_cls"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="n">catalog_cls</span><span class="p">)</span>
+                <span class="n">cosmological</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_mixins"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"cosmology"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixins</span><span class="p">:</span>
+                    <span class="n">cosmological</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">(</span>
+                    <span class="n">overwrite_cache</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"overwrite_cache"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                    <span class="n">catalog_cls</span><span class="o">=</span><span class="n">catalog_cls</span><span class="p">,</span>
+                    <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">withunits</span><span class="p">,</span>
+                    <span class="n">cosmological</span><span class="o">=</span><span class="n">cosmological</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="c1"># add aliases</span>
         <span class="n">aliases</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -11637,7 +11719,9 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
         <span class="c1"># add some default fields</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fielddefs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">load_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_catalog</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">overwrite_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cosmological</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Load the group catalog.</span>
 
@@ -11653,8 +11737,6 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="sd">        None</span>
 <span class="sd">        """</span>
         <span class="n">virtualcache</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># copy catalog for better performance</span>
-        <span class="n">catalog_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"catalog_kwargs"</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">catalog_kwargs</span><span class="p">[</span><span class="s2">"overwritecache"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"overwritecache"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="c1"># fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)</span>
         <span class="n">prfx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileprefix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">)</span>
 
@@ -11664,13 +11746,16 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
             <span class="bp">cls</span> <span class="o">=</span> <span class="n">ArepoCatalog</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">cls</span> <span class="o">=</span> <span class="n">catalog_cls</span>
-        <span class="n">withunits</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">withunits</span> <span class="o">=</span> <span class="n">units</span>
         <span class="n">mixins</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">withunits</span><span class="p">:</span>
             <span class="n">mixins</span> <span class="o">+=</span> <span class="p">[</span><span class="n">UnitMixin</span><span class="p">]</span>
 
         <span class="n">other_mixins</span> <span class="o">=</span> <span class="n">_determine_mixins</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">mixins</span> <span class="o">+=</span> <span class="n">other_mixins</span>
+        <span class="k">if</span> <span class="n">cosmological</span> <span class="ow">and</span> <span class="n">CosmologyMixin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mixins</span><span class="p">:</span>
+            <span class="n">mixins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CosmologyMixin</span><span class="p">)</span>
+
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">create_datasetclass_with_mixins</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mixins</span><span class="p">)</span>
 
         <span class="n">ureg</span> <span class="o">=</span> <span class="kc">None</span>
@@ -11679,6 +11764,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
         <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">,</span>
+            <span class="n">overwrite_cache</span><span class="o">=</span><span class="n">overwrite_cache</span><span class="p">,</span>
             <span class="n">virtualcache</span><span class="o">=</span><span class="n">virtualcache</span><span class="p">,</span>
             <span class="n">fileprefix</span><span class="o">=</span><span class="n">prfx</span><span class="p">,</span>
             <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">withunits</span><span class="p">,</span>
@@ -12368,7 +12454,15 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
-<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialize an ArepoSnapshot object.</span>
 
@@ -12407,7 +12501,15 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
             <span class="k">pass</span>  <span class="c1"># this string can be set to explicitly disable catalog</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">:</span>
             <span class="n">catalog_cls</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"catalog_cls"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="n">catalog_cls</span><span class="p">)</span>
+            <span class="n">cosmological</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_mixins"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"cosmology"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mixins</span><span class="p">:</span>
+                <span class="n">cosmological</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_catalog</span><span class="p">(</span>
+                <span class="n">overwrite_cache</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"overwrite_cache"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                <span class="n">catalog_cls</span><span class="o">=</span><span class="n">catalog_cls</span><span class="p">,</span>
+                <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">withunits</span><span class="p">,</span>
+                <span class="n">cosmological</span><span class="o">=</span><span class="n">cosmological</span><span class="p">,</span>
+            <span class="p">)</span>
 
     <span class="c1"># add aliases</span>
     <span class="n">aliases</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -12477,19 +12579,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
@@ -12612,7 +12702,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">400</span>
 <span class="normal">401</span>
 <span class="normal">402</span>
-<span class="normal">403</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_catalogIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_catalogIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Add field for halo and subgroup IDs for all particle types.</span>
 
@@ -12838,19 +12940,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">481</span>
 <span class="normal">482</span>
 <span class="normal">483</span>
 <span class="normal">484</span>
@@ -12872,7 +12962,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">500</span>
 <span class="normal">501</span>
 <span class="normal">502</span>
-<span class="normal">503</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_groupquantity_to_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_groupquantity_to_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Map a quantity from the group catalog to the particles based on a particle's group index.</span>
 
@@ -12955,19 +13057,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
@@ -12977,7 +13067,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">235</span>
 <span class="normal">236</span>
 <span class="normal">237</span>
-<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">discover_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">discover_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Discover the group catalog given the current path</span>
 
@@ -13077,19 +13179,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span>
-<span class="normal">509</span>
-<span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
-<span class="normal">514</span>
-<span class="normal">515</span>
-<span class="normal">516</span>
-<span class="normal">517</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">517</span>
 <span class="normal">518</span>
 <span class="normal">519</span>
 <span class="normal">520</span>
@@ -13097,7 +13187,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">522</span>
 <span class="normal">523</span>
 <span class="normal">524</span>
-<span class="normal">525</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_grouplengths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_grouplengths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the lengths, i.e. the total number of particles, of a given type in all halos.</span>
 
@@ -13195,23 +13297,23 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">539</span>
 <span class="normal">540</span>
 <span class="normal">541</span>
 <span class="normal">542</span>
-<span class="normal">543</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_groupoffsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_groupoffsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the array index offset of the first particle of a given type in each halo.</span>
 
@@ -13305,19 +13407,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">553</span>
-<span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
-<span class="normal">564</span>
-<span class="normal">565</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">565</span>
 <span class="normal">566</span>
 <span class="normal">567</span>
 <span class="normal">568</span>
@@ -13325,7 +13415,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">570</span>
 <span class="normal">571</span>
 <span class="normal">572</span>
-<span class="normal">573</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subhalolengths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subhalolengths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the lengths, i.e. the total number of particles, of a given type in all subhalos.</span>
 
@@ -13423,19 +13525,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">587</span>
 <span class="normal">588</span>
 <span class="normal">589</span>
 <span class="normal">590</span>
@@ -13460,7 +13550,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">609</span>
 <span class="normal">610</span>
 <span class="normal">611</span>
-<span class="normal">612</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subhalooffsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subhalooffsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the array index offset of the first particle of a given type in each subhalo.</span>
 
@@ -13602,19 +13704,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span>
-<span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">626</span>
 <span class="normal">627</span>
 <span class="normal">628</span>
 <span class="normal">629</span>
@@ -13659,7 +13749,19 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">668</span>
 <span class="normal">669</span>
 <span class="normal">670</span>
-<span class="normal">671</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grouped</span><span class="p">(</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grouped</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">Array</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
     <span class="n">parttype</span><span class="o">=</span><span class="s2">"PartType0"</span><span class="p">,</span>
@@ -13730,7 +13832,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
 
 <h6 id="scida.customs.arepo.dataset.ArepoSnapshot.load_catalog" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">load_catalog</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">load_catalog</span><span class="p">(</span><span class="n">overwrite_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cosmological</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h6>
 
@@ -13807,15 +13909,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
@@ -13873,7 +13967,21 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="normal">165</span>
 <span class="normal">166</span>
 <span class="normal">167</span>
-<span class="normal">168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_catalog</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">overwrite_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cosmological</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">catalog_cls</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Load the group catalog.</span>
 
@@ -13889,8 +13997,6 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 <span class="sd">    None</span>
 <span class="sd">    """</span>
     <span class="n">virtualcache</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># copy catalog for better performance</span>
-    <span class="n">catalog_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"catalog_kwargs"</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="n">catalog_kwargs</span><span class="p">[</span><span class="s2">"overwritecache"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"overwritecache"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="c1"># fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)</span>
     <span class="n">prfx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileprefix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">)</span>
 
@@ -13900,13 +14006,16 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">ArepoCatalog</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">catalog_cls</span>
-    <span class="n">withunits</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">withunits</span> <span class="o">=</span> <span class="n">units</span>
     <span class="n">mixins</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">withunits</span><span class="p">:</span>
         <span class="n">mixins</span> <span class="o">+=</span> <span class="p">[</span><span class="n">UnitMixin</span><span class="p">]</span>
 
     <span class="n">other_mixins</span> <span class="o">=</span> <span class="n">_determine_mixins</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
     <span class="n">mixins</span> <span class="o">+=</span> <span class="n">other_mixins</span>
+    <span class="k">if</span> <span class="n">cosmological</span> <span class="ow">and</span> <span class="n">CosmologyMixin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mixins</span><span class="p">:</span>
+        <span class="n">mixins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CosmologyMixin</span><span class="p">)</span>
+
     <span class="bp">cls</span> <span class="o">=</span> <span class="n">create_datasetclass_with_mixins</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mixins</span><span class="p">)</span>
 
     <span class="n">ureg</span> <span class="o">=</span> <span class="kc">None</span>
@@ -13915,6 +14024,7 @@ Can specify onlyfuzz=True to only return the "fuzz" particles for a given zoom t
 
     <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">,</span>
+        <span class="n">overwrite_cache</span><span class="o">=</span><span class="n">overwrite_cache</span><span class="p">,</span>
         <span class="n">virtualcache</span><span class="o">=</span><span class="n">virtualcache</span><span class="p">,</span>
         <span class="n">fileprefix</span><span class="o">=</span><span class="n">prfx</span><span class="p">,</span>
         <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">withunits</span><span class="p">,</span>
@@ -14096,19 +14206,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">417</span>
 <span class="normal">418</span>
 <span class="normal">419</span>
 <span class="normal">420</span>
@@ -14158,7 +14256,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">464</span>
 <span class="normal">465</span>
 <span class="normal">466</span>
-<span class="normal">467</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@computedecorator</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@computedecorator</span>
 <span class="k">def</span> <span class="nf">map_group_operation</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">func</span><span class="p">,</span>
@@ -14327,19 +14437,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
 <span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
@@ -14353,7 +14451,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">263</span>
 <span class="normal">264</span>
 <span class="normal">265</span>
-<span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">register_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">construct</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">register_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parttype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">construct</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Register a field.</span>
 <span class="sd">    Parameters</span>
@@ -14428,16 +14538,16 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ArepoSelector</span><span class="p">()</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@ArepoSelector</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">return_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldContainer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return data object of this snapshot.</span>
@@ -14555,19 +14665,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
@@ -14588,7 +14686,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
-<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">validate_path</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CandidateStatus</span><span class="p">:</span>
@@ -14655,19 +14765,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
             <details class="quote">
               <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">715</span>
-<span class="normal">716</span>
-<span class="normal">717</span>
-<span class="normal">718</span>
-<span class="normal">719</span>
-<span class="normal">720</span>
-<span class="normal">721</span>
-<span class="normal">722</span>
-<span class="normal">723</span>
-<span class="normal">724</span>
-<span class="normal">725</span>
-<span class="normal">726</span>
-<span class="normal">727</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">727</span>
 <span class="normal">728</span>
 <span class="normal">729</span>
 <span class="normal">730</span>
@@ -14689,7 +14787,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">746</span>
 <span class="normal">747</span>
 <span class="normal">748</span>
-<span class="normal">749</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ChainOps</span><span class="p">:</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ChainOps</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Chain operations together.</span>
 <span class="sd">    """</span>
@@ -14786,19 +14896,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">720</span>
-<span class="normal">721</span>
-<span class="normal">722</span>
-<span class="normal">723</span>
-<span class="normal">724</span>
-<span class="normal">725</span>
-<span class="normal">726</span>
-<span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">732</span>
 <span class="normal">733</span>
 <span class="normal">734</span>
 <span class="normal">735</span>
@@ -14812,7 +14910,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">743</span>
 <span class="normal">744</span>
 <span class="normal">745</span>
-<span class="normal">746</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">funcs</span><span class="p">):</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">funcs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialize a ChainOps object.</span>
 
@@ -14872,19 +14982,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
             <details class="quote">
               <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
-<span class="normal">757</span>
-<span class="normal">758</span>
-<span class="normal">759</span>
-<span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">764</span>
 <span class="normal">765</span>
 <span class="normal">766</span>
 <span class="normal">767</span>
@@ -15062,7 +15160,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">939</span>
 <span class="normal">940</span>
 <span class="normal">941</span>
-<span class="normal">942</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">GroupAwareOperation</span><span class="p">:</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">GroupAwareOperation</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Class for applying operations to groups.</span>
 <span class="sd">    """</span>
@@ -15352,22 +15462,22 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span>
-<span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span>
-<span class="normal">871</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">871</span>
 <span class="normal">872</span>
 <span class="normal">873</span>
-<span class="normal">874</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="normal">874</span>
+<span class="normal">875</span>
+<span class="normal">876</span>
+<span class="normal">877</span>
+<span class="normal">878</span>
+<span class="normal">879</span>
+<span class="normal">880</span>
+<span class="normal">881</span>
+<span class="normal">882</span>
+<span class="normal">883</span>
+<span class="normal">884</span>
+<span class="normal">885</span>
+<span class="normal">886</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Apply a passed function.</span>
 
@@ -15473,19 +15583,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">788</span>
-<span class="normal">789</span>
-<span class="normal">790</span>
-<span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
-<span class="normal">797</span>
-<span class="normal">798</span>
-<span class="normal">799</span>
-<span class="normal">800</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">800</span>
 <span class="normal">801</span>
 <span class="normal">802</span>
 <span class="normal">803</span>
@@ -15502,7 +15600,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">814</span>
 <span class="normal">815</span>
 <span class="normal">816</span>
-<span class="normal">817</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">add_op</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
+<span class="normal">823</span>
+<span class="normal">824</span>
+<span class="normal">825</span>
+<span class="normal">826</span>
+<span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">add_op</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Chain another operation to this one.</span>
 
@@ -15611,19 +15721,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">887</span>
-<span class="normal">888</span>
-<span class="normal">889</span>
-<span class="normal">890</span>
-<span class="normal">891</span>
-<span class="normal">892</span>
-<span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">899</span>
 <span class="normal">900</span>
 <span class="normal">901</span>
 <span class="normal">902</span>
@@ -15666,7 +15764,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">939</span>
 <span class="normal">940</span>
 <span class="normal">941</span>
-<span class="normal">942</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idxlist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idxlist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Evaluate the operation.</span>
 
@@ -15770,15 +15880,15 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">849</span>
-<span class="normal">850</span>
-<span class="normal">851</span>
-<span class="normal">852</span>
-<span class="normal">853</span>
-<span class="normal">854</span>
-<span class="normal">855</span>
-<span class="normal">856</span>
-<span class="normal">857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">half</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span>
+<span class="normal">867</span>
+<span class="normal">868</span>
+<span class="normal">869</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">half</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Half the number of particles in each group member. For testing purposes.</span>
 
@@ -15811,15 +15921,15 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">829</span>
-<span class="normal">830</span>
-<span class="normal">831</span>
-<span class="normal">832</span>
-<span class="normal">833</span>
-<span class="normal">834</span>
-<span class="normal">835</span>
-<span class="normal">836</span>
-<span class="normal">837</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the maximum value for each group member.</span>
 <span class="sd">    """</span>
@@ -15852,15 +15962,15 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">819</span>
-<span class="normal">820</span>
-<span class="normal">821</span>
-<span class="normal">822</span>
-<span class="normal">823</span>
-<span class="normal">824</span>
-<span class="normal">825</span>
-<span class="normal">826</span>
-<span class="normal">827</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the minimum value for each group member.</span>
 <span class="sd">    """</span>
@@ -15893,15 +16003,15 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">839</span>
-<span class="normal">840</span>
-<span class="normal">841</span>
-<span class="normal">842</span>
-<span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Sum the values for each group member.</span>
 <span class="sd">    """</span>
@@ -15943,19 +16053,7 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1600</span>
-<span class="normal">1601</span>
-<span class="normal">1602</span>
-<span class="normal">1603</span>
-<span class="normal">1604</span>
-<span class="normal">1605</span>
-<span class="normal">1606</span>
-<span class="normal">1607</span>
-<span class="normal">1608</span>
-<span class="normal">1609</span>
-<span class="normal">1610</span>
-<span class="normal">1611</span>
-<span class="normal">1612</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1612</span>
 <span class="normal">1613</span>
 <span class="normal">1614</span>
 <span class="normal">1615</span>
@@ -15967,7 +16065,19 @@ used for calculating the dask chunks. Default: 1e4</p>
 <span class="normal">1621</span>
 <span class="normal">1622</span>
 <span class="normal">1623</span>
-<span class="normal">1624</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@fielddefs</span><span class="o">.</span><span class="n">register_field</span><span class="p">(</span><span class="s2">"PartType0"</span><span class="p">)</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@fielddefs</span><span class="o">.</span><span class="n">register_field</span><span class="p">(</span><span class="s2">"PartType0"</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">Temperature</span><span class="p">(</span><span class="n">arrs</span><span class="p">,</span> <span class="n">ureg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Compute gas temperature given (ElectronAbundance,InternalEnergy) in [K]."""</span>
     <span class="n">xh</span> <span class="o">=</span> <span class="mf">0.76</span>
@@ -16016,15 +16126,15 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1049</span>
-<span class="normal">1050</span>
-<span class="normal">1051</span>
-<span class="normal">1052</span>
-<span class="normal">1053</span>
-<span class="normal">1054</span>
-<span class="normal">1055</span>
-<span class="normal">1056</span>
-<span class="normal">1057</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_haloindex</span><span class="p">(</span><span class="n">gidx</span><span class="p">,</span> <span class="n">halocelloffsets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">index_unbound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_haloindex</span><span class="p">(</span><span class="n">gidx</span><span class="p">,</span> <span class="n">halocelloffsets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">index_unbound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Computes the halo index for each particle with dask."""</span>
     <span class="k">return</span> <span class="n">da</span><span class="o">.</span><span class="n">map_blocks</span><span class="p">(</span>
         <span class="n">get_hidx_daskwrap</span><span class="p">,</span>
@@ -16057,20 +16167,20 @@ used for calculating the dask chunks. Default: 1e4</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1060</span>
-<span class="normal">1061</span>
-<span class="normal">1062</span>
-<span class="normal">1063</span>
-<span class="normal">1064</span>
-<span class="normal">1065</span>
-<span class="normal">1066</span>
-<span class="normal">1067</span>
-<span class="normal">1068</span>
-<span class="normal">1069</span>
-<span class="normal">1070</span>
-<span class="normal">1071</span>
-<span class="normal">1072</span>
-<span class="normal">1073</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_haloquantity</span><span class="p">(</span><span class="n">gidx</span><span class="p">,</span> <span class="n">halocelloffsets</span><span class="p">,</span> <span class="n">hvals</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_haloquantity</span><span class="p">(</span><span class="n">gidx</span><span class="p">,</span> <span class="n">halocelloffsets</span><span class="p">,</span> <span class="n">hvals</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Computes a halo quantity for each particle with dask."""</span>
     <span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">hvals</span><span class="p">,</span> <span class="s2">"units"</span><span class="p">):</span>
@@ -16204,19 +16314,7 @@ starting at 0 for the central subhalo.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1194</span>
-<span class="normal">1195</span>
-<span class="normal">1196</span>
-<span class="normal">1197</span>
-<span class="normal">1198</span>
-<span class="normal">1199</span>
-<span class="normal">1200</span>
-<span class="normal">1201</span>
-<span class="normal">1202</span>
-<span class="normal">1203</span>
-<span class="normal">1204</span>
-<span class="normal">1205</span>
-<span class="normal">1206</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1206</span>
 <span class="normal">1207</span>
 <span class="normal">1208</span>
 <span class="normal">1209</span>
@@ -16235,7 +16333,19 @@ starting at 0 for the central subhalo.</p>
 <span class="normal">1222</span>
 <span class="normal">1223</span>
 <span class="normal">1224</span>
-<span class="normal">1225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_localsubhaloindex</span><span class="p">(</span>
+<span class="normal">1225</span>
+<span class="normal">1226</span>
+<span class="normal">1227</span>
+<span class="normal">1228</span>
+<span class="normal">1229</span>
+<span class="normal">1230</span>
+<span class="normal">1231</span>
+<span class="normal">1232</span>
+<span class="normal">1233</span>
+<span class="normal">1234</span>
+<span class="normal">1235</span>
+<span class="normal">1236</span>
+<span class="normal">1237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_localsubhaloindex</span><span class="p">(</span>
     <span class="n">gidx</span><span class="p">,</span> <span class="n">halocelloffsets</span><span class="p">,</span> <span class="n">shnumber</span><span class="p">,</span> <span class="n">shcounts</span><span class="p">,</span> <span class="n">shcellcounts</span><span class="p">,</span> <span class="n">index_unbound</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">da</span><span class="o">.</span><span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
@@ -16363,19 +16473,7 @@ of the dtype is used.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 990</span>
-<span class="normal"> 991</span>
-<span class="normal"> 992</span>
-<span class="normal"> 993</span>
-<span class="normal"> 994</span>
-<span class="normal"> 995</span>
-<span class="normal"> 996</span>
-<span class="normal"> 997</span>
-<span class="normal"> 998</span>
-<span class="normal"> 999</span>
-<span class="normal">1000</span>
-<span class="normal">1001</span>
-<span class="normal">1002</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1002</span>
 <span class="normal">1003</span>
 <span class="normal">1004</span>
 <span class="normal">1005</span>
@@ -16402,7 +16500,19 @@ of the dtype is used.</p>
 <span class="normal">1026</span>
 <span class="normal">1027</span>
 <span class="normal">1028</span>
-<span class="normal">1029</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span>
+<span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_hidx</span><span class="p">(</span><span class="n">gidx_start</span><span class="p">,</span> <span class="n">gidx_count</span><span class="p">,</span> <span class="n">celloffsets</span><span class="p">,</span> <span class="n">index_unbound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Get halo index of a given cell</span>
 
@@ -16603,19 +16713,7 @@ of the dtype is used.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1076</span>
-<span class="normal">1077</span>
-<span class="normal">1078</span>
-<span class="normal">1079</span>
-<span class="normal">1080</span>
-<span class="normal">1081</span>
-<span class="normal">1082</span>
-<span class="normal">1083</span>
-<span class="normal">1084</span>
-<span class="normal">1085</span>
-<span class="normal">1086</span>
-<span class="normal">1087</span>
-<span class="normal">1088</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1088</span>
 <span class="normal">1089</span>
 <span class="normal">1090</span>
 <span class="normal">1091</span>
@@ -16696,7 +16794,19 @@ of the dtype is used.</p>
 <span class="normal">1166</span>
 <span class="normal">1167</span>
 <span class="normal">1168</span>
-<span class="normal">1169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="normal">1169</span>
+<span class="normal">1170</span>
+<span class="normal">1171</span>
+<span class="normal">1172</span>
+<span class="normal">1173</span>
+<span class="normal">1174</span>
+<span class="normal">1175</span>
+<span class="normal">1176</span>
+<span class="normal">1177</span>
+<span class="normal">1178</span>
+<span class="normal">1179</span>
+<span class="normal">1180</span>
+<span class="normal">1181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_localshidx</span><span class="p">(</span>
     <span class="n">gidx_start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">gidx_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -16890,19 +17000,7 @@ of the dtype is used.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1228</span>
-<span class="normal">1229</span>
-<span class="normal">1230</span>
-<span class="normal">1231</span>
-<span class="normal">1232</span>
-<span class="normal">1233</span>
-<span class="normal">1234</span>
-<span class="normal">1235</span>
-<span class="normal">1236</span>
-<span class="normal">1237</span>
-<span class="normal">1238</span>
-<span class="normal">1239</span>
-<span class="normal">1240</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1240</span>
 <span class="normal">1241</span>
 <span class="normal">1242</span>
 <span class="normal">1243</span>
@@ -16922,7 +17020,19 @@ of the dtype is used.</p>
 <span class="normal">1257</span>
 <span class="normal">1258</span>
 <span class="normal">1259</span>
-<span class="normal">1260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="normal">1260</span>
+<span class="normal">1261</span>
+<span class="normal">1262</span>
+<span class="normal">1263</span>
+<span class="normal">1264</span>
+<span class="normal">1265</span>
+<span class="normal">1266</span>
+<span class="normal">1267</span>
+<span class="normal">1268</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_shcounts_shcells</span><span class="p">(</span><span class="n">SubhaloGrNr</span><span class="p">,</span> <span class="n">hlength</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns the id of the first subhalo and count of subhalos per halo.</span>
@@ -17168,19 +17278,7 @@ of the dtype is used.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1359</span>
-<span class="normal">1360</span>
-<span class="normal">1361</span>
-<span class="normal">1362</span>
-<span class="normal">1363</span>
-<span class="normal">1364</span>
-<span class="normal">1365</span>
-<span class="normal">1366</span>
-<span class="normal">1367</span>
-<span class="normal">1368</span>
-<span class="normal">1369</span>
-<span class="normal">1370</span>
-<span class="normal">1371</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1371</span>
 <span class="normal">1372</span>
 <span class="normal">1373</span>
 <span class="normal">1374</span>
@@ -17394,7 +17492,19 @@ of the dtype is used.</p>
 <span class="normal">1582</span>
 <span class="normal">1583</span>
 <span class="normal">1584</span>
-<span class="normal">1585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">map_group_operation</span><span class="p">(</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
+<span class="normal">1587</span>
+<span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
+<span class="normal">1591</span>
+<span class="normal">1592</span>
+<span class="normal">1593</span>
+<span class="normal">1594</span>
+<span class="normal">1595</span>
+<span class="normal">1596</span>
+<span class="normal">1597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">map_group_operation</span><span class="p">(</span>
     <span class="n">func</span><span class="p">,</span>
     <span class="n">offsets</span><span class="p">,</span>
     <span class="n">lengths</span><span class="p">,</span>
@@ -17763,19 +17873,7 @@ of the dtype is used.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1292</span>
-<span class="normal">1293</span>
-<span class="normal">1294</span>
-<span class="normal">1295</span>
-<span class="normal">1296</span>
-<span class="normal">1297</span>
-<span class="normal">1298</span>
-<span class="normal">1299</span>
-<span class="normal">1300</span>
-<span class="normal">1301</span>
-<span class="normal">1302</span>
-<span class="normal">1303</span>
-<span class="normal">1304</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1304</span>
 <span class="normal">1305</span>
 <span class="normal">1306</span>
 <span class="normal">1307</span>
@@ -17827,7 +17925,19 @@ of the dtype is used.</p>
 <span class="normal">1353</span>
 <span class="normal">1354</span>
 <span class="normal">1355</span>
-<span class="normal">1356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">map_group_operation_get_chunkedges</span><span class="p">(</span>
+<span class="normal">1356</span>
+<span class="normal">1357</span>
+<span class="normal">1358</span>
+<span class="normal">1359</span>
+<span class="normal">1360</span>
+<span class="normal">1361</span>
+<span class="normal">1362</span>
+<span class="normal">1363</span>
+<span class="normal">1364</span>
+<span class="normal">1365</span>
+<span class="normal">1366</span>
+<span class="normal">1367</span>
+<span class="normal">1368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">map_group_operation_get_chunkedges</span><span class="p">(</span>
     <span class="n">lengths</span><span class="p">,</span>
     <span class="n">entry_nbytes_in</span><span class="p">,</span>
     <span class="n">entry_nbytes_out</span><span class="p">,</span>
@@ -17916,19 +18026,7 @@ of the dtype is used.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1263</span>
-<span class="normal">1264</span>
-<span class="normal">1265</span>
-<span class="normal">1266</span>
-<span class="normal">1267</span>
-<span class="normal">1268</span>
-<span class="normal">1269</span>
-<span class="normal">1270</span>
-<span class="normal">1271</span>
-<span class="normal">1272</span>
-<span class="normal">1273</span>
-<span class="normal">1274</span>
-<span class="normal">1275</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1275</span>
 <span class="normal">1276</span>
 <span class="normal">1277</span>
 <span class="normal">1278</span>
@@ -17942,7 +18040,19 @@ of the dtype is used.</p>
 <span class="normal">1286</span>
 <span class="normal">1287</span>
 <span class="normal">1288</span>
-<span class="normal">1289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">memorycost_limiter</span><span class="p">(</span><span class="n">cost_memory</span><span class="p">,</span> <span class="n">cost_cpu</span><span class="p">,</span> <span class="n">list_chunkedges</span><span class="p">,</span> <span class="n">cost_memory_max</span><span class="p">):</span>
+<span class="normal">1289</span>
+<span class="normal">1290</span>
+<span class="normal">1291</span>
+<span class="normal">1292</span>
+<span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span>
+<span class="normal">1296</span>
+<span class="normal">1297</span>
+<span class="normal">1298</span>
+<span class="normal">1299</span>
+<span class="normal">1300</span>
+<span class="normal">1301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">memorycost_limiter</span><span class="p">(</span><span class="n">cost_memory</span><span class="p">,</span> <span class="n">cost_cpu</span><span class="p">,</span> <span class="n">list_chunkedges</span><span class="p">,</span> <span class="n">cost_memory_max</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""If a chunk too memory expensive, split into equal cpu expense operations."""</span>
     <span class="n">list_chunkedges_new</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">chunkedges</span> <span class="ow">in</span> <span class="n">list_chunkedges</span><span class="p">:</span>
@@ -18126,19 +18236,7 @@ of the dtype is used.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/scida/customs/arepo/dataset.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span>
-<span class="normal">948</span>
-<span class="normal">949</span>
-<span class="normal">950</span>
-<span class="normal">951</span>
-<span class="normal">952</span>
-<span class="normal">953</span>
-<span class="normal">954</span>
-<span class="normal">955</span>
-<span class="normal">956</span>
-<span class="normal">957</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">957</span>
 <span class="normal">958</span>
 <span class="normal">959</span>
 <span class="normal">960</span>
@@ -18168,7 +18266,19 @@ of the dtype is used.</p>
 <span class="normal">984</span>
 <span class="normal">985</span>
 <span class="normal">986</span>
-<span class="normal">987</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">wrap_func_scalar</span><span class="p">(</span>
+<span class="normal">987</span>
+<span class="normal">988</span>
+<span class="normal">989</span>
+<span class="normal">990</span>
+<span class="normal">991</span>
+<span class="normal">992</span>
+<span class="normal">993</span>
+<span class="normal">994</span>
+<span class="normal">995</span>
+<span class="normal">996</span>
+<span class="normal">997</span>
+<span class="normal">998</span>
+<span class="normal">999</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">wrap_func_scalar</span><span class="p">(</span>
     <span class="n">func</span><span class="p">,</span>
     <span class="n">offsets_in_chunks</span><span class="p">,</span>
     <span class="n">lengths_in_chunks</span><span class="p">,</span>
@@ -28751,7 +28861,7 @@ information about the datasets and groups.</p>
         <span class="n">path</span><span class="p">,</span>
         <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
         <span class="n">virtualcache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">overwritecache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">overwrite_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">fileprefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
         <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
@@ -28767,7 +28877,7 @@ information about the datasets and groups.</p>
 <span class="sd">            Chunksize for dask arrays.</span>
 <span class="sd">        virtualcache: bool</span>
 <span class="sd">            Whether to use virtual caching.</span>
-<span class="sd">        overwritecache: bool</span>
+<span class="sd">        overwrite_cache: bool</span>
 <span class="sd">            Whether to overwrite existing cache.</span>
 <span class="sd">        fileprefix: str</span>
 <span class="sd">            Prefix for files to scan for.</span>
@@ -28785,7 +28895,7 @@ information about the datasets and groups.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunksize</span> <span class="o">=</span> <span class="n">chunksize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">virtualcache</span> <span class="o">=</span> <span class="n">virtualcache</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">overwritecache</span> <span class="o">=</span> <span class="n">overwritecache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span> <span class="o">=</span> <span class="n">overwrite_cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">withunits</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Let's find the data and metadata for the object at 'path'</span>
@@ -28797,7 +28907,7 @@ information about the datasets and groups.</p>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Specified path '</span><span class="si">%s</span><span class="s2">' does not exist."</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="n">loadkwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">overwritecache</span><span class="p">,</span>
+            <span class="n">overwrite_cache</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span><span class="p">,</span>
             <span class="n">fileprefix</span><span class="o">=</span><span class="n">fileprefix</span><span class="p">,</span>
             <span class="n">virtualcache</span><span class="o">=</span><span class="n">virtualcache</span><span class="p">,</span>
             <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">snap</span><span class="o">=</span><span class="bp">self</span><span class="p">),</span>
@@ -29230,7 +29340,7 @@ information about the datasets and groups.</p>
 
 
 <h4 id="scida.interface.BaseDataset.__init__" class="doc doc-heading">
-          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="s1">'auto'</span><span class="p">,</span> <span class="n">virtualcache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwritecache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fileprefix</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="s1">'auto'</span><span class="p">,</span> <span class="n">virtualcache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fileprefix</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h4>
 
@@ -29292,7 +29402,7 @@ information about the datasets and groups.</p>
           </td>
         </tr>
         <tr>
-          <td><code>overwritecache</code></td>
+          <td><code>overwrite_cache</code></td>
           <td>
           </td>
           <td>
@@ -29427,7 +29537,7 @@ information about the datasets and groups.</p>
     <span class="n">path</span><span class="p">,</span>
     <span class="n">chunksize</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
     <span class="n">virtualcache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">overwritecache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">overwrite_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">fileprefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
     <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span>
@@ -29443,7 +29553,7 @@ information about the datasets and groups.</p>
 <span class="sd">        Chunksize for dask arrays.</span>
 <span class="sd">    virtualcache: bool</span>
 <span class="sd">        Whether to use virtual caching.</span>
-<span class="sd">    overwritecache: bool</span>
+<span class="sd">    overwrite_cache: bool</span>
 <span class="sd">        Whether to overwrite existing cache.</span>
 <span class="sd">    fileprefix: str</span>
 <span class="sd">        Prefix for files to scan for.</span>
@@ -29461,7 +29571,7 @@ information about the datasets and groups.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">chunksize</span> <span class="o">=</span> <span class="n">chunksize</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">virtualcache</span> <span class="o">=</span> <span class="n">virtualcache</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">overwritecache</span> <span class="o">=</span> <span class="n">overwritecache</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span> <span class="o">=</span> <span class="n">overwrite_cache</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">withunits</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"units"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># Let's find the data and metadata for the object at 'path'</span>
@@ -29473,7 +29583,7 @@ information about the datasets and groups.</p>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Specified path '</span><span class="si">%s</span><span class="s2">' does not exist."</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
     <span class="n">loadkwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">overwrite</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">overwritecache</span><span class="p">,</span>
+        <span class="n">overwrite_cache</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span><span class="p">,</span>
         <span class="n">fileprefix</span><span class="o">=</span><span class="n">fileprefix</span><span class="p">,</span>
         <span class="n">virtualcache</span><span class="o">=</span><span class="n">virtualcache</span><span class="p">,</span>
         <span class="n">derivedfields_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">snap</span><span class="o">=</span><span class="bp">self</span><span class="p">),</span>
@@ -33956,7 +34066,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">514</span>
 <span class="normal">515</span>
 <span class="normal">516</span>
-<span class="normal">517</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DatasetSeries</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DatasetSeries</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A container for collections of dataset instances</span>
 
 <span class="sd">    Attributes</span>
@@ -34006,6 +34122,8 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadatafile</span> <span class="o">=</span> <span class="n">return_cachefile_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span> <span class="s2">"data.json"</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="n">lazy</span>
+        <span class="k">if</span> <span class="n">overwrite_cache</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadatafile</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadatafile</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -34014,11 +34132,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
         <span class="n">dec</span> <span class="o">=</span> <span class="n">delay_init</span>  <span class="c1"># lazy loading</span>
 
         <span class="c1"># Catch Mixins and create type:</span>
-        <span class="n">mixins</span> <span class="o">=</span> <span class="n">interface_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"mixins"</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">ikw</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">overwrite_cache</span><span class="o">=</span><span class="n">overwrite_cache</span><span class="p">)</span>
+        <span class="n">ikw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">interface_kwargs</span><span class="p">)</span>
+        <span class="n">mixins</span> <span class="o">=</span> <span class="n">ikw</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"mixins"</span><span class="p">,</span> <span class="p">[])</span>
         <span class="n">datasetclass</span> <span class="o">=</span> <span class="n">create_datasetclass_with_mixins</span><span class="p">(</span><span class="n">datasetclass</span><span class="p">,</span> <span class="n">mixins</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_cls</span> <span class="o">=</span> <span class="n">datasetclass</span>
 
-        <span class="n">gen</span> <span class="o">=</span> <span class="n">map_interface_args</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">)</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">map_interface_args</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span> <span class="o">**</span><span class="n">ikw</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">dec</span><span class="p">(</span><span class="n">datasetclass</span><span class="p">)(</span><span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">gen</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -34027,7 +34147,9 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
                 <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">))</span>
             <span class="p">):</span>
-                <span class="n">rawmeta</span> <span class="o">=</span> <span class="n">load_metadata</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">choose_prefix</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">rawmeta</span> <span class="o">=</span> <span class="n">load_metadata</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">choose_prefix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_cachefile</span><span class="o">=</span><span class="ow">not</span> <span class="p">(</span><span class="n">overwrite_cache</span><span class="p">)</span>
+                <span class="p">)</span>
                 <span class="c1"># class method does not initiate obj.</span>
                 <span class="n">dct</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">_clean_metadata_from_raw</span><span class="p">(</span><span class="n">rawmeta</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">dct</span>
@@ -34569,19 +34691,19 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
-<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return dataset by index.</span>
 <span class="sd">    Parameters</span>
@@ -34784,7 +34906,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
-<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span>
     <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span>
@@ -34819,6 +34947,8 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
     <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_metadatafile</span> <span class="o">=</span> <span class="n">return_cachefile_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span> <span class="s2">"data.json"</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="n">lazy</span>
+    <span class="k">if</span> <span class="n">overwrite_cache</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadatafile</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadatafile</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -34827,11 +34957,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
     <span class="n">dec</span> <span class="o">=</span> <span class="n">delay_init</span>  <span class="c1"># lazy loading</span>
 
     <span class="c1"># Catch Mixins and create type:</span>
-    <span class="n">mixins</span> <span class="o">=</span> <span class="n">interface_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"mixins"</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">ikw</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">overwrite_cache</span><span class="o">=</span><span class="n">overwrite_cache</span><span class="p">)</span>
+    <span class="n">ikw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">interface_kwargs</span><span class="p">)</span>
+    <span class="n">mixins</span> <span class="o">=</span> <span class="n">ikw</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"mixins"</span><span class="p">,</span> <span class="p">[])</span>
     <span class="n">datasetclass</span> <span class="o">=</span> <span class="n">create_datasetclass_with_mixins</span><span class="p">(</span><span class="n">datasetclass</span><span class="p">,</span> <span class="n">mixins</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_cls</span> <span class="o">=</span> <span class="n">datasetclass</span>
 
-    <span class="n">gen</span> <span class="o">=</span> <span class="n">map_interface_args</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">)</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">map_interface_args</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span> <span class="o">**</span><span class="n">ikw</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">dec</span><span class="p">(</span><span class="n">datasetclass</span><span class="p">)(</span><span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">gen</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -34840,7 +34972,9 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
             <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">))</span>
         <span class="p">):</span>
-            <span class="n">rawmeta</span> <span class="o">=</span> <span class="n">load_metadata</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">choose_prefix</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">rawmeta</span> <span class="o">=</span> <span class="n">load_metadata</span><span class="p">(</span>
+                <span class="n">path</span><span class="p">,</span> <span class="n">choose_prefix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_cachefile</span><span class="o">=</span><span class="ow">not</span> <span class="p">(</span><span class="n">overwrite_cache</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="c1"># class method does not initiate obj.</span>
             <span class="n">dct</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">_clean_metadata_from_raw</span><span class="p">(</span><span class="n">rawmeta</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">dct</span>
@@ -34934,13 +35068,7 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
 <span class="normal">167</span>
 <span class="normal">168</span>
 <span class="normal">169</span>
@@ -34948,7 +35076,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span>
-<span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Register datasetseries subclass in registry.</span>
 <span class="sd">    Parameters</span>
@@ -35011,14 +35145,14 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Return number of datasets in series.</span>
 
 <span class="sd">    Returns</span>
@@ -35074,13 +35208,7 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
 <span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
@@ -35088,7 +35216,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return a string representation of the datasetseries object.</span>
 
@@ -35236,13 +35370,7 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span>
@@ -35267,7 +35395,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">from_directory</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">interface_args</span><span class="p">,</span> <span class="n">datasetclass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"DatasetSeries"</span><span class="p">:</span>
@@ -35417,13 +35551,7 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
@@ -35520,7 +35648,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span>
-<span class="normal">439</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dataset</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -35672,13 +35806,7 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
@@ -35712,7 +35840,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Print information about this datasetseries.</span>
 
@@ -35860,13 +35994,7 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">290</span>
 <span class="normal">291</span>
 <span class="normal">292</span>
 <span class="normal">293</span>
@@ -35877,7 +36005,13 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span>
-<span class="normal">301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">validate_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CandidateStatus</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Check whether a given path is a valid path for this dataseries class.</span>
@@ -35930,19 +36064,19 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
             <details class="quote">
               <summary>Source code in <code>src/scida/series.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">520</span>
-<span class="normal">521</span>
-<span class="normal">522</span>
-<span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">526</span>
 <span class="normal">527</span>
 <span class="normal">528</span>
 <span class="normal">529</span>
 <span class="normal">530</span>
 <span class="normal">531</span>
-<span class="normal">532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DirectoryCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DirectoryCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A catalog consisting of interface instances contained in a directory."""</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
@@ -36017,16 +36151,16 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">529</span>
 <span class="normal">530</span>
 <span class="normal">531</span>
-<span class="normal">532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialize a directory catalog.</span>
 
@@ -36071,20 +36205,20 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
             <details class="quote">
               <summary>Source code in <code>src/scida/series.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">541</span>
 <span class="normal">542</span>
 <span class="normal">543</span>
 <span class="normal">544</span>
 <span class="normal">545</span>
 <span class="normal">546</span>
 <span class="normal">547</span>
-<span class="normal">548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HomogeneousSeries</span><span class="p">(</span><span class="n">DatasetSeries</span><span class="p">):</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HomogeneousSeries</span><span class="p">(</span><span class="n">DatasetSeries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Series consisting of same-type data sets."""</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">):</span>
@@ -36173,17 +36307,17 @@ Subclasses are automatically registered through <strong>init_subclass</strong></
 
           <details class="quote">
             <summary>Source code in <code>src/scida/series.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">544</span>
 <span class="normal">545</span>
 <span class="normal">546</span>
 <span class="normal">547</span>
-<span class="normal">548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">):</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialize a homogeneous series.</span>
 <span class="sd">    Parameters</span>
