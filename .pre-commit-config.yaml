@@ -22,12 +22,11 @@ repos:
     rev: 0.6.0
     hooks:
       - id: nbstripout
-        exclude: ^(docs/notebooks/static/)
-          #exclude: | # if we want to exclude multiple directories
-          #      (?x)^(
-          #          docs/notebooks/static/.*|
-          #          docs/EXAMPLE2/.*
-          #      )$
+        exclude: |
+            (?x)^(
+                docs/cookbooks/.*|
+                docs/notebooks/static/.*
+            )$
   - repo: local
     hooks:
       - id: black
