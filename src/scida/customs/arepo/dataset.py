@@ -120,7 +120,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             if not np.isclose(z_catalog, z_snap):
                 raise ValueError(
                     "Redshift mismatch between snapshot and catalog: "
-                    f"{z_snap:.2f} vs {z_catalog:.2f}"
+                    f"{z_snap:.3f} vs {z_catalog:.3f}"
                 )
 
         # merge data

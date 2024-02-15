@@ -492,7 +492,7 @@ def _cachefile_available_in_path(
     """
     try:
         chnkfiles = _get_chunkedfiles(path, fileprefix=fileprefix)
-    except ValueError:
+    except (IndexError, ValueError):
         return False
     if len(chnkfiles) == 0:
         return False
@@ -595,6 +595,8 @@ def _get_chunkedfiles(
     files = np.array(files)
     prfxs = sorted([f.split(".")[0] for f in files])
     if fileprefix is None:
+        if len(prfxs) == 0:
+            return []
         prfx = prfxs[0]
         prfxs = [prfx]
         files = np.array([f for f in files if f.startswith(prfx)])

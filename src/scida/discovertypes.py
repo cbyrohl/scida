@@ -25,7 +25,10 @@ def _determine_mixins(path=None, metadata_raw=None):
     mixins = []
     assert not (path is None and metadata_raw is None)
     if metadata_raw is None:
-        metadata_raw = load_metadata(path, fileprefix=None)
+        try:
+            metadata_raw = load_metadata(path, fileprefix=None)
+        except (IndexError, ValueError):
+            metadata_raw = {}  # cannot get metadata, so let's assume we have none
     z = metadata_raw.get("/Header", {}).get("Redshift", None)
     if z is not None:
         mixins.append(CosmologyMixin)
