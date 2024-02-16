@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.3.0] - 2024-02-16
+
+### Added
+
+- various documentation improvements, including API cleanup, cookbooks and developer guide (PR #123, #136, #137, #145, #153; furthermore fixes #147, #148, #149, #151)
+- improved docstring coverage (PR #121)
+- more default units for gadget-style snapshots (PR #96)
+- unit inference reporting (PR #130)
+- tolerance for get_dataset (PR #132)
+- overwrite_cache for load of series (PR #152)
+
+### Fixed
+
+- recover from corrupt cache (PR #95)
+- various documentation fixes (PR #120, #107, #112, #114, #122, #124, #126, #127)
+- testing of markdown docs (PR #128, #135, #146)
+- some unit support fix (PR #131)
+
+
 ## [0.2.4] - 2023-08-24
 
 ### Added
