@@ -106,7 +106,7 @@ def get_unitstr_from_attrs(attrs: dict) -> Optional[str]:
                 pass
         if unitstr is not None and unitstr != desc and unitstr != "None":
             unitstr = unitstr.strip("'")
-        unitstr = unitstr.lower()
+            unitstr = unitstr.lower()
 
     return unitstr
 
