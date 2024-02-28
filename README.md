@@ -1,6 +1,7 @@
 # scida
 
 ![test status](https://github.com/cbyrohl/scida/actions/workflows/tests.yml/badge.svg)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.06064/status.svg)](https://doi.org/10.21105/joss.06064)
 
 scida is an out-of-the-box analysis tool for large scientific datasets. It primarily supports the astrophysics community, focusing on cosmological and galaxy formation simulations using particles or unstructured meshes, as well as large observational datasets.
 This tool uses dask, allowing analysis to scale up from your personal computer to HPC resources and the cloud.
