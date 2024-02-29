@@ -6,7 +6,7 @@
     On the command line, you can download and extract the dataset with:
 
     ``` bash
-    wget https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl=1 -O snapshot.tar.gz
+    wget "https://heibox.uni-heidelberg.de/f/dc65a8c75220477eb62d/?dl=1" -O snapshot.tar.gz
     tar -xvf snapshot.tar.gz
     ```
     The snapshot will be extracted into a folder called *snapdir_030*.
