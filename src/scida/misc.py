@@ -117,7 +117,10 @@ def return_cachefile_path(fname: str) -> Optional[str]:
     fp = os.path.expanduser(fp)
     bp = os.path.dirname(fp)
     if not os.path.exists(bp):
-        os.mkdir(bp)
+        try:
+            os.mkdir(bp)
+        except FileExistsError:
+            pass  # can happen due to parallel access
     return fp
 
 
