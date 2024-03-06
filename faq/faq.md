@@ -24,6 +24,10 @@ field = field.magnitude * units
 ds.data['PartType0']["Masses2"] = field
 ```
 
+> "AttributeError: Series do not have 'data' attribute. Load a dataset from series.get_dataset()."
+
+You most likely invoked the [load](https://scida.io/api/base_api/#convenience-functions) function prior to accessing the data attribute. Depending on the path passed to the load function, it returns an instance of a DataSeries or Dataset. DataSeries are collections of Datasets, and do not have the ".data" attribute. You can either access a dataset of the series (e.g. "sim.get_dataset(0)" where 0 is the index of the dataset to load), or directly load the dataset by specifying the correct subdirectory. You can subsequently call the data attribute on the dataset.
+
 
 ## Extending existing datasets
 > How do I add custom fields (that are not derived fields) to my existing dataset?

@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -59,17 +59,15 @@
     
     
    <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
-        html.glightbox-open { overflow: initial; height: 100%; }
-        .gslide-title { margin-top: 0px; user-select: text; }
-        .gslide-desc { color: #666; user-select: text; }
-        .gslide-image img { background: white; }
-        
-            .gscrollbar-fixer { padding-right: 15px; }
-            .gdesc-inner { font-size: 0.75rem; }
-            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
-            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
-            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
-            </style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
   
   
     <body dir="ltr">
@@ -1095,6 +1093,10 @@ you could use the following workaround:</p>
 </span><span class="hll"><span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">magnitude</span> <span class="o">*</span> <span class="n">units</span>
 </span><span class="n">ds</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">'PartType0'</span><span class="p">][</span><span class="s2">"Masses2"</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span>
 </code></pre></div>
+<blockquote>
+<p>"AttributeError: Series do not have 'data' attribute. Load a dataset from series.get_dataset()."</p>
+</blockquote>
+<p>You most likely invoked the <a href="https://scida.io/api/base_api/#convenience-functions">load</a> function prior to accessing the data attribute. Depending on the path passed to the load function, it returns an instance of a DataSeries or Dataset. DataSeries are collections of Datasets, and do not have the ".data" attribute. You can either access a dataset of the series (e.g. "sim.get_dataset(0)" where 0 is the index of the dataset to load), or directly load the dataset by specifying the correct subdirectory. You can subsequently call the data attribute on the dataset.</p>
 <h2 id="extending-existing-datasets">Extending existing datasets</h2>
 <blockquote>
 <p>How do I add custom fields (that are not derived fields) to my existing dataset?</p>
@@ -1172,10 +1174,10 @@ as so-called <a href="https://en.wikipedia.org/wiki/Mixin">Mixins</a> to the dat
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.code.copy", "navigation.sections", "navigation.indexes"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.code.copy", "navigation.sections", "navigation.indexes"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../javascripts/mathjax.js"></script>
       
