@@ -40,7 +40,7 @@ data:
             InitCondFile: /draco/ptmp/dnelson/InitialConditions/L35n270TNG/output/ICs
   TNG100:
       <<: *tng_params
-      alias:
+      aliases:
         - IllustrisTNG100
         - TNG100-1
       identifiers:
@@ -59,7 +59,7 @@ data:
 
   TNG300:
       <<: *tng_params
-      alias:
+      aliases:
         - IllustrisTNG300
         - TNG300-1
       identifiers:

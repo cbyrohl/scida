@@ -337,11 +337,10 @@ def get_dataset_by_name(name: str) -> Optional[str]:
     else:
         # could still be an alias
         for k, v in datasets.items():
-            if "aliases" not in v:
-                continue
-            if name in v["aliases"]:
-                dname = k
-                break
+            if "aliases" in v:
+                if name in v["aliases"]:
+                    dname = k
+                    break
     return dname
 
 
