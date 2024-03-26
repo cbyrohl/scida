@@ -56,6 +56,32 @@ ds2 = load("./snapdir_030")
 ds.data['PartType0']["NewDensity"] = ds2.data['PartType0']["Density"]
 ```
 
+## What libraries is scida built on?
+
+Scida strongly relies on the following libraries:
+- [dask](https://dask.org/): For parallel computing
+- [pint](https://pint.readthedocs.io/en/stable): For handling units
+
+Data support is provided, among others, by:
+
+- [h5py](https://www.h5py.org/): For reading HDF5 files
+- [zarr](https://zarr.readthedocs.io/en/stable/): For reading Zarr files
+
+Visualization in the examples is commonly done with:
+
+- [matplotlib](https://matplotlib.org/): For plotting
+- [bokeh](https://docs.bokeh.org/en/latest/index.html): For interactive plotting
+- [holoviz](https://holoviz.org/): high-level interactive visualization
+
+The original repository structure was inspired by the following templates:
+
+- [wolt template](https://github.com/woltapp/wolt-python-package-cookiecutter)
+- [hypermodern python template](https://github.com/cjolowicz/cookiecutter-hypermodern-python)
+
+These lists are not exhaustive. Also see the [pyproject.toml](https://github.com/cbyrohl/scida/blob/main/pyproject.toml)
+file for a list of dependencies.
+
+
 
 ## Misc
 > How does load() determine the right type of dataset/series to load?
