@@ -179,7 +179,10 @@ def extract_units_from_attrs(
         return "none"
     if unitstr is not None:
         has_expl_units = True
-        unit *= str_to_unit(unitstr, ureg)
+        ures = str_to_unit(unitstr, ureg)
+        if ures == "none":
+            return "none"
+        unit *= ures
         return unit
 
     if not has_expl_units and not has_convfactor:
