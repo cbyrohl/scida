@@ -1,6 +1,7 @@
 """
 Defines a series representing a Gadget-style simulation.
 """
+
 import os
 import pathlib
 from pathlib import Path
@@ -55,7 +56,11 @@ class GadgetStyleSimulation(DatasetSeries):
         for k in keys:
             subpath = subpath_dict.get(k, "output")
             sp = p / subpath
-
+            # by default, we assume that we are given a folder that has an "output" subfolder.
+            # this is not always the case - for example for subboxes.
+            # in such case, we attempt to continue with the given path.
+            if not sp.exists():
+                sp = p
             prefix = _get_snapshotfolder_prefix(sp)
             prefix = prefix_dict.get(k, prefix)
             if not sp.exists():
@@ -65,6 +70,8 @@ class GadgetStyleSimulation(DatasetSeries):
             fns = os.listdir(sp)
             prfxs = set([f.split("_")[0] for f in fns if f.startswith(prefix)])
             if len(prfxs) == 0:
+                if k != "paths":
+                    continue  # do not require optional sources
                 raise ValueError(
                     "Could not find any files with prefix '%s' in '%s'." % (prefix, sp)
                 )
