@@ -84,6 +84,11 @@ class GadgetStyleSimulation(DatasetSeries):
                 for p in paths
                 if str(p).split("_")[-1].isdigit() or str(p).endswith(".hdf5")
             ]
+            # attempt additional sorting in case zfill not used
+            try:
+                paths = sorted(paths, key=lambda x: int(str(x).split("_")[-1]))
+            except:  # noqa
+                pass
             paths_dict[k] = paths
 
         # make sure we have the same amount of paths respectively
