@@ -34,6 +34,7 @@ jobs:
 
       - name: Upgrade pip
         run: |
+          pwd
           pip install --constraint=.github/workflows/constraints.txt pip
           pip --version
 
@@ -48,6 +49,7 @@ jobs:
 
       - name: Install Poetry
         run: |
+          pwd
           pipx install --pip-args=--constraint=.github/workflows/constraints.txt poetry
           poetry --version
 
