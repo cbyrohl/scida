@@ -2,6 +2,7 @@
 Defines a series representing a Gadget-style simulation.
 """
 
+import logging
 import os
 import pathlib
 from pathlib import Path
@@ -10,6 +11,8 @@ from typing import Dict, Optional
 from scida.discovertypes import _determine_mixins, _determine_type
 from scida.interface import create_datasetclass_with_mixins
 from scida.series import DatasetSeries
+
+log = logging.getLogger(__name__)
 
 
 class GadgetStyleSimulation(DatasetSeries):
@@ -93,12 +96,26 @@ class GadgetStyleSimulation(DatasetSeries):
 
         # make sure we have the same amount of paths respectively
         length = None
+        mismatch_length = False
         for k in paths_dict.keys():
             paths = paths_dict[k]
             if length is None:
                 length = len(paths)
             else:
-                assert length == len(paths)
+                if length != len(paths):
+                    mismatch_length = True
+        if mismatch_length:
+            msg = """Mismatch between number of groups and snapshots.
+                     Only loading groups that have a snapshot associated."""
+            log.info(msg)
+            # extract ids
+            paths = paths_dict["paths"]
+            ids = [int(str(p).split("_")[-1]) for p in paths]
+            for k in paths_dict.keys():
+                if k == "paths":
+                    continue
+                paths = paths_dict[k]
+                paths_dict[k] = [p for p in paths if int(str(p).split("_")[-1]) in ids]
 
         paths = paths_dict.pop("paths", None)
         if paths is None:
