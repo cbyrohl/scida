@@ -1,7 +1,7 @@
 # Configuration
 
 ## Main configuration file
-The main configuration file is located at `~/.scida/config.yaml`. If this file does not exist, it is created with the
+The main configuration file is located at `~/.config/scida/config.yaml`. If this file does not exist, it is created with the
 first use of scida. The file is using the YAML format.
 The following options are available:
 
@@ -12,7 +12,7 @@ The following options are available:
 
 `cache_path`
 
-: Sets the folder to use as a cache for scida. Recommended to be moved out of the home directory to a fast disk.
+: Sets the folder to use as a cache for scida. Recommended to be located on a fast disk.
 
 `datafolders`
 
