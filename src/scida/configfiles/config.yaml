@@ -1,4 +1,4 @@
-# example for scida config. copy to ~/.scida.yaml and modify accordingly
+# example for scida config. copy to ~/.config/scida/config.yaml and modify accordingly
 ---
 
 copied_default: True  # if this is set, a warning is printed as the default config has not been adjusted
