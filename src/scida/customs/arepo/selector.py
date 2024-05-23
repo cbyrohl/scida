@@ -2,7 +2,7 @@
 Selector for ArepoSnapshot
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from scida.customs.arepo.helpers import grp_type_str
 from scida.interface import Selector
@@ -20,7 +20,7 @@ class ArepoSelector(Selector):
         Initialize the selector.
         """
         super().__init__()
-        self.keys = ["haloID", "subhaloID", "unbound"]
+        self.keys = ["haloID", "subhaloID", "localSubhaloID", "unbound"]
 
     def prepare(self, *args, **kwargs) -> None:
         if all([kwargs.get(k, None) is None for k in self.keys]):
@@ -28,6 +28,7 @@ class ArepoSelector(Selector):
         snap: ArepoSnapshot = args[0]
         halo_id = kwargs.get("haloID", None)
         subhalo_id = kwargs.get("subhaloID", None)
+        subhalo_id_local: Optional[int] = kwargs.get("localSubhaloID", None)
         unbound = kwargs.get("unbound", None)
 
         if halo_id is not None and subhalo_id is not None:
@@ -38,10 +39,25 @@ class ArepoSelector(Selector):
                 "Cannot select haloID/subhaloID and unbound particles at the same time."
             )
 
+        if subhalo_id_local is not None and subhalo_id is not None:
+            raise ValueError(
+                "Cannot select for localSubhaloID and subhaloID at the same time."
+            )
+
         if snap.catalog is None:
             raise ValueError("Cannot select for haloID without catalog loaded.")
 
         # select for halo
+        if subhalo_id_local is not None:
+            if halo_id is None:
+                raise ValueError("Cannot select for localSubhaloID without haloID.")
+            # compute subhalo_id from subhalo_id_local
+            shid_of_first_sh = snap.data["Group"]["GroupFirstSub"]
+            nshs = int(snap.data["Group"]["GroupNsubs"][halo_id].compute())
+            if subhalo_id_local >= nshs:
+                raise ValueError("localSubhaloID exceeds number of subhalos in halo.")
+            subhalo_id = shid_of_first_sh[halo_id] + subhalo_id_local
+
         idx = subhalo_id if subhalo_id is not None else halo_id
         objtype = "subhalo" if subhalo_id is not None else "halo"
         if idx is not None:

@@ -1,5 +1,6 @@
 .PHONY: all version localdocs publicdocs clean
 
+# version format: major.minor.patch; to bump patch, do "make version v=patch"
 version:
 	@poetry version $(v)
 	@git add pyproject.toml

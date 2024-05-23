@@ -2,6 +2,7 @@ import logging
 
 import dask.array as da
 import numpy as np
+import pytest
 
 from scida import load
 from scida.customs.arepo.dataset import part_type_num
@@ -15,6 +16,7 @@ def test_selector(testdatapath):
     hid = 41
     obj = load(testdatapath, units=False)
     d = obj.return_data(haloID=hid)
+    hid41_len = d[parttype]["GroupID"].shape[0]
     assert da.all(d[parttype]["GroupID"] == hid).compute()
 
     # test selecting by subhalo id
@@ -23,6 +25,21 @@ def test_selector(testdatapath):
     p0_shid = d[parttype]["SubhaloID"]
     assert p0_shid.shape[0] == obj.get_subhalolengths(parttype)[shid]
     assert da.all(p0_shid == shid).compute()
+
+    # test selecting by local subhalo id
+    # -- test a valid hid+local_shid combination
+    local_shid = 1
+    hid = 41
+    nshs = int(obj.data["Group"]["GroupNsubs"][hid].compute())
+    assert nshs > 0  # this is just a requirement for our selected test halo
+    d = obj.return_data(haloID=hid, localSubhaloID=local_shid)
+    shid = obj.data["Group"]["GroupFirstSub"][hid] + local_shid
+    p0_shid = d[parttype]["SubhaloID"]
+    assert p0_shid.shape[0] == obj.get_subhalolengths(parttype)[shid]
+    assert p0_shid.shape[0] < hid41_len
+    # -- now test an invalid hid+local_shid combination
+    local_shid = nshs  # does not exist by construction
+    pytest.raises(ValueError, obj.return_data, haloID=hid, localSubhaloID=local_shid)
 
     # test selecting by unbound gas
     d = obj.return_data(unbound=True)

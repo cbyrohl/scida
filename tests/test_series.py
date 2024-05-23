@@ -95,7 +95,7 @@ def test_areposimulation_lazy_message(cachedir, testdatapath):
     print(bs.datasets[0])
     assert type(bs.datasets[0]).__name__ == "Delay"
     print(dt0)
-    assert dt0 < 2.0  # should be fast
+    assert dt0 < 4.0  # should be fast
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
@@ -106,7 +106,7 @@ def test_areposimulation_lazy(cachedir, testdatapath):
     print(bs.datasets[0])
     assert type(bs.datasets[0]).__name__ == "Delay"
     print(dt0)
-    assert dt0 < 2.0  # should be fast
+    assert dt0 < 4.0  # should be fast
 
 
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])

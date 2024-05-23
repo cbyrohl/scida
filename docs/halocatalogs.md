@@ -78,6 +78,18 @@ data = ds.return_data(haloID=42)
 
 *data* will have the same structure as *ds.data* but restricted to particles of a given group.
 
+We can similarly restrict the data to a given subhalo by passing the *subhaloID* keyword instead of *haloID*:
+
+``` py
+data = ds.return_data(subhaloID=42)
+```
+
+Note that this is the global subhalo ID (i.e. the position within the Subhalo catalog) and not the local subhalo ID (i.e. the subhalo position within the group). If you want the latter, use the *localSubhaloID* field:
+
+``` py
+data = ds.return_data(haloID=1, localSubhaloID=3)
+```
+
 ### Applying to all groups in parallel
 
 In many cases, we do not want the particle data of an individual group, but we want to calculate some reduced statistic from the bound particles of each group. For this, we provide the *grouped* functionality. In the following we give a range of examples of its use.
