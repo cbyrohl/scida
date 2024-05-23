@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.3.2] - 2024-05-23
+
+### Added
+
+- for arepo snapshots, add local subhalo id selector (PR #163)
+- JOSS publication reference in readme (PR #159)
+- add new question to FAQ docs
+- move docs to scida.io
+
+### Fixed
+
+- bugfix for potentially wrong snapshot order for gadgetsyle series
+- gh pipeline fix required due to new abs path requirement in some pip calls (PR #161)
+- update outdated config path in config (PR #162)
+- fix wget command in docs (#156)
+- some fixes to unit discovery
+- fix on parallel cache file access
+
+## [0.3.1] - 2024-02-19
+
+- Cut a new release for zenodo record as required for JOSS publication
+
 ## [0.3.0] - 2024-02-16
 
 ### Added
