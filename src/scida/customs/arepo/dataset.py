@@ -652,9 +652,28 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             else:
                 arrdict = dict(field=self.data[parttype][fields])
                 inputfields = [fields]
-        elif isinstance(fields, da.Array) or isinstance(fields, pint.Quantity):
+        elif isinstance(fields, da.Array):
             arrdict = dict(daskarr=fields)
             inputfields = [fields.name]
+        elif isinstance(fields, pint.Quantity):
+            field_mag = fields.magnitude
+            if isinstance(field_mag, da.Array):
+                arrdict = dict(daskarr=fields)
+                inputfields = [field_mag.name]
+            elif isinstance(field_mag, np.ndarray):
+                field_u = fields.units
+                arrdict = dict(
+                    daskarr=da.from_array(field_mag, chunks="auto") * field_u
+                )
+                inputfields = ["field"]
+            else:
+                raise ValueError(
+                    "Unknown input type '%s' decorated with pint quantity."
+                    % type(field_mag)
+                )
+        elif isinstance(fields, np.ndarray):
+            arrdict = dict(daskarr=da.from_array(fields, chunks="auto"))
+            inputfields = ["field"]
         elif isinstance(fields, list):
             arrdict = {k: self.data[parttype][k] for k in fields}
             inputfields = fields
@@ -664,6 +683,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             inputfields = list(arrdict.keys())
         else:
             raise ValueError("Unknown input type '%s'." % type(fields))
+        check_shape_plausability = True
+        if check_shape_plausability and "Coordinates" in self.data[parttype]:
+            shape0_ref = self.data[parttype]["Coordinates"].shape[0]
+            for k, arr in arrdict.items():
+                if arr.shape[0] != shape0_ref:
+                    raise ValueError(
+                        f"Shape mismatch: {k} has shape {arr.shape} while Coordinates has shape {shape0_ref}. "
+                        f"Check parttype passed to grouped()?"
+                    )
         objtype = grp_type_str(objtype)
         if objtype == "halo":
             offsets = self.get_groupoffsets(parttype=parttype)

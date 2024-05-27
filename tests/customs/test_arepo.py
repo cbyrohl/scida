@@ -282,8 +282,47 @@ def test_interface_groupedoperations(testdatapath):
 
     # Test subhalos
     nsubs = snp.data["Subhalo"]["SubhaloMass"].shape[0]
-    m = snp.grouped("Masses", objtype="subhalos").sum().evaluate()
-    assert m.shape[0] == nsubs
+    sm = snp.grouped("Masses", objtype="subhalos").sum().evaluate()
+    # sh = snp.data["Subhalo"]
+    # sm_true = sh["SubhaloMass"].compute()
+    assert sm.shape[0] == nsubs
+
+    # check mass sum (halos)
+    h_bhmass = (
+        snp.grouped("BH_Mass", objtype="halos", parttype="PartType5").sum().evaluate()
+    )
+    h_bhmass_true = snp.data["Group"]["GroupBHMass"].compute()
+    v1, v2 = h_bhmass.magnitude, h_bhmass_true.magnitude
+    assert np.allclose(v1, v2)
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_interface_groupedoperations_subhalo(testdatapath):
+    snp = load(testdatapath)
+    # more subhalo tests
+    # check mass sum (subhalos)
+    sh_bhmass = (
+        snp.grouped("BH_Mass", objtype="subhalos", parttype="PartType5")
+        .sum()
+        .evaluate()
+    )
+    sh_bhmass_true = snp.data["Subhalo"]["SubhaloBHMass"].compute()
+    v1, v2 = sh_bhmass.magnitude, sh_bhmass_true.magnitude
+    assert np.allclose(v1, v2)
+
+    # most likely all black holes are in subhalos, thus we need another test that is more general
+    # (non-contiguous particles due to some particles belonging to halo "fluff" rather than a subhalo)
+    # check mass sum (dark matter for subhalos)
+    dmparticle_mass = snp.header["MassTable"][1] * snp.ureg("code_mass")
+    ones = np.ones(snp.data["PartType1"]["Coordinates"].shape[0]) * dmparticle_mass
+    sh_dmmass = (
+        snp.grouped(ones, objtype="subhalos", parttype="PartType1").sum().evaluate()
+    )
+    sh_dmmass_true = (
+        snp.data["Subhalo"]["SubhaloLenType"][:, 1].compute() * dmparticle_mass
+    )
+    v1, v2 = sh_dmmass.magnitude, sh_dmmass_true.magnitude
+    assert np.allclose(v1, v2)
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
