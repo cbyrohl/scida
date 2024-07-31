@@ -11,9 +11,10 @@ numpy = [
     {version = "^1.21", python = "<3.12"},
     {version = "^1.26", python = ">=3.12"}
 ]
+# need dask>2024.4.1 for py>=3.11.9 (https://github.com/dask/dask/pull/11035)
 dask = [{extras = ["array", "dataframe", "distributed"],
 	 version = ">=2023",
-         python = "<3.11.9"}, #https://github.com/dask/dask/pull/11035
+         python = "<3.11.9"},
         {extras = ["array", "dataframe", "distributed"],
 	 version = ">=2024.4.1",
          python = ">=3.11.9"}
