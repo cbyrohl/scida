@@ -15,18 +15,10 @@ on:
         default: 'false'
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      include_full_matrix: ${{ steps.condition_check.outputs.full_matrix }}
-    steps:
-      - id: condition_check
-        run: echo "full_matrix=$(echo ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true') }})" >> $GITHUB_ENV
   tests:
     name: ${{ matrix.session }} ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      needs: setup
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
@@ -34,11 +26,11 @@ jobs:
         python-version: ['3.10']
         include:
           - python-version: '3.9'
-            if: ${{ needs.setup.outputs.include_full_matrix }}
+            if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true') }}
           - python-version: '3.11'
-            if: ${{ needs.setup.outputs.include_full_matrix }}
+            if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true') }}
           - python-version: '3.12'
-            if: ${{ needs.setup.outputs.include_full_matrix }}
+            if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true') }}
     env:
       NOXSESSION: ${{ matrix.session }}
       FORCE_COLOR: "1"
