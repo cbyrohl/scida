@@ -7,6 +7,12 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+    inputs:
+      run_full_matrix:
+        description: 'Run the full matrix of Python versions'
+        required: false
+        default: 'false'
 
 jobs:
   tests:
@@ -15,9 +21,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest]
+        session: [tests]
+        python-version: [3.9, 3.10, 3.11, 3.12]
         include:
-          - { python: "3.10", os: "ubuntu-latest", session: "tests" }
-          #- { python: "3.9", os: "ubuntu-latest", session: "tests" }
+          - python-version: 3.9
+            full_matrix: true # true => only run on full matrix request
+          - python-version: 3.10
+            full_matrix: false
+          - python-version: 3.11
+            full_matrix: true
+          - python-version: 3.12
+            full_matrix: true
     env:
       NOXSESSION: ${{ matrix.session }}
       FORCE_COLOR: "1"
@@ -110,6 +125,7 @@ jobs:
         with:
           name: docs
           path: docs/_build
+    continue-on-error: ${{ github.event.inputs.run_full_matrix == 'false' && matrix.full_matrix != true }}
 
   coverage:
     runs-on: ubuntu-latest
