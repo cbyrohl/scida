@@ -26,6 +26,7 @@ jobs:
     name: ${{ matrix.session }} ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      needs: setup
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
