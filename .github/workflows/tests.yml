@@ -15,6 +15,13 @@ on:
         default: 'false'
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      include_full_matrix: ${{ steps.condition_check.outputs.full_matrix }}
+    steps:
+      - id: condition_check
+        run: echo "full_matrix=$(echo ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true') }})" >> $GITHUB_ENV
   tests:
     name: ${{ matrix.session }} ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -23,16 +30,14 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         session: [tests]
-        python-version: [3.9, 3.10, 3.11, 3.12]
+        python-version: ['3.10']
         include:
-          - python-version: 3.9
-            full_matrix: true # true => only run on full matrix request
-          - python-version: 3.10
-            full_matrix: false
-          - python-version: 3.11
-            full_matrix: true
-          - python-version: 3.12
-            full_matrix: true
+          - python-version: '3.9'
+            if: ${{ needs.setup.outputs.include_full_matrix }}
+          - python-version: '3.10'
+            if: ${{ needs.setup.outputs.include_full_matrix }}
+          - python-version: '3.12'
+            if: ${{ needs.setup.outputs.include_full_matrix }}
     env:
       NOXSESSION: ${{ matrix.session }}
       FORCE_COLOR: "1"
