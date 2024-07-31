@@ -11,13 +11,13 @@ numpy = [
     {version = "^1.21", python = "<3.12"},
     {version = "^1.26", python = ">=3.12"}
 ]
-dask = {{extras = ["array", "dataframe", "distributed"],
+dask = [{extras = ["array", "dataframe", "distributed"],
 	 version = ">=2023",
          python = "<3.11.9"}, #https://github.com/dask/dask/pull/11035
         {extras = ["array", "dataframe", "distributed"],
 	 version = ">=2024.4.1",
          python = ">=3.11.9"}
-        }
+        ]
 distributed = "^2023"
 h5py = "^3.7.0"
 zarr = "^v2.10.0"
