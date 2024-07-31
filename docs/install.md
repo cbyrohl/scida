@@ -2,7 +2,7 @@
 
 ## Installation
 
-scida can be installed via [PyPI](https://pypi.org/). scida requires a Python version 3.9, 3.10 or 3.11.
+scida can be installed via [PyPI](https://pypi.org/). scida requires a Python version 3.9, 3.10, 3.11 or 3.12.
 
 ??? tip "Encapsulating packages"
     We recommend encapsulating your python environments. For example using [anaconda](https://www.anaconda.com/) or [virtualenv](https://virtualenv.pypa.io/en/latest/).

@@ -16,7 +16,7 @@ This tool uses dask, allowing analysis to scale up from your personal computer t
 
 ## Requirements
 
-- Python 3.9, 3.10, 3.11
+- Python 3.9, 3.10, 3.11, 3.12
 
 
 ## Documentation
