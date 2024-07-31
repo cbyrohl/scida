@@ -2,7 +2,7 @@ from pathlib import Path
 
 from nox_poetry import Session, session
 
-python_versions = ["3.11", "3.10", "3.9"]
+python_versions = ["3.12", "3.11", "3.10", "3.9"]
 python_dflt = "3.10"
 
 
