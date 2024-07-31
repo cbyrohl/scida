@@ -34,7 +34,7 @@ jobs:
         include:
           - python-version: '3.9'
             if: ${{ needs.setup.outputs.include_full_matrix }}
-          - python-version: '3.10'
+          - python-version: '3.11'
             if: ${{ needs.setup.outputs.include_full_matrix }}
           - python-version: '3.12'
             if: ${{ needs.setup.outputs.include_full_matrix }}
