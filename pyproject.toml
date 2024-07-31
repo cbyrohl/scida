@@ -15,7 +15,7 @@ numpy = [
 dask = [{extras = ["array", "dataframe", "distributed"], version = ">=2023", python = "<3.11.9"},
         {extras = ["array", "dataframe", "distributed"], version = ">=2024.4.1", python = ">=3.11.9"}
         ]
-distributed = "^2023"
+distributed = ">=2023"
 h5py = "^3.7.0"
 zarr = "^v2.10.0"
 astropy = "^5.0"
