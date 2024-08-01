@@ -18,7 +18,7 @@ A clear and concise description of what you expected to happen, what outcome you
 
 **Environment:**
 Add the environment by running
-```
+``` python
 import platform
 from importlib.metadata import version
 print("python version:", platform.python_version())
