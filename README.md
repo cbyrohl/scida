@@ -57,7 +57,7 @@ with the following bibtex entry:
 ## Issues
 
 If you encounter any problems,
-please [file an issue](https://github.com/cbyrohl/scida/issues/new) along with a detailed description.
+please [file an issue](https://github.com/cbyrohl/scida/issues/new/choose) along with a detailed description.
 
 ## License
 
