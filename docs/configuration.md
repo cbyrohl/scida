@@ -90,8 +90,9 @@ data:
 ## Unit files
 Unit files are used to determine the units of datasets, particularly for datasets that do not have metadata
 that can be used to infer units. Unit files are specified either explicitly via the `unitfile` option in `scida.load`
-or implicitly via the simulation configuration, see above. Relative paths, such as `units/simnameunits.yaml` are
-relative to the user/package simulation config folder. The former (`~/.config/scida/`) takes precedence.
+or implicitly via the simulation configuration, see above. The precedence in descending order is: absolute paths,
+relative paths in the current working directory, relative paths in the user config folder (`~/.config/scida/`), and
+the package config folder.
 
 A unit file could look like this:
 
