@@ -219,14 +219,19 @@ def get_config_fromfile(resource: str) -> Dict:
             conf = yaml.safe_load(file)
         return conf
     # 2. non-absolute path?
-    # 2.1. check ~/.config/scida/
+    # 2.1. check local (project-specific) path
+    if os.path.isfile(resource):
+        with open(resource, "r") as file:
+            conf = yaml.safe_load(file)
+        return conf
+    # 2.2. check ~/.config/scida/
     bpath = os.path.expanduser("~/.config/scida")
     path = os.path.join(bpath, resource)
     if os.path.isfile(path):
         with open(path, "r") as file:
             conf = yaml.safe_load(file)
         return conf
-    # 2.2 check scida package resources
+    # 2.3. check scida package resources
     resource_path = "scida.configfiles"
     resource_elements = resource.split("/")
     rname = resource_elements[-1]
