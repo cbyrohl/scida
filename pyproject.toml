@@ -7,10 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-numpy = [
-    {version = "^1.21", python = "<3.12"},
-    {version = "^1.26", python = ">=3.12"}
-]
+numpy = ">=1.21"
 # need dask>2024.4.1 for py>=3.11.9 (https://github.com/dask/dask/pull/11035)
 dask = [{extras = ["array", "dataframe", "distributed"], version = ">=2023", python = "<3.11.9"},
         {extras = ["array", "dataframe", "distributed"], version = ">=2024.4.1", python = ">=3.11.9"}
@@ -18,15 +15,12 @@ dask = [{extras = ["array", "dataframe", "distributed"], version = ">=2023", pyt
 distributed = ">=2023"
 h5py = "^3.7.0"
 zarr = "^v2.10.0"
-astropy = "^5.0"
-numba = [
-    {version = "^0.57", python = "<3.12"},
-    {version = "^0.59", python = ">=3.12"}
-]
+astropy = ">=5.0"
+numba = ">=0.57"
 pyyaml = ">=5.3.1"
 jupyter = "^1.0.0"
 tqdm = "^4.64.1"
-pint = "^0.22"
+pint = "^0.24"
 requests = "^2.31.0"
 
 

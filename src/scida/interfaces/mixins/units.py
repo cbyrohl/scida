@@ -4,6 +4,7 @@ Functionality to handle units.
 
 import contextlib
 import logging
+import tokenize
 from enum import Enum
 from typing import Optional, Union
 
@@ -55,6 +56,9 @@ def str_to_unit(
     unit = None
     try:
         unit = ureg(unitstr)
+    except tokenize.TokenError as e:  # cannot parse; raises exception since python 3.12
+        log.debug("Cannot parse unit string '%s'. Skipping." % unitstr)
+        raise e
     except pint.errors.UndefinedUnitError as e:
         log.debug(
             "Cannot parse unit string '%s' from metadata description. Skipping."
@@ -469,6 +473,10 @@ class UnitMixin(Mixin):
                             ureg=self.unitregistry,
                         )
                     except pint.errors.UndefinedUnitError:
+                        self._unitstates[path] = UnitState.parse_error
+                    except (
+                        tokenize.TokenError
+                    ):  # cannot parse; raises exception since python 3.12
                         self._unitstates[path] = UnitState.parse_error
                     except ValueError as e:
                         if str(e) != "Could not find units.":

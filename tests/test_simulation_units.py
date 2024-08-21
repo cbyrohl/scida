@@ -16,7 +16,7 @@ def test_simulation_tng50(testdatapath):
     # Compare dark matter mass
     cosmology: FlatLambdaCDM = snp.cosmology
     ureg = snp.unitregistry
-    vol = np.product(snp.boxsize) / cosmology.h**3 * ureg.kpc**3
+    vol = np.prod(snp.boxsize) / cosmology.h**3 * ureg.kpc**3
     dens = (cosmology.Om0 - cosmology.Ob0) * cosmology.critical_density0
     dens = dens.value * ureg(dens.unit.to_string("ogip"))
     boxmass = vol * dens
