@@ -1531,7 +1531,7 @@ def map_group_operation(
     # TODO: very messy and inefficient routine. improve some time.
     # TODO: Set entry_bytes_out
     nbytes_dtype_out = 4  # TODO: hardcode 4 byte output dtype as estimate for now
-    entry_nbytes_out = nbytes_dtype_out * np.product(shape)
+    entry_nbytes_out = nbytes_dtype_out * np.prod(shape)
 
     # list_chunkedges refers to bounds of index intervals to be processed together
     # if idxlist is specified, then these indices do not have to refer to group indices.
