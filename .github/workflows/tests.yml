@@ -116,6 +116,7 @@ jobs:
           echo "test data path: $SCIDA_TESTDATA_PATH"
           echo "test data path content: $(ls $SCIDA_TESTDATA_PATH)"
           nox --python=${{ matrix.python-version }}
+          ls -la
 
       - name: Upload coverage data
         if: always() && matrix.session == 'tests'
