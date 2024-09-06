@@ -122,7 +122,7 @@ jobs:
         uses: "actions/upload-artifact@v4"
         with:
           name: coverage-data
-          path: "/home/runner/work/scida/scida/.coverage*"
+          path: "/home/runner/work/scida/scida/*coverage*"
 
 
       - name: Upload documentation
