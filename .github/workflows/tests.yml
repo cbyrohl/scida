@@ -116,15 +116,14 @@ jobs:
           echo "test data path: $SCIDA_TESTDATA_PATH"
           echo "test data path content: $(ls $SCIDA_TESTDATA_PATH)"
           nox --python=${{ matrix.python-version }}
-          ls -la
-          pwd
 
       - name: Upload coverage data
         if: always() && matrix.session == 'tests'
         uses: "actions/upload-artifact@v4"
         with:
           name: coverage-data
-          path: ".coverage*"
+          path: "/home/runner/work/scida/scida/.coverage*"
+
 
       - name: Upload documentation
         if: matrix.session == 'docs-build'
