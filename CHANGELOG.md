@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
 
-- unit config files are searched relative to working directory
+## [0.3.3] - 2024-09-06
+
+### Added
+- python 3.12 support
+- numpy 2.0 support
+- unit config files also search relative to working directory (PR #171)
 
 ## [0.3.2] - 2024-05-23
 
