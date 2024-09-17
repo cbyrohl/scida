@@ -1002,10 +1002,15 @@ def _get_chunkedfiles(
     files_numbered = []
     for f in files:
         try:
-            numbers.append(int(f.split(".")[-2]))
+            numbers.append(
+                int(f.split(".")[-2])
+            )  # first check that we have the format prefix_SNAPID.CHUNKID.FORMAT
             files_numbered.append(f)
         except ValueError:
-            pass  # do not add file
+            # if this fails, we might have the format prefix.SNAPID.FORMAT in a single file (otherwise ignore file)
+            if len(files) == 1:
+                numbers.append(0)
+                files_numbered.append(f)
     sortidx = np.argsort(numbers)
     files_numbered = np.array(files_numbered)
     files = files_numbered[sortidx]
