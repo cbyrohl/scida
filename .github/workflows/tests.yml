@@ -118,15 +118,17 @@ jobs:
           nox --python=${{ matrix.python-version }}
 
       - name: Upload coverage data
-        if: always() && matrix.session == 'tests'
-        uses: "actions/upload-artifact@v3"
+        if: always() && matrix.session == 'tests' && matrix.python-version == '3.10'
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-data
-          path: ".coverage.*"
+          include-hidden-files: true
+          path: ".coverage*"
+
 
       - name: Upload documentation
         if: matrix.session == 'docs-build'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docs
           path: docs/_build
@@ -161,7 +163,7 @@ jobs:
           nox --version
 
       - name: Download coverage data
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage-data
 
