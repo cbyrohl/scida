@@ -18,7 +18,7 @@ def tests_base(session):
         session.run(
             "coverage",
             "run",
-            "--parallel",
+            "--parallel-mode",
             "-m",
             "pytest",
             "-v",
