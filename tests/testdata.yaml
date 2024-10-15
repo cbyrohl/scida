@@ -1,4 +1,7 @@
 testdata:
+  thor_mcrt/peel:
+    types:
+      - interface
   TNG50-4:
     types:
       - series

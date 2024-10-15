@@ -217,8 +217,9 @@ def create_mergedhdf5file(
         # create groups
         for group in sorted(groups):
             if group == "/":
-                continue  # nothing to do.
-            hf.create_group(group)
+                group = ""
+            else:
+                hf.create_group(group)
             groupfields = [
                 field
                 for field in shapes.keys()
