@@ -982,6 +982,13 @@ def _get_chunkedfiles(
     files = np.array(files)
     prfxs = sorted([f.split(".")[0] for f in files])
     if fileprefix is None:
+        if len(prfxs) == 0:
+            # warn if no files found
+            msg = "No files found in directory '%s' for prefix '%s'" % (
+                path,
+                fileprefix,
+            )
+            raise ValueError(msg)
         prfx = prfxs[0]
         prfxs = [prfx]
         files = np.array([f for f in files if f.startswith(prfx)])
