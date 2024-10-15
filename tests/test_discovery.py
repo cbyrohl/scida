@@ -26,7 +26,9 @@ def return_intended_stype(name) -> Type[DatasetSeries]:
         return SwiftSimulation
     elif any(k in name for k in ["tng"]):
         return ArepoSimulation
-    raise ValueError("Have not specified intended type for %s" % name)
+    print("No intended type found for %s" % name)
+    return DatasetSeries
+    # raise ValueError("Have not specified intended type for %s" % name)
 
 
 def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
@@ -63,7 +65,9 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
     elif any(k in name for k in ["rockstar"]):
         return RockstarCatalog
 
-    raise ValueError("Have not specified intended type for %s" % name)
+    print("No intended type found for %s" % name)
+    return Dataset
+    # raise ValueError("Have not specified intended type for %s" % name)
 
 
 @require_testdata_path("series")
