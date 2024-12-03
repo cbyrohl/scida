@@ -414,6 +414,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"]
             )
 
+        # add GroupID and SubhaloID to catalogs/groups themselves
+        self.data["Group"]["GroupID"] = self.data["Group"]["uid"]
+        self.data["Subhalo"]["SubhaloID"] = self.data["Subhalo"]["uid"]
+
     @computedecorator
     def map_group_operation(
         self,
