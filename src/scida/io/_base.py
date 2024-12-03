@@ -758,7 +758,7 @@ def determine_loader(path, **kwargs):
             loader = ChunkedHDF5Loader(path)
     elif not os.path.exists(path):
         raise ValueError("Path '%s' does not exist" % path)
-    elif str(path).endswith(".hdf5"):
+    elif str(path).endswith(".hdf5") or str(path).endswith(".h5"):
         # we are directly given a target file
         loader = HDF5Loader(path)
     elif str(path).endswith(".fits"):
