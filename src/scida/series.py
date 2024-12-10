@@ -2,7 +2,6 @@
 This module contains the base class for DataSeries, which is a container for collections of dataset instances.
 """
 
-
 import inspect
 import json
 import os
@@ -406,7 +405,7 @@ class DatasetSeries(object):
                 if k not in dm:
                     is_candidate = False
                     continue
-                if isinstance(v, int) or isinstance(v, float):
+                if isinstance(v, (int, float, np.integer, np.floating)):
                     candidates_props[k].append(dm[k])
                     props_compare.add(k)
                 elif v != dm[k]:
