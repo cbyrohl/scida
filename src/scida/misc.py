@@ -2,7 +2,6 @@
 Miscellaneous helper functions.
 """
 
-
 import logging
 import os
 import pathlib
@@ -221,7 +220,7 @@ def rectangular_cutout_mask(
     kwargs = {}
     if backend == "dask":
         kwargs["chunks"] = chunksize
-    mask = be.ones(coords.shape[0], dtype=np.bool, **kwargs)
+    mask = be.ones(coords.shape[0], dtype=bool, **kwargs)
     for i in range(3):
         mask &= dists[:, i] < (
             width[i] / 2.0
@@ -364,3 +363,12 @@ def parse_size(size):
     number = size[:idx]
     unit = size[idx:]
     return int(float(number) * _sizeunits[unit.lower().strip()])
+
+
+def get_scalar(value):
+    scalar = None
+    if isinstance(value, np.ndarray) and value.ndim > 0:
+        scalar = value[0]
+    else:
+        scalar = float(value)
+    return scalar

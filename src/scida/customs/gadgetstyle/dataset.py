@@ -12,6 +12,7 @@ import numpy as np
 from scida.discovertypes import CandidateStatus
 from scida.interface import Dataset
 from scida.io import load_metadata
+from scida.misc import get_scalar
 
 log = logging.getLogger(__name__)
 
@@ -225,13 +226,13 @@ class GadgetStyleSnapshot(Dataset):
         if "/Header" in rawmetadata:
             header = rawmetadata["/Header"]
             if "Redshift" in header:
-                metadata["redshift"] = float(header["Redshift"])
+                metadata["redshift"] = get_scalar(header["Redshift"])
                 metadata["z"] = metadata["redshift"]
             if "BoxSize" in header:
                 # can be scalar or array
                 metadata["boxsize"] = header["BoxSize"]
             if "Time" in header:
-                metadata["time"] = float(header["Time"])
+                metadata["time"] = get_scalar(header["Time"])
                 metadata["t"] = metadata["time"]
         return metadata
 
