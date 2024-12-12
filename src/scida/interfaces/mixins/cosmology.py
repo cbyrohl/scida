@@ -5,6 +5,7 @@ import numpy as np
 from scida.helpers_misc import sprint
 from scida.interfaces.mixins.base import Mixin
 from scida.interfaces.mixins.units import ignore_warn_redef
+from scida.misc import get_scalar
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ def get_redshift_from_rawmetadata(metadata_raw):
         Redshift.
     """
     z = metadata_raw.get("/Header", {}).get("Redshift", np.nan)
-    z = float(z)
+    z = get_scalar(z)
     return z
 
 

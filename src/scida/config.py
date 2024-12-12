@@ -190,11 +190,11 @@ def copy_defaultconfig(overwrite=False) -> None:
     path_conf = os.path.join(path_confdir, "config.yaml")
     if os.path.exists(path_conf) and not overwrite:
         raise ValueError("Configuration file already exists at '%s'" % path_conf)
-    with importlib.resources.path("scida.configfiles", "config.yaml") as fp:
-        with open(fp, "r") as file:
-            content = file.read()
-            with open(path_conf, "w") as newfile:
-                newfile.write(content)
+    resource = importlib.resources.files("scida.configfiles").joinpath("config.yaml")
+    with resource.open("r") as file:
+        content = file.read()
+        with open(path_conf, "w") as newfile:
+            newfile.write(content)
 
 
 def get_config_fromfile(resource: str) -> Dict:
@@ -237,9 +237,9 @@ def get_config_fromfile(resource: str) -> Dict:
     rname = resource_elements[-1]
     if len(resource_elements) > 1:
         resource_path += "." + ".".join(resource_elements[:-1])
-    with importlib.resources.path(resource_path, rname) as fp:
-        with open(fp, "r") as file:
-            conf = yaml.safe_load(file)
+    resource = importlib.resources.files(resource_path).joinpath(rname)
+    with resource.open("r") as file:
+        conf = yaml.safe_load(file)
     return conf
 
 
