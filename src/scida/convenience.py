@@ -76,7 +76,7 @@ def download_and_extract(
             t.mode = int("0755", base=8)
         else:
             t.mode = int("0644", base=8)
-    tar.extractall(path.parents[0])
+    tar.extractall(path.parents[0], filter=None)
     foldername = tar.getmembers()[0].name  # parent folder of extracted tar.gz
     tar.close()
     os.remove(path)
