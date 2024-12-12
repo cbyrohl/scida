@@ -76,7 +76,11 @@ def download_and_extract(
             t.mode = int("0755", base=8)
         else:
             t.mode = int("0644", base=8)
-    tar.extractall(path.parents[0], filter=None)
+    # if python version >= 3.12, need filter argument (required from 3.14 onwards)
+    if sys.version_info >= (3, 12):
+        tar.extractall(path.parents[0], filter="fully_trusted")
+    else:
+        tar.extractall(path.parents[0])
     foldername = tar.getmembers()[0].name  # parent folder of extracted tar.gz
     tar.close()
     os.remove(path)
