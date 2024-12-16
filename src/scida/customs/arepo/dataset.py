@@ -11,6 +11,7 @@ from dask import delayed
 from numba import jit
 from numpy.typing import NDArray
 
+from scida.customs.arepo.extra_fields import fielddefs
 from scida.customs.arepo.helpers import grp_type_str, part_type_num
 from scida.customs.arepo.selector import ArepoSelector
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
@@ -105,7 +106,21 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self._set_metadata()
 
         # add some default fields
-        self.data.merge(fielddefs)
+        overwrite_fields = False
+        for kfield in fielddefs.fielddefs:
+            parttype = fielddefs.fielddefs[kfield].parttype
+            if parttype in self.data:
+                if overwrite_fields or kfield not in self.data[parttype]:
+                    func = fielddefs.fielddefs[kfield].func
+                    # verify that we have the dependencies
+                    dependencies = fielddefs.fielddefs[kfield].dependencies
+                    deps_fulfilled = True
+                    for dep in dependencies:
+                        if dep not in self.data[parttype]:
+                            deps_fulfilled = False
+                            break
+                    if deps_fulfilled:
+                        self.data.register_field(parttype, name=kfield)(func)
 
     def load_catalog(
         self, overwrite_cache=False, units=False, cosmological=False, catalog_cls=None
@@ -1627,42 +1642,3 @@ def map_group_operation(
     )
 
     return calc
-
-
-groupnames = [
-    "PartType0",
-    "PartType1",
-    "PartType3",
-    "PartType4",
-    "PartType5",
-    "Group",
-    "Subhalo",
-]
-fielddefs = FieldContainer(containers=groupnames)
-
-
-@fielddefs.register_field("PartType0")
-def Temperature(arrs, ureg=None, **kwargs):
-    """Compute gas temperature given (ElectronAbundance,InternalEnergy) in [K]."""
-    xh = 0.76
-    gamma = 5.0 / 3.0
-
-    m_p = 1.672622e-24  # proton mass [g]
-    k_B = 1.380650e-16  # boltzmann constant [erg/K]
-
-    UnitEnergy_over_UnitMass = (
-        1e10  # standard unit system (TODO: can obtain from snapshot)
-    )
-    f = UnitEnergy_over_UnitMass
-    if ureg is not None:
-        f = 1.0
-        m_p = m_p * ureg.g
-        k_B = k_B * ureg.erg / ureg.K
-
-    xe = arrs["ElectronAbundance"]
-    u_internal = arrs["InternalEnergy"]
-
-    mu = 4 / (1 + 3 * xh + 4 * xh * xe) * m_p
-    temp = f * (gamma - 1.0) * u_internal / k_B * mu
-
-    return temp
