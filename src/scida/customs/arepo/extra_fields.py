@@ -50,6 +50,10 @@ def Temperature(arrs, ureg=None, **kwargs):
         f = 1.0
         m_p = m_p * ureg.g
         k_B = k_B * ureg.erg / ureg.K
+    else:
+        # in this case the arrs cannot have pint units
+        assert not hasattr(arrs["ElectronAbundance"], "units")
+        assert not hasattr(arrs["InternalEnergy"], "units")
 
     xe = arrs["ElectronAbundance"]
     u_internal = arrs["InternalEnergy"]

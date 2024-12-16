@@ -128,9 +128,9 @@ class FieldContainer(MutableMapping):
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
         self._ureg: Optional[pint.UnitRegistry] = ureg
-        self._containers: Dict[
-            str, FieldContainer
-        ] = dict()  # other containers as subgroups
+        self._containers: Dict[str, FieldContainer] = (
+            dict()
+        )  # other containers as subgroups
         if containers is not None:
             for k in containers:
                 self.add_container(k, deep=True)
@@ -679,7 +679,7 @@ class FieldContainer(MutableMapping):
         func_kwargs = get_kwargs(func)
         dkwargs = self.fieldrecipes_kwargs
         ureg = None
-        if "ureg" not in dkwargs:
+        if "ureg" not in dkwargs or dkwargs["ureg"] is None:
             ureg = self.get_ureg()
             dkwargs["ureg"] = ureg
         # first, we overwrite all optional arguments with class instance defaults where func kwarg is None
