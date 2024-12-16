@@ -1,6 +1,8 @@
 import pathlib
 from typing import Type
 
+from testdata_properties import get_testdata_yaml_config
+
 from scida import ArepoSnapshot, MTNGArepoSnapshot, TNGClusterSnapshot
 from scida.customs.arepo.dataset import ArepoCatalog
 from scida.customs.arepo.MTNG.dataset import MTNGArepoCatalog
@@ -42,7 +44,7 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
             return MTNGArepoSnapshot
     elif any([k in name for k in ["tng-cluster", "tngcluster"]]):
         return TNGClusterSnapshot
-    elif any(k in name for k in ["tng", "illustris", "auriga"]):
+    elif any(k in name for k in ["tng", "illustris", "auriga", "mcst"]):
         if "group" in name:
             return ArepoCatalog
         else:
@@ -64,6 +66,19 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
         return GizmoSnapshot
     elif any(k in name for k in ["rockstar"]):
         return RockstarCatalog
+
+    # alternative check testdata.yaml metadata
+    tdprops = get_testdata_yaml_config()
+    dname = name.split("/")[-1]
+    for k in tdprops:
+        # remove extension if present
+        dname_without_ext = dname
+        if dname.endswith(".hdf5"):
+            dname_without_ext = dname[:-5]
+        fname = tdprops[k].get("fn", "")
+        if str(k).lower() == dname_without_ext or fname == dname:
+            if "areposnapshot" in tdprops[k]["types"]:
+                return ArepoSnapshot
 
     print("No intended type found for %s" % name)
     return Dataset
