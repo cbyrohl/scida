@@ -1,8 +1,6 @@
 import pathlib
 from typing import Type
 
-from testdata_properties import get_testdata_yaml_config
-
 from scida import ArepoSnapshot, MTNGArepoSnapshot, TNGClusterSnapshot
 from scida.customs.arepo.dataset import ArepoCatalog
 from scida.customs.arepo.MTNG.dataset import MTNGArepoCatalog
@@ -17,7 +15,7 @@ from scida.interface import Dataset
 from scida.io import load_metadata
 from scida.misc import check_config_for_dataset
 from scida.series import DatasetSeries
-from tests.testdata_properties import require_testdata_path
+from tests.testdata_properties import get_testdata_yaml_config, require_testdata_path
 
 
 def return_intended_stype(name) -> Type[DatasetSeries]:
