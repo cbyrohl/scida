@@ -103,3 +103,8 @@ runs:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_flamingo_snapshot.hdf5
         url: https://heibox.uni-heidelberg.de/f/8749a46fdfc74577b29a/?dl=1
+    - uses: ./.github/actions/get-testdata
+      with:
+        outputfolder: ${{ inputs.outputfolder }}
+        filename: minimal_mcst_arepo_mcstmodel.hdf5
+        url: https://heibox.uni-heidelberg.de/f/802d5c8cbee1483a983f/?dl=1

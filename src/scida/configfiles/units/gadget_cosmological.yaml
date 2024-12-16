@@ -43,7 +43,14 @@ fields:
     GFM_MetalsTagged:
     GFM_WindDMVelDisp: km / s
     GFM_WindHostHaloMass: code_mass
+    GrackleTemperature: K
+    GrackleCoolTime: (kpc / h) / (km / s)  # double checked that physical kpc
     HighResGasMass: code_mass
+    HeIIIMassFraction:  # no units
+    HeIIMassFraction:  # no units
+    HeIMassFraction:  # no units
+    HIIMassFraction:  # no units
+    HIMassFraction:  # no units
     InternalEnergy: (km / s) ^ 2
     InternalEnergyOld: (km / s)^2
     Machnumber:
@@ -51,9 +58,13 @@ fields:
     MagneticFieldDivergence: (h^3 / a^2) * code_mass^(1/2) * (km/s) * (ckpc)^(-5/2)
     # we guess the alternative has the same units as the original field...
     MagneticFieldDivergenceAlternative: (h^3 / a^2) * code_mass^(1/2) * (km/s) * (ckpc)^(-5/2)
-    NeutralHydrogenAbundance:
+    Metallicity:  # no units
+    NeutralHydrogenAbundance:  # no units
     # TODO: Pressure?
+    RadiationEnergyDensity: code_mass * (km / s)^2 / (kpc / h)^3  # double checked that physical kpc
     SmoothingLength: code_length
+    StromgrenRadius: code_length
+    StromgrenSourceID: none
     SubfindDMDensity: code_mass / code_length^3
     Temperature: K
     TimebinHydro:
@@ -62,6 +73,8 @@ fields:
     Acceleration: unknown  # TODO: From MTNG
   PartType1:
     SubfindDMDensity: code_mass / code_length^3
+  PartType2:
+    Metallicity: # field existence is a bug in MCST model, needs to be removed.
   PartType3:
     ParentID: none
     TracerID: none
@@ -75,7 +88,13 @@ fields:
     GFM_MetalsTagged:
     GFM_StellarFormationTime: # expressed as signed scale factor
     GFM_StellarPhotometrics:  # not supported mag for now
-    StellarHsml:
+    IMFMass: code_mass
+    IonisingPhotonRate1e49: 1e49 / s
+    LowMass: code_mass
+    Metallicity: # no units
+    StellarArray: none
+    StellarHsml: code_length
+    StellarLuminosity: 1e10 * Msun * (km^3 / s^3) / kpc
     SubfindDMDensity: code_mass / code_length^3
   PartType5:
     BH_BPressure: (h^4 / a^4) * (1e10 Msun) * (km / s)^2 / ckpc^3
