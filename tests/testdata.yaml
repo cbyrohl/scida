@@ -221,6 +221,18 @@ testdata:
       - areposnapshot
     fn: minimal_mcst_arepo_mcstmodel.hdf5
 
+  MCST_ST8_snapshot_z3:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|MCST1|0|2
+
+  MCST_ST8_group_z3:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|MCST1|1|2
+
   FIRE2_snapshot_z1_minimal:
     types:
       - interface

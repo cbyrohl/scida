@@ -76,3 +76,11 @@ def test_issue_78():
         # this dataset does not exist, so should still raise proper exception
         find_path(path)
     assert "unknown" in str(e.value)
+
+
+@require_testdata_path("interface", only=["MCST_ST8_snapshot_z3"])
+def test_issue185(testdatapath):
+    # check that we can load a snapshot with a different snapshot class
+    obj = load(testdatapath, units=True)
+    particles = obj.return_data(haloID=0)
+    print(particles)
