@@ -57,6 +57,10 @@ with open(os.path.join(os.path.dirname(__file__), "testdata.yaml"), "r") as file
         print(name, properties)
 
 
+def get_testdata_yaml_config():
+    return testdata_properties
+
+
 testdataskip = testdataskip.split()
 testdata_local = []
 for k, v in testdatadict.items():
