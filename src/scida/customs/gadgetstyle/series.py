@@ -64,6 +64,9 @@ class GadgetStyleSimulation(DatasetSeries):
             # in such case, we attempt to continue with the given path.
             if not sp.exists():
                 sp = p
+
+            # normally, runs have subfolders for each snapshot...
+            found_prefix = False
             prefix = _get_snapshotfolder_prefix(sp)
             prefix = prefix_dict.get(k, prefix)
             if not sp.exists():
@@ -75,21 +78,40 @@ class GadgetStyleSimulation(DatasetSeries):
             if len(prfxs) == 0:
                 if k != "paths":
                     continue  # do not require optional sources
+            else:
+                found_prefix = True
+                prfx = prfxs.pop()
+            # ... however, sometimes runs have single-file hdf5 snapshots
+            if not found_prefix:
+                h5files = [f for f in fns if f.endswith(".hdf5")]
+                # we only test "snap" prefix for now...
+                prfx_tmp = {"gpaths": "group", "paths": "snap"}.get(k, None)
+                if prfx_tmp is not None:
+                    files = [
+                        f.split("_")[0] for f in h5files if f.startswith(prfx_tmp + "_")
+                    ]
+                    if len(files) > 1:
+                        prfx = prfx_tmp
+                        found_prefix = True
+
+            if not found_prefix:
                 raise ValueError(
                     "Could not find any files with prefix '%s' in '%s'." % (prefix, sp)
                 )
-            prfx = prfxs.pop()
 
             paths = sorted([p for p in sp.glob(prfx + "_*")])
             # sometimes there are backup folders with different suffix, exclude those.
+
+            # now sort by snapshot order
             paths = [
                 p
                 for p in paths
                 if str(p).split("_")[-1].isdigit() or str(p).endswith(".hdf5")
             ]
-            # attempt additional sorting in case zfill not used
+            # attempt sorting
             try:
-                paths = sorted(paths, key=lambda x: int(str(x).split("_")[-1]))
+                nmbrs = [int(str(p).replace(".hdf5", "").split("_")[-1]) for p in paths]
+                paths = [p for _, p in sorted(zip(nmbrs, paths))]
             except:  # noqa
                 pass
             paths_dict[k] = paths

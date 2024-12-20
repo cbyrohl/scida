@@ -244,6 +244,12 @@ testdata:
       - areposimulation
     fn: "minimal_FIRE2_simulation"
 
+  arepoturbbox_series:
+    types:
+      - series
+      - areposimulation
+    fn: "arepo_turbbox"
+
   LGal21_z3_minimal:
     types:
       - interface

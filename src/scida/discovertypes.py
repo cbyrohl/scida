@@ -19,6 +19,27 @@ from scida.registries import dataseries_type_registry, dataset_type_registry
 log = logging.getLogger(__name__)
 
 
+def is_valid_candidate(val):
+    """
+    Map mix of old bool and new Candidate Status enum to bool.
+    Parameters
+    ----------
+    val: bool or CandidateStatus
+        Value to map.
+
+    Returns
+    -------
+    CandidateStatus
+    """
+    if isinstance(val, bool):
+        if val:
+            return CandidateStatus.MAYBE
+        else:
+            return CandidateStatus.NO
+    else:
+        return val
+
+
 class CandidateStatus(Enum):
     """
     Enum to indicate our confidence in a candidate.
@@ -153,36 +174,16 @@ def _determine_type(
     for k, dtype in reg.items():
         valid = CandidateStatus.NO
 
-        def is_valid(val):
-            """
-            Map mix of old bool and new Candidate Status enum to bool.
-            Parameters
-            ----------
-            val: bool or CandidateStatus
-                Value to map.
-
-            Returns
-            -------
-            CandidateStatus
-            """
-            if isinstance(val, bool):
-                if val:
-                    return CandidateStatus.MAYBE
-                else:
-                    return CandidateStatus.NO
-            else:
-                return val
-
         if catch_exception:
             try:
-                valid = is_valid(dtype.validate_path(path, **kwargs))
+                valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
             except Exception as e:
                 log.debug(
                     "Exception raised during validate_path of tested type '%s': %s"
                     % (k, e)
                 )
         else:
-            valid = is_valid(dtype.validate_path(path, **kwargs))
+            valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
         if valid != CandidateStatus.NO:
             available_dtypes.append(k)
             dtypes_status.append(valid)  # will be YES or MAYBE
