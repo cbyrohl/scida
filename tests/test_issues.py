@@ -84,3 +84,14 @@ def test_issue185(testdatapath):
     obj = load(testdatapath, units=True)
     particles = obj.return_data(haloID=0)
     print(particles)
+
+
+@require_testdata_path("series", only=["arepoturbbox_series"])
+def test_issue187(testdatapath):
+    sim = load(testdatapath)
+    assert isinstance(sim, ArepoSimulation)
+    ds = sim.get_dataset(0)
+    assert isinstance(ds, ArepoSnapshot)
+    # just load some data...
+    veldiv = ds.data["PartType0"]["VelocityDivergence"][0].compute()
+    assert veldiv == 0.0  # is zero at the beginning...

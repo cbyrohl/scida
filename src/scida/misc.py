@@ -5,6 +5,8 @@ Miscellaneous helper functions.
 import logging
 import os
 import pathlib
+import re
+from collections import defaultdict
 from collections.abc import MutableMapping
 from typing import Optional
 
@@ -372,3 +374,14 @@ def get_scalar(value):
     else:
         scalar = float(value)
     return scalar
+
+
+def group_by_common_prefix(file_names):
+    groups = defaultdict(list)
+    for file in file_names:
+        # Split by both "_" and "."
+        parts = re.split(r"[_\.]", file)
+        prefix = parts[0]  # Use the first part as the prefix
+        groups[prefix].append(file)
+
+    return dict(groups)
