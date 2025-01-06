@@ -22,6 +22,8 @@ class CosmologyMixin(Mixin):
         Initialize a CosmologyMixin object. Requires _metadata_raw to be filled.
         """
         self.metadata = {}
+        if not hasattr(self, "hints"):
+            self.hints = {}
         if hasattr(self, "_mixins"):
             self._mixins.append(self._mixin_name)
         else:
@@ -31,6 +33,7 @@ class CosmologyMixin(Mixin):
         c = get_cosmology_from_rawmetadata(metadata_raw)
         self.cosmology = c
         z = get_redshift_from_rawmetadata(metadata_raw)
+        self.hints["cosmological"] = True
         self.redshift = z
         self.metadata["redshift"] = self.redshift
         if hasattr(self, "ureg"):
@@ -94,7 +97,6 @@ class CosmologyMixin(Mixin):
             if np.isclose(time, 1.0 / (1.0 + redshift)):
                 # print("Legacy metadata detected for Cosmology Mixin detection.")
                 valid = True
-            print(time, redshift)
 
         # in case of SWIFT, we have the "Cosmological run" key in the "Cosmology" group set to 1
         if "/Cosmology" in metadata:

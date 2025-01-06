@@ -245,8 +245,8 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
 
     Returns
     -------
-    list
-        candidates
+    List[str]
+        Strings of Candidate identifiers
 
     """
     c = get_simulationconfig()
@@ -296,9 +296,18 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
                     if isinstance(av, bytes):
                         av = av.decode("UTF-8")
                     if matchtype is None:
-                        if av != ival:
-                            possible_candidate = False
-                            break
+                        if is_scalar(av):
+                            if not np.isclose(av, ival):
+                                possible_candidate = False
+                                break
+                        elif isinstance(av, (list, np.ndarray)):
+                            if not np.all(av == ival):
+                                possible_candidate = False
+                                break
+                        else:
+                            if av != ival:
+                                possible_candidate = False
+                                break
                     elif matchtype == "substring":
                         if ival not in av:
                             possible_candidate = False
@@ -365,6 +374,13 @@ def parse_size(size):
     number = size[:idx]
     unit = size[idx:]
     return int(float(number) * _sizeunits[unit.lower().strip()])
+
+
+def is_scalar(value):
+    is_sclr = isinstance(value, (int, float, np.integer, np.floating))
+    # also allow 0d arrays
+    is_sclr |= isinstance(value, np.ndarray) and value.ndim == 0
+    return is_sclr
 
 
 def get_scalar(value):

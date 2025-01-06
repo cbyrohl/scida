@@ -98,3 +98,5 @@ def test_issue187(testdatapath):
 
     # make sure this is not cosmological
     assert "Cosmology" not in str(type(ds))
+
+    print(sim.info())

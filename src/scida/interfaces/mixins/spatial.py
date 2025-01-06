@@ -33,7 +33,8 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         args
         kwargs
         """
-        self.hints = {}
+        if not hasattr(self, "hints"):
+            self.hints = {}
         super().__init__(*args, **kwargs)
         # TODO: determine whether periodic?
         self.pbc = True

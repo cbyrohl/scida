@@ -56,7 +56,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
         self.config = {}
-        self._defaultunitfiles: List[str] = ["units/gadget_cosmological.yaml"]
+        # check whether we have a cosmology mixin
+        self._defaultunitfiles: List[str] = []
+        if hasattr(self, "_mixins") and "cosmology" in self._mixins:
+            self._defaultunitfiles = ["units/gadget_cosmological.yaml"]
         self.parameters = {}
         self._grouplengths = {}
         self._subhalolengths = {}
