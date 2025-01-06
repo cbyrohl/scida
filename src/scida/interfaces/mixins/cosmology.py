@@ -28,19 +28,30 @@ class CosmologyMixin(Mixin):
             self._mixins.append(self._mixin_name)
         else:
             self._mixins = [self._mixin_name]
+        self.hints["cosmological"] = True
+
+        # now call the parent class constructor as we need the metadata_raw
         super().__init__(*args, **kwargs)
+
         metadata_raw = self._metadata_raw
         c = get_cosmology_from_rawmetadata(metadata_raw)
+        # sometimes, we want to inherit the cosmology from the parent dataset (e.g. catalogs for snapshots)
+        if c is None and "metadata_raw_parent" in kwargs:
+            c = get_cosmology_from_rawmetadata(kwargs["metadata_raw_parent"])
         self.cosmology = c
+        if c is not None:
+            self.hints["cosmology"] = c
         z = get_redshift_from_rawmetadata(metadata_raw)
-        self.hints["cosmological"] = True
         self.redshift = z
         self.metadata["redshift"] = self.redshift
+
         if hasattr(self, "ureg"):
             ureg = self.ureg
             with ignore_warn_redef(ureg):
                 if c is not None:
                     ureg.define("h = %s" % str(c.h))
+                elif "cosmology" in self.hints:
+                    ureg.define("h = %s" % str(self.hints["cosmology"].h))
                 if z is not None:
                     a = 1.0 / (1.0 + z)
                     ureg.define("a = %s" % str(float(a)))
@@ -96,6 +107,10 @@ class CosmologyMixin(Mixin):
             # for cosmological runs, time is the scale factor a = 1/(1+z)
             if np.isclose(time, 1.0 / (1.0 + redshift)):
                 # print("Legacy metadata detected for Cosmology Mixin detection.")
+                valid = True
+        # sometimes, we have a cosmological runs if we only have the redshift key but no time key (e.g. LGalaxies)
+        if "/Header" in metadata and "Redshift" in metadata["/Header"]:
+            if "Time" not in metadata["/Header"]:
                 valid = True
 
         # in case of SWIFT, we have the "Cosmological run" key in the "Cosmology" group set to 1

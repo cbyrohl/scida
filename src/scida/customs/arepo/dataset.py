@@ -175,6 +175,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             fileprefix=prfx,
             units=self.withunits,
             ureg=ureg,
+            hints=self.hints,
+            metadata_raw_parent=self._metadata_raw,
         )
         if "Redshift" in self.catalog.header and "Redshift" in self.header:
             z_catalog = self.catalog.header["Redshift"]

@@ -121,15 +121,18 @@ data:
         - Illustris100
       identifiers:
         name_contains: "Illustris-1"  # can only rely on path name in lack of metadata...
+      unitfile: [ units/illustris.yaml ]  # cosmology explicitly needed for catalogs
 
   Illustris-2:
       <<: *illustris_params
       identifiers:
         name_contains: "Illustris-2"
+      unitfile: [ units/illustris.yaml ]
   Illustris-3:
       <<: *illustris_params
       identifiers:
         name_contains: "Illustris-3"
+      unitfile: [ units/illustris.yaml ]
 
   EAGLEtype:
       identifiers:

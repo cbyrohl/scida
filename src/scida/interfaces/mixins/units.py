@@ -262,7 +262,6 @@ def _get_default_units(mode: str, ureg: pint.UnitRegistry) -> dict:
             "velocity": ureg.cm / ureg.s,
             "time": ureg.s,
         }
-
     # common factors in cosmological simulations
     if "h" in ureg:
         udict["h"] = str_to_unit("h", ureg)
@@ -294,6 +293,10 @@ def new_unitregistry() -> UnitRegistry:
     """
     ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
     ureg.define("unknown = 1.0")
+    # we remove the hours "h" unit, so we cannot confuse it with the Hubble factor
+    del ureg._units["h"]
+    # we remove the year "a" unit, so we cannot confuse it with the scale factor
+    del ureg._units["a"]
     return ureg
 
 
@@ -667,7 +670,10 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
     bool:
         Whether the units agree.
     """
-    without_units = unit == "none" or unit_metadata == "none"  # explicitly no units
+    without_units = isinstance(unit, str) and unit == "none"
+    without_units |= (
+        isinstance(unit_metadata, str) and unit_metadata == "none"
+    )  # explicitly no units
     if unit is not None and unit_metadata is not None:
         msg = None
         if without_units and unit == unit_metadata:
