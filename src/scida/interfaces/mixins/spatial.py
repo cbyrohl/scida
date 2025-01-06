@@ -53,7 +53,8 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
             print("Boxsize:", bs)
             raise NotImplementedError
         common_coord_names = ["Coordinates", "Position", "GroupPos", "SubhaloPos"]
-        self.hints["CoordinatesName"] = dict()
+        if "CoordinatesName" not in self.hints:
+            self.hints["CoordinatesName"] = dict()
         for k, cntr in self.data.items():
             found = False
             for ccn in common_coord_names:

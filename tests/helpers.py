@@ -20,9 +20,9 @@ class DummyGadgetFile:
 
     def create_dummyheader(self):
         header = self.header
-        attrs_float_keys = ["Time", "Redshift", "BoxSize"]
-        for key in attrs_float_keys:
-            header[key] = 0.0
+        header["Time"] = 1.0
+        header["Redshift"] = 0.0
+        header["BoxSize"] = 100.0
         attrs_int_keys = [
             "NumFilesPerSnapshot",
             "Flag_Sfr",

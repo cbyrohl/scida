@@ -61,7 +61,7 @@ def str_to_unit(
         raise e
     except pint.errors.UndefinedUnitError as e:
         log.debug(
-            "Cannot parse unit string '%s' from metadata description. Skipping."
+            "Cannot parse unit string '%s' from metadata description due to unknown units. Skipping."
             % unitstr
         )
         raise e
@@ -162,8 +162,8 @@ def extract_units_from_attrs(
         if len(unit) != 1:
             log.debug("Unexpected shape (%s) of unit factor." % unit.shape)
         unit = unit[0]
-    if unit == 0.0:
-        unit = ureg.Quantity(1.0)  # zero makes no sense.
+    if unit in [0.0, 1.0]:
+        unit = ureg.Quantity(1.0)
 
     # TODO: recheck that a and h scaling are added IFF code units are used
     ukeys = ["length", "mass", "velocity", "time", "h", "a"]
@@ -175,7 +175,9 @@ def extract_units_from_attrs(
                 # TODO: double check this...
                 continue  # h scaling absorbed into code units
             aname = k + "_scaling"
-            unit *= udict[k] ** attrs.get(aname, 0.0)
+            exp = attrs.get(aname, 0.0)
+            if exp != 0.0:
+                unit *= udict[k] ** attrs.get(aname, 0.0)
         return unit
 
     unitstr = get_unitstr_from_attrs(attrs)
@@ -344,6 +346,7 @@ class UnitMixin(Mixin):
             ureg = new_unitregistry()
 
         self.ureg = self.unitregistry = ureg
+        print("a in ureg?", "a" in self.ureg)
 
         super().__init__(*args, **kwargs)
 
@@ -687,6 +690,7 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
             )
         else:
             # check whether both metadata and unit file agree
+            print(unit, "vs.", unit_metadata)
             val_cgs_uf = unit.to_base_units().magnitude
             val_cgs_md = unit_metadata.to_base_units().magnitude
             if not override and not np.isclose(val_cgs_uf, val_cgs_md, rtol=1e-3):
