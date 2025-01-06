@@ -95,3 +95,6 @@ def test_issue187(testdatapath):
     # just load some data...
     veldiv = ds.data["PartType0"]["VelocityDivergence"][0].compute()
     assert veldiv == 0.0  # is zero at the beginning...
+
+    # make sure this is not cosmological
+    assert "Cosmology" not in str(type(ds))

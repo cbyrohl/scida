@@ -11,10 +11,13 @@ from inspect import getmro
 from typing import List, Union
 
 from scida.config import get_simulationconfig
-from scida.interfaces.mixins import CosmologyMixin
 from scida.io import load_metadata
 from scida.misc import check_config_for_dataset
-from scida.registries import dataseries_type_registry, dataset_type_registry
+from scida.registries import (
+    dataseries_type_registry,
+    dataset_type_registry,
+    mixin_type_registry,
+)
 
 log = logging.getLogger(__name__)
 
@@ -72,9 +75,11 @@ def _determine_mixins(path=None, metadata_raw=None):
     assert not (path is None and metadata_raw is None)
     if metadata_raw is None:
         metadata_raw = load_metadata(path, fileprefix=None)
-    z = metadata_raw.get("/Header", {}).get("Redshift", None)
-    if z is not None:
-        mixins.append(CosmologyMixin)
+    # go through registry
+    for k, mixin in mixin_type_registry.items():
+        valid: bool = mixin.validate(metadata_raw)
+        if valid:
+            mixins.append(mixin)
     return mixins
 
 

@@ -59,6 +59,55 @@ class CosmologyMixin(Mixin):
         rep += sprint("===============================")
         return rep
 
+    @classmethod
+    def validate(cls, metadata: dict, *args, **kwargs):
+        """
+        Validate whether the dataset is valid for this mixin.
+        Parameters
+        ----------
+        metadata: dict
+        args
+        kwargs
+
+        Returns
+        -------
+        bool
+
+        """
+        valid = False
+        # in case of AREPO/GIZMO, we have the "ComovingIntegrationOn" key in the "Config" group set to 1
+        if "/Config" in metadata:
+            if "ComovingIntegrationOn" in metadata["/Config"]:
+                comoving_integration_on = metadata["/Config"]["ComovingIntegrationOn"]
+                if comoving_integration_on == 1:
+                    return True
+            # do not return False here, because we still might have a legacy run with no ComovingIntegrationOn key
+            # for now, we check legacy runs by consistency of Time and Redshift key
+        if (
+            "/Header" in metadata
+            and "Time" in metadata["/Header"]
+            and "Redshift" in metadata["/Header"]
+        ):
+            time = get_scalar(metadata["/Header"]["Time"])
+            redshift = get_scalar(metadata["/Header"]["Redshift"])
+            # for cosmological runs, time is the scale factor a = 1/(1+z)
+            if np.isclose(time, 1.0 / (1.0 + redshift)):
+                # print("Legacy metadata detected for Cosmology Mixin detection.")
+                valid = True
+            print(time, redshift)
+
+        # in case of SWIFT, we have the "Cosmological run" key in the "Cosmology" group set to 1
+        if "/Cosmology" in metadata:
+            if "Cosmological run" in metadata["/Cosmology"]:
+                # saved as array, thus get first element
+                cosmological_run = get_scalar(
+                    metadata["/Cosmology"]["Cosmological run"]
+                )
+                if cosmological_run == 1 or cosmological_run is True:
+                    return True
+            return False
+        return valid
+
 
 def get_redshift_from_rawmetadata(metadata_raw):
     """
