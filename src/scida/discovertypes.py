@@ -76,7 +76,7 @@ def _determine_mixins(path=None, metadata_raw=None):
     if metadata_raw is None:
         metadata_raw = load_metadata(path, fileprefix=None)
     # go through registry
-    for k, mixin in mixin_type_registry.items():
+    for mixin in mixin_type_registry.values():
         valid: bool = mixin.validate(metadata_raw)
         if valid:
             mixins.append(mixin)

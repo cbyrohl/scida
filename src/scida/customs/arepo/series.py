@@ -83,7 +83,7 @@ class ArepoSimulation(GadgetStyleSimulation):
             # group by prefix
             prfxs_lst = group_by_common_prefix(h5files)
             # sort by number of files per prefix
-            prfxs_lst = sorted(prfxs_lst, key=lambda x: len(x), reverse=True)
+            prfxs_lst = sorted(prfxs_lst, key=len, reverse=True)
             # take the longest prefix
             prfx = prfxs_lst[0]
             # if we have more than one file for this prefix, we might have a series...
