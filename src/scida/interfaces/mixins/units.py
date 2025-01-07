@@ -346,7 +346,6 @@ class UnitMixin(Mixin):
             ureg = new_unitregistry()
 
         self.ureg = self.unitregistry = ureg
-        print("a in ureg?", "a" in self.ureg)
 
         super().__init__(*args, **kwargs)
 

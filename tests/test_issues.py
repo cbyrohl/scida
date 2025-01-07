@@ -79,15 +79,20 @@ def test_issue_78():
 
 
 @require_testdata_path("interface", only=["MCST_ST8_snapshot_z3"])
-def test_issue185(testdatapath):
+def test_issue185(testdatapath, capsys):
     # check that we can load a snapshot with a different snapshot class
     obj = load(testdatapath, units=True)
     particles = obj.return_data(haloID=0)
     print(particles)
 
+    obj.info()
+    captured = capsys.readouterr()
+    assert "=== Cosmological Simulation ===" in captured.out
+    assert "z =" in captured.out  # cosmological dataset (in contrast to issue187)
+
 
 @require_testdata_path("series", only=["arepoturbbox_series"])
-def test_issue187(testdatapath):
+def test_issue187(testdatapath, capsys):
     sim = load(testdatapath)
     assert isinstance(sim, ArepoSimulation)
     ds = sim.get_dataset(0)
@@ -99,4 +104,14 @@ def test_issue187(testdatapath):
     # make sure this is not cosmological
     assert "Cosmology" not in str(type(ds))
 
-    print(sim.info())
+    # make sure "redshift" is not in info output
+    sim.info()
+
+    captured = capsys.readouterr()
+    assert "=== metadata ===" in captured.out
+    assert "redshift: " not in captured.out
+
+    ds.info()
+    captured = capsys.readouterr()
+    assert "=== Cosmological Simulation ===" not in captured.out
+    assert "z =" not in captured.out
