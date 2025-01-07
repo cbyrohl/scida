@@ -56,7 +56,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.iscatalog = kwargs.pop("iscatalog", False)
         self.header = {}
         self.config = {}
-        self._defaultunitfiles: List[str] = ["units/gadget_cosmological.yaml"]
+        # check whether we have a cosmology mixin
+        self._defaultunitfiles: List[str] = ["units/gadget_base.yaml"]
+        if hasattr(self, "_mixins") and "cosmology" in self._mixins:
+            self._defaultunitfiles += ["units/gadget_cosmological.yaml"]
         self.parameters = {}
         self._grouplengths = {}
         self._subhalolengths = {}
@@ -172,6 +175,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             fileprefix=prfx,
             units=self.withunits,
             ureg=ureg,
+            hints=self.hints,
+            metadata_raw_parent=self._metadata_raw,
         )
         if "Redshift" in self.catalog.header and "Redshift" in self.header:
             z_catalog = self.catalog.header["Redshift"]
@@ -253,12 +258,16 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         candidates = [
             p.replace("snapshot", "group"),
             p.replace("snapshot", "groups"),
+            p.replace("snap", "groups"),
+            p.replace("snap", "group"),
             p.replace("snapdir", "groups").replace("snap", "groups"),
             p.replace("snapdir", "groups").replace("snap", "fof_subhalo_tab"),
         ]
         for candidate in candidates:
             if not os.path.exists(candidate):
                 continue
+            if candidate == p:
+                continue  # do not set catalog to snapshot itself
             if candidate == self.path:
                 continue
             self.catalog = candidate

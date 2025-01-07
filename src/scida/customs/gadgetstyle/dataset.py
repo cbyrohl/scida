@@ -11,6 +11,7 @@ import numpy as np
 
 from scida.discovertypes import CandidateStatus
 from scida.interface import Dataset
+from scida.interfaces.mixins import CosmologyMixin
 from scida.io import load_metadata
 from scida.misc import get_scalar
 
@@ -222,10 +223,12 @@ class GadgetStyleSnapshot(Dataset):
         """
         Set metadata from raw metadata.
         """
+        # check whether we inherit from CosmologyMixin
+        cosmological = issubclass(cls, CosmologyMixin)
         metadata = dict()
         if "/Header" in rawmetadata:
             header = rawmetadata["/Header"]
-            if "Redshift" in header:
+            if cosmological and "Redshift" in header:
                 metadata["redshift"] = get_scalar(header["Redshift"])
                 metadata["z"] = metadata["redshift"]
             if "BoxSize" in header:

@@ -22,22 +22,36 @@ class CosmologyMixin(Mixin):
         Initialize a CosmologyMixin object. Requires _metadata_raw to be filled.
         """
         self.metadata = {}
+        if not hasattr(self, "hints"):
+            self.hints = {}
         if hasattr(self, "_mixins"):
             self._mixins.append(self._mixin_name)
         else:
             self._mixins = [self._mixin_name]
+        self.hints["cosmological"] = True
+
+        # now call the parent class constructor as we need the metadata_raw
         super().__init__(*args, **kwargs)
+
         metadata_raw = self._metadata_raw
         c = get_cosmology_from_rawmetadata(metadata_raw)
+        # sometimes, we want to inherit the cosmology from the parent dataset (e.g. catalogs for snapshots)
+        if c is None and "metadata_raw_parent" in kwargs:
+            c = get_cosmology_from_rawmetadata(kwargs["metadata_raw_parent"])
         self.cosmology = c
+        if c is not None:
+            self.hints["cosmology"] = c
         z = get_redshift_from_rawmetadata(metadata_raw)
         self.redshift = z
         self.metadata["redshift"] = self.redshift
+
         if hasattr(self, "ureg"):
             ureg = self.ureg
             with ignore_warn_redef(ureg):
                 if c is not None:
                     ureg.define("h = %s" % str(c.h))
+                elif "cosmology" in self.hints:
+                    ureg.define("h = %s" % str(self.hints["cosmology"].h))
                 if z is not None:
                     a = 1.0 / (1.0 + z)
                     ureg.define("a = %s" % str(float(a)))
@@ -58,6 +72,58 @@ class CosmologyMixin(Mixin):
             rep += sprint("cosmology =", str(self.cosmology))
         rep += sprint("===============================")
         return rep
+
+    @classmethod
+    def validate(cls, metadata: dict, *args, **kwargs):
+        """
+        Validate whether the dataset is valid for this mixin.
+        Parameters
+        ----------
+        metadata: dict
+        args
+        kwargs
+
+        Returns
+        -------
+        bool
+
+        """
+        valid = False
+        # in case of AREPO/GIZMO, we have the "ComovingIntegrationOn" key in the "Config" group set to 1
+        if "/Config" in metadata:
+            if "ComovingIntegrationOn" in metadata["/Config"]:
+                comoving_integration_on = metadata["/Config"]["ComovingIntegrationOn"]
+                if comoving_integration_on == 1:
+                    return True
+            # do not return False here, because we still might have a legacy run with no ComovingIntegrationOn key
+            # for now, we check legacy runs by consistency of Time and Redshift key
+        if (
+            "/Header" in metadata
+            and "Time" in metadata["/Header"]
+            and "Redshift" in metadata["/Header"]
+        ):
+            time = get_scalar(metadata["/Header"]["Time"])
+            redshift = get_scalar(metadata["/Header"]["Redshift"])
+            # for cosmological runs, time is the scale factor a = 1/(1+z)
+            if np.isclose(time, 1.0 / (1.0 + redshift)):
+                # print("Legacy metadata detected for Cosmology Mixin detection.")
+                valid = True
+        # sometimes, we have a cosmological runs if we only have the redshift key but no time key (e.g. LGalaxies)
+        if "/Header" in metadata and "Redshift" in metadata["/Header"]:
+            if "Time" not in metadata["/Header"]:
+                valid = True
+
+        # in case of SWIFT, we have the "Cosmological run" key in the "Cosmology" group set to 1
+        if "/Cosmology" in metadata:
+            if "Cosmological run" in metadata["/Cosmology"]:
+                # saved as array, thus get first element
+                cosmological_run = get_scalar(
+                    metadata["/Cosmology"]["Cosmological run"]
+                )
+                if cosmological_run == 1 or cosmological_run is True:
+                    return True
+            return False
+        return valid
 
 
 def get_redshift_from_rawmetadata(metadata_raw):

@@ -11,9 +11,9 @@ units:
 fields:
   _all:
     Coordinates: code_length
-    GroupID: none
-    SubhaloID: none
-    ParticleIDs: none
+    #GroupID: none
+    #SubhaloID: none
+    #ParticleIDs: none
     Masses: code_mass
     NumTracers: none
     Potential: (km / s)^2 / a
@@ -23,7 +23,7 @@ fields:
     Velocities: km * a^(1/2) / s
     TimeStep:
     GroupFirstSub: none
-    LocalSubhaloID: none
+    #LocalSubhaloID: none
   Offsets: "no_units" # "no_units" indicates that no field has units in this group
   # only do this for fields that have wrong or no metadata
   PartType0:

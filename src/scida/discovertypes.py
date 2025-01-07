@@ -11,12 +11,36 @@ from inspect import getmro
 from typing import List, Union
 
 from scida.config import get_simulationconfig
-from scida.interfaces.mixins import CosmologyMixin
 from scida.io import load_metadata
 from scida.misc import check_config_for_dataset
-from scida.registries import dataseries_type_registry, dataset_type_registry
+from scida.registries import (
+    dataseries_type_registry,
+    dataset_type_registry,
+    mixin_type_registry,
+)
 
 log = logging.getLogger(__name__)
+
+
+def is_valid_candidate(val):
+    """
+    Map mix of old bool and new Candidate Status enum to bool.
+    Parameters
+    ----------
+    val: bool or CandidateStatus
+        Value to map.
+
+    Returns
+    -------
+    CandidateStatus
+    """
+    if isinstance(val, bool):
+        if val:
+            return CandidateStatus.MAYBE
+        else:
+            return CandidateStatus.NO
+    else:
+        return val
 
 
 class CandidateStatus(Enum):
@@ -51,9 +75,11 @@ def _determine_mixins(path=None, metadata_raw=None):
     assert not (path is None and metadata_raw is None)
     if metadata_raw is None:
         metadata_raw = load_metadata(path, fileprefix=None)
-    z = metadata_raw.get("/Header", {}).get("Redshift", None)
-    if z is not None:
-        mixins.append(CosmologyMixin)
+    # go through registry
+    for mixin in mixin_type_registry.values():
+        valid: bool = mixin.validate(metadata_raw)
+        if valid:
+            mixins.append(mixin)
     return mixins
 
 
@@ -153,36 +179,16 @@ def _determine_type(
     for k, dtype in reg.items():
         valid = CandidateStatus.NO
 
-        def is_valid(val):
-            """
-            Map mix of old bool and new Candidate Status enum to bool.
-            Parameters
-            ----------
-            val: bool or CandidateStatus
-                Value to map.
-
-            Returns
-            -------
-            CandidateStatus
-            """
-            if isinstance(val, bool):
-                if val:
-                    return CandidateStatus.MAYBE
-                else:
-                    return CandidateStatus.NO
-            else:
-                return val
-
         if catch_exception:
             try:
-                valid = is_valid(dtype.validate_path(path, **kwargs))
+                valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
             except Exception as e:
                 log.debug(
                     "Exception raised during validate_path of tested type '%s': %s"
                     % (k, e)
                 )
         else:
-            valid = is_valid(dtype.validate_path(path, **kwargs))
+            valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
         if valid != CandidateStatus.NO:
             available_dtypes.append(k)
             dtypes_status.append(valid)  # will be YES or MAYBE

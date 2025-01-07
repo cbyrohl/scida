@@ -1,0 +1,13 @@
+fields:
+  _all:
+    GroupID: none
+    SubhaloID: none
+    ParticleIDs: none
+    GroupFirstSub: none
+    LocalSubhaloID: none
+    StromgrenSourceID: none
+    ParentID: none
+    TracerID: none
+    GroupOrigHaloID: none
+    SubhaloIDMostbound: none
+    SubhaloOrigHaloID: none

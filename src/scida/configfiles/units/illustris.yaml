@@ -1,0 +1,3 @@
+# file for Illustris simulations, particularly needed for catalogs that do not carry cosmology metadata
+units:
+  h: 0.704

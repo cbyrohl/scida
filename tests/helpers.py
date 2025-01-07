@@ -20,9 +20,9 @@ class DummyGadgetFile:
 
     def create_dummyheader(self):
         header = self.header
-        attrs_float_keys = ["Time", "Redshift", "BoxSize"]
-        for key in attrs_float_keys:
-            header[key] = 0.0
+        header["Time"] = 1.0
+        header["Redshift"] = 0.0
+        header["BoxSize"] = 100.0
         attrs_int_keys = [
             "NumFilesPerSnapshot",
             "Flag_Sfr",
@@ -152,6 +152,7 @@ class DummyTNGFile(DummyGadgetSnapshotFile):
     def create_dummyheader(self, lengths=None):
         super().create_dummyheader(lengths)
         header = self.header
+        header["BoxSize"] = 35000.0
         header["UnitLength_in_cm"] = 3.085678e21
         header["UnitMass_in_g"] = 1.989e43
         header["UnitVelocity_in_cm_per_s"] = 100000.0

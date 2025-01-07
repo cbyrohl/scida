@@ -61,7 +61,7 @@ def str_to_unit(
         raise e
     except pint.errors.UndefinedUnitError as e:
         log.debug(
-            "Cannot parse unit string '%s' from metadata description. Skipping."
+            "Cannot parse unit string '%s' from metadata description due to unknown units. Skipping."
             % unitstr
         )
         raise e
@@ -162,8 +162,8 @@ def extract_units_from_attrs(
         if len(unit) != 1:
             log.debug("Unexpected shape (%s) of unit factor." % unit.shape)
         unit = unit[0]
-    if unit == 0.0:
-        unit = ureg.Quantity(1.0)  # zero makes no sense.
+    if unit in [0.0, 1.0]:
+        unit = ureg.Quantity(1.0)
 
     # TODO: recheck that a and h scaling are added IFF code units are used
     ukeys = ["length", "mass", "velocity", "time", "h", "a"]
@@ -175,7 +175,9 @@ def extract_units_from_attrs(
                 # TODO: double check this...
                 continue  # h scaling absorbed into code units
             aname = k + "_scaling"
-            unit *= udict[k] ** attrs.get(aname, 0.0)
+            exp = attrs.get(aname, 0.0)
+            if exp != 0.0:
+                unit *= udict[k] ** attrs.get(aname, 0.0)
         return unit
 
     unitstr = get_unitstr_from_attrs(attrs)
@@ -262,7 +264,6 @@ def _get_default_units(mode: str, ureg: pint.UnitRegistry) -> dict:
             "velocity": ureg.cm / ureg.s,
             "time": ureg.s,
         }
-
     # common factors in cosmological simulations
     if "h" in ureg:
         udict["h"] = str_to_unit("h", ureg)
@@ -294,6 +295,10 @@ def new_unitregistry() -> UnitRegistry:
     """
     ureg = UnitRegistry(autoconvert_offset_to_baseunit=True)
     ureg.define("unknown = 1.0")
+    # we remove the hours "h" unit, so we cannot confuse it with the Hubble factor
+    del ureg._units["h"]
+    # we remove the year "a" unit, so we cannot confuse it with the scale factor
+    del ureg._units["a"]
     return ureg
 
 
@@ -363,7 +368,13 @@ class UnitMixin(Mixin):
                 unitdefs.update(get_config_fromfile(uf).get("units", {}))
 
         if unitfile != "":
-            unithints = get_config_fromfile(unitfile)
+            if isinstance(unitfile, list):
+                unithints = combine_configs(
+                    [get_config_fromfile(uf) for uf in unitfile],
+                    mode="overwrite_values",
+                )
+            else:
+                unithints = get_config_fromfile(unitfile)
             newdefs = unithints.get("units", {})
             if newdefs is None:
                 newdefs = {}
@@ -661,7 +672,10 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
     bool:
         Whether the units agree.
     """
-    without_units = unit == "none" or unit_metadata == "none"  # explicitly no units
+    without_units = isinstance(unit, str) and unit == "none"
+    without_units |= (
+        isinstance(unit_metadata, str) and unit_metadata == "none"
+    )  # explicitly no units
     if unit is not None and unit_metadata is not None:
         msg = None
         if without_units and unit == unit_metadata:
@@ -675,6 +689,7 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
             )
         else:
             # check whether both metadata and unit file agree
+            print(unit, "vs.", unit_metadata)
             val_cgs_uf = unit.to_base_units().magnitude
             val_cgs_md = unit_metadata.to_base_units().magnitude
             if not override and not np.isclose(val_cgs_uf, val_cgs_md, rtol=1e-3):

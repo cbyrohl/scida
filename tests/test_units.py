@@ -27,6 +27,14 @@ def test_load_codeunits(tngfile_dummy):
     p = tngfile_dummy.path
     ds = load(p, units=True)
     u = ds.ureg
+    #
+    if "code_velocity" not in u:
+        u.define("code_velocity = 1.0 * cm/s")
+    if "code_length" not in u:
+        u.define("code_length = 1.0 * cm")
+    if "code_mass" not in u:
+        u.define("code_mass = 1.0 * g")
+
     # test units of some fields
     ptype = "PartType0"
     gas = ds.data[ptype]
