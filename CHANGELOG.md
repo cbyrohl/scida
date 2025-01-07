@@ -8,10 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4] - 2025-01-07
+
+### Added
+
+- THOR code output support
+- unitfile for MCST galaxy formation model runs
+- add GroupID/SubhaloID field to particles ordered by groups (PR #178)
+
+### Fixed
+
+- get_dataset float compare fix (PR #181)
+- fix deprec warnings (PR #182)
+
+### Changed
+- make cosmology discovery more flexible (PR #188)
+- add TNG-style temperature only if needed fields are available (PR #185)
+- accept single chunk snapshots and allow h5 hdf5 file extension
+
 
 ## [0.3.3] - 2024-09-06
 
 ### Added
+
 - python 3.12 support
 - numpy 2.0 support
 - unit config files also search relative to working directory (PR #171)
