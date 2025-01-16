@@ -689,7 +689,6 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
             )
         else:
             # check whether both metadata and unit file agree
-            print(unit, "vs.", unit_metadata)
             val_cgs_uf = unit.to_base_units().magnitude
             val_cgs_md = unit_metadata.to_base_units().magnitude
             if not override and not np.isclose(val_cgs_uf, val_cgs_md, rtol=1e-3):
