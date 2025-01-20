@@ -208,6 +208,18 @@ testdata:
       - areposnapshot_withcatalog|F|1|2
     fn: minimal_TNG50-1_group_z3.hdf5
 
+  TNG100-3_api_cutout_z0:
+    types:
+      - interface
+      - areposnapshot
+    fn: tngapi_tng100-3_snap99_cutout_sid42.hdf5
+
+  TNG100-1_api_cutout_z0:
+    types:
+      - interface
+      - areposnapshot
+    fn: tngapi_tng100-1_snap99_cutout_hid97993.hdf5
+
   TNG50-1_group_z0_minimal:
     types:
       - interface

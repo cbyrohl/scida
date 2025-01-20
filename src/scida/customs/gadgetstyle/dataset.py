@@ -123,13 +123,14 @@ class GadgetStyleSnapshot(Dataset):
             metadata_raw = load_metadata(path, **kwargs)
             # need some silly combination of attributes to be sure
             if all([k in metadata_raw for k in ["/Header"]]):
+                # tng-project.org api snapshots do not have "NumPart_Total" in header
+                is_zoom = "CutoutID" in metadata_raw["/Header"]
+                headerattrs = ["NumPart_ThisFile"]
+                if not is_zoom:
+                    headerattrs.append("NumPart_Total")
+
                 # identifying snapshot or group catalog
-                is_snap = all(
-                    [
-                        k in metadata_raw["/Header"]
-                        for k in ["NumPart_ThisFile", "NumPart_Total"]
-                    ]
-                )
+                is_snap = all([k in metadata_raw["/Header"] for k in headerattrs])
                 is_grp = all(
                     [
                         k in metadata_raw["/Header"]
