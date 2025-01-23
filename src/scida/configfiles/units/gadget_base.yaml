@@ -11,3 +11,5 @@ fields:
     GroupOrigHaloID: none
     SubhaloIDMostbound: none
     SubhaloOrigHaloID: none
+    SubhaloFlag: none
+    BH_CGM_ZOOM_Flag: none
