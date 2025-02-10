@@ -1007,6 +1007,7 @@ def _get_chunkedfiles(
     # determine numbers where possible
     numbers = []
     files_numbered = []
+    is_numbered = True  # default
     for f in files:
         try:
             numbers.append(
@@ -1015,10 +1016,24 @@ def _get_chunkedfiles(
             files_numbered.append(f)
         except ValueError:
             # if this fails, we might have the format prefix.SNAPID.FORMAT in a single file (otherwise ignore file)
-            if len(files) == 1:
-                numbers.append(0)
-                files_numbered.append(f)
+            if not is_numbered:  # only do this once (select one unnumbered file)
+                continue
+            if len(files) != 1:
+                log.debug(
+                    "Multiple files available, even though not numbered. Picking first candidate."
+                )
+            numbers.append(np.inf)
+            files_numbered.append(f)
+            is_numbered = False
     sortidx = np.argsort(numbers)
+    if len(numbers) > 1 and not is_numbered:
+        # only legit combination if this is the "summary file"
+        # e.g. files are "base.0.h5", "base.1.h5", ..., and summary file is "base.h5"
+        basename = files_numbered[0].split(".")[0]
+        if not np.all([f.split(".")[0] == basename for f in files_numbered]):
+            msg = "Cannot mix numbered and non-numbered files. Aborting."
+            raise ValueError(msg)
+        sortidx = sortidx[:-1]  # remove the last element, which is the summary file
     files_numbered = np.array(files_numbered)
     files = files_numbered[sortidx]
     return files
