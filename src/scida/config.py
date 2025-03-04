@@ -48,11 +48,7 @@ def get_config(reload: bool = False, update_global=True) -> dict:
     """
     global _conf
     prefix = "SCIDA_"
-    envconf = {
-        k.replace(prefix, "").lower(): v
-        for k, v in os.environ.items()
-        if k.startswith(prefix)
-    }
+    envconf = {k.replace(prefix, "").lower(): v for k, v in os.environ.items() if k.startswith(prefix)}
 
     # in any case, we make sure that there is some config in the default path.
     path_confdir = _access_confdir()
@@ -66,10 +62,7 @@ def get_config(reload: bool = False, update_global=True) -> dict:
         return _conf
     config = get_config_fromfile(path)
     if config.get("copied_default", False):
-        print(
-            "Warning! Using default configuration. Please adjust/replace in '%s'."
-            % path
-        )
+        print("Warning! Using default configuration. Please adjust/replace in '%s'." % path)
 
     config.update(**envconf)
     if update_global:
@@ -118,9 +111,7 @@ def combine_configs(configs: List[Dict], mode="overwrite_keys") -> Dict:
         raise ValueError("Unknown mode '%s'" % mode)
     conf = configs[0]
     for c in configs[1:]:
-        merge_dicts_recursively(
-            conf, c, mergefunc_keys=mergefunc_keys, mergefunc_values=mergefunc_values
-        )
+        merge_dicts_recursively(conf, c, mergefunc_keys=mergefunc_keys, mergefunc_values=mergefunc_values)
     return conf
 
 

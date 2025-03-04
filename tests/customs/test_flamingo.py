@@ -10,9 +10,7 @@ from tests.testdata_properties import require_testdata_path
 
 def check_flamingosnap(obj: SwiftSnapshot, obj_wu: SwiftSnapshot):
     assert isinstance(obj, SwiftSnapshot)
-    assert all(
-        [k in obj.data for k in ["PartType0", "PartType4", "PartType5", "PartType6"]]
-    )
+    assert all([k in obj.data for k in ["PartType0", "PartType4", "PartType5", "PartType6"]])
 
     z = obj._metadata_raw["/Header"]["Redshift"]
     a = 1.0 / (1.0 + z)
@@ -52,9 +50,7 @@ def check_flamingosnap(obj: SwiftSnapshot, obj_wu: SwiftSnapshot):
             assert not hasattr(d[k], "units")  # we do not want units for IDs
 
 
-@require_testdata_path(
-    "interface", only=["FLAMINGO_snapshot_reduced", "FLAMINGO_snapshot_minimal"]
-)
+@require_testdata_path("interface", only=["FLAMINGO_snapshot_reduced", "FLAMINGO_snapshot_minimal"])
 def test_snapshot(testdatapath):
     """Test loading of a full snapshot"""
     obj: SwiftSnapshot = load(testdatapath, units=True)

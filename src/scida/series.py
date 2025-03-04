@@ -103,7 +103,7 @@ class DatasetSeries(object):
         overwrite_cache=False,
         lazy=True,  # lazy will only initialize data sets on demand.
         names=None,
-        **interface_kwargs
+        **interface_kwargs,
     ):
         """
 
@@ -152,12 +152,8 @@ class DatasetSeries(object):
         if self.metadata is None:
             print("Have not cached this data series. Can take a while.")
             dct = {}
-            for i, (path, d) in enumerate(
-                tqdm(zip(self.paths, self.datasets), total=len(self.paths))
-            ):
-                rawmeta = load_metadata(
-                    path, choose_prefix=True, use_cachefile=not (overwrite_cache)
-                )
+            for i, (path, d) in enumerate(tqdm(zip(self.paths, self.datasets), total=len(self.paths))):
+                rawmeta = load_metadata(path, choose_prefix=True, use_cachefile=not (overwrite_cache))
                 # class method does not initiate obj.
                 dct[i] = d._clean_metadata_from_raw(rawmeta)
             self.metadata = dct
@@ -237,9 +233,7 @@ class DatasetSeries(object):
                 if (not np.isscalar(m1)) or (np.isscalar(m1) and m1 == m2):
                     rep += sprint("%s: %s" % (k, minmax_dct[k][0]))
                 else:
-                    rep += sprint(
-                        "%s: %s -- %s" % (k, minmax_dct[k][0], minmax_dct[k][1])
-                    )
+                    rep += sprint("%s: %s -- %s" % (k, minmax_dct[k][0], minmax_dct[k][1]))
             rep += sprint("============")
         print(rep)
 
@@ -252,9 +246,7 @@ class DatasetSeries(object):
         None
 
         """
-        raise AttributeError(
-            "Series do not have 'data' attribute. Load a dataset from series.get_dataset()."
-        )
+        raise AttributeError("Series do not have 'data' attribute. Load a dataset from series.get_dataset().")
 
     def _repr_dict(self) -> Dict[str, str]:
         """
@@ -334,17 +326,9 @@ class DatasetSeries(object):
         if pattern is None:
             pattern = "*"
         paths = [f for f in p.glob(pattern)]
-        return cls(
-            paths, *interface_args, datasetclass=datasetclass, **interface_kwargs
-        )
+        return cls(paths, *interface_args, datasetclass=datasetclass, **interface_kwargs)
 
-    def get_dataset(
-        self,
-        index: Optional[int] = None,
-        name: Optional[str] = None,
-        reltol=1e-2,
-        **kwargs
-    ):
+    def get_dataset(self, index: Optional[int] = None, name: Optional[str] = None, reltol=1e-2, **kwargs):
         """
         Get dataset by some metadata property. In the base class, we go by list index.
 
@@ -387,9 +371,7 @@ class DatasetSeries(object):
             return self.datasets[self.names.index(name)]
         if len(kwargs) > 0 and self.metadata is None:
             if self.lazy:
-                raise ValueError(
-                    "Cannot select by given keys before dataset evaluation."
-                )
+                raise ValueError("Cannot select by given keys before dataset evaluation.")
             raise ValueError("Unknown error.")  # should not happen?
 
         # find candidates from metadata
@@ -432,13 +414,10 @@ class DatasetSeries(object):
         # tolerance check
         for k in props_compare:
             if not np.isclose(kwargs[k], self.metadata[index][k], rtol=reltol):
-                msg = (
-                    "Candidate does not match tolerance for %s (%s vs %s requested)"
-                    % (
-                        k,
-                        self.metadata[index][k],
-                        kwargs[k],
-                    )
+                msg = "Candidate does not match tolerance for %s (%s vs %s requested)" % (
+                    k,
+                    self.metadata[index][k],
+                    kwargs[k],
                 )
                 raise ValueError(msg)
         return self.get_dataset(index=index)

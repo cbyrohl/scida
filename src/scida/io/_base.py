@@ -77,15 +77,7 @@ class FITSLoader(Loader):
         super().__init__(path)
         self.location = self.path
 
-    def load(
-        self,
-        overwrite_cache=False,
-        fileprefix="",
-        token="",
-        chunksize="auto",
-        virtualcache=False,
-        **kwargs
-    ):
+    def load(self, overwrite_cache=False, fileprefix="", token="", chunksize="auto", virtualcache=False, **kwargs):
         """
         Load data from FITS file.
         Parameters
@@ -118,9 +110,7 @@ class FITSLoader(Loader):
 
         derivedfields_kwargs = kwargs.get("derivedfields_kwargs", {})
         withunits = kwargs.get("withunits", False)
-        rootcontainer = FieldContainer(
-            fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits
-        )
+        rootcontainer = FieldContainer(fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits)
 
         for name, darr in darrs.items():
             rootcontainer[name] = darr
@@ -183,15 +173,7 @@ class HDF5Loader(Loader):
         super().__init__(path)
         self.location = ""
 
-    def load(
-        self,
-        overwrite_cache=False,
-        fileprefix="",
-        token="",
-        chunksize="auto",
-        virtualcache=False,
-        **kwargs
-    ):
+    def load(self, overwrite_cache=False, fileprefix="", token="", chunksize="auto", virtualcache=False, **kwargs):
         """
         Load data from HDF5 file.
         Parameters
@@ -219,9 +201,7 @@ class HDF5Loader(Loader):
         tree = {}
         walk_hdf5file(self.location, tree=tree)
         file = h5py.File(self.location, "r")
-        data, metadata = load_datadict_old(
-            self.path, file, token=token, chunksize=chunksize, **kwargs
-        )
+        data, metadata = load_datadict_old(self.path, file, token=token, chunksize=chunksize, **kwargs)
         self.file = file
         return data, metadata
 
@@ -277,15 +257,7 @@ class ZarrLoader(Loader):
         super().__init__(path)
         self.location = ""
 
-    def load(
-        self,
-        overwrite_cache=False,
-        fileprefix="",
-        token="",
-        chunksize="auto",
-        virtualcache=False,
-        **kwargs
-    ):
+    def load(self, overwrite_cache=False, fileprefix="", token="", chunksize="auto", virtualcache=False, **kwargs):
         """
         Load data from Zarr file.
 
@@ -314,12 +286,7 @@ class ZarrLoader(Loader):
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
         data, metadata = load_datadict_old(
-            self.path,
-            self.file,
-            token=token,
-            chunksize=chunksize,
-            filetype="zarr",
-            **kwargs
+            self.path, self.file, token=token, chunksize=chunksize, filetype="zarr", **kwargs
         )
         return data, metadata
 
@@ -382,9 +349,7 @@ class ChunkedHDF5Loader(Loader):
             path = cachefp
         else:
             # get data from first file in list
-            paths = self.get_chunkedfiles(
-                fileprefix, choose_prefix=kwargs.get("choose_prefix", False)
-            )
+            paths = self.get_chunkedfiles(fileprefix, choose_prefix=kwargs.get("choose_prefix", False))
             if len(paths) == 0:
                 raise ValueError("No files for prefix '%s' found." % fileprefix)
             path = paths[0]
@@ -400,7 +365,7 @@ class ChunkedHDF5Loader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Load data from chunked HDF5 file.
@@ -451,22 +416,16 @@ class ChunkedHDF5Loader(Loader):
             )
 
         try:
-            data, metadata = self.load_cachefile(
-                cachefp, token=token, chunksize=chunksize, **kwargs
-            )
+            data, metadata = self.load_cachefile(cachefp, token=token, chunksize=chunksize, **kwargs)
         except InvalidCacheError:
             # if we get an error, we try to create a new cache file (once)
             log.info("Invalid cache file, attempting to create new one.")
             os.remove(cachefp)
             self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
-            data, metadata = self.load_cachefile(
-                cachefp, token=token, chunksize=chunksize, **kwargs
-            )
+            data, metadata = self.load_cachefile(cachefp, token=token, chunksize=chunksize, **kwargs)
         return data, metadata
 
-    def get_chunkedfiles(
-        self, fileprefix: Optional[str] = "", choose_prefix=False
-    ) -> list:
+    def get_chunkedfiles(self, fileprefix: Optional[str] = "", choose_prefix=False) -> list:
         """
         Get all files in directory with given prefix.
         Parameters
@@ -479,13 +438,9 @@ class ChunkedHDF5Loader(Loader):
         -------
 
         """
-        return _get_chunkedfiles(
-            self.path, fileprefix=fileprefix, choose_prefix=choose_prefix
-        )
+        return _get_chunkedfiles(self.path, fileprefix=fileprefix, choose_prefix=choose_prefix)
 
-    def create_cachefile(
-        self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False
-    ):
+    def create_cachefile(self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False):
         """
         Create a cache file from the chunked HDF5 files.
         Parameters
@@ -517,9 +472,7 @@ class ChunkedHDF5Loader(Loader):
             # no filepath available
             self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
             self.location = self.tempfile.name
-            log.warning(
-                "No caching directory specified. Initial file read will remain slow."
-            )
+            log.warning("No caching directory specified. Initial file read will remain slow.")
 
         try:
             create_mergedhdf5file(cachefp, files, virtual=virtualcache)
@@ -553,9 +506,7 @@ class ChunkedHDF5Loader(Loader):
         """
         try:
             self.file = h5py.File(location, "r")
-        except (
-            OSError
-        ) as e:  # file potentially corrupted, raise InvalidCacheError and potentially recover
+        except OSError as e:  # file potentially corrupted, raise InvalidCacheError and potentially recover
             raise InvalidCacheError(
                 """Cache file '%s' might be invalid. An OSError '%s' was raised.
                 Delete file and try again."""
@@ -566,13 +517,9 @@ class ChunkedHDF5Loader(Loader):
         if "_cachingcomplete" in hf.attrs:
             cache_valid = hf.attrs["_cachingcomplete"]
         if not cache_valid:
-            raise InvalidCacheError(
-                "Cache file '%s' is not valid. Delete file and try again." % location
-            )
+            raise InvalidCacheError("Cache file '%s' is not valid. Delete file and try again." % location)
 
-        datadict = load_datadict_old(
-            location, self.file, token=token, chunksize=chunksize, **kwargs
-        )
+        datadict = load_datadict_old(location, self.file, token=token, chunksize=chunksize, **kwargs)
         return datadict
 
 
@@ -631,9 +578,7 @@ def load_datadict_old(
         raise ValueError("Unknown filetype ''" % filetype)
 
     # hosting all data
-    rootcontainer = FieldContainer(
-        fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits
-    )
+    rootcontainer = FieldContainer(fieldrecipes_kwargs=derivedfields_kwargs, withunits=withunits)
 
     datagroups = []  # names of groups with datasets
     # othergroups = []  # names of groups without datasets
@@ -684,10 +629,7 @@ def load_datadict_old(
             hds = file[dataset[0]]
             dt = hds.dtype
             if h5py.check_vlen_dtype(dt):
-                log.warning(
-                    "HDF5 vlen dtypes not supported. Skip loading field '%s'"
-                    % fieldname
-                )
+                log.warning("HDF5 vlen dtypes not supported. Skip loading field '%s'" % fieldname)
                 continue
 
         lz = lazy and i > 0  # need one non-lazy field (?)
@@ -831,9 +773,7 @@ def load(path, **kwargs):
     return data, metadata, file, tmpfile
 
 
-def _cachefile_available_in_path(
-    path: str, fileprefix: Optional[str] = "", **kwargs
-) -> Union[bool, str]:
+def _cachefile_available_in_path(path: str, fileprefix: Optional[str] = "", **kwargs) -> Union[bool, str]:
     """
     Check whether a virtual merged HDF5 file is present in folder.
     Parameters
@@ -913,16 +853,7 @@ def _add_hdf5arr_to_fieldcontainer(
         container[fieldname] = ds
         return
 
-    def field(
-        arrs,
-        snap=None,
-        h5path="",
-        chunksize="",
-        name="",
-        inline_array=False,
-        file=None,
-        **kwargs
-    ):
+    def field(arrs, snap=None, h5path="", chunksize="", name="", inline_array=False, file=None, **kwargs):
         """
         helper function to load resource field into dask array
         """
@@ -943,14 +874,10 @@ def _add_hdf5arr_to_fieldcontainer(
         inline_array=inline_array,
         file=file,
     )
-    container.register_field(
-        name=fieldname, description=fieldname + ": lazy field from disk"
-    )(fnc)
+    container.register_field(name=fieldname, description=fieldname + ": lazy field from disk")(fnc)
 
 
-def _get_chunkedfiles(
-    path, fileprefix: Optional[str] = "", choose_prefix=False
-) -> list:
+def _get_chunkedfiles(path, fileprefix: Optional[str] = "", choose_prefix=False) -> list:
     """
     Get all files in directory with given prefix.
     Parameters
@@ -967,9 +894,7 @@ def _get_chunkedfiles(
     fns = [f for f in os.listdir(path)]
     files = [join(path, f) for f in fns]
     files = [
-        f
-        for i, f in enumerate(files)
-        if not any(fns[i].startswith(start) for start in [".", "bak"])
+        f for i, f in enumerate(files) if not any(fns[i].startswith(start) for start in [".", "bak"])
     ]  # ignore hidden files
     files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
     if fileprefix is not None:
@@ -999,19 +924,14 @@ def _get_chunkedfiles(
             files = np.array([f for f in files if f.startswith(prfx)])
         else:
             # print("Available prefixes:", set(prfxs))
-            msg = (
-                "More than one file prefix in directory '%s', specify 'fileprefix'."
-                % path
-            )
+            msg = "More than one file prefix in directory '%s', specify 'fileprefix'." % path
             raise ValueError(msg)
     # determine numbers where possible
     numbers = []
     files_numbered = []
     for f in files:
         try:
-            numbers.append(
-                int(f.split(".")[-2])
-            )  # first check that we have the format prefix_SNAPID.CHUNKID.FORMAT
+            numbers.append(int(f.split(".")[-2]))  # first check that we have the format prefix_SNAPID.CHUNKID.FORMAT
             files_numbered.append(f)
         except ValueError:
             # if this fails, we might have the format prefix.SNAPID.FORMAT in a single file (otherwise ignore file)

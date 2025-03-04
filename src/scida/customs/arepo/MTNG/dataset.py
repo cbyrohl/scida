@@ -74,9 +74,7 @@ class MTNGArepoSnapshot(ArepoSnapshot):
         self.merge_data(self.mostbound, fieldname_suffix="_mostbound")
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for the MTNG-Arepo snapshot class.
 
@@ -93,9 +91,7 @@ class MTNGArepoSnapshot(ArepoSnapshot):
             Whether the path is a candidate for this dataset class.
 
         """
-        tkwargs = dict(
-            fileprefix=cls._fileprefix, fileprefix_catalog=cls._fileprefix_catalog
-        )
+        tkwargs = dict(fileprefix=cls._fileprefix, fileprefix_catalog=cls._fileprefix_catalog)
         tkwargs.update(**kwargs)
         try:
             valid = super().validate_path(path, *args, **tkwargs)
@@ -146,9 +142,7 @@ class MTNGArepoCatalog(ArepoCatalog):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for the MTNG-Arepo catalog class.
 

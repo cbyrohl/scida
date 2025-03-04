@@ -132,9 +132,7 @@ def walk_hdf5file(fn, tree, get_attrs=True):
     return tree
 
 
-def create_mergedhdf5file(
-    fn, files, max_workers=None, virtual=True, groupwise_shape=False
-):
+def create_mergedhdf5file(fn, files, max_workers=None, virtual=True, groupwise_shape=False):
     """
     Creates a virtual hdf5 file from list of given files. Virtual by default.
 
@@ -221,9 +219,7 @@ def create_mergedhdf5file(
             else:
                 hf.create_group(group)
             groupfields = [
-                field
-                for field in shapes.keys()
-                if field.startswith(group) and field.count("/") - 1 == group.count("/")
+                field for field in shapes.keys() if field.startswith(group) and field.count("/") - 1 == group.count("/")
             ]
             if len(groupfields) == 0:
                 continue
@@ -233,9 +229,7 @@ def create_mergedhdf5file(
                 # for virtual datasets, iterate over all fields and concat each file to virtual dataset
                 for field in groupfields:
                     totentries = np.array([k[1] for k in chunks[field]]).sum()
-                    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][
-                        1:
-                    ]
+                    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
 
                     # create virtual sources
                     vsources = []
@@ -248,9 +242,7 @@ def create_mergedhdf5file(
                                 dtype=dtypes[field],
                             )
                         )
-                    layout = h5py.VirtualLayout(
-                        shape=tuple(newshape), dtype=dtypes[field]
-                    )
+                    layout = h5py.VirtualLayout(shape=tuple(newshape), dtype=dtypes[field])
 
                     # fill virtual dataset
                     offset = 0
@@ -258,9 +250,7 @@ def create_mergedhdf5file(
                         length = vsource.shape[0]
                         layout[offset : offset + length] = vsource
                         offset += length
-                    assert (
-                        newshape[0] == offset
-                    )  # make sure we filled the array up fully.
+                    assert newshape[0] == offset  # make sure we filled the array up fully.
                     hf.create_virtual_dataset(field, layout)
             else:  # copied dataset. For performance, we iterate differently: Loop over each file's fields
                 for field in groupfields:
@@ -286,18 +276,14 @@ def create_mergedhdf5file(
 
         # write the attributes
         # find attributes that change across data sets
-        attrs_key_lists = [
-            list(v["attrs"].keys()) for v in result
-        ]  # attribute paths for each file
+        attrs_key_lists = [list(v["attrs"].keys()) for v in result]  # attribute paths for each file
         attrspaths_all = set().union(*attrs_key_lists)
         attrspaths_intersec = set(attrspaths_all).intersection(*attrs_key_lists)
         attrspath_diff = attrspaths_all.difference(attrspaths_intersec)
         if attrspaths_all != attrspaths_intersec:
             # if difference only stems from missing datasets (and their assoc. attrs); thats fine
             if not attrspath_diff.issubset(datasets):
-                raise NotImplementedError(
-                    "Some attribute paths not present in each partial data file."
-                )
+                raise NotImplementedError("Some attribute paths not present in each partial data file.")
         # check for common key+values across all files
         attrs_same = {}
         attrs_differ = {}
@@ -307,13 +293,7 @@ def create_mergedhdf5file(
         for apath in sorted(attrspaths_all):
             attrs_same[apath] = {}
             attrs_differ[apath] = {}
-            attrsnames = set().union(
-                *[
-                    result[i]["attrs"][apath]
-                    for i in range(nfiles)
-                    if apath in result[i]["attrs"]
-                ]
-            )
+            attrsnames = set().union(*[result[i]["attrs"][apath] for i in range(nfiles) if apath in result[i]["attrs"]])
             for k in attrsnames:
                 # we ignore apaths and k existing in some files.
                 attrvallist = [

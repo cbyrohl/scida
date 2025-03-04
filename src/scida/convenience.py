@@ -25,9 +25,7 @@ from scida.series import DatasetSeries
 log = logging.getLogger(__name__)
 
 
-def download_and_extract(
-    url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False
-):
+def download_and_extract(url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False):
     """
     Download and extract a file from a given url.
     Parameters
@@ -139,16 +137,12 @@ def find_path(path, overwrite=False) -> str:
             # dataset on the internet
             savepath = config.get("download_path", None)
             if savepath is None:
-                print(
-                    "Have not specified 'download_path' in config. Using 'cache_path' instead."
-                )
+                print("Have not specified 'download_path' in config. Using 'cache_path' instead.")
                 savepath = config.get("cache_path")
             savepath = os.path.expanduser(savepath)
             savepath = pathlib.Path(savepath)
             savepath.mkdir(parents=True, exist_ok=True)
-            urlhash = str(
-                int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8
-            )
+            urlhash = str(int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8)
             savepath = savepath / ("download" + urlhash)
             filename = "archive.tar.gz"
             if not savepath.exists():
@@ -164,9 +158,7 @@ def find_path(path, overwrite=False) -> str:
             foldercontent = [f for f in savepath.glob("*")]
             if len(foldercontent) == 0:
                 savepath = savepath / filename
-                extractpath = download_and_extract(
-                    path, savepath, progressbar=True, overwrite=overwrite
-                )
+                extractpath = download_and_extract(path, savepath, progressbar=True, overwrite=overwrite)
             else:
                 extractpath = savepath
             extractpath = pathlib.Path(extractpath)
@@ -175,9 +167,7 @@ def find_path(path, overwrite=False) -> str:
             nfolders = len([f for f in extractpath.glob("*") if f.is_dir()])
             nobjects = len([f for f in extractpath.glob("*") if f.is_dir()])
             if nobjects == 1 and nfolders == 1:
-                extractpath = (
-                    extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
-                )
+                extractpath = extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
             path = extractpath
         elif databackend == "testdata":
             path = get_testdata(dataname)
@@ -188,9 +178,7 @@ def find_path(path, overwrite=False) -> str:
                 raise ValueError("Unknown resource '%s'" % databackend)
             r = resources[databackend]
             if dataname not in r:
-                raise ValueError(
-                    "Unknown dataset '%s' in resource '%s'" % (dataname, databackend)
-                )
+                raise ValueError("Unknown dataset '%s' in resource '%s'" % (dataname, databackend))
             path = os.path.expanduser(r[dataname]["path"])
     else:
         found = False
@@ -212,7 +200,7 @@ def load(
     unitfile: str = "",
     overwrite: bool = False,
     force_class: Optional[object] = None,
-    **kwargs
+    **kwargs,
 ):
     """
     Load a dataset or dataset series from a given path.

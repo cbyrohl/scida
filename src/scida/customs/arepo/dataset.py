@@ -125,9 +125,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                     if deps_fulfilled:
                         self.data.register_field(parttype, name=kfield)(func)
 
-    def load_catalog(
-        self, overwrite_cache=False, units=False, cosmological=False, catalog_cls=None
-    ):
+    def load_catalog(self, overwrite_cache=False, units=False, cosmological=False, catalog_cls=None):
         """
         Load the group catalog.
 
@@ -182,10 +180,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             z_catalog = self.catalog.header["Redshift"]
             z_snap = self.header["Redshift"]
             if not np.isclose(z_catalog, z_snap):
-                raise ValueError(
-                    "Redshift mismatch between snapshot and catalog: "
-                    f"{z_snap:.2f} vs {z_catalog:.2f}"
-                )
+                raise ValueError(f"Redshift mismatch between snapshot and catalog: {z_snap:.2f} vs {z_catalog:.2f}")
 
         # merge data
         self.merge_data(self.catalog)
@@ -200,9 +195,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.merge_hints(self.catalog)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> CandidateStatus:
         """
         Validate a path to use for instantiation of this class.
 
@@ -321,26 +314,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 if not (key.startswith("PartType")):
                     continue
                 uid = self.data[key]["uid"]
-                self.data[key]["GroupID"] = self.misc["unboundID"] * da.ones_like(
-                    uid, dtype=np.int64
-                )
-                self.data[key]["SubhaloID"] = self.misc["unboundID"] * da.ones_like(
-                    uid, dtype=np.int64
-                )
+                self.data[key]["GroupID"] = self.misc["unboundID"] * da.ones_like(uid, dtype=np.int64)
+                self.data[key]["SubhaloID"] = self.misc["unboundID"] * da.ones_like(uid, dtype=np.int64)
             return
 
         glen = self.data["Group"]["GroupLenType"]
         ngrp = glen.shape[0]
-        da_halocelloffsets = da.concatenate(
-            [
-                np.zeros((1, 6), dtype=np.int64),
-                da.cumsum(glen, axis=0, dtype=np.int64),
-            ]
-        )
+        da_halocelloffsets = da.concatenate([
+            np.zeros((1, 6), dtype=np.int64),
+            da.cumsum(glen, axis=0, dtype=np.int64),
+        ])
         # remove last entry to match shapematch shape
-        self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(
-            glen.chunks
-        )
+        self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(glen.chunks)
         halocelloffsets = da_halocelloffsets.rechunk(-1)
 
         index_unbound = self.misc["unboundID"]
@@ -352,9 +337,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             if "uid" not in self.data[key]:
                 continue  # can happen for empty containers
             gidx = self.data[key]["uid"]
-            hidx = compute_haloindex(
-                gidx, halocelloffsets[:, num], index_unbound=index_unbound
-            )
+            hidx = compute_haloindex(gidx, halocelloffsets[:, num], index_unbound=index_unbound)
             self.data[key]["GroupID"] = hidx
 
         # Subhalo ID
@@ -362,18 +345,14 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             for key in self.data:
                 if not (key.startswith("PartType")):
                     continue
-                self.data[key]["SubhaloID"] = -1 * da.ones_like(
-                    da[key]["uid"], dtype=np.int64
-                )
+                self.data[key]["SubhaloID"] = -1 * da.ones_like(da[key]["uid"], dtype=np.int64)
             return
 
         shnr_attr = "SubhaloGrNr"
         if shnr_attr not in self.data["Subhalo"]:
             shnr_attr = "SubhaloGroupNr"  # what MTNG does
         if shnr_attr not in self.data["Subhalo"]:
-            raise ValueError(
-                f"Could not find 'SubhaloGrNr' or 'SubhaloGroupNr' in {self.catalog}"
-            )
+            raise ValueError(f"Could not find 'SubhaloGrNr' or 'SubhaloGroupNr' in {self.catalog}")
 
         subhalogrnr = self.data["Subhalo"][shnr_attr]
         subhalocellcounts = self.data["Subhalo"]["SubhaloLenType"]
@@ -434,9 +413,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             # calculate first subhalo of each halo that a particle belongs to
             self.add_groupquantity_to_particles("GroupFirstSub", parttype=key)
             pdata["SubhaloID"] = pdata["GroupFirstSub"] + pdata["LocalSubhaloID"]
-            pdata["SubhaloID"] = da.where(
-                pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"]
-            )
+            pdata["SubhaloID"] = da.where(pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"])
 
         # add GroupID and SubhaloID to catalogs/groups themselves
         self.data["Group"]["GroupID"] = self.data["Group"]["uid"]
@@ -522,13 +499,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         None
         """
         pdata = self.data[parttype]
-        assert (
-            name not in pdata
-        )  # we simply map the name from Group to Particle for now. Should work (?)
+        assert name not in pdata  # we simply map the name from Group to Particle for now. Should work (?)
         glen = self.data["Group"]["GroupLenType"]
-        da_halocelloffsets = da.concatenate(
-            [np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0)]
-        )
+        da_halocelloffsets = da.concatenate([np.zeros((1, 6), dtype=np.int64), da.cumsum(glen, axis=0)])
         if "GroupOffsetsType" not in self.data["Group"]:
             self.data["Group"]["GroupOffsetsType"] = da_halocelloffsets[:-1].rechunk(
                 glen.chunks
@@ -537,9 +510,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         gidx = pdata["uid"]
         num = int(parttype[-1])
-        hquantity = compute_haloquantity(
-            gidx, halocelloffsets[:, num], self.data["Group"][name]
-        )
+        hquantity = compute_haloquantity(gidx, halocelloffsets[:, num], self.data["Group"][name])
         pdata[name] = hquantity
 
     def get_grouplengths(self, parttype="PartType0"):
@@ -585,9 +556,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
     @property
     def _groupoffsets(self):
         lengths = self._grouplengths
-        offsets = {
-            k: np.concatenate([[0], np.cumsum(v)[:-1]]) for k, v in lengths.items()
-        }
+        offsets = {k: np.concatenate([[0], np.cumsum(v)[:-1]]) for k, v in lengths.items()}
         return offsets
 
     def get_subhalolengths(self, parttype="PartType0"):
@@ -690,15 +659,10 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 inputfields = [field_mag.name]
             elif isinstance(field_mag, np.ndarray):
                 field_u = fields.units
-                arrdict = dict(
-                    daskarr=da.from_array(field_mag, chunks="auto") * field_u
-                )
+                arrdict = dict(daskarr=da.from_array(field_mag, chunks="auto") * field_u)
                 inputfields = ["field"]
             else:
-                raise ValueError(
-                    "Unknown input type '%s' decorated with pint quantity."
-                    % type(field_mag)
-                )
+                raise ValueError("Unknown input type '%s' decorated with pint quantity." % type(field_mag))
         elif isinstance(fields, np.ndarray):
             arrdict = dict(daskarr=da.from_array(fields, chunks="auto"))
             inputfields = ["field"]
@@ -759,9 +723,7 @@ class ArepoCatalog(ArepoSnapshot):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> CandidateStatus:
         """
         Validate a path to use for instantiation of this class.
 
@@ -795,9 +757,7 @@ class ChainOps:
             Functions to chain together.
         """
         self.funcs = funcs
-        self.kwargs = get_kwargs(
-            funcs[-1]
-        )  # so we can pass info from kwargs to map_halo_operation
+        self.kwargs = get_kwargs(funcs[-1])  # so we can pass info from kwargs to map_halo_operation
         if self.kwargs.get("dtype") is None:
             self.kwargs["dtype"] = float
 
@@ -988,13 +948,10 @@ class GroupAwareOperation:
                     fieldnames = [fieldnames]
                 if fieldnames is None:
                     raise ValueError(
-                        "Either pass fields to grouped(fields=...) "
-                        "or specify fieldnames=... in applied func."
+                        "Either pass fields to grouped(fields=...) or specify fieldnames=... in applied func."
                     )
             else:
-                raise ValueError(
-                    "Specify field to operate on in operation or grouped()."
-                )
+                raise ValueError("Specify field to operate on in operation or grouped().")
 
         res = map_group_operation(
             func,
@@ -1100,9 +1057,7 @@ def get_hidx(gidx_start, gidx_count, celloffsets, index_unbound=None):
 def get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=None):
     gidx_start = gidx[0]
     gidx_count = gidx.shape[0]
-    return get_hidx(
-        gidx_start, gidx_count, halocelloffsets, index_unbound=index_unbound
-    )
+    return get_hidx(gidx_start, gidx_count, halocelloffsets, index_unbound=index_unbound)
 
 
 def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
@@ -1199,9 +1154,7 @@ def get_localshidx(
     # Now iterate through list.
     cont = True
     while cont and (startid < gidx_count):
-        res[startid:endid] = (
-            sidx_start_idx if sidx_start_idx + 1 < shcumsum.shape[0] else -1
-        )
+        res[startid:endid] = sidx_start_idx if sidx_start_idx + 1 < shcumsum.shape[0] else -1
         sidx_start_idx += 1
         if sidx_start_idx < shcounts[hidx_start_idx]:
             # we prepare to fill the next available subhalo for current halo
@@ -1225,9 +1178,7 @@ def get_localshidx(
                 count = celloffsets[hidx_start_idx + 1] - celloffsets[hidx_start_idx]
                 if hidx < shcounts.shape[0]:
                     shcumsum = np.zeros(shcounts[hidx] + 1, dtype=np.int64)
-                    shcumsum[1:] = np.cumsum(
-                        shcellcounts[shnumber[hidx] : shnumber[hidx] + shcounts[hidx]]
-                    )
+                    shcumsum[1:] = np.cumsum(shcellcounts[shnumber[hidx] : shnumber[hidx] + shcounts[hidx]])
                     shcumsum += celloffsets[hidx_start_idx]
                     sidx_start_idx = 0
                     if sidx_start_idx < shcounts[hidx]:
@@ -1259,9 +1210,7 @@ def get_local_shidx_daskwrap(
     return res
 
 
-def compute_localsubhaloindex(
-    gidx, halocelloffsets, shnumber, shcounts, shcellcounts, index_unbound=None
-) -> da.Array:
+def compute_localsubhaloindex(gidx, halocelloffsets, shnumber, shcounts, shcellcounts, index_unbound=None) -> da.Array:
     """
     Compute the local subhalo index for each particle with dask.
     The local subhalo index is the index of the subhalo within each halo,
@@ -1348,12 +1297,8 @@ def memorycost_limiter(cost_memory, cost_cpu, list_chunkedges, cost_memory_max):
             if idx == chunkedges[0] or idx == chunkedges[1]:
                 raise ValueError("This should not happen.")
             list_chunkedges_new.pop()
-            list_chunkedges_new += memorycost_limiter(
-                cost_memory, cost_cpu, [chunkedges1], cost_memory_max
-            )
-            list_chunkedges_new += memorycost_limiter(
-                cost_memory, cost_cpu, [chunkedges2], cost_memory_max
-            )
+            list_chunkedges_new += memorycost_limiter(cost_memory, cost_cpu, [chunkedges1], cost_memory_max)
+            list_chunkedges_new += memorycost_limiter(cost_memory, cost_cpu, [chunkedges2], cost_memory_max)
     return list_chunkedges_new
 
 
@@ -1411,16 +1356,10 @@ def map_group_operation_get_chunkedges(
     for i in range(len(idx) - 1):
         list_chunkedges.append([idx[i], idx[i + 1]])
 
-    list_chunkedges = np.asarray(
-        memorycost_limiter(cost_memory, cost, list_chunkedges, chunksize_bytes)
-    )
+    list_chunkedges = np.asarray(memorycost_limiter(cost_memory, cost, list_chunkedges, chunksize_bytes))
 
     # make sure we did not lose any halos.
-    assert np.all(
-        ~(list_chunkedges.flatten()[2:-1:2] - list_chunkedges.flatten()[1:-1:2]).astype(
-            bool
-        )
-    )
+    assert np.all(~(list_chunkedges.flatten()[2:-1:2] - list_chunkedges.flatten()[1:-1:2]).astype(bool))
     return list_chunkedges
 
 
@@ -1512,13 +1451,9 @@ def map_group_operation(
     if infer:
         # attempt to determine shape.
         if infer_shape:
-            log.debug(
-                "No shape specified. Attempting to determine shape of func output."
-            )
+            log.debug("No shape specified. Attempting to determine shape of func output.")
         if infer_units:
-            log.debug(
-                "No units specified. Attempting to determine units of func output."
-            )
+            log.debug("No units specified. Attempting to determine units of func output.")
         arrs = [arrdict[f][:1].compute() for f in fieldnames]
         # remove units if present
         # arrs = [arr.magnitude if hasattr(arr, "magnitude") else arr for arr in arrs]
@@ -1591,19 +1526,14 @@ def map_group_operation(
 
     # slcoffsets = [offsets[chunkedge[0]] for chunkedge in list_chunkedges]
     # the actual length of relevant data in each chunk
-    slclengths = [
-        offsets[chunkedge[1]] - offsets[chunkedge[0]] for chunkedge in list_chunkedges
-    ]
+    slclengths = [offsets[chunkedge[1]] - offsets[chunkedge[0]] for chunkedge in list_chunkedges]
     if idxlist is not None:
         # the chunk length to be fed into map_blocks
         tmplist = np.concatenate([idxlist, [len(lengths_all)]])
         slclengths_map = [
-            offsets_all[tmplist[chunkedge[1]]] - offsets_all[tmplist[chunkedge[0]]]
-            for chunkedge in list_chunkedges
+            offsets_all[tmplist[chunkedge[1]]] - offsets_all[tmplist[chunkedge[0]]] for chunkedge in list_chunkedges
         ]
-        slcoffsets_map = [
-            offsets_all[tmplist[chunkedge[0]]] for chunkedge in list_chunkedges
-        ]
+        slcoffsets_map = [offsets_all[tmplist[chunkedge[0]]] for chunkedge in list_chunkedges]
         slclengths_map[0] = slcoffsets_map[0]
         slcoffsets_map[0] = 0
     else:
@@ -1630,9 +1560,7 @@ def map_group_operation(
         drop_axis = np.arange(1, arrdims[0])
 
     if dtype is None:
-        raise ValueError(
-            "dtype must be specified, dask will not be able to automatically determine this here."
-        )
+        raise ValueError("dtype must be specified, dask will not be able to automatically determine this here.")
 
     calc = map_blocks(
         wrap_func_scalar,

@@ -14,7 +14,5 @@ def test_allunitsdiscovered(testdatapath, caplog):
     if "thor" in testdatapath:
         # no metadata units in thor yet
         return
-    assert (
-        "Cannot determine units from neither unit file nor metadata" not in caplog.text
-    )
+    assert "Cannot determine units from neither unit file nor metadata" not in caplog.text
     assert not ds.missing_units()

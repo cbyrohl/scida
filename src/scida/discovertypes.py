@@ -128,9 +128,7 @@ def _determine_type_from_simconfig(path, classtype="dataset", reg=None):
         elif dstype is None:
             pass  # simply no dataset_type specified
         else:
-            raise ValueError(
-                "Unknown type of dataset config variable. content: '%s'" % dstype
-            )
+            raise ValueError("Unknown type of dataset config variable. content: '%s'" % dstype)
     return cls
 
 
@@ -140,7 +138,7 @@ def _determine_type(
     test_dataseries: bool = True,
     strict: bool = False,
     catch_exception: bool = True,
-    **kwargs
+    **kwargs,
 ):
     """
     Determine type of dataset or dataseries.
@@ -183,10 +181,7 @@ def _determine_type(
             try:
                 valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
             except Exception as e:
-                log.debug(
-                    "Exception raised during validate_path of tested type '%s': %s"
-                    % (k, e)
-                )
+                log.debug("Exception raised during validate_path of tested type '%s': %s" % (k, e))
         else:
             valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
         if valid != CandidateStatus.NO:
@@ -198,15 +193,9 @@ def _determine_type(
     if len(available_dtypes) > 1:
         # TODO: Rethink how tu use MAYBE/YES information.
         # below lines not suitable for this.
-        good_matches = [
-            k
-            for k, v in zip(available_dtypes, dtypes_status)
-            if v == CandidateStatus.YES
-        ]
+        good_matches = [k for k, v in zip(available_dtypes, dtypes_status) if v == CandidateStatus.YES]
         if len(good_matches) >= 1:
-            available_dtypes = (
-                good_matches  # discard all MAYBEs as we have better options
-            )
+            available_dtypes = good_matches  # discard all MAYBEs as we have better options
 
         # reduce candidates by looking at most specific ones.
         inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
@@ -224,9 +213,7 @@ def _determine_type(
         if len(available_dtypes) > 1:
             # after looking for the most specific candidate(s), do we still have multiple?
             if strict:
-                raise ValueError(
-                    "Ambiguous data type. Available types:", available_dtypes
-                )
+                raise ValueError("Ambiguous data type. Available types:", available_dtypes)
             else:
                 log.info("Note: Multiple dataset candidates: %s" % available_dtypes)
     return available_dtypes, [reg[k] for k in available_dtypes]

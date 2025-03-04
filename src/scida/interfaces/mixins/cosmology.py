@@ -97,11 +97,7 @@ class CosmologyMixin(Mixin):
                     return True
             # do not return False here, because we still might have a legacy run with no ComovingIntegrationOn key
             # for now, we check legacy runs by consistency of Time and Redshift key
-        if (
-            "/Header" in metadata
-            and "Time" in metadata["/Header"]
-            and "Redshift" in metadata["/Header"]
-        ):
+        if "/Header" in metadata and "Time" in metadata["/Header"] and "Redshift" in metadata["/Header"]:
             time = get_scalar(metadata["/Header"]["Time"])
             redshift = get_scalar(metadata["/Header"]["Redshift"])
             # for cosmological runs, time is the scale factor a = 1/(1+z)
@@ -117,9 +113,7 @@ class CosmologyMixin(Mixin):
         if "/Cosmology" in metadata:
             if "Cosmological run" in metadata["/Cosmology"]:
                 # saved as array, thus get first element
-                cosmological_run = get_scalar(
-                    metadata["/Cosmology"]["Cosmological run"]
-                )
+                cosmological_run = get_scalar(metadata["/Cosmology"]["Cosmological run"])
                 if cosmological_run == 1 or cosmological_run is True:
                     return True
             return False
@@ -188,10 +182,7 @@ def get_cosmology_from_rawmetadata(metadata_raw):
     # flamingo-swift
     if cparams["om0"] is not None and float(cparams["om0"]) <= 0.0:
         # sometimes -1.0, then need to query Om_cdm + OM_b
-        if (
-            "/Parameters" in metadata_raw
-            and "Cosmology:Omega_cdm" in metadata_raw["/Parameters"]
-        ):
+        if "/Parameters" in metadata_raw and "Cosmology:Omega_cdm" in metadata_raw["/Parameters"]:
             omdm = float(metadata_raw["/Parameters"]["Cosmology:Omega_cdm"])
             omb = float(cparams["ob0"]) if cparams["ob0"] is not None else None
             if omb is not None:
@@ -202,9 +193,7 @@ def get_cosmology_from_rawmetadata(metadata_raw):
         log.info("Cannot infer cosmology.")
         return None
     if ob0 is None:
-        log.info(
-            "No Omega baryon given, we will assume a value of '0.0486' for the cosmology."
-        )
+        log.info("No Omega baryon given, we will assume a value of '0.0486' for the cosmology.")
         ob0 = 0.0486
     h = float(h)
     om0 = float(om0)

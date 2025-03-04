@@ -7,9 +7,7 @@ from tests.testdata_properties import require_testdata_path
 
 @require_testdata_path("series", only=["MTNGarepo_1080hydro_simulation"])
 def test_fullsimulation(testdatapath):
-    series = load(
-        testdatapath, catalog=False
-    )  # catalog not working for minimal tesdata
+    series = load(testdatapath, catalog=False)  # catalog not working for minimal tesdata
     assert isinstance(series, ArepoSimulation)
     ds = series.get_dataset(redshift=0.0)
     ds.evaluate_lazy()

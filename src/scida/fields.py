@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from __future__ import annotations
 
@@ -34,9 +32,7 @@ class FieldRecipe(object):
     Recipe for a field.
     """
 
-    def __init__(
-        self, name, func=None, arr=None, description="", units=None, ftype=FieldType.IO
-    ):
+    def __init__(self, name, func=None, arr=None, description="", units=None, ftype=FieldType.IO):
         """
         Recipes for a field. Either specify a function or an array.
 
@@ -128,9 +124,7 @@ class FieldContainer(MutableMapping):
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
         self._ureg: Optional[pint.UnitRegistry] = ureg
-        self._containers: Dict[str, FieldContainer] = (
-            dict()
-        )  # other containers as subgroups
+        self._containers: Dict[str, FieldContainer] = dict()  # other containers as subgroups
         if containers is not None:
             for k in containers:
                 self.add_container(k, deep=True)
@@ -424,9 +418,7 @@ class FieldContainer(MutableMapping):
                 name = func.__name__
             for container in containers:
                 drvfields = container._fieldrecipes
-                drvfields[name] = DerivedFieldRecipe(
-                    name, func, description=description, units=units
-                )
+                drvfields[name] = DerivedFieldRecipe(name, func, description=description, units=units)
             return func
 
         return decorator
@@ -507,9 +499,7 @@ class FieldContainer(MutableMapping):
                 if v.ndim <= 1:
                     raise ValueError("No second dimensional index for %s" % k)
                 if idim >= v.shape[1]:
-                    raise ValueError(
-                        "Second dimensional index %i not defined for %s" % (idim, k)
-                    )
+                    raise ValueError("Second dimensional index %i not defined for %s" % (idim, k))
 
             if v.ndim > 1:
                 for i in range(v.shape[1]):
@@ -622,9 +612,7 @@ class FieldContainer(MutableMapping):
 
         return instance
 
-    def _getitem(
-        self, key, force_derived=False, update_dict=True, evaluate_recipe=True
-    ):
+    def _getitem(self, key, force_derived=False, update_dict=True, evaluate_recipe=True):
         """
         Get an item from the container.
 
@@ -683,21 +671,10 @@ class FieldContainer(MutableMapping):
             ureg = self.get_ureg()
             dkwargs["ureg"] = ureg
         # first, we overwrite all optional arguments with class instance defaults where func kwarg is None
-        kwargs = {
-            k: dkwargs[k]
-            for k in (
-                set(dkwargs) & set([k for k, v in func_kwargs.items() if v is None])
-            )
-        }
+        kwargs = {k: dkwargs[k] for k in (set(dkwargs) & set([k for k, v in func_kwargs.items() if v is None]))}
         # next, we add all optional arguments if func is accepting **kwargs and varname not yet in signature
         if accept_kwargs:
-            kwargs.update(
-                **{
-                    k: v
-                    for k, v in dkwargs.items()
-                    if k not in inspect.getfullargspec(func).args
-                }
-            )
+            kwargs.update(**{k: v for k, v in dkwargs.items() if k not in inspect.getfullargspec(func).args})
         # finally, instantiate field
         field = func(self, **kwargs)
         if self.withunits and units is not None:
@@ -712,24 +689,17 @@ class FieldContainer(MutableMapping):
                         if field.units != units:
                             # if unit is present, but unit from metadata is unknown,
                             # we stick with the former
-                            if not (
-                                hasattr(units, "units")
-                                and str(units.units) == "unknown"
-                            ):
+                            if not (hasattr(units, "units") and str(units.units) == "unknown"):
                                 try:
                                     field = field.to(units)
                                 except pint.errors.DimensionalityError as e:
                                     print(e)
                                     raise ValueError(
-                                        "Field '%s' units '%s' do not match '%s'"
-                                        % (key, field.units, units)
+                                        "Field '%s' units '%s' do not match '%s'" % (key, field.units, units)
                                     )
                     else:
                         # this should not happen. TODO: figure out when this happens
-                        logging.warning(
-                            "Unit registries of field '%s' do not match. container registry."
-                            % key
-                        )
+                        logging.warning("Unit registries of field '%s' do not match. container registry." % key)
         return field
 
     def __delitem__(self, key):
@@ -766,16 +736,12 @@ class FieldContainer(MutableMapping):
             raise KeyError("Field '%s' is derived (allow_derived=False)" % key)
         else:
             try:
-                return self._getitem(
-                    key, force_derived=force_derived, update_dict=False
-                )
+                return self._getitem(key, force_derived=force_derived, update_dict=False)
             except KeyError:
                 return value
 
 
-def walk_container(
-    cntr, path="", handler_field=None, handler_group=None, withrecipes=False
-):
+def walk_container(cntr, path="", handler_field=None, handler_group=None, withrecipes=False):
     """
     Recursively walk a container and call handlers on fields and groups.
 

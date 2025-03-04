@@ -25,7 +25,7 @@ class GadgetStyleSimulation(DatasetSeries):
         subpath_dict: Optional[Dict] = None,
         arg_dict: Optional[Dict] = None,
         lazy=True,
-        **interface_kwargs
+        **interface_kwargs,
     ):
         """
         Initialize a GadgetStyleSimulation object.
@@ -87,27 +87,19 @@ class GadgetStyleSimulation(DatasetSeries):
                 # we only test "snap" prefix for now...
                 prfx_tmp = {"gpaths": "group", "paths": "snap"}.get(k, None)
                 if prfx_tmp is not None:
-                    files = [
-                        f.split("_")[0] for f in h5files if f.startswith(prfx_tmp + "_")
-                    ]
+                    files = [f.split("_")[0] for f in h5files if f.startswith(prfx_tmp + "_")]
                     if len(files) > 1:
                         prfx = prfx_tmp
                         found_prefix = True
 
             if not found_prefix:
-                raise ValueError(
-                    "Could not find any files with prefix '%s' in '%s'." % (prefix, sp)
-                )
+                raise ValueError("Could not find any files with prefix '%s' in '%s'." % (prefix, sp))
 
             paths = sorted([p for p in sp.glob(prfx + "_*")])
             # sometimes there are backup folders with different suffix, exclude those.
 
             # now sort by snapshot order
-            paths = [
-                p
-                for p in paths
-                if str(p).split("_")[-1].isdigit() or str(p).endswith(".hdf5")
-            ]
+            paths = [p for p in paths if str(p).split("_")[-1].isdigit() or str(p).endswith(".hdf5")]
             # attempt sorting
             try:
                 nmbrs = [int(str(p).replace(".hdf5", "").split("_")[-1]) for p in paths]

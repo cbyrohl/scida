@@ -35,13 +35,7 @@ class ArepoSimulation(GadgetStyleSimulation):
             path = str(p.parent)
         prefix_dict = dict(paths="snapdir", gpaths="group")
         arg_dict = dict(gpaths="catalog")
-        super().__init__(
-            path,
-            prefix_dict=prefix_dict,
-            arg_dict=arg_dict,
-            lazy=lazy,
-            **interface_kwargs
-        )
+        super().__init__(path, prefix_dict=prefix_dict, arg_dict=arg_dict, lazy=lazy, **interface_kwargs)
 
     @classmethod
     def validate_path(cls, path, *args, **kwargs) -> CandidateStatus:

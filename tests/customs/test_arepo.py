@@ -97,26 +97,20 @@ def halooperations(path, catalogpath=None):
         assert np.all(counttask.compute() <= 1)
     else:
         assert np.all(counttask.compute() == 1)
-    assert (
-        count.shape == counttask.compute().shape
-    ), "Expected shape different from result's shape."
+    assert count.shape == counttask.compute().shape, "Expected shape different from result's shape."
     assert count.shape[0] == snap.data["Group"]["GroupPos"].shape[0]
     assert np.all(partcount == snap.data["Group"]["GroupLenType"][:, 0].compute())
 
     # test nmax
     nmax = 10
-    partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, nmax=nmax
-    )
+    partcounttask = snap.map_group_operation(calculate_partcount, compute=False, nmax=nmax)
     partcount2 = partcounttask.compute()
     assert partcount2.shape[0] == nmax
     assert np.all(partcount2 == partcount[:nmax])
 
     # test idxlist
     idxlist = [3, 5, 7, 25200]
-    partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, idxlist=idxlist
-    )
+    partcounttask = snap.map_group_operation(calculate_partcount, compute=False, idxlist=idxlist)
     partcount2 = partcounttask.compute()
     assert partcount2.shape[0] == len(idxlist)
     assert np.all(partcount2 == partcount[idxlist])
@@ -161,9 +155,7 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
         """Particle Count per halo."""
         return SubhaloID.shape[0]
 
-    def calculate_subhaloid(
-        SubhaloID, parttype=parttype, fill_value=-21, dtype=np.int64
-    ):
+    def calculate_subhaloid(SubhaloID, parttype=parttype, fill_value=-21, dtype=np.int64):
         """returns Subhalo ID"""
         return SubhaloID[0]
 
@@ -171,24 +163,12 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
         """returns Halo ID"""
         return GroupID[0]
 
-    pindextask = snap.map_group_operation(
-        calculate_pindex_min, compute=False, nchunks_min=20, objtype="subhalo"
-    )
-    shcounttask = snap.map_group_operation(
-        calculate_subhalocount, compute=False, nchunks_min=20, objtype="subhalo"
-    )
-    hcounttask = snap.map_group_operation(
-        calculate_halocount, compute=False, nchunks_min=20, objtype="subhalo"
-    )
-    partcounttask = snap.map_group_operation(
-        calculate_partcount, compute=False, objtype="subhalo"
-    )
-    hidtask = snap.map_group_operation(
-        calculate_haloid, compute=False, objtype="subhalo"
-    )
-    sidtask = snap.map_group_operation(
-        calculate_subhaloid, compute=False, objtype="subhalo"
-    )
+    pindextask = snap.map_group_operation(calculate_pindex_min, compute=False, nchunks_min=20, objtype="subhalo")
+    shcounttask = snap.map_group_operation(calculate_subhalocount, compute=False, nchunks_min=20, objtype="subhalo")
+    hcounttask = snap.map_group_operation(calculate_halocount, compute=False, nchunks_min=20, objtype="subhalo")
+    partcounttask = snap.map_group_operation(calculate_partcount, compute=False, objtype="subhalo")
+    hidtask = snap.map_group_operation(calculate_haloid, compute=False, objtype="subhalo")
+    sidtask = snap.map_group_operation(calculate_subhaloid, compute=False, objtype="subhalo")
     pindex_min = pindextask.compute()
     hcount = hcounttask.compute()
     shcount = shcounttask.compute()
@@ -201,9 +181,7 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
     shgrnr = snap.data["Subhalo"]["SubhaloGrNr"].compute()
     assert hid.shape[0] == shgrnr.shape[0]
 
-    sh_pcount = snap.data["Subhalo"]["SubhaloLenType"][
-        :, part_type_num(parttype)
-    ].compute()
+    sh_pcount = snap.data["Subhalo"]["SubhaloLenType"][:, part_type_num(parttype)].compute()
     mask = sh_pcount > 0
 
     # each subhalo belongs only to one halo
@@ -231,9 +209,7 @@ def test_interface_groupedoperations(testdatapath):
     # check bound mass sums as a start
     g = snp.grouped("Masses")
     boundmass = g.sum().evaluate().sum()
-    boundmass2 = da.sum(
-        snp.data["PartType0"]["Masses"][: np.sum(snp.get_grouplengths())]
-    ).compute()
+    boundmass2 = da.sum(snp.data["PartType0"]["Masses"][: np.sum(snp.get_grouplengths())]).compute()
     assert boundmass.units == boundmass2.units
     assert np.isclose(boundmass, boundmass2)
 
@@ -241,9 +217,7 @@ def test_interface_groupedoperations(testdatapath):
     assert np.sum(g.half().sum().evaluate()) < np.sum(g.sum().evaluate())
 
     # Test custom function apply
-    assert np.allclose(
-        g.apply(lambda x: x[::2]).sum().evaluate(), g.half().sum().evaluate()
-    )
+    assert np.allclose(g.apply(lambda x: x[::2]).sum().evaluate(), g.half().sum().evaluate())
 
     # Test unspecified fieldnames when grouping
     g2 = snp.grouped()
@@ -288,9 +262,7 @@ def test_interface_groupedoperations(testdatapath):
     assert sm.shape[0] == nsubs
 
     # check mass sum (halos)
-    h_bhmass = (
-        snp.grouped("BH_Mass", objtype="halos", parttype="PartType5").sum().evaluate()
-    )
+    h_bhmass = snp.grouped("BH_Mass", objtype="halos", parttype="PartType5").sum().evaluate()
     h_bhmass_true = snp.data["Group"]["GroupBHMass"].compute()
     v1, v2 = h_bhmass.magnitude, h_bhmass_true.magnitude
     assert np.allclose(v1, v2)
@@ -301,11 +273,7 @@ def test_interface_groupedoperations_subhalo(testdatapath):
     snp = load(testdatapath)
     # more subhalo tests
     # check mass sum (subhalos)
-    sh_bhmass = (
-        snp.grouped("BH_Mass", objtype="subhalos", parttype="PartType5")
-        .sum()
-        .evaluate()
-    )
+    sh_bhmass = snp.grouped("BH_Mass", objtype="subhalos", parttype="PartType5").sum().evaluate()
     sh_bhmass_true = snp.data["Subhalo"]["SubhaloBHMass"].compute()
     v1, v2 = sh_bhmass.magnitude, sh_bhmass_true.magnitude
     assert np.allclose(v1, v2)
@@ -315,12 +283,8 @@ def test_interface_groupedoperations_subhalo(testdatapath):
     # check mass sum (dark matter for subhalos)
     dmparticle_mass = snp.header["MassTable"][1] * snp.ureg("code_mass")
     ones = np.ones(snp.data["PartType1"]["Coordinates"].shape[0]) * dmparticle_mass
-    sh_dmmass = (
-        snp.grouped(ones, objtype="subhalos", parttype="PartType1").sum().evaluate()
-    )
-    sh_dmmass_true = (
-        snp.data["Subhalo"]["SubhaloLenType"][:, 1].compute() * dmparticle_mass
-    )
+    sh_dmmass = snp.grouped(ones, objtype="subhalos", parttype="PartType1").sum().evaluate()
+    sh_dmmass_true = snp.data["Subhalo"]["SubhaloLenType"][:, 1].compute() * dmparticle_mass
     v1, v2 = sh_dmmass.magnitude, sh_dmmass_true.magnitude
     assert np.allclose(v1, v2)
 
@@ -381,6 +345,4 @@ def test_default_recipes(testdatapath):
 def test_allunitsdiscovered(testdatapath, caplog):
     load(testdatapath)
     caplog.set_level(logging.DEBUG)
-    assert (
-        "Cannot determine units from neither unit file nor metadata" not in caplog.text
-    )
+    assert "Cannot determine units from neither unit file nor metadata" not in caplog.text

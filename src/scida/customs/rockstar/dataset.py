@@ -1,6 +1,7 @@
 """
 Defines the RockstarCatalog class.
 """
+
 import os
 from typing import Union
 

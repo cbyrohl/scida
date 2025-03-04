@@ -50,9 +50,7 @@ def create_hdf5_testfile(src: str, dst: str, length: int = 1, verbose: bool = Fa
                         tmpdata = g[path][:length]
                         if length > 1:
                             np.random.seed(42)
-                            idx = np.random.choice(
-                                g[path].shape[0], length, replace=False
-                            )
+                            idx = np.random.choice(g[path].shape[0], length, replace=False)
                             idx = np.sort(idx)
                             tmpdata = g[path][idx]
                     elif len(shape) == 1:
@@ -61,9 +59,7 @@ def create_hdf5_testfile(src: str, dst: str, length: int = 1, verbose: bool = Fa
                             tmpdata = g[path].astype(dt)[0]
                             if length > 1:
                                 np.random.seed(42)
-                                idx = np.random.choice(
-                                    g[path].shape[0], length, replace=False
-                                )
+                                idx = np.random.choice(g[path].shape[0], length, replace=False)
                                 idx = np.sort(idx)
                                 tmpdata = g[path][idx]
                         else:
@@ -110,9 +106,7 @@ def minimize_series_hdf5(
         for d in dirs:
             if not ps.resume_operation(d):
                 continue
-            pathlib.Path(os.path.join(dst, root[len(src) + 1 :], d)).mkdir(
-                exist_ok=True
-            )
+            pathlib.Path(os.path.join(dst, root[len(src) + 1 :], d)).mkdir(exist_ok=True)
 
         # hdf5 files
         hdf5files = [f for f in files if f.endswith(".hdf5")]

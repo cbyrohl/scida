@@ -9,12 +9,7 @@ def test_coordsalias(testdata_areposnapshot_withcatalog):
     for ptype in ["PartType%i" % i for i in range(6)] + ["Group", "Subhalo"]:
         if ptype not in obj.data:
             continue
-        if not any(
-            [
-                k in ["Coordinates", "SubhaloPos", "GroupPos"]
-                for k in obj.data[ptype].keys(withgroups=False)
-            ]
-        ):
+        if not any([k in ["Coordinates", "SubhaloPos", "GroupPos"] for k in obj.data[ptype].keys(withgroups=False)]):
             continue
         coords = obj.get_coords(parttype=ptype)
         assert coords is not None

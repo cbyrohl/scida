@@ -2,7 +2,6 @@
 FITS file reader for scida
 """
 
-
 import dask
 import dask.array as da
 import numpy as np

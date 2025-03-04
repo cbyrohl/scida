@@ -28,9 +28,7 @@ class SwiftSnapshot(GadgetStyleSnapshot):
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> CandidateStatus:
         """
         Check if path is valid for this dataset class.
 

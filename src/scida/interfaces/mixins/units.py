@@ -25,14 +25,10 @@ from scida.interfaces.mixins.base import Mixin
 log = logging.getLogger(__name__)
 
 # enum for unit state
-UnitState = Enum(
-    "UnitState", ["success", "success_none", "missing", "mismatch", "parse_error"]
-)
+UnitState = Enum("UnitState", ["success", "success_none", "missing", "mismatch", "parse_error"])
 
 
-def str_to_unit(
-    unitstr: Optional[str], ureg: pint.UnitRegistry
-) -> Union[pint.Unit, str]:
+def str_to_unit(unitstr: str | None, ureg: pint.UnitRegistry) -> pint.Unit | str:
     """
     Convert a string to a unit.
     Parameters
@@ -60,15 +56,12 @@ def str_to_unit(
         log.debug("Cannot parse unit string '%s'. Skipping." % unitstr)
         raise e
     except pint.errors.UndefinedUnitError as e:
-        log.debug(
-            "Cannot parse unit string '%s' from metadata description due to unknown units. Skipping."
-            % unitstr
-        )
+        log.debug("Cannot parse unit string '%s' from metadata description due to unknown units. Skipping." % unitstr)
         raise e
     return unit
 
 
-def get_unitstr_from_attrs(attrs: dict) -> Optional[str]:
+def get_unitstr_from_attrs(attrs: dict) -> str | None:
     """
     Get the unit string from the given attributes.
 
@@ -119,7 +112,7 @@ def extract_units_from_attrs(
     attrs: dict,
     require: bool = False,
     mode: str = "cgs",
-    ureg: Optional[pint.UnitRegistry] = None,
+    ureg: pint.UnitRegistry | None = None,
 ) -> pint.Quantity:
     """
     Extract units from given attributes.
@@ -167,7 +160,7 @@ def extract_units_from_attrs(
 
     # TODO: recheck that a and h scaling are added IFF code units are used
     ukeys = ["length", "mass", "velocity", "time", "h", "a"]
-    if any([k + "_scaling" in attrs.keys() for k in ukeys]):  # like TNG
+    if any(k + "_scaling" in attrs.keys() for k in ukeys):  # like TNG
         if mode != "cgs":
             log.debug("Only have cgs conversion instead of code units.")
         for k in ukeys:
@@ -191,9 +184,8 @@ def extract_units_from_attrs(
         unit *= ures
         return unit
 
-    if not has_expl_units and not has_convfactor:
-        if require:
-            raise ValueError("Could not find explicit units nor cgs-factor.")
+    if not has_expl_units and not has_convfactor and require:
+        raise ValueError("Could not find explicit units nor cgs-factor.")
     if require:
         raise ValueError("Could not find units.")
     return str_to_unit("", ureg)
@@ -339,7 +331,7 @@ class UnitMixin(Mixin):
         self.data = {}
         self._metadata_raw = {}
         self._logger_missingunits = log.getChild("missing_units")
-        self._unitstates = dict()
+        self._unitstates = {}
 
         ureg = kwargs.pop("ureg", None)
         if ureg is None:
@@ -432,13 +424,9 @@ class UnitMixin(Mixin):
                     return
             if gfwu is None:
                 gfwu = {}  # marginal case where no fields are given
-            keys = sorted(
-                container.keys(withfields=False, withrecipes=True, withgroups=False)
-            )
+            keys = sorted(container.keys(withfields=False, withrecipes=True, withgroups=False))
             nrecipes = len(keys)
-            keys += sorted(
-                container.keys(withfields=True, withrecipes=False, withgroups=False)
-            )
+            keys += sorted(container.keys(withfields=True, withrecipes=False, withgroups=False))
             recipe_mask = np.zeros(len(keys), dtype=bool)
             recipe_mask[:nrecipes] = True
             for i, k in enumerate(keys):
@@ -449,9 +437,7 @@ class UnitMixin(Mixin):
                     path = "/" + k
                 funit = gfwu.get(k, "N/A")
                 if funit == "N/A":
-                    funit = fwu.get("_all", {}).get(
-                        k, "N/A"
-                    )  # check whether defined for all particles
+                    funit = fwu.get("_all", {}).get(k, "N/A")  # check whether defined for all particles
                 if funit != "N/A":
                     # we have two options: either the unit is given as a string, reflecting code units
                     # or as a dictionary with either or both keys 'cgsunits' and 'codeunits' who hold the unit strings
@@ -485,15 +471,13 @@ class UnitMixin(Mixin):
                         )
                     except pint.errors.UndefinedUnitError:
                         self._unitstates[path] = UnitState.parse_error
-                    except (
-                        tokenize.TokenError
-                    ):  # cannot parse; raises exception since python 3.12
+                    except tokenize.TokenError:  # cannot parse; raises exception since python 3.12
                         self._unitstates[path] = UnitState.parse_error
                     except ValueError as e:
                         if str(e) != "Could not find units.":
                             raise e
                         print("Hint: Did you pass a unit file? Is it complete?")
-                        raise ValueError("Could not find units for '%s'" % path)
+                        raise ValueError("Could not find units for '%s'" % path) from e
 
                     # we do not want any pint decorated objects for index fields
                     # hardcoded for now
@@ -514,9 +498,7 @@ class UnitMixin(Mixin):
                 if unit is None:
                     unit = unit_metadata
 
-                uexist = check_missing_units(
-                    unit, missing_units, path, logger=self._logger_missingunits
-                )
+                uexist = check_missing_units(unit, missing_units, path, logger=self._logger_missingunits)
                 if not uexist and path not in self._unitstates.keys():
                     self._unitstates[path] = UnitState.missing
 
@@ -579,9 +561,8 @@ class UnitMixin(Mixin):
             Custom info string for the mixin.
         """
         rep = ""
-        if hasattr(super(), "_info_custom"):
-            if super()._info_custom() is not None:
-                rep += super()._info_custom()
+        if hasattr(super(), "_info_custom") and super()._info_custom() is not None:
+            rep += super()._info_custom()
         rep += sprint("=== Unit-aware Dataset ===")
         rep += sprint("==========================")
         return rep
@@ -608,8 +589,7 @@ class UnitMixin(Mixin):
                     if v not in success_states:
                         print("  - %s (%s)" % (k, v.name))
             print(
-                "Re-run with\n\t>>> import logging\n\t>>> logging.getLogger().setLevel(logging.DEBUG)\n"
-                "to learn more."
+                "Re-run with\n\t>>> import logging\n\t>>> logging.getLogger().setLevel(logging.DEBUG)\nto learn more."
             )
         return count > 0
 
@@ -673,9 +653,7 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
         Whether the units agree.
     """
     without_units = isinstance(unit, str) and unit == "none"
-    without_units |= (
-        isinstance(unit_metadata, str) and unit_metadata == "none"
-    )  # explicitly no units
+    without_units |= isinstance(unit_metadata, str) and unit_metadata == "none"  # explicitly no units
     if unit is not None and unit_metadata is not None:
         msg = None
         if without_units and unit == unit_metadata:
@@ -726,10 +704,7 @@ def check_missing_units(unit, missing_units, path, logger=log):
     """
     # if we still don't have a unit, we raise/warn as needed
     if unit is None:
-        msg = (
-            "Cannot determine units from neither unit file nor metadata for '%s'."
-            % path
-        )
+        msg = "Cannot determine units from neither unit file nor metadata for '%s'." % path
         if missing_units == "raise":
             raise ValueError(msg)
         elif missing_units == "warn":

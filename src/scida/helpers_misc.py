@@ -90,11 +90,7 @@ def get_kwargs(func):
         Keyword arguments of the function
     """
     signature = inspect.signature(func)
-    return {
-        k: v.default
-        for k, v in signature.parameters.items()
-        if v.default is not inspect.Parameter.empty
-    }
+    return {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
 
 
 def get_args(func):
@@ -111,11 +107,7 @@ def get_args(func):
         Positional arguments of the function
     """
     signature = inspect.signature(func)
-    return [
-        k
-        for k, v in signature.parameters.items()
-        if v.default is inspect.Parameter.empty
-    ]
+    return [k for k, v in signature.parameters.items() if v.default is inspect.Parameter.empty]
 
 
 def computedecorator(func):

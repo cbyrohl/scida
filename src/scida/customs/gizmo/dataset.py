@@ -1,6 +1,7 @@
 """
 Defines the GizmoSnapshot class. Code information: http://www.tapir.caltech.edu/~phopkins/Site/GIZMO.html
 """
+
 import os
 from typing import List, Union
 
@@ -56,9 +57,7 @@ class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             self.merge_data(rs, root_group="rockstar_star")
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for Gizmo snapshot class.
 

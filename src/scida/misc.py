@@ -177,9 +177,7 @@ def str_is_float(element: str) -> bool:
         return False
 
 
-def rectangular_cutout_mask(
-    center, width, coords, pbc=True, boxsize=None, backend="dask", chunksize="auto"
-):
+def rectangular_cutout_mask(center, width, coords, pbc=True, boxsize=None, backend="dask", chunksize="auto"):
     """
     Create a rectangular mask for a given set of coordinates.
     Parameters
@@ -224,9 +222,7 @@ def rectangular_cutout_mask(
         kwargs["chunks"] = chunksize
     mask = be.ones(coords.shape[0], dtype=bool, **kwargs)
     for i in range(3):
-        mask &= dists[:, i] < (
-            width[i] / 2.0
-        )  # TODO: This interval is not closed on the left side.
+        mask &= dists[:, i] < (width[i] / 2.0)  # TODO: This interval is not closed on the left side.
     return mask
 
 
