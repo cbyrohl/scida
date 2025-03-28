@@ -111,8 +111,8 @@ fields:
     BH_Mdot: code_mass / (code_time / h)
     BH_MdotBondi: code_mass / (code_time / h)
     BH_MdotEddington: code_mass / (code_time / h)
-    BH_Pressure:  # TODO: metadata cgs factor seems wrong. double check
-      units: code_mass / code_length / (code_time / h)^2
+    BH_Pressure:  # TODO: older AREPO runs have wrong metadata, see AREPO PR420
+      units: code_mass * code_velocity^2 / code_length^3
       override: true
     BH_Progs:
     BH_U: (km / s)^2
