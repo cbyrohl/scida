@@ -251,6 +251,9 @@ class FieldContainer(MutableMapping):
                 c2 = self._containers[k]
             c1._fields.update(**c2._fields)
             c1._fieldrecipes.update(**c2._fieldrecipes)
+        # now do the fields in the root container
+        self._fields.update(**collection._fields)
+        self._fieldrecipes.update(**collection._fieldrecipes)
 
     @property
     def fieldcount(self):
