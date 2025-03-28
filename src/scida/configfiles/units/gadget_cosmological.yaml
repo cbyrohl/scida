@@ -111,7 +111,7 @@ fields:
     BH_Mdot: code_mass / (code_time / h)
     BH_MdotBondi: code_mass / (code_time / h)
     BH_MdotEddington: code_mass / (code_time / h)
-    BH_Pressure:  # TODO: older AREPO runs have wrong metadata, see AREPO PR420
+    BH_Pressure:  # older AREPO runs have wrong metadata, see AREPO PR420
       units: code_mass * code_velocity^2 / code_length^3
       override: true
     BH_Progs:
