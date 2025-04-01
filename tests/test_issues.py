@@ -1,5 +1,6 @@
 # tests for gh issues. to be cleaned up and moved to the right place eventually
 import pathlib
+import os
 
 import h5py
 import numpy as np
@@ -115,3 +116,17 @@ def test_issue187(testdatapath, capsys):
     captured = capsys.readouterr()
     assert "=== Cosmological Simulation ===" not in captured.out
     assert "z =" not in captured.out
+
+
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_issue196(testdatapath, capsys, cachedir):
+    ds = load(testdatapath, units=True)
+    h5file_catalog = ds.catalog.file
+    # fn_catalog = h5file_catalog.filename
+    # size_catalog = os.path.getsize(fn_catalog)
+    # print("size_catalog (in MB):", size_catalog / 1024 / 1024)
+    dataset = h5file_catalog["Group"]["GroupPos"]
+    assert dataset.is_virtual
+    # now check one of the fields we do not want to have virtual...
+    dataset = h5file_catalog["Group"]["GroupLenType"]
+    assert not dataset.is_virtual

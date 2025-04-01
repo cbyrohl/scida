@@ -9,7 +9,7 @@ import pathlib
 import tempfile
 from functools import partial
 from os.path import join
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 import dask.array as da
 import h5py
@@ -441,11 +441,14 @@ class ChunkedHDF5Loader(Loader):
             # 3. cachefile exists, but overwrite=True
             create = True
 
+        nonvirtual_datasets: Optional[List] = kwargs.pop("nonvirtual_datasets", None)
+
         if create:
             print_cachefile_creation = kwargs.get("print_cachefile_creation", True)
             self.create_cachefile(
                 fileprefix=fileprefix,
                 virtualcache=virtualcache,
+                nonvirtual_datasets=nonvirtual_datasets,
                 verbose=print_cachefile_creation,
                 choose_prefix=choose_prefix,
             )
@@ -458,7 +461,8 @@ class ChunkedHDF5Loader(Loader):
             # if we get an error, we try to create a new cache file (once)
             log.info("Invalid cache file, attempting to create new one.")
             os.remove(cachefp)
-            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
+            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache,
+                                  nonvirtual_datasets=nonvirtual_datasets)
             data, metadata = self.load_cachefile(
                 cachefp, token=token, chunksize=chunksize, **kwargs
             )
@@ -484,7 +488,8 @@ class ChunkedHDF5Loader(Loader):
         )
 
     def create_cachefile(
-        self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False
+        self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False,
+        nonvirtual_datasets=None
     ):
         """
         Create a cache file from the chunked HDF5 files.
@@ -498,6 +503,8 @@ class ChunkedHDF5Loader(Loader):
             Whether to print messages.
         choose_prefix: bool
             Whether to choose the prefix if multiple are available.
+        nonvirtual_datasets: list
+            List of datasets to be created as non-virtual in any case.
 
         Returns
         -------
@@ -522,7 +529,7 @@ class ChunkedHDF5Loader(Loader):
             )
 
         try:
-            create_mergedhdf5file(cachefp, files, virtual=virtualcache)
+            create_mergedhdf5file(cachefp, files, virtual=virtualcache, nonvirtual_datasets=nonvirtual_datasets)
         except Exception as ex:
             if os.path.exists(cachefp):
                 os.remove(cachefp)  # remove failed attempt at merging file

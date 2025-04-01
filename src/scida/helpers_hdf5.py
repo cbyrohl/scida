@@ -5,6 +5,7 @@ Helper functions for hdf5 and zarr file processing.
 import logging
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
+from typing import Optional, List
 
 import h5py
 import numpy as np
@@ -132,8 +133,41 @@ def walk_hdf5file(fn, tree, get_attrs=True):
     return tree
 
 
+def virtual_concat(field, hf, chunks, shapes, dtypes, files):
+    totentries = np.array([k[1] for k in chunks[field]]).sum()
+    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][
+                               1:
+                               ]
+
+    # create virtual sources
+    vsources = []
+    for k in shapes[field]:
+        vsources.append(
+            h5py.VirtualSource(
+                files[k],
+                name=field,
+                shape=shapes[field][k],
+                dtype=dtypes[field],
+            )
+        )
+    layout = h5py.VirtualLayout(
+        shape=tuple(newshape), dtype=dtypes[field]
+    )
+
+    # fill virtual dataset
+    offset = 0
+    for vsource in vsources:
+        length = vsource.shape[0]
+        layout[offset: offset + length] = vsource
+        offset += length
+    assert (
+            newshape[0] == offset
+    )  # make sure we filled the array up fully.
+    hf.create_virtual_dataset(field, layout)
+
 def create_mergedhdf5file(
-    fn, files, max_workers=None, virtual=True, groupwise_shape=False
+    fn, files, max_workers=None, virtual=True, groupwise_shape=False,
+    nonvirtual_datasets: Optional[List[str]] = None,
 ):
     """
     Creates a virtual hdf5 file from list of given files. Virtual by default.
@@ -148,6 +182,8 @@ def create_mergedhdf5file(
         parallel workers to process files
     virtual: bool
         whether to create linked ("virtual") dataset on disk (otherwise copy)
+    nonvirtual_datasets: list
+        list of datasets to copy (not virtual) for more fine-grained control
     groupwise_shape: bool
         whether to require shapes to be the same within a group
 
@@ -155,6 +191,8 @@ def create_mergedhdf5file(
     -------
     None
     """
+    if nonvirtual_datasets is None:
+        nonvirtual_datasets = []
     if max_workers is None:
         # read from config
         config = get_config()
@@ -212,6 +250,9 @@ def create_mergedhdf5file(
             # then save the chunking information for this group
             groupchunks[field] = arr0
 
+    # just in case somebody forgot trailing slashes
+    nonvirtual_datasets_stripped = [v.strip("/") for v in nonvirtual_datasets]
+
     # next fill merger file
     with h5py.File(fn, "w", libver="latest") as hf:
         # create groups
@@ -228,56 +269,34 @@ def create_mergedhdf5file(
             if len(groupfields) == 0:
                 continue
 
-            # fill fields
-            if virtual:
-                # for virtual datasets, iterate over all fields and concat each file to virtual dataset
-                for field in groupfields:
-                    totentries = np.array([k[1] for k in chunks[field]]).sum()
-                    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][
-                        1:
-                    ]
 
-                    # create virtual sources
-                    vsources = []
-                    for k in shapes[field]:
-                        vsources.append(
-                            h5py.VirtualSource(
-                                files[k],
-                                name=field,
-                                shape=shapes[field][k],
-                                dtype=dtypes[field],
-                            )
-                        )
-                    layout = h5py.VirtualLayout(
-                        shape=tuple(newshape), dtype=dtypes[field]
-                    )
+            # create virtual datasets as requested
+            for field in groupfields:
+                nonvirtual_field = field.strip("/") in nonvirtual_datasets_stripped
+                if virtual and not nonvirtual_field:
+                    virtual_concat(field, hf, chunks, shapes, dtypes, files)
 
-                    # fill virtual dataset
-                    offset = 0
-                    for vsource in vsources:
-                        length = vsource.shape[0]
-                        layout[offset : offset + length] = vsource
-                        offset += length
-                    assert (
-                        newshape[0] == offset
-                    )  # make sure we filled the array up fully.
-                    hf.create_virtual_dataset(field, layout)
-            else:  # copied dataset. For performance, we iterate differently: Loop over each file's fields
-                for field in groupfields:
-                    totentries = np.array([k[1] for k in chunks[field]]).sum()
-                    extrashapes = shapes[field][next(iter(shapes[field]))][1:]
-                    newshape = (totentries,) + extrashapes
-                    hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
-                counters = {field: 0 for field in groupfields}
-                for k, fl in enumerate(files):
-                    with h5py.File(fl) as hf_load:
-                        for field in groupfields:
-                            n = shapes[field].get(k, [0, 0])[0]
-                            if n == 0:
-                                continue
-                            offset = counters[field]
-                            hf[field][offset : offset + n] = hf_load[field]
-                            counters[field] = offset + n
+            # remaining datasets are created non-virtual
+            groupfields_nonvirtual = list(groupfields)
+            # remove fields already present in hf from fields we copy in the following
+            for field in groupfields:
+                if field in hf[group]:
+                    groupfields_nonvirtual.remove(field)
+            for field in groupfields_nonvirtual:
+                totentries = np.array([k[1] for k in chunks[field]]).sum()
+                extrashapes = shapes[field][next(iter(shapes[field]))][1:]
+                newshape = (totentries,) + extrashapes
+                hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
+            counters = {field: 0 for field in groupfields}
+            for k, fl in enumerate(files):
+                with h5py.File(fl) as hf_load:
+                    for field in groupfields_nonvirtual:
+                        n = shapes[field].get(k, [0, 0])[0]
+                        if n == 0:
+                            continue
+                        offset = counters[field]
+                        hf[field][offset : offset + n] = hf_load[field]
+                        counters[field] = offset + n
 
         # save information regarding chunks
         grp = hf.create_group("_chunks")
