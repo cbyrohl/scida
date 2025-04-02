@@ -169,7 +169,7 @@ class FITSLoader(Loader):
 
 class HDF5Loader(Loader):
     """
-    HDF5 file loader.
+    HDF5 file loader (single file).
     """
 
     def __init__(self, path):
@@ -219,6 +219,7 @@ class HDF5Loader(Loader):
         tree = {}
         walk_hdf5file(self.location, tree=tree)
         file = h5py.File(self.location, "r")
+        kwargs.pop("nonvirtual_datasets", None)
         data, metadata = load_datadict_old(
             self.path, file, token=token, chunksize=chunksize, **kwargs
         )
@@ -313,6 +314,7 @@ class ZarrLoader(Loader):
         tree = {}
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
+        kwargs.pop("nonvirtual_datasets", None)
         data, metadata = load_datadict_old(
             self.path,
             self.file,

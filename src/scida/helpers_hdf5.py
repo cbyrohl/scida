@@ -280,7 +280,11 @@ def create_mergedhdf5file(
             groupfields_nonvirtual = list(groupfields)
             # remove fields already present in hf from fields we copy in the following
             for field in groupfields:
-                if field in hf[group]:
+                if len(group) > 0:
+                    grp = hf[group]
+                else:
+                    grp = hf
+                if field in grp:
                     groupfields_nonvirtual.remove(field)
             for field in groupfields_nonvirtual:
                 totentries = np.array([k[1] for k in chunks[field]]).sum()

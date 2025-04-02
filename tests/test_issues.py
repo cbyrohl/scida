@@ -65,7 +65,10 @@ def test_issue_88(testdatapath, tmp_path):
     assert isinstance(srs, ArepoSimulation)
 
     # make sure ~ is resolved as home folder
-    path = "~/test"
+    path = "~/tmp_test"
+    # create a test file
+    abspath = os.path.expanduser(path)
+    os.makedirs(abspath, exist_ok=True)
     assert find_path(path).startswith("/")
 
 
