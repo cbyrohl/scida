@@ -142,7 +142,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         -------
         None
         """
-        virtualcache = False  # copy catalog for better performance
+        virtualcache = True
         # fileprefix = catalog_kwargs.get("fileprefix", self._fileprefix_catalog)
         prfx = self._get_fileprefix(self.catalog)
 
@@ -168,10 +168,15 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         if hasattr(self, "ureg"):
             ureg = self.ureg
 
+        # non-virtual catalog fields for better performance
+        nonvirtual_datasets = ["Group/GroupFirstSub", "Group/GroupLenType", "Group/GroupNsubs",
+                               "Subhalo/SubhaloGrNr", "Subhalo/SubhaloGroupNr", "Subhalo/SubhaloLenType"]
+
         self.catalog = cls(
             self.catalog,
             overwrite_cache=overwrite_cache,
             virtualcache=virtualcache,
+            nonvirtual_datasets=nonvirtual_datasets,
             fileprefix=prfx,
             units=self.withunits,
             ureg=ureg,
