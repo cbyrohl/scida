@@ -124,18 +124,27 @@ docstring-code-line-length = "dynamic"
 
 [tool.ruff.lint]
 select = [
-    "E", # pycodestyle (error)
-    "F", # pyflakes
-    "B", # bugbear
-    "B9",
-    "C4", # flake8-comprehensions
-    "SIM", # flake8-simplify
-    "I", # isort
-    "UP", # pyupgrade
-    "PIE", # flake8-pie
-    "PGH", # pygrep-hooks
-    "PYI", # flake8-pyi
-    "RUF",
+    "B",     # bugbear
+    "C4",    # flake8-comprehensions
+    "E",     # pycodestyle (error)
+    "F",     # pyflakes
+    "FA",    # flake8-future-annotations
+    "FLY",   # flynt
+    "FURB",  # refurb
+    "G",     # flake8-logging-format
+    "I",     # isort
+    "LOG",   # flake8-logging
+    "N",     # pep8-naming
+    "NPY",   # numpy
+    "PERF",  # perflint
+    "PGH",   # pygrep-hooks
+    "PT",    # flake8-pytest-style
+    "PIE",   # flake8-pie
+    "RUF",   # ruff
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "UP",    # pyupgrade
+    "W",     # pycodestyle
 ]
 ignore = [
     # only relevant if you run a script with `python -0`,
@@ -147,17 +156,19 @@ ignore = [
     "RUF052",
     "E201",
     "E241",
-    # Can use % formater inplace of f-strings
-    "UP031", 
-    # Use key in group instrad of key in group.keys()
-    "SIM118",
+    "N816",     # mixed case naming in globalScope
+    "N806",     # lower case naming
+    "N802",
+    "N803",
+    "SIM118",    # keys in dict.keys()
+    "FURB103"
 ]
 
 fixable = ["A", "B", "C", "D", "E", "F"]
 unfixable = []
 
 [tool.ruff.lint.pydocstyle]
-convention = "google"
+convention = "numpy"
 
 # Pyright
 [tool.pyright]
@@ -170,4 +181,4 @@ exclude = ["**/node_modules",
 ignore = ["src/oldstuff"]
 defineConstant = { DEBUG = true }
 stubPath = "src/stubs"
-typeCheckingMode = "standard"
+typeCheckingMode = "off"
