@@ -6,7 +6,6 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -70,12 +69,12 @@ def delay_init(cls):
             del self._kwargs
             self.__init__(*arg, **kwarg)
             if name == "evaluate_lazy":
-                return getattr(self, "__repr__")  # some dummy
+                return self.__repr__  # some dummy
             return getattr(self, name)
 
         def __repr__(self):
             """Return a string representation of the lazy class."""
-            return "<Lazy %s>" % cls.__name__
+            return f"<Lazy {cls.__name__}>"
 
     return Delay
 
@@ -97,7 +96,7 @@ class DatasetSeries(object):
 
     def __init__(
         self,
-        paths: Union[List[str], List[Path]],
+        paths: list[str] | list[Path],
         *interface_args,
         datasetclass=None,
         overwrite_cache=False,
@@ -136,11 +135,11 @@ class DatasetSeries(object):
             if not (isinstance(p, Path)):
                 p = Path(p)
             if not (p.exists()):
-                raise ValueError("Specified path '%s' does not exist." % p)
+                raise ValueError(f"Specified path '{p}' does not exist.")
         dec = delay_init  # lazy loading
 
         # Catch Mixins and create type:
-        ikw = dict(overwrite_cache=overwrite_cache)
+        ikw = {"overwrite_cache": overwrite_cache}
         ikw.update(**interface_kwargs)
         mixins = ikw.pop("mixins", [])
         datasetclass = create_datasetclass_with_mixins(datasetclass, mixins)
@@ -152,7 +151,7 @@ class DatasetSeries(object):
         if self.metadata is None:
             print("Have not cached this data series. Can take a while.")
             dct = {}
-            for i, (path, d) in enumerate(tqdm(zip(self.paths, self.datasets), total=len(self.paths))):
+            for i, (path, d) in enumerate(tqdm(zip(self.paths, self.datasets, strict=False), total=len(self.paths))):
                 rawmeta = load_metadata(path, choose_prefix=True, use_cachefile=not (overwrite_cache))
                 # class method does not initiate obj.
                 dct[i] = d._clean_metadata_from_raw(rawmeta)
@@ -209,7 +208,7 @@ class DatasetSeries(object):
         rep += "class: " + sprint(self.__class__.__name__)
         props = self._repr_dict()
         for k, v in props.items():
-            rep += sprint("%s: %s" % (k, v))
+            rep += sprint(f"{k}: {v}")
         if self.metadata is not None:
             rep += sprint("=== metadata ===")
             # we print the range of each metadata attribute
@@ -226,14 +225,14 @@ class DatasetSeries(object):
             for k in minmax_dct:
                 reprval1, reprval2 = minmax_dct[k][0], minmax_dct[k][1]
                 if isinstance(reprval1, float):
-                    reprval1 = "%.2f" % reprval1
-                    reprval2 = "%.2f" % reprval2
+                    reprval1 = f"{reprval1:.2f}"
+                    reprval2 = f"{reprval2:.2f}"
                 m1 = minmax_dct[k][0]
                 m2 = minmax_dct[k][1]
                 if (not np.isscalar(m1)) or (np.isscalar(m1) and m1 == m2):
-                    rep += sprint("%s: %s" % (k, minmax_dct[k][0]))
+                    rep += sprint(f"{k}: {minmax_dct[k][0]}")
                 else:
-                    rep += sprint("%s: %s -- %s" % (k, minmax_dct[k][0], minmax_dct[k][1]))
+                    rep += sprint(f"{k}: {minmax_dct[k][0]} -- {minmax_dct[k][1]}")
             rep += sprint("============")
         print(rep)
 
@@ -248,7 +247,7 @@ class DatasetSeries(object):
         """
         raise AttributeError("Series do not have 'data' attribute. Load a dataset from series.get_dataset().")
 
-    def _repr_dict(self) -> Dict[str, str]:
+    def _repr_dict(self) -> dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
 
@@ -256,7 +255,7 @@ class DatasetSeries(object):
         -------
         dict
         """
-        props = dict()
+        props = {}
         sources = [str(p) for p in self.paths]
         props["source(id=0)"] = sources[0]
         props["Ndatasets"] = len(self.datasets)
@@ -274,7 +273,7 @@ class DatasetSeries(object):
         clsname = self.__class__.__name__
         result = clsname + "["
         for k, v in props.items():
-            result += "%s=%s, " % (k, v)
+            result += f"{k}={v}, "
         result = result[:-2] + "]"
         return result
 
@@ -325,10 +324,10 @@ class DatasetSeries(object):
             raise ValueError("Specified path does not exist.")
         if pattern is None:
             pattern = "*"
-        paths = [f for f in p.glob(pattern)]
+        paths = list(p.glob(pattern))
         return cls(paths, *interface_args, datasetclass=datasetclass, **interface_kwargs)
 
-    def get_dataset(self, index: Optional[int] = None, name: Optional[str] = None, reltol=1e-2, **kwargs):
+    def get_dataset(self, index: int | None = None, name: str | None = None, reltol=1e-2, **kwargs):
         """
         Get dataset by some metadata property. In the base class, we go by list index.
 
@@ -367,7 +366,7 @@ class DatasetSeries(object):
             if self.names is None:
                 raise ValueError("No names specified for members of this series.")
             if name not in self.names:
-                raise ValueError("Name %s not found in this series." % name)
+                raise ValueError(f"Name {name} not found in this series.")
             return self.datasets[self.names.index(name)]
         if len(kwargs) > 0 and self.metadata is None:
             if self.lazy:
@@ -378,7 +377,7 @@ class DatasetSeries(object):
         candidates = []
         candidates_props = {}
         props_compare = set()  # save names of fields we want to compare
-        for k, v in kwargs.items():
+        for k in kwargs.keys():
             candidates_props[k] = []
         for i, (j, dm) in enumerate(self.metadata.items()):
             assert int(i) == int(j)
@@ -387,7 +386,7 @@ class DatasetSeries(object):
                 if k not in dm:
                     is_candidate = False
                     continue
-                if isinstance(v, (int, float, np.integer, np.floating)):
+                if isinstance(v, int | float | np.integer | np.floating):
                     candidates_props[k].append(dm[k])
                     props_compare.add(k)
                 elif v != dm[k]:
@@ -414,11 +413,7 @@ class DatasetSeries(object):
         # tolerance check
         for k in props_compare:
             if not np.isclose(kwargs[k], self.metadata[index][k], rtol=reltol):
-                msg = "Candidate does not match tolerance for %s (%s vs %s requested)" % (
-                    k,
-                    self.metadata[index][k],
-                    kwargs[k],
-                )
+                msg = f"Candidate does not match tolerance for {k} ({self.metadata[index][k]} vs {kwargs[k]} requested)"
                 raise ValueError(msg)
         return self.get_dataset(index=index)
 
@@ -436,7 +431,8 @@ class DatasetSeries(object):
             return self._metadata
         fp = self._metadatafile
         if os.path.exists(fp):
-            md = json.load(open(fp, "r"))
+            with open(fp) as file:
+                md = json.load(file)
             ikeys = sorted([int(k) for k in md.keys()])
             mdnew = {}
             for ik in ikeys:
@@ -498,7 +494,8 @@ class DatasetSeries(object):
         self._metadata = dct
         fp = self._metadatafile
         if not os.path.exists(fp):
-            json.dump(dct, open(fp, "w"), cls=ComplexEncoder)
+            with open(fp, "w") as file:
+                json.dump(dct, file, cls=ComplexEncoder)
 
 
 class DirectoryCatalog(object):

@@ -6,7 +6,6 @@ import inspect
 import logging
 from collections.abc import MutableMapping
 from enum import Enum
-from typing import Dict, Optional
 
 import dask.array as da
 import dask.dataframe as dd
@@ -89,8 +88,8 @@ class FieldContainer(MutableMapping):
         aliases=None,
         withunits=False,
         ureg=None,
-        parent: Optional[FieldContainer] = None,
-        name: Optional[str] = None,
+        parent: FieldContainer | None = None,
+        name: str | None = None,
         **kwargs,
     ):
         """
@@ -117,14 +116,14 @@ class FieldContainer(MutableMapping):
             fieldrecipes_kwargs = {}
         self.aliases = aliases
         self.name = name
-        self._fields: Dict[str, da.Array] = {}
+        self._fields: {str, da.Array} = {}
         self._fields.update(*args, **kwargs)
         self._fieldrecipes = {}
         self._fieldlength = None
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
-        self._ureg: Optional[pint.UnitRegistry] = ureg
-        self._containers: Dict[str, FieldContainer] = dict()  # other containers as subgroups
+        self._ureg: pint.UnitRegistry | None = ureg
+        self._containers: {str, FieldContainer} = {}  # other containers as subgroups
         if containers is not None:
             for k in containers:
                 self.add_container(k, deep=True)
@@ -151,9 +150,8 @@ class FieldContainer(MutableMapping):
         if ureg is None and discover:
             keys = self.keys(withgroups=False, withrecipes=False, withinternal=True)
             for k in keys:
-                if hasattr(self[k], "units"):
-                    if isinstance(self[k].units, pint.Unit):
-                        ureg = self[k].units._REGISTRY
+                if hasattr(self[k], "units") and isinstance(self[k].units, pint.Unit):
+                    ureg = self[k].units._REGISTRY
         self._ureg = ureg
 
     def get_ureg(self, discover=True):
@@ -181,7 +179,7 @@ class FieldContainer(MutableMapping):
             res[k] = cntr.copy_skeleton()
         return res
 
-    def info(self, level=0, name: Optional[str] = None) -> str:
+    def info(self, level=0, name: str | None = None) -> str:
         """
         Return a string representation of the object.
 
@@ -204,13 +202,12 @@ class FieldContainer(MutableMapping):
         ncontainers = len(self._containers)
         statstrs = []
         if length is not None and length > 0:
-            statstrs.append("fields: %i" % count)
-            statstrs.append("entries: %i" % length)
+            statstrs.extend([f"fields: {count}", f"entries: {length}"])
         if ncontainers > 0:
-            statstrs.append("containers: %i" % ncontainers)
+            statstrs.append(f"containers: {ncontainers}")
         if len(statstrs) > 0:
             statstr = ", ".join(statstrs)
-            rep += sprint((level + 1) * "+", name, "(%s)" % statstr)
+            rep += sprint((level + 1) * "+", name, f"({statstr})")
         for k in sorted(self._containers.keys()):
             v = self._containers[k]
             rep += v.info(level=level + 1)
@@ -256,7 +253,7 @@ class FieldContainer(MutableMapping):
         int
         """
         rcps = set(self._fieldrecipes)
-        flds = set([k for k in self._fields if k not in self.internals])
+        flds = {k for k in self._fields if k not in self.internals}
         ntot = len(rcps | flds)
         return ntot
 
@@ -373,7 +370,7 @@ class FieldContainer(MutableMapping):
     def register_field(
         self,
         containernames=None,
-        name: Optional[str] = None,
+        name: str | None = None,
         description="",
         units=None,
     ):
@@ -447,10 +444,7 @@ class FieldContainer(MutableMapping):
         str
         """
         txt = ""
-        txt += "FieldContainer[containers=%s, fields=%s]" % (
-            len(self._containers),
-            self.fieldcount,
-        )
+        txt += f"FieldContainer[containers={len(self._containers)}, fields={self.fieldcount}]"
         return txt
 
     @property
@@ -490,16 +484,16 @@ class FieldContainer(MutableMapping):
                     i += -1
                 i += 1
                 if i == 0:
-                    raise ValueError("Field '%s' not found" % k)
+                    raise ValueError(f"Field '{k}' not found")
                 idim = int(k[i:])
                 k = k.split(k[i:])[0]
             v = self[k]
             assert v.ndim <= 2  # cannot support more than 2 here...
             if idim is not None:
                 if v.ndim <= 1:
-                    raise ValueError("No second dimensional index for %s" % k)
+                    raise ValueError(f"No second dimensional index for {k}")
                 if idim >= v.shape[1]:
-                    raise ValueError("Second dimensional index %i not defined for %s" % (idim, k))
+                    raise ValueError(f"Second dimensional index {idim} not defined for {k}")
 
             if v.ndim > 1:
                 for i in range(v.shape[1]):
@@ -550,7 +544,7 @@ class FieldContainer(MutableMapping):
         if key in self._containers:
             del self._containers[key]
         else:
-            raise KeyError("Unknown container '%s'" % key)
+            raise KeyError(f"Unknown container '{key}'")
 
     def add_container(self, key, deep=False, **kwargs):
         """
@@ -646,7 +640,7 @@ class FieldContainer(MutableMapping):
                     self._fields[key] = field
                 return field
             else:
-                raise KeyError("Unknown field '%s'" % key)
+                raise KeyError(f"Unknown field '{key}'")
 
     def _instantiate_field(self, key):
         """
@@ -671,7 +665,7 @@ class FieldContainer(MutableMapping):
             ureg = self.get_ureg()
             dkwargs["ureg"] = ureg
         # first, we overwrite all optional arguments with class instance defaults where func kwarg is None
-        kwargs = {k: dkwargs[k] for k in (set(dkwargs) & set([k for k, v in func_kwargs.items() if v is None]))}
+        kwargs = {k: dkwargs[k] for k in (set(dkwargs) & {k for k, v in func_kwargs.items() if v is None})}
         # next, we add all optional arguments if func is accepting **kwargs and varname not yet in signature
         if accept_kwargs:
             kwargs.update(**{k: v for k, v in dkwargs.items() if k not in inspect.getfullargspec(func).args})
@@ -686,20 +680,17 @@ class FieldContainer(MutableMapping):
                 has_regs = has_reg1 and has_reg2
                 if has_regs:
                     if field.units._REGISTRY == units._REGISTRY:
-                        if field.units != units:
-                            # if unit is present, but unit from metadata is unknown,
-                            # we stick with the former
-                            if not (hasattr(units, "units") and str(units.units) == "unknown"):
-                                try:
-                                    field = field.to(units)
-                                except pint.errors.DimensionalityError as e:
-                                    print(e)
-                                    raise ValueError(
-                                        "Field '%s' units '%s' do not match '%s'" % (key, field.units, units)
-                                    )
+                        # if unit is present, but unit from metadata is unknown,
+                        # we stick with the former
+                        if field.units != units and not (hasattr(units, "units") and str(units.units) == "unknown"):
+                            try:
+                                field = field.to(units)
+                            except pint.errors.DimensionalityError as e:
+                                print(e)
+                                raise ValueError(f"Field '{key}' units '{field.units}' do not match '{units}'") from e
                     else:
                         # this should not happen. TODO: figure out when this happens
-                        logging.warning("Unit registries of field '%s' do not match. container registry." % key)
+                        log.warning("Unit registries of field '%s' do not match. container registry.", key)
         return field
 
     def __delitem__(self, key):
@@ -710,7 +701,7 @@ class FieldContainer(MutableMapping):
         elif key in self._fields:
             del self._fields[key]
         else:
-            raise KeyError("Unknown key '%s'" % key)
+            raise KeyError(f"Unknown key '{key}'")
 
     def __len__(self):
         return len(self.keys())
@@ -733,7 +724,7 @@ class FieldContainer(MutableMapping):
         da.Array
         """
         if key in self._fieldrecipes and not allow_derived:
-            raise KeyError("Field '%s' is derived (allow_derived=False)" % key)
+            raise KeyError(f"Field '{key}' is derived (allow_derived=False)")
         else:
             try:
                 return self._getitem(key, force_derived=force_derived, update_dict=False)
@@ -762,7 +753,7 @@ def walk_container(cntr, path="", handler_field=None, handler_group=None, withre
     -------
     None
     """
-    keykwargs = dict(withgroups=True, withrecipes=withrecipes)
+    keykwargs = {"withgroups": True, "withrecipes": withrecipes}
     for ck in cntr.keys(**keykwargs):
         # we do not want to instantiate entry from recipe by calling cntr[ck] here
         entry = cntr[ck]

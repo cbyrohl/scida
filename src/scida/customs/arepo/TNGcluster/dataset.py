@@ -1,5 +1,4 @@
 import os
-from typing import Union
 
 import numpy as np
 
@@ -38,13 +37,13 @@ class TNGClusterSelector(Selector):
         None
         """
         snap: TNGClusterSnapshot = args[0]
-        zoom_id = kwargs.get("zoomID", None)
-        fuzz = kwargs.get("withfuzz", None)
-        onlyfuzz = kwargs.get("onlylfuzz", None)
+        zoom_id = kwargs.get("zoomID")
+        fuzz = kwargs.get("withfuzz")
+        onlyfuzz = kwargs.get("onlylfuzz")
         if zoom_id is None:
             return
         if zoom_id < 0 or zoom_id > (snap.ntargets - 1):
-            raise ValueError("zoomID must be in range 0-%i" % (snap.ntargets - 1))
+            raise ValueError(f"zoomID must be in range 0-{(snap.ntargets - 1):d}")
 
         for p in self.data_backup:
             if p.startswith("PartType"):
@@ -102,10 +101,7 @@ class TNGClusterSelector(Selector):
                 arr = v[offset : offset + length]
                 if offset_fuzz is not None:
                     arr_fuzz = v[offset_fuzz : offset_fuzz + length_fuzz]
-                    if onlyfuzz:
-                        arr = arr_fuzz
-                    else:
-                        arr = np.concatenate([arr, arr_fuzz])
+                    arr = arr_fuzz if onlyfuzz else np.concatenate([arr, arr_fuzz])
                 return arr
 
             def get_slicedfunc(func, offset, length, offset_fuzz, length_fuzz, key, fuzz=False):
@@ -208,8 +204,8 @@ class TNGClusterSnapshot(ArepoSnapshot):
                 )[:-1]
             return res
 
-        self.lengths_zoom = dict(particles=self.header["NumPart_ThisFile"])
-        self.offsets_zoom = dict(particles=len_to_offsets(self.lengths_zoom["particles"]))
+        self.lengths_zoom = {"particles": self.header["NumPart_ThisFile"]}
+        self.offsets_zoom = {"particles": len_to_offsets(self.lengths_zoom["particles"])}
 
         if hasattr(self, "catalog") and self.catalog is not None:
             self.lengths_zoom["groups"] = self.catalog.header["Ngroups_ThisFile"]
@@ -230,7 +226,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
         return super().return_data()
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for TNG-Cluster snapshot class.
 
@@ -247,7 +243,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
             Whether the path is a candidate for this simulation class.
         """
 
-        tkwargs = dict(fileprefix=cls._fileprefix, fileprefix_catalog=cls._fileprefix_catalog)
+        tkwargs = {"fileprefix": cls._fileprefix, "fileprefix_catalog": cls._fileprefix_catalog}
         tkwargs.update(**kwargs)
         valid = super().validate_path(path, *args, **tkwargs)
         if valid == CandidateStatus.NO:
@@ -266,8 +262,5 @@ class TNGClusterSnapshot(ArepoSnapshot):
         matchingattrs &= header["NumPart_Total"][1] == 1944529344
         matchingattrs &= header["NumPart_Total"][2] == 586952200
 
-        if matchingattrs:
-            valid = CandidateStatus.YES
-        else:
-            valid = CandidateStatus.NO
+        valid = CandidateStatus.YES if matchingattrs else CandidateStatus.NO
         return valid

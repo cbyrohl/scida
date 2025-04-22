@@ -32,8 +32,7 @@ repos:
     hooks:
       - id: ruff
         name: Run Ruff (lint)
-        args: [--exit-non-zero-on-fix]
-        types_or: [python, pyi, jupyter]
+        types_or: [python, pyi]
 
       - id: ruff-format
         name: Run Ruff (format)

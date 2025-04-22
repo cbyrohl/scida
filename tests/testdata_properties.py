@@ -109,7 +109,7 @@ def get_testdata_partners(typestr):
             dct[int(splt[2])] = [k, td]
     assert max(dct.keys()) + 1 == len(dct)
     partners = [dct[i] for i in range(len(dct))]
-    partners_name, partners_entry = map(list, zip(*partners))
+    partners_name, partners_entry = map(list, zip(*partners, strict=False))
     return partners_name, partners_entry
 
 

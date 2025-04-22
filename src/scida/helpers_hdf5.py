@@ -70,15 +70,15 @@ def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
 
     """
     if len(tree) == 0:
-        tree.update(**dict(attrs={}, groups=[], datasets=[]))
+        tree.update(attrs={}, groups=[], datasets=[])
     if get_attrs and len(obj.attrs) > 0:
         tree["attrs"][obj.name] = dict(obj.attrs)
-    if isinstance(obj, (h5py.Dataset, zarr.Array)):
+    if isinstance(obj, h5py.Dataset | zarr.Array):
         dtype = get_dtype(obj)
         tree["datasets"].append([obj.name, obj.shape, dtype])
         if scalar_to_attr and len(obj.shape) == 0:
             tree["attrs"][obj.name] = obj[()]
-    elif isinstance(obj, (h5py.Group, zarr.Group)):
+    elif isinstance(obj, h5py.Group | zarr.Group):
         tree["groups"].append(obj.name)  # continue the walk
         for o in obj.values():
             walk_group(o, tree, get_attrs=get_attrs)
@@ -164,8 +164,8 @@ def create_mergedhdf5file(fn, files, max_workers=None, virtual=True, groupwise_s
         result = executor.map(walk_hdf5file, files, trees)
     result = list(result)
 
-    groups = set([item for r in result for item in r["groups"]])
-    datasets = set([item[0] for r in result for item in r["datasets"]])
+    groups = {item for r in result for item in r["groups"]}
+    datasets = {item[0] for r in result for item in r["datasets"]}
 
     def todct(lst):
         """helper func"""
@@ -232,16 +232,15 @@ def create_mergedhdf5file(fn, files, max_workers=None, virtual=True, groupwise_s
                     newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
 
                     # create virtual sources
-                    vsources = []
-                    for k in shapes[field]:
-                        vsources.append(
-                            h5py.VirtualSource(
-                                files[k],
-                                name=field,
-                                shape=shapes[field][k],
-                                dtype=dtypes[field],
-                            )
+                    vsources = [
+                        h5py.VirtualSource(
+                            files[k],
+                            name=field,
+                            shape=shapes[field][k],
+                            dtype=dtypes[field],
                         )
+                        for k in shapes[field]
+                    ]
                     layout = h5py.VirtualLayout(shape=tuple(newshape), dtype=dtypes[field])
 
                     # fill virtual dataset
@@ -256,9 +255,9 @@ def create_mergedhdf5file(fn, files, max_workers=None, virtual=True, groupwise_s
                 for field in groupfields:
                     totentries = np.array([k[1] for k in chunks[field]]).sum()
                     extrashapes = shapes[field][next(iter(shapes[field]))][1:]
-                    newshape = (totentries,) + extrashapes
+                    newshape = (totentries,) + extrashapes  # noqa: RUF005
                     hf.create_dataset(field, shape=newshape, dtype=dtypes[field])
-                counters = {field: 0 for field in groupfields}
+                counters = dict.fromkeys(groupfields, 0)
                 for k, fl in enumerate(files):
                     with h5py.File(fl) as hf_load:
                         for field in groupfields:
@@ -280,10 +279,9 @@ def create_mergedhdf5file(fn, files, max_workers=None, virtual=True, groupwise_s
         attrspaths_all = set().union(*attrs_key_lists)
         attrspaths_intersec = set(attrspaths_all).intersection(*attrs_key_lists)
         attrspath_diff = attrspaths_all.difference(attrspaths_intersec)
-        if attrspaths_all != attrspaths_intersec:
-            # if difference only stems from missing datasets (and their assoc. attrs); thats fine
-            if not attrspath_diff.issubset(datasets):
-                raise NotImplementedError("Some attribute paths not present in each partial data file.")
+        # if difference only stems from missing datasets (and their assoc. attrs); thats fine
+        if attrspaths_all != attrspaths_intersec and not attrspath_diff.issubset(datasets):
+            raise NotImplementedError("Some attribute paths not present in each partial data file.")
         # check for common key+values across all files
         attrs_same = {}
         attrs_differ = {}
@@ -304,7 +302,7 @@ def create_mergedhdf5file(fn, files, max_workers=None, virtual=True, groupwise_s
                 attrval0 = attrvallist[0]
                 if isinstance(attrval0, np.ndarray):
                     if not (np.all([np.array_equal(attrval0, v) for v in attrvallist])):
-                        log.debug("%s: %s has different values." % (apath, k))
+                        log.debug("%s: %s has different values.", apath, k)
                         attrs_differ[apath][k] = np.stack(attrvallist)
                         continue
                 else:
@@ -314,7 +312,7 @@ def create_mergedhdf5file(fn, files, max_workers=None, virtual=True, groupwise_s
                         # (we had some incident...)
                         same = np.allclose(attrval0, attrvallist)
                     if not same:
-                        log.debug("%s: %s has different values." % (apath, k))
+                        log.debug("%s: %s has different values.", apath, k)
                         attrs_differ[apath][k] = np.array(attrvallist)
                         continue
                 attrs_same[apath][k] = attrval0

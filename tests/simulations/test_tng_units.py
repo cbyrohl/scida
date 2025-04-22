@@ -32,7 +32,7 @@ def test_tng_units(testdatapath):
     if not np.isclose(ds.redshift, 0.0):
         assert ureg("a").to_base_units().magnitude != 1.0
 
-    for pk1, pk2 in zip(["PartType0", "Group", "Subhalo"], ["particles", "groups", "subhalos"]):
+    for pk1, pk2 in zip(["PartType0", "Group", "Subhalo"], ["particles", "groups", "subhalos"], strict=False):
         # if pk1 not in ds.data.keys():
         #     continue
         for k in sorted(ds.data[pk1].keys()):

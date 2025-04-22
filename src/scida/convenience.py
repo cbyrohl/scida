@@ -7,7 +7,6 @@ import shutil
 import sys
 import tarfile
 import time
-from typing import Optional, Union
 
 import requests
 
@@ -44,7 +43,7 @@ def download_and_extract(url: str, path: pathlib.Path, progressbar: bool = True,
         The path to the downloaded and extracted file(s).
     """
     if path.exists() and not overwrite:
-        raise ValueError("Target path '%s' already exists." % path)
+        raise ValueError(f"Target path '{path}' already exists.")
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         totlength = int(r.headers.get("content-length", 0))
@@ -58,29 +57,23 @@ def download_and_extract(url: str, path: pathlib.Path, progressbar: bool = True,
                 if progressbar:
                     rate = (lread / 2**20) / (t2 - t1)
                     sys.stdout.write(
-                        "\rDownloaded %.2f/%.2f Megabytes (%.2f%%, %.2f MB/s)"
-                        % (
-                            lread / 2**20,
-                            totlength / 2**20,
-                            100.0 * lread / totlength,
-                            rate,
-                        )
+                        f"\rDownloaded {lread / 2**20:.2f}/{totlength / 2**20:.2f} Megabytes "
+                        f"({100.0 * lread / totlength:.2f}%, {rate:.2f} MB/s)"
                     )
                     sys.stdout.flush()
         sys.stdout.write("\n")
-    tar = tarfile.open(path, "r:gz")
-    for t in tar:
-        if t.isdir():
-            t.mode = int("0755", base=8)
+    with tarfile.open(path, "r:gz") as tar:
+        for t in tar:
+            if t.isdir():
+                t.mode = int("0755", base=8)
+            else:
+                t.mode = int("0644", base=8)
+        # if python version >= 3.12, need filter argument (required from 3.14 onwards)
+        if sys.version_info >= (3, 12):
+            tar.extractall(path.parents[0], filter="fully_trusted")
         else:
-            t.mode = int("0644", base=8)
-    # if python version >= 3.12, need filter argument (required from 3.14 onwards)
-    if sys.version_info >= (3, 12):
-        tar.extractall(path.parents[0], filter="fully_trusted")
-    else:
-        tar.extractall(path.parents[0])
-    foldername = tar.getmembers()[0].name  # parent folder of extracted tar.gz
-    tar.close()
+            tar.extractall(path.parents[0])
+        foldername = tar.getmembers()[0].name  # parent folder of extracted tar.gz
     os.remove(path)
     return os.path.join(path.parents[0], foldername)
 
@@ -98,7 +91,7 @@ def get_testdata(name: str) -> str:
     str
     """
     config = get_config()
-    tdpath: Optional[str] = config.get("testdata_path", None)
+    tdpath: str | None = config.get("testdata_path", None)
     if tdpath is None:
         raise ValueError("Test data directory not specified in configuration")
     if not os.path.isdir(tdpath):
@@ -155,7 +148,7 @@ def find_path(path, overwrite=False) -> str:
                         os.unlink(fp)
                     else:
                         shutil.rmtree(fp)
-            foldercontent = [f for f in savepath.glob("*")]
+            foldercontent = list(savepath.glob("*"))
             if len(foldercontent) == 0:
                 savepath = savepath / filename
                 extractpath = download_and_extract(path, savepath, progressbar=True, overwrite=overwrite)
@@ -167,7 +160,7 @@ def find_path(path, overwrite=False) -> str:
             nfolders = len([f for f in extractpath.glob("*") if f.is_dir()])
             nobjects = len([f for f in extractpath.glob("*") if f.is_dir()])
             if nobjects == 1 and nfolders == 1:
-                extractpath = extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
+                extractpath = extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]  # noqa: RUF015
             path = extractpath
         elif databackend == "testdata":
             path = get_testdata(dataname)
@@ -175,10 +168,10 @@ def find_path(path, overwrite=False) -> str:
             # potentially custom dataset.
             resources = config.get("resources", {})
             if databackend not in resources:
-                raise ValueError("Unknown resource '%s'" % databackend)
+                raise ValueError(f"Unknown resource '{databackend}'")
             r = resources[databackend]
             if dataname not in r:
-                raise ValueError("Unknown dataset '%s' in resource '%s'" % (dataname, databackend))
+                raise ValueError(f"Unknown dataset '{dataname}' in resource '{databackend}'")
             path = os.path.expanduser(r[dataname]["path"])
     else:
         found = False
@@ -190,16 +183,16 @@ def find_path(path, overwrite=False) -> str:
                     found = True
                     break
         if not found:
-            raise ValueError("Specified path '%s' unknown." % path)
+            raise ValueError(f"Specified path '{path}' unknown.")
     return path
 
 
 def load(
     path: str,
-    units: Union[bool, str] = True,
+    units: bool | str = True,
     unitfile: str = "",
     overwrite: bool = False,
-    force_class: Optional[object] = None,
+    force_class: object | None = None,
     **kwargs,
 ):
     """
@@ -241,14 +234,14 @@ def load(
             kwargs["catalog"] = find_path(c, overwrite=overwrite)
 
     # determine dataset class
-    reg = dict()
+    reg = {}
     reg.update(**dataset_type_registry)
     reg.update(**dataseries_type_registry)
 
     path = os.path.realpath(path)
     cls = _determine_type(path, **kwargs)[1][0]
 
-    msg = "Dataset is identified as '%s' via _determine_type." % cls
+    msg = f"Dataset is identified as '{cls}' via _determine_type."
     log.debug(msg)
 
     # any identifying metadata?
@@ -262,10 +255,10 @@ def load(
         cls = cls_simconf
         if oldcls != cls:
             msg = "Dataset is identified as '%s' via the simulation config replacing prior candidate '%s'."
-            log.debug(msg % (cls, oldcls))
+            log.debug(msg.format(cls, oldcls))
         else:
             msg = "Dataset is identified as '%s' via the simulation config, identical to prior candidate."
-            log.debug(msg % cls)
+            log.debug(msg, cls)
 
     if force_class is not None:
         cls = force_class
@@ -288,13 +281,13 @@ def load(
     kwargs["overwrite_cache"] = overwrite
 
     # we append since unit mixin is added outside of this func right now
-    metadata_raw = dict()
+    metadata_raw = {}
     if classtype == "dataset":
         metadata_raw = load_metadata(path, fileprefix=None)
     other_mixins = _determine_mixins(path=path, metadata_raw=metadata_raw)
     mixins += other_mixins
 
-    log.debug("Adding mixins '%s' to dataset." % mixins)
+    log.debug("Adding mixins '%s' to dataset.", mixins)
     if hasattr(cls, "_mixins"):
         cls_mixins = cls._mixins
         for m in cls_mixins:
@@ -306,7 +299,7 @@ def load(
     return instance
 
 
-def get_dataset_by_name(name: str) -> Optional[str]:
+def get_dataset_by_name(name: str) -> str | None:
     """
     Get dataset name from alias or name found in the configuration files.
 

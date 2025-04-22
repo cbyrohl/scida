@@ -107,6 +107,7 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
+    "tests",
 ]
 extend-include = ["*.ipynb"]
 preview = true
@@ -161,7 +162,8 @@ ignore = [
     "N802",
     "N803",
     "SIM118",    # keys in dict.keys()
-    "FURB103"
+    "FURB103",
+    "UP004",    # Class `foo` inherits from `object`
 ]
 
 fixable = ["A", "B", "C", "D", "E", "F"]

@@ -171,3 +171,6 @@ pre-commit
 
 # VS code
 .vscode
+
+# dev notebooks
+dev*.ipynb

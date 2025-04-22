@@ -1,6 +1,6 @@
-from .cosmology import CosmologyMixin
-from .spatial import SpatialCartesian3DMixin
-from .units import UnitMixin
+from .cosmology import CosmologyMixin as CosmologyMixin
+from .spatial import SpatialCartesian3DMixin as SpatialCartesian3DMixin
+from .units import UnitMixin as UnitMixin
 
 # TODO: Think about this once more...
 # Certain Mixins can cooperate.

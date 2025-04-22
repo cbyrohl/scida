@@ -8,7 +8,7 @@ from collections import Counter
 from enum import Enum
 from functools import reduce
 from inspect import getmro
-from typing import List, Union
+from operator import add, itemgetter
 
 from scida.config import get_simulationconfig
 from scida.io import load_metadata
@@ -103,10 +103,10 @@ def _determine_type_from_simconfig(path, classtype="dataset", reg=None):
 
     """
     if reg is None:
-        reg = dict()
+        reg = {}
         reg.update(**dataset_type_registry)
         reg.update(**dataseries_type_registry)
-    metadata_raw = dict()
+    metadata_raw = {}
     if classtype == "dataset":
         metadata_raw = load_metadata(path, fileprefix=None)
     candidates = check_config_for_dataset(metadata_raw, path=path)
@@ -122,18 +122,18 @@ def _determine_type_from_simconfig(path, classtype="dataset", reg=None):
             elif classtype == "dataset":
                 cls = reg[dstype["dataset"]]
             else:
-                raise ValueError("Unknown class type '%s'." % classtype)
+                raise ValueError(f"Unknown class type '{classtype}'.")
         elif isinstance(dstype, str):
             cls = reg[dstype]  # not split into series and dataset
         elif dstype is None:
             pass  # simply no dataset_type specified
         else:
-            raise ValueError("Unknown type of dataset config variable. content: '%s'" % dstype)
+            raise ValueError(f"Unknown type of dataset config variable. content: '{dstype}'" % dstype)
     return cls
 
 
 def _determine_type(
-    path: Union[str, os.PathLike],
+    path: str | os.PathLike,
     test_datasets: bool = True,
     test_dataseries: bool = True,
     strict: bool = False,
@@ -166,9 +166,9 @@ def _determine_type(
         List of classes that are candidates.
 
     """
-    available_dtypes: List[str] = []
-    dtypes_status: List[CandidateStatus] = []
-    reg = dict()
+    available_dtypes: list[str] = []
+    dtypes_status: list[CandidateStatus] = []
+    reg = {}
     if test_datasets:
         reg.update(**dataset_type_registry)
     if test_dataseries:
@@ -181,7 +181,7 @@ def _determine_type(
             try:
                 valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
             except Exception as e:
-                log.debug("Exception raised during validate_path of tested type '%s': %s" % (k, e))
+                log.debug("Exception raised during validate_path of tested type '%s': %s", k, e)
         else:
             valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
         if valid != CandidateStatus.NO:
@@ -193,7 +193,7 @@ def _determine_type(
     if len(available_dtypes) > 1:
         # TODO: Rethink how tu use MAYBE/YES information.
         # below lines not suitable for this.
-        good_matches = [k for k, v in zip(available_dtypes, dtypes_status) if v == CandidateStatus.YES]
+        good_matches = [k for k, v in zip(available_dtypes, dtypes_status, strict=False) if v == CandidateStatus.YES]
         if len(good_matches) >= 1:
             available_dtypes = good_matches  # discard all MAYBEs as we have better options
 
@@ -201,12 +201,12 @@ def _determine_type(
         inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
         mros = [getmro(reg[k]) for k in reg.keys()]
         lens = [len([m for m in mro if "Mixin" not in m.__name__]) for mro in mros]
-        zp = zip(available_dtypes, lens, dtypes_status)
+        zp = zip(available_dtypes, lens, dtypes_status, strict=False)
         lst = sorted(zp, key=lambda x: x[2].value)
-        lst = sorted(lst, key=lambda x: x[1])
+        lst = sorted(lst, key=itemgetter(1))
         # try to find candidate that shows up only once across all inheritance trees.
         # => this will be the most specific candidate(s).
-        count = reduce(lambda x, y: x + y, inheritancecounters)
+        count = reduce(add, inheritancecounters)
         countdict = {k: count[reg[k]] for k in available_dtypes}
         mincount = min(countdict.values())
         available_dtypes = [k for k in available_dtypes if count[reg[k]] == mincount]
@@ -215,5 +215,5 @@ def _determine_type(
             if strict:
                 raise ValueError("Ambiguous data type. Available types:", available_dtypes)
             else:
-                log.info("Note: Multiple dataset candidates: %s" % available_dtypes)
+                log.info("Note: Multiple dataset candidates: %s", available_dtypes)
     return available_dtypes, [reg[k] for k in available_dtypes]
