@@ -144,7 +144,18 @@ def computedecorator(func):
 
 
 # based on https://stackoverflow.com/a/60708339 & https://stackoverflow.com/a/42865957/2002471
-units = {"B": 1, "KIB": 2**10, "MIB": 2**20, "GIB": 2**30, "TIB": 2**40}
+units = {
+    "B": 1,
+    "KIB": 2**10,
+    "MIB": 2**20,
+    "GIB": 2**30,
+    "TIB": 2**40,
+    "KB": 10**3,
+    "MB": 10**6,
+    "GB": 10**9,
+    "TB": 10**12,
+    "PB": 10**15,
+}
 
 
 # needed for processing dask arrays

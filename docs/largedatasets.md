@@ -10,6 +10,15 @@ Until now, we have applied our framework to a very small simulation.
 However, what if we are working with a very large data set
 (like the TNG50-1 cosmological simulation, which has $2160^3$ particles, $512$ times more than TNG50-4)?
 
+## Preparation
+First, we need to inform scida/dask about the resources it is allowed to use or allocate.
+By default, scida would use all available memory and CPU cores, which is not always desired, particularly on shared systems such as HPC clusters or [TNGLab](https://www.tng-project.org/data/lab/).
+
+scida provides a convenient `init_resources()` function that set up reasonable local resource defaults.
+**Call `scida.init_resources()` immediately after importing scida** and before any other dask operations .
+For TNGLab, we impose a default memory limit of 4GB via this mechanism. Monitor memory usage via the [dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
+
+
 ## Starting simple: computing in chunks
 
 First, we can still run the same calculation as above, and it will "just work" (hopefully).
@@ -52,17 +61,14 @@ Rather than sequentially calculating large tasks, we can also run the computatio
 To do so different advanced dask schedulers are available.
 Here, we use the most straight forward [distributed scheduler](https://docs.dask.org/en/latest/how-to/deploy-dask/single-distributed.html).
 
-### Running a LocalCluster
-Usually, we would start a scheduler and then connect new workers (e.g. running on multiple compute/backend nodes of a HPC cluster).
-After, tasks (either interactively or scripted) can leverage the power of these connected resources.
+### Manual LocalCluster setup
 
-For this example, we will use the same "distributed" scheduler/API, but keep things simple by using just the one (local) node we are currently running on.
-
-While the result is eventually computed, it is a bit slow, primarily because the actual reading of the data off disk is the limiting factor, and we can only use resources available on our local machine.
+If you need fine-grained control beyond what `scida.init_resources()` provides, you can manually configure the Local distributed scheduler:
 
 ```pycon
 >>> from dask.distributed import Client, LocalCluster
 >>> cluster = LocalCluster(n_workers=16, threads_per_worker=1,
+                           memory_limit="4GB",
                            dashboard_address=":8787")
 >>> client = Client(cluster)
 >>> client

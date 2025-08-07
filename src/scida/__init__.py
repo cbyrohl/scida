@@ -18,5 +18,6 @@ from scida.customs.gizmo.series import GizmoSimulation
 from scida.customs.rockstar.dataset import RockstarCatalog
 from scida.customs.swift.dataset import SwiftSnapshot
 from scida.customs.swift.series import SwiftSimulation
+from scida.init import init_resources
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)

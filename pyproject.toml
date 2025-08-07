@@ -39,7 +39,7 @@ pytest-profiling = "^1.7.0"
 mypy = ">=0.930"
 mkdocs = "^1.5.3"
 mkdocs-material = "^9.5.3"
-mkdocstrings = {extras = ["python"], version = "^0.24.0"}
+mkdocstrings = {extras = ["python"], version = "^0.30.0"}
 mkdocs-jupyter = "^0.24.6"
 ipykernel = "^6.19.4"
 matplotlib = "^3.6.2"
