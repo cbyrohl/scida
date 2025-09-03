@@ -40,14 +40,7 @@ class BaseDataset(metaclass=MixinMeta):
     """
 
     def __init__(
-        self,
-        path,
-        chunksize="auto",
-        virtualcache=True,
-        overwrite_cache=False,
-        fileprefix="",
-        hints=None,
-        **kwargs
+        self, path, chunksize="auto", virtualcache=True, overwrite_cache=False, fileprefix="", hints=None, **kwargs
     ):
         """
         Initialize a dataset object.
@@ -240,10 +233,7 @@ class BaseDataset(metaclass=MixinMeta):
         int
         """
         # determinstic hash; note that hash() on a string is no longer deterministic in python3.
-        hash_value = (
-            int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16)
-            % 10**10
-        )
+        hash_value = int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16) % 10**10
         return hash_value
 
     def __getitem__(self, item):
@@ -272,9 +262,7 @@ class BaseDataset(metaclass=MixinMeta):
     def save(
         self,
         fname,
-        fields: Union[
-            str, Dict[str, Union[List[str], Dict[str, da.Array]]], FieldContainer
-        ] = "all",
+        fields: Union[str, Dict[str, Union[List[str], Dict[str, da.Array]]], FieldContainer] = "all",
         overwrite: bool = True,
         zarr_kwargs: Optional[dict] = None,
         cast_uints: bool = False,
@@ -357,9 +345,7 @@ class BaseDataset(metaclass=MixinMeta):
                         arr = arr.astype(np.int64)
                     elif arr.dtype == np.uint32:
                         arr = arr.astype(np.int32)
-                task = da.to_zarr(
-                    arr, os.path.join(fname, p, k), overwrite=True, compute=False
-                )
+                task = da.to_zarr(arr, os.path.join(fname, p, k), overwrite=True, compute=False)
                 tasks.append(task)
         dask.compute(tasks)
 
@@ -443,9 +429,7 @@ class Selector(object):
 
             self.prepare(*args, **kwargs)
             if self.keys is None:
-                raise NotImplementedError(
-                    "Subclass implementation needed for self.keys!"
-                )
+                raise NotImplementedError("Subclass implementation needed for self.keys!")
             if kwargs.pop("dropkeys", True):
                 for k in self.keys:
                     kwargs.pop(k, None)

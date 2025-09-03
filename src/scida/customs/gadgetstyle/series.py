@@ -6,7 +6,6 @@ import logging
 import os
 import pathlib
 from pathlib import Path
-from typing import Dict, Optional
 
 from scida.discovertypes import _determine_mixins, _determine_type
 from scida.interface import create_datasetclass_with_mixins
@@ -21,11 +20,11 @@ class GadgetStyleSimulation(DatasetSeries):
     def __init__(
         self,
         path,
-        prefix_dict: Optional[Dict] = None,
-        subpath_dict: Optional[Dict] = None,
-        arg_dict: Optional[Dict] = None,
+        prefix_dict: dict | None = None,
+        subpath_dict: dict | None = None,
+        arg_dict: dict | None = None,
         lazy=True,
-        **interface_kwargs
+        **interface_kwargs,
     ):
         """
         Initialize a GadgetStyleSimulation object.
@@ -43,15 +42,15 @@ class GadgetStyleSimulation(DatasetSeries):
         self.path = path
         self.name = os.path.basename(path)
         if prefix_dict is None:
-            prefix_dict = dict()
+            prefix_dict = {}
         if subpath_dict is None:
-            subpath_dict = dict()
+            subpath_dict = {}
         if arg_dict is None:
-            arg_dict = dict()
+            arg_dict = {}
         p = Path(path)
         if not (p.exists()):
-            raise ValueError("Specified path '%s' does not exist." % path)
-        paths_dict = dict()
+            raise ValueError(f"Specified path '{path}' does not exist.")
+        paths_dict = {}
         keys = []
         for d in [prefix_dict, subpath_dict, arg_dict]:
             keys.extend(list(d.keys()))
@@ -74,7 +73,7 @@ class GadgetStyleSimulation(DatasetSeries):
                     continue  # do not require optional sources
                 raise ValueError("Specified path '%s' does not exist." % (p / subpath))
             fns = os.listdir(sp)
-            prfxs = set([f.split("_")[0] for f in fns if f.startswith(prefix)])
+            prfxs = {f.split("_")[0] for f in fns if f.startswith(prefix)}
             if len(prfxs) == 0:
                 if k != "paths":
                     continue  # do not require optional sources
@@ -85,34 +84,26 @@ class GadgetStyleSimulation(DatasetSeries):
             if not found_prefix:
                 h5files = [f for f in fns if f.endswith(".hdf5")]
                 # we only test "snap" prefix for now...
-                prfx_tmp = {"gpaths": "group", "paths": "snap"}.get(k, None)
+                prfx_tmp = {"gpaths": "group", "paths": "snap"}.get(k)
                 if prfx_tmp is not None:
-                    files = [
-                        f.split("_")[0] for f in h5files if f.startswith(prfx_tmp + "_")
-                    ]
+                    files = [f.split("_")[0] for f in h5files if f.startswith(prfx_tmp + "_")]
                     if len(files) > 1:
                         prfx = prfx_tmp
                         found_prefix = True
 
             if not found_prefix:
-                raise ValueError(
-                    "Could not find any files with prefix '%s' in '%s'." % (prefix, sp)
-                )
+                raise ValueError(f"Could not find any files with prefix '{prefix}' in '{sp}'.")
 
-            paths = sorted([p for p in sp.glob(prfx + "_*")])
+            paths = sorted(sp.glob(prfx + "_*"))
             # sometimes there are backup folders with different suffix, exclude those.
 
             # now sort by snapshot order
-            paths = [
-                p
-                for p in paths
-                if str(p).split("_")[-1].isdigit() or str(p).endswith(".hdf5")
-            ]
+            paths = [p for p in paths if str(p).split("_")[-1].isdigit() or str(p).endswith(".hdf5")]
             # attempt sorting
             try:
                 nmbrs = [int(str(p).replace(".hdf5", "").split("_")[-1]) for p in paths]
-                paths = [p for _, p in sorted(zip(nmbrs, paths))]
-            except:  # noqa
+                paths = [p for _, p in sorted(zip(nmbrs, paths, strict=False))]
+            except:  # noqa: E722
                 pass
             paths_dict[k] = paths
 
@@ -158,7 +149,7 @@ def _get_snapshotfolder_prefix(path) -> str:
     """Try to infer the snapshot folder prefix"""
     p = pathlib.Path(path)
     if not p.exists():
-        raise ValueError("Specified path '%s' does not exist." % path)
+        raise ValueError(f"Specified path '{path}' does not exist.")
     fns = os.listdir(p)
     fns = [f for f in fns if os.path.isdir(p / f)]
     # find most occuring prefix

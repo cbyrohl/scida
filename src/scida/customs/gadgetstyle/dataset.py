@@ -91,9 +91,7 @@ class GadgetStyleSnapshot(Dataset):
         return prfxs[0]
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, expect_grp=False, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: Union[str, os.PathLike], *args, expect_grp=False, **kwargs) -> CandidateStatus:
         """
         Check if path is valid for this interface.
         Parameters
@@ -131,12 +129,7 @@ class GadgetStyleSnapshot(Dataset):
 
                 # identifying snapshot or group catalog
                 is_snap = all([k in metadata_raw["/Header"] for k in headerattrs])
-                is_grp = all(
-                    [
-                        k in metadata_raw["/Header"]
-                        for k in ["Ngroups_ThisFile", "Ngroups_Total"]
-                    ]
-                )
+                is_grp = all([k in metadata_raw["/Header"] for k in ["Ngroups_ThisFile", "Ngroups_Total"]])
                 if is_grp:
                     return CandidateStatus.MAYBE
                 if is_snap and not expect_grp:
@@ -164,9 +157,7 @@ class GadgetStyleSnapshot(Dataset):
         res = self.data.register_field(parttype, name=name, description=description)
         return res
 
-    def merge_data(
-        self, secondobj, fieldname_suffix="", root_group: Optional[str] = None
-    ):
+    def merge_data(self, secondobj, fieldname_suffix="", root_group: Optional[str] = None):
         """
         Merge data from other snapshot into self.data.
 

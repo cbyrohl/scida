@@ -1,6 +1,7 @@
 """
 Defines a series representing a Gizmo simulation.
 """
+
 import os
 
 from scida.customs.gadgetstyle.series import GadgetStyleSimulation
@@ -18,9 +19,7 @@ class GizmoSimulation(GadgetStyleSimulation):
             rh_paths="halo/rockstar_dm/catalog_hdf5",
             rs_paths="halo/rockstar_dm/catalog_hdf5",
         )
-        arg_dict = dict(
-            rh_paths="catalog_rockstar_halo", rs_paths="catalog_rockstar_star"
-        )
+        arg_dict = dict(rh_paths="catalog_rockstar_halo", rs_paths="catalog_rockstar_star")
         super().__init__(
             path,
             prefix_dict=prefix_dict,
@@ -28,7 +27,7 @@ class GizmoSimulation(GadgetStyleSimulation):
             arg_dict=arg_dict,
             lazy=lazy,
             async_caching=async_caching,
-            **interface_kwargs
+            **interface_kwargs,
         )
 
     @classmethod

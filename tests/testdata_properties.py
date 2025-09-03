@@ -109,13 +109,11 @@ def get_testdata_partners(typestr):
             dct[int(splt[2])] = [k, td]
     assert max(dct.keys()) + 1 == len(dct)
     partners = [dct[i] for i in range(len(dct))]
-    partners_name, partners_entry = map(list, zip(*partners))
+    partners_name, partners_entry = map(list, zip(*partners, strict=False))
     return partners_name, partners_entry
 
 
-def init_param_from_testdata(
-    entries: Union[List[TestDataProperties], TestDataProperties], extramarks=None
-):
+def init_param_from_testdata(entries: Union[List[TestDataProperties], TestDataProperties], extramarks=None):
     if extramarks is None:
         extramarks = []
     if not isinstance(entries, list):
@@ -209,9 +207,7 @@ def get_ids(datatype, **kwargs):
     return ids
 
 
-def require_testdata(
-    name, scope="function", only=None, specific=True, nmax=None, **kwargs
-):
+def require_testdata(name, scope="function", only=None, specific=True, nmax=None, **kwargs):
     """
 
     Parameters

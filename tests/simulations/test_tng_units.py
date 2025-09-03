@@ -32,9 +32,7 @@ def test_tng_units(testdatapath):
     if not np.isclose(ds.redshift, 0.0):
         assert ureg("a").to_base_units().magnitude != 1.0
 
-    for pk1, pk2 in zip(
-        ["PartType0", "Group", "Subhalo"], ["particles", "groups", "subhalos"]
-    ):
+    for pk1, pk2 in zip(["PartType0", "Group", "Subhalo"], ["particles", "groups", "subhalos"], strict=False):
         # if pk1 not in ds.data.keys():
         #     continue
         for k in sorted(ds.data[pk1].keys()):
@@ -48,9 +46,7 @@ def test_tng_units(testdatapath):
             if isinstance(val1, pint.Quantity):
                 mag1 = val1.magnitude
                 if np.any(np.isnan(mag1)):
-                    print(
-                        "Skipping validation of '%s' due to underlying Nan entry." % k
-                    )
+                    print("Skipping validation of '%s' due to underlying Nan entry." % k)
                     continue
                 val1 = val1.to_base_units().compute()
                 mag1 = val1.magnitude
@@ -58,23 +54,19 @@ def test_tng_units(testdatapath):
                 val1 = val1.compute()
                 mag1 = val1
                 if np.any(np.isnan(mag1)):
-                    print(
-                        "Skipping validation of '%s' due to underlying Nan entry." % k
-                    )
-                if not any(
-                    [
-                        s in k
-                        for s in [
-                            "ID",
-                            "GrNr",
-                            "Len",
-                            "Flag",
-                            "Parent",
-                            "GroupFirstSub",
-                            "Nsubs",
-                        ]
+                    print("Skipping validation of '%s' due to underlying Nan entry." % k)
+                if not any([
+                    s in k
+                    for s in [
+                        "ID",
+                        "GrNr",
+                        "Len",
+                        "Flag",
+                        "Parent",
+                        "GroupFirstSub",
+                        "Nsubs",
                     ]
-                ):
+                ]):
                     print("WARNING (TODO): Field '%s' has no units." % k)
             u2 = units[pk2][k]
             mag2 = ds_nounits.data[pk1][k][0].compute()
@@ -170,14 +162,10 @@ def get_units_from_unittuples(unittuples, codeunitdict):
     cudict["UnitVelocity"] = codeunitdict["UnitVelocity_in_cm_per_s"] * u.cm / u.s
     # Pressure: M/L/T^2 = M/L^3 * V^2
     # P = M / L / T^2
-    cudict["UnitPressure"] = (
-        cudict["UnitMass"] / cudict["UnitLength"] ** 3 * cudict["UnitVelocity"] ** 2
-    )
+    cudict["UnitPressure"] = cudict["UnitMass"] / cudict["UnitLength"] ** 3 * cudict["UnitVelocity"] ** 2
     cudict["h"] = codeunitdict["HubbleParam"]
     cudict["a"] = 1.0 / (1.0 + codeunitdict["Redshift"])
-    cudict["ckpc"] = (
-        cudict["a"] * u.kpc
-    )  # as we express everything physical => multiply with a
+    cudict["ckpc"] = cudict["a"] * u.kpc  # as we express everything physical => multiply with a
     units = 1.0
     for ut in unittuples:
         if isinstance(ut, tuple):
@@ -199,17 +187,11 @@ def get_units_from_unittuples(unittuples, codeunitdict):
 def get_units_from_TNGdocs(codeunitdict):
     units = dict(particles={}, groups={}, subhalos={})
     unittuples = get_unittuples_from_TNGdocs_particles()
-    units["particles"] = {
-        k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()
-    }
+    units["particles"] = {k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()}
     unittuples = get_unittuples_from_TNGdocs_groups()
-    units["groups"] = {
-        k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()
-    }
+    units["groups"] = {k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()}
     unittuples = get_unittuples_from_TNGdocs_subhalos()
-    units["subhalos"] = {
-        k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()
-    }
+    units["subhalos"] = {k: get_units_from_unittuples(ut, codeunitdict) for k, ut in unittuples.items()}
     return units
 
 
@@ -395,9 +377,7 @@ def get_unittuples_from_TNGdocs_subhalos():
     uts["SubhaloStarMetallicity"] = []
     uts["SubhaloStarMetallicityHalfRad"] = []
     uts["SubhaloStarMetallicityMaxRad"] = []
-    uts[
-        "SubhaloStellarPhotometrics"
-    ] = []  # [("mag",)]  # TODO: Do not treat "mag" unit for now
+    uts["SubhaloStellarPhotometrics"] = []  # [("mag",)]  # TODO: Do not treat "mag" unit for now
     uts["SubhaloStellarPhotometricsMassInRad"] = uts["SubhaloBHMass"]
     uts["SubhaloStellarPhotometricsRad"] = uts["SubhaloCM"]
     uts["SubhaloVel"] = [("km",), ("s", -1)]

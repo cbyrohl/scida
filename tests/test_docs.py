@@ -33,9 +33,7 @@ class DocFile:
             if blocktype == "py" or blocktype == "python":
                 cblines.append(lines[start + 1 : end])
             elif blocktype == "pycon":
-                cblines.append(
-                    [k[4:] for k in lines[start + 1 : end] if k.startswith(">>>")]
-                )
+                cblines.append([k[4:] for k in lines[start + 1 : end] if k.startswith(">>>")])
             elif blocktype in ["bash", "yaml", "json", "console", "text", "html"]:
                 # not python; ignore
                 pass

@@ -5,64 +5,63 @@ description = "Convenience wrapper around large scientific datasets to process w
 authors = [{ name = "Chris Byrohl" }]
 requires-python = ">=3.11"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.9"
-numpy = [
-    {version = "^1.21", python = "<3.11"},
-    {version = ">=1.26", python = ">=3.11"}
+dependencies = [
+    "numpy~=1.21 ; python_version < '3.11'",
+    "numpy>=2.0 ; python_version >= '3.11'",
+    "dask[array, dataframe, distributed]>=2023 ; python_version < '3.11.9'",
+    "dask[array, dataframe, distributed]>=2024.4.1 ; python_version >= '3.11.9'",
+    "distributed>=2023",
+    "h5py>=3.7.0,<4",
+    "zarr>=2.10.0,<3",
+    "astropy>=5.0",
+    "numba>=0.6",
+    "pyyaml>=5.3.1",
+    "jupyter>=1.0.0,<2",
+    "tqdm>=4.64.1,<5",
+    "pint>=0.24,<0.25",
+    "requests>=2.31.0,<3",
 ]
-# need dask>2024.4.1 for py>=3.11.9 (https://github.com/dask/dask/pull/11035)
-dask = [{extras = ["array", "dataframe", "distributed"], version = ">=2023", python = "<3.11.9"},
-        {extras = ["array", "dataframe", "distributed"], version = ">=2024.4.1", python = ">=3.11.9"}
-        ]
-distributed = ">=2023"
-h5py = "^3.7.0"
-zarr = "^v2.10.0"
-astropy = ">=5.0"
-numba = ">=0.57"
-pyyaml = ">=5.3.1"
-jupyter = "^1.0.0"
-tqdm = "^4.64.1"
-pint = "^0.24"
-requests = "^2.31.0"
 
+[dependency-groups]
+dev = [
+    "pytest>=6.2.5",
+    "pre-commit>=2.17.0",
+    "black>=22.1.0",
+    "requests>=2.2.7",
+    "coverage>=7.0.1,<8",
+    "pytest-xdist[psutil]>=3.1.0,<4",
+    "pytest-profiling>=1.7.0,<2",
+    "mypy>=0.930",
+    "mkdocs>=1.5.3,<2",
+    "mkdocs-material>=9.5.3,<10",
+    "mkdocstrings[python]>=0.24.0,<0.25",
+    "mkdocs-jupyter>=0.24.6,<0.25",
+    "ipykernel>=6.19.4,<7",
+    "matplotlib>=3.6.2,<4",
+    "ipywidgets>=8.0.4,<9",
+    "isort>=5.11.4,<6",
+    "flake8>=6.0.0,<7",
+    "line-profiler>=4.0.2,<5",
+    "memory-profiler>=0.61.0,<0.62",
+    "holoviews[recommended]>=1.15.3,<2",
+    "xarray>=2022.12.0,<2023",
+    "datashader>=0.14.3,<=0.17",
+    "pyinstrument>=4.4.0,<5",
+    "memray>=1.6.0,<2",
+    "mkdocs-video>=1.4.0,<2",
+    "jupyter-contrib-nbextensions>=0.7.0,<0.8",
+    "typer>=0.9.0,<0.10",
+    "dask-jobqueue>=0.8.2,<0.9",
+    "jupyter>=1.0.0,<2",
+    "pytest-mock>=3.11.1,<4",
+    "notebook>=6.4.12,<7",
+    "mkdocs-glightbox>=0.3.4,<0.4",
+    "markdown-include>=0.8.1,<0.9",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=6.2.5"
-pre-commit = ">=2.17.0"
-black = ">=22.1.0"
-requests = ">=2.2.7"
-coverage = "^7.0.1"
-pytest-xdist = {extras = ["psutil"], version = "^3.1.0"}
-pytest-profiling = "^1.7.0"
-mypy = ">=0.930"
-mkdocs = "^1.5.3"
-mkdocs-material = "^9.5.3"
-mkdocstrings = {extras = ["python"], version = "^0.24.0"}
-mkdocs-jupyter = "^0.24.6"
-ipykernel = "^6.19.4"
-matplotlib = "^3.6.2"
-ipywidgets = "^8.0.4"
-isort = "^5.11.4"
-flake8 = "^6.0.0"
-line-profiler = "^4.0.2"
-memory-profiler = "^0.61.0"
-holoviews = {extras = ["recommended"], version = "^1.15.3"}
-xarray = "^2022.12.0"
-datashader = "^0.14.3"
-pyinstrument = "^4.4.0"
-memray = "^1.6.0"
-mkdocs-video = "^1.4.0"
-jupyter-contrib-nbextensions = "^0.7.0"
-typer = "^0.9.0"
-dask-jobqueue = "^0.8.2"
-jupyter = "^1.0.0"
-# https://github.com/Jupyter-contrib/jupyter_nbextensions_configurator/issues/165
-pytest-mock = "^3.11.1"
-notebook = "^6.4.12"
-mkdocs-glightbox = "^0.3.4"
-markdown-include = "^0.8.1"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
@@ -80,6 +79,7 @@ filterwarnings = [
 
 
 [tool.ruff]
+# Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
     ".direnv",
@@ -110,8 +110,6 @@ exclude = [
     "data",
     "plots",
 ]
-
-[tool.ruff]
 extend-include = ["*.ipynb"]
 preview = true
 line-length = 120
@@ -128,18 +126,27 @@ docstring-code-line-length = "dynamic"
 
 [tool.ruff.lint]
 select = [
-    "E", # pycodestyle (error)
-    "F", # pyflakes
-    "B", # bugbear
-    "B9",
-    "C4", # flake8-comprehensions
-    "SIM", # flake8-simplify
-    "I", # isort
-    "UP", # pyupgrade
-    "PIE", # flake8-pie
-    "PGH", # pygrep-hooks
-    "PYI", # flake8-pyi
-    "RUF",
+    "B",     # bugbear
+    "C4",    # flake8-comprehensions
+    "E",     # pycodestyle (error)
+    "F",     # pyflakes
+    "FA",    # flake8-future-annotations
+    "FLY",   # flynt
+    "FURB",  # refurb
+    "G",     # flake8-logging-format
+    "I",     # isort
+    "LOG",   # flake8-logging
+    "N",     # pep8-naming
+    "NPY",   # numpy
+    "PERF",  # perflint
+    "PGH",   # pygrep-hooks
+    "PT",    # flake8-pytest-style
+    "PIE",   # flake8-pie
+    "RUF",   # ruff
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "UP",    # pyupgrade
+    "W",     # pycodestyle
 ]
 ignore = [
     # only relevant if you run a script with `python -0`,
@@ -153,15 +160,21 @@ ignore = [
     "E241",
     # Can use % formater inplace of f-strings
     "UP031",
-    # Use key in group instrad of key in group.keys()
-    "SIM118",
+    "N816",     # mixed case naming in globalScope
+    "N806",     # lower case naming
+    "N802",
+    "N803",
+    "SIM118",    # keys in dict.keys()
+    "FURB103",
+    "UP004",    # Class `foo` inherits from `object`
 ]
 
 fixable = ["A", "B", "C", "D", "E", "F"]
 unfixable = []
 
 [tool.ruff.lint.pydocstyle]
-convention = "google"
+convention = "numpy"
+
 
 # Pyright
 [tool.pyright]
@@ -174,4 +187,5 @@ exclude = ["**/node_modules",
 ignore = ["src/oldstuff"]
 defineConstant = { DEBUG = true }
 stubPath = "src/stubs"
-typeCheckingMode = "standard"
+typeCheckingMode = "off"
+

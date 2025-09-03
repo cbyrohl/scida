@@ -31,9 +31,7 @@ class FieldDefs:
 fielddefs = FieldDefs()
 
 
-@fielddefs.register_field(
-    "Temperature", ["ElectronAbundance", "InternalEnergy"], "PartType0"
-)
+@fielddefs.register_field("Temperature", ["ElectronAbundance", "InternalEnergy"], "PartType0")
 def Temperature(arrs, ureg=None, **kwargs):
     """Compute gas temperature given (ElectronAbundance,InternalEnergy) in [K]."""
     xh = 0.76
@@ -42,9 +40,7 @@ def Temperature(arrs, ureg=None, **kwargs):
     m_p = 1.672622e-24  # proton mass [g]
     k_B = 1.380650e-16  # boltzmann constant [erg/K]
 
-    UnitEnergy_over_UnitMass = (
-        1e10  # standard unit system (TODO: can obtain from snapshot)
-    )
+    UnitEnergy_over_UnitMass = 1e10  # standard unit system (TODO: can obtain from snapshot)
     f = UnitEnergy_over_UnitMass
     if ureg is not None:
         f = 1.0

@@ -35,14 +35,10 @@ class ArepoSelector(Selector):
             raise ValueError("Cannot select for haloID and subhaloID at the same time.")
 
         if unbound is True and (halo_id is not None or subhalo_id is not None):
-            raise ValueError(
-                "Cannot select haloID/subhaloID and unbound particles at the same time."
-            )
+            raise ValueError("Cannot select haloID/subhaloID and unbound particles at the same time.")
 
         if subhalo_id_local is not None and subhalo_id is not None:
-            raise ValueError(
-                "Cannot select for localSubhaloID and subhaloID at the same time."
-            )
+            raise ValueError("Cannot select for localSubhaloID and subhaloID at the same time.")
 
         if snap.catalog is None:
             raise ValueError("Cannot select for haloID without catalog loaded.")

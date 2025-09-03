@@ -1,5 +1,4 @@
 import os
-from typing import Union
 
 import numpy as np
 
@@ -38,13 +37,13 @@ class TNGClusterSelector(Selector):
         None
         """
         snap: TNGClusterSnapshot = args[0]
-        zoom_id = kwargs.get("zoomID", None)
-        fuzz = kwargs.get("withfuzz", None)
-        onlyfuzz = kwargs.get("onlylfuzz", None)
+        zoom_id = kwargs.get("zoomID")
+        fuzz = kwargs.get("withfuzz")
+        onlyfuzz = kwargs.get("onlylfuzz")
         if zoom_id is None:
             return
         if zoom_id < 0 or zoom_id > (snap.ntargets - 1):
-            raise ValueError("zoomID must be in range 0-%i" % (snap.ntargets - 1))
+            raise ValueError(f"zoomID must be in range 0-{(snap.ntargets - 1):d}")
 
         for p in self.data_backup:
             if p.startswith("PartType"):
@@ -78,9 +77,7 @@ class TNGClusterSelector(Selector):
                 offset = offsets
                 length = lengths
 
-            def get_slicedarr(
-                v, offset, length, offset_fuzz, length_fuzz, key, fuzz=False
-            ):
+            def get_slicedarr(v, offset, length, offset_fuzz, length_fuzz, key, fuzz=False):
                 """
                 Get a sliced dask array for a given (length, offset) and (length_fuzz, offset_fuzz).
 
@@ -104,15 +101,10 @@ class TNGClusterSelector(Selector):
                 arr = v[offset : offset + length]
                 if offset_fuzz is not None:
                     arr_fuzz = v[offset_fuzz : offset_fuzz + length_fuzz]
-                    if onlyfuzz:
-                        arr = arr_fuzz
-                    else:
-                        arr = np.concatenate([arr, arr_fuzz])
+                    arr = arr_fuzz if onlyfuzz else np.concatenate([arr, arr_fuzz])
                 return arr
 
-            def get_slicedfunc(
-                func, offset, length, offset_fuzz, length_fuzz, key, fuzz=False
-            ):
+            def get_slicedfunc(func, offset, length, offset_fuzz, length_fuzz, key, fuzz=False):
                 """
                 Slice a functions output for a given (length, offset) and (length_fuzz, offset_fuzz).
 
@@ -132,9 +124,7 @@ class TNGClusterSelector(Selector):
                     The sliced function.
                 """
 
-                def newfunc(
-                    arrs, o=offset, ln=length, of=offset_fuzz, lnf=length_fuzz, **kwargs
-                ):
+                def newfunc(arrs, o=offset, ln=length, of=offset_fuzz, lnf=length_fuzz, **kwargs):
                     arr_all = func(arrs, **kwargs)
                     arr = arr_all[o : o + ln]
                     if of is None:
@@ -149,19 +139,13 @@ class TNGClusterSelector(Selector):
 
             # need to evaluate without recipes first
             for k, v in self.data_backup[p].items(withrecipes=False):
-                self.data[p][k] = get_slicedarr(
-                    v, offset, length, offset_fuzz, length_fuzz, key, fuzz
-                )
+                self.data[p][k] = get_slicedarr(v, offset, length, offset_fuzz, length_fuzz, key, fuzz)
 
-            for k, v in self.data_backup[p].items(
-                withfields=False, withrecipes=True, evaluate=False
-            ):
+            for k, v in self.data_backup[p].items(withfields=False, withrecipes=True, evaluate=False):
                 if not isinstance(v, FieldRecipe):
                     continue  # already evaluated, no need to port recipe (?)
                 rcp: FieldRecipe = v
-                func = get_slicedfunc(
-                    v.func, offset, length, offset_fuzz, length_fuzz, key, fuzz
-                )
+                func = get_slicedfunc(v.func, offset, length, offset_fuzz, length_fuzz, key, fuzz)
                 newrcp = DerivedFieldRecipe(rcp.name, func)
                 newrcp.type = rcp.type
                 newrcp.description = rcp.description
@@ -212,9 +196,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
             shp = len(lengths.shape)
             n = lengths.shape[-1]
             if shp == 1:
-                res = np.concatenate(
-                    [np.zeros(1, dtype=np.int64), np.cumsum(lengths.astype(np.int64))]
-                )[:-1]
+                res = np.concatenate([np.zeros(1, dtype=np.int64), np.cumsum(lengths.astype(np.int64))])[:-1]
             else:
                 res = np.cumsum(
                     np.vstack([np.zeros(n, dtype=np.int64), lengths.astype(np.int64)]),
@@ -222,18 +204,14 @@ class TNGClusterSnapshot(ArepoSnapshot):
                 )[:-1]
             return res
 
-        self.lengths_zoom = dict(particles=self.header["NumPart_ThisFile"])
-        self.offsets_zoom = dict(
-            particles=len_to_offsets(self.lengths_zoom["particles"])
-        )
+        self.lengths_zoom = {"particles": self.header["NumPart_ThisFile"]}
+        self.offsets_zoom = {"particles": len_to_offsets(self.lengths_zoom["particles"])}
 
         if hasattr(self, "catalog") and self.catalog is not None:
             self.lengths_zoom["groups"] = self.catalog.header["Ngroups_ThisFile"]
             self.offsets_zoom["groups"] = len_to_offsets(self.lengths_zoom["groups"])
             self.lengths_zoom["subgroups"] = self.catalog.header["Nsubgroups_ThisFile"]
-            self.offsets_zoom["subgroups"] = len_to_offsets(
-                self.lengths_zoom["subgroups"]
-            )
+            self.offsets_zoom["subgroups"] = len_to_offsets(self.lengths_zoom["subgroups"])
 
     @TNGClusterSelector()
     def return_data(self) -> FieldContainer:
@@ -248,9 +226,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
         return super().return_data()
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for TNG-Cluster snapshot class.
 
@@ -267,9 +243,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
             Whether the path is a candidate for this simulation class.
         """
 
-        tkwargs = dict(
-            fileprefix=cls._fileprefix, fileprefix_catalog=cls._fileprefix_catalog
-        )
+        tkwargs = {"fileprefix": cls._fileprefix, "fileprefix_catalog": cls._fileprefix_catalog}
         tkwargs.update(**kwargs)
         valid = super().validate_path(path, *args, **tkwargs)
         if valid == CandidateStatus.NO:
@@ -288,8 +262,5 @@ class TNGClusterSnapshot(ArepoSnapshot):
         matchingattrs &= header["NumPart_Total"][1] == 1944529344
         matchingattrs &= header["NumPart_Total"][2] == 586952200
 
-        if matchingattrs:
-            valid = CandidateStatus.YES
-        else:
-            valid = CandidateStatus.NO
+        valid = CandidateStatus.YES if matchingattrs else CandidateStatus.NO
         return valid

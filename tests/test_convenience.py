@@ -168,9 +168,7 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
     nfiles = 0
     for _, _, files in os.walk(cachedir):
         nfiles += len(files)
-    assert (
-        nfiles == 0
-    )  # no cache file should be created on interrupt: a os.remove() was triggered.
+    assert nfiles == 0  # no cache file should be created on interrupt: a os.remove() was triggered.
 
     # now let it finish
     ds = load(testdatapath, **loadkwargs)

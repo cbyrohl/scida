@@ -37,9 +37,7 @@ def test_series(testdatapath):
 
 def check_firesnap(obj: GizmoSnapshot):
     assert isinstance(obj, GizmoSnapshot)
-    assert all(
-        [k in obj.data for k in ["PartType0", "PartType1", "PartType2", "PartType4"]]
-    )
+    assert all([k in obj.data for k in ["PartType0", "PartType1", "PartType2", "PartType4"]])
 
     z = obj._metadata_raw["/Header"]["Redshift"]
     h = obj._metadata_raw["/Header"]["HubbleParam"]
@@ -67,9 +65,7 @@ def check_firesnap(obj: GizmoSnapshot):
     uq_ref = (1.0 * u.km**2 / u.s**2).to("cm**2/s**2").value
     assert pytest.approx(uq) == uq_ref
     # InternalEnergy
-    uq = (
-        (1.0 * obj.data["PartType0"]["InternalEnergy"].units).to("cm**2/s**2").magnitude
-    )
+    uq = (1.0 * obj.data["PartType0"]["InternalEnergy"].units).to("cm**2/s**2").magnitude
     uq_ref = (1.0 * u.km**2 / u.s**2).to("cm**2/s**2").value
     assert pytest.approx(uq) == uq_ref
     # SmoothingLength
@@ -77,9 +73,7 @@ def check_firesnap(obj: GizmoSnapshot):
     uq_ref = a * (1.0 * u.kpc).to("cm").value / h
     assert pytest.approx(uq) == uq_ref
     # StarFormationRate
-    uq = (
-        (1.0 * obj.data["PartType0"]["StarFormationRate"].units).to("Msun/yr").magnitude
-    )
+    uq = (1.0 * obj.data["PartType0"]["StarFormationRate"].units).to("Msun/yr").magnitude
     uq_ref = (1.0 * u.Msun / u.yr).to("Msun/yr").value
     assert pytest.approx(uq) == uq_ref
     # TODO: Test BH units; need massive halo snapshot for this.

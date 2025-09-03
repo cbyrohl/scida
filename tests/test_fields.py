@@ -13,9 +13,7 @@ def test_fieldcontainer_aliasing():
     with pytest.raises(KeyError):
         print(fc["test"])  # "test2" not defined yet
     fc["test"] = 1
-    assert (
-        "test2" in fc._fields
-    )  # if we write to the alias, the original entry should be set
+    assert "test2" in fc._fields  # if we write to the alias, the original entry should be set
 
 
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])

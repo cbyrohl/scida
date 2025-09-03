@@ -105,9 +105,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         da.Array
         """
         coords = self.get_coords(parttype=parttype)
-        return rectangular_cutout_mask(
-            center, width, coords, pbc=self.pbc, boxsize=self.boxsize
-        )
+        return rectangular_cutout_mask(center, width, coords, pbc=self.pbc, boxsize=self.boxsize)
 
     def rectangular_cutout(self, center, width, parttype="PartType0"):
         """

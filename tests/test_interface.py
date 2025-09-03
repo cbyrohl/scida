@@ -121,9 +121,7 @@ def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatal
     assert snp.file is not None
 
 
-@require_testdata(
-    "illustrissnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
-)
+@require_testdata("illustrissnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True)
 def test_areposnapshot_map_hquantity(testdata_illustrissnapshot_withcatalog):
     snp = testdata_illustrissnapshot_withcatalog
     snp.add_groupquantity_to_particles("GroupSFR")

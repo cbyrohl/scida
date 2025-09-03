@@ -1,6 +1,7 @@
 """
 Defines a series representing a SWIFT simulation.
 """
+
 import pathlib
 
 from scida.customs.gadgetstyle.series import GadgetStyleSimulation
