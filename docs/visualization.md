@@ -77,6 +77,7 @@ plt.show()
 !!! info
     This example requires the `holoviews`, `datashader` and `bokeh` packages installed.
     Make sure that these [holoviews examples](https://holoviews.org/getting_started/index.html) work before continuing.
+    The conversion from hdf5-backed dask arrays to dataframes seems to be broken with recent dask versions, this example might currently not work.
 
 
 We can do interactive visualization with holoviews. For example, we can create a scatter plot of the particle positions.

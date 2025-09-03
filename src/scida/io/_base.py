@@ -9,7 +9,7 @@ import pathlib
 import tempfile
 from functools import partial
 from os.path import join
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 import dask.array as da
 import h5py
@@ -159,7 +159,7 @@ class FITSLoader(Loader):
 
 class HDF5Loader(Loader):
     """
-    HDF5 file loader.
+    HDF5 file loader (single file).
     """
 
     def __init__(self, path):
@@ -201,7 +201,10 @@ class HDF5Loader(Loader):
         tree = {}
         walk_hdf5file(self.location, tree=tree)
         file = h5py.File(self.location, "r")
-        data, metadata = load_datadict_old(self.path, file, token=token, chunksize=chunksize, **kwargs)
+        kwargs.pop("nonvirtual_datasets", None)
+        data, metadata = load_datadict_old(
+            self.path, file, token=token, chunksize=chunksize, **kwargs
+        )
         self.file = file
         return data, metadata
 
@@ -285,6 +288,7 @@ class ZarrLoader(Loader):
         tree = {}
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
+        kwargs.pop("nonvirtual_datasets", None)
         data, metadata = load_datadict_old(
             self.path, self.file, token=token, chunksize=chunksize, filetype="zarr", **kwargs
         )
@@ -406,11 +410,14 @@ class ChunkedHDF5Loader(Loader):
             # 3. cachefile exists, but overwrite=True
             create = True
 
+        nonvirtual_datasets: Optional[List] = kwargs.pop("nonvirtual_datasets", None)
+
         if create:
             print_cachefile_creation = kwargs.get("print_cachefile_creation", True)
             self.create_cachefile(
                 fileprefix=fileprefix,
                 virtualcache=virtualcache,
+                nonvirtual_datasets=nonvirtual_datasets,
                 verbose=print_cachefile_creation,
                 choose_prefix=choose_prefix,
             )
@@ -421,8 +428,11 @@ class ChunkedHDF5Loader(Loader):
             # if we get an error, we try to create a new cache file (once)
             log.info("Invalid cache file, attempting to create new one.")
             os.remove(cachefp)
-            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache)
-            data, metadata = self.load_cachefile(cachefp, token=token, chunksize=chunksize, **kwargs)
+            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache,
+                                  nonvirtual_datasets=nonvirtual_datasets)
+            data, metadata = self.load_cachefile(
+                cachefp, token=token, chunksize=chunksize, **kwargs
+            )
         return data, metadata
 
     def get_chunkedfiles(self, fileprefix: Optional[str] = "", choose_prefix=False) -> list:
@@ -440,7 +450,10 @@ class ChunkedHDF5Loader(Loader):
         """
         return _get_chunkedfiles(self.path, fileprefix=fileprefix, choose_prefix=choose_prefix)
 
-    def create_cachefile(self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False):
+    def create_cachefile(
+        self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False,
+        nonvirtual_datasets=None
+    ):
         """
         Create a cache file from the chunked HDF5 files.
         Parameters
@@ -453,6 +466,8 @@ class ChunkedHDF5Loader(Loader):
             Whether to print messages.
         choose_prefix: bool
             Whether to choose the prefix if multiple are available.
+        nonvirtual_datasets: list
+            List of datasets to be created as non-virtual in any case.
 
         Returns
         -------
@@ -475,7 +490,7 @@ class ChunkedHDF5Loader(Loader):
             log.warning("No caching directory specified. Initial file read will remain slow.")
 
         try:
-            create_mergedhdf5file(cachefp, files, virtual=virtualcache)
+            create_mergedhdf5file(cachefp, files, virtual=virtualcache, nonvirtual_datasets=nonvirtual_datasets)
         except Exception as ex:
             if os.path.exists(cachefp):
                 os.remove(cachefp)  # remove failed attempt at merging file

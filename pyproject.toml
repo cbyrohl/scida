@@ -106,8 +106,9 @@ exclude = [
     "dist",
     "node_modules",
     "site-packages",
-    "venv",
-    "tests",
+    ".venv",
+    "data",
+    "plots",
 ]
 extend-include = ["*.ipynb"]
 preview = true
@@ -157,6 +158,8 @@ ignore = [
     "RUF052",
     "E201",
     "E241",
+    # Can use % formater inplace of f-strings
+    "UP031",
     "N816",     # mixed case naming in globalScope
     "N806",     # lower case naming
     "N802",
@@ -172,6 +175,7 @@ unfixable = []
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
+
 # Pyright
 [tool.pyright]
 include = ["src", "**/*.py"]
@@ -184,3 +188,4 @@ ignore = ["src/oldstuff"]
 defineConstant = { DEBUG = true }
 stubPath = "src/stubs"
 typeCheckingMode = "off"
+

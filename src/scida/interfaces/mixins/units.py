@@ -331,6 +331,8 @@ class UnitMixin(Mixin):
         self._unitstates = {}
 
         ureg = kwargs.pop("ureg", None)
+        if ureg is None and hasattr(self, "ureg"):
+            ureg = self.ureg
         if ureg is None:
             ureg = new_unitregistry()
 
@@ -356,7 +358,7 @@ class UnitMixin(Mixin):
             for uf in self._defaultunitfiles:
                 unitdefs.update(get_config_fromfile(uf).get("units", {}))
 
-        if unitfile != "":
+        if isinstance(unitfile, str) and unitfile != "":
             if isinstance(unitfile, list):
                 unithints = combine_configs(
                     [get_config_fromfile(uf) for uf in unitfile],
@@ -368,8 +370,14 @@ class UnitMixin(Mixin):
             if newdefs is None:
                 newdefs = {}
             unitdefs.update(**newdefs)
+        elif isinstance(unitfile, dict):
+            unithints = unitfile
+            newdefs = unithints.get("units", {})
+            if newdefs is None:
+                newdefs = {}
+            unitdefs.update(**newdefs)
 
-        units = kwargs.pop("units")
+        units = kwargs.pop("units", True)
         if isinstance(units, bool):
             assert units is not False, "Mixin should not be called here."
             units = "code"

@@ -86,6 +86,7 @@ class BaseDataset(metaclass=MixinMeta):
             overwrite_cache=self.overwrite_cache,
             fileprefix=fileprefix,
             virtualcache=virtualcache,
+            nonvirtual_datasets=kwargs.get("nonvirtual_datasets", None),
             derivedfields_kwargs=dict(snap=self),
             token=self.__dask_tokenize__(),
             withunits=self.withunits,
