@@ -240,8 +240,7 @@ class BaseDataset(metaclass=MixinMeta):
         """
         # determinstic hash; note that hash() on a string is no longer deterministic in python3.
         hash_value = (
-            int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16)
-            % 10**10
+            int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16) % 10**10
         )
         return hash_value
 
@@ -505,6 +504,24 @@ def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
     """
     newcls = cls
     if isinstance(mixins, list) and len(mixins) > 0:
+        # check whether any mixin already in cls recursively
+        remove = False  # if false, we just raise an error an make it fail instead of removing the mixin; false should be safer...
+
+        def check_mixins(cls, m):
+            if m in cls.__bases__:
+                return True
+            for b in cls.__bases__:
+                if check_mixins(b, m):
+                    return True
+            return False
+
+        mixins_tmp = list(mixins)
+        for m in mixins_tmp:
+            if check_mixins(cls, m):
+                if remove:
+                    mixins.remove(m)
+                else:
+                    raise ValueError("Mixin '%s' already in class." % str(m))
         name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
         # adjust entry point if __init__ available in some mixin
         nms = dict(cls.__dict__)
