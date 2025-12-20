@@ -521,7 +521,11 @@ def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
                 if remove:
                     mixins.remove(m)
                 else:
-                    raise ValueError("Mixin '%s' already in class." % str(m))
+                    raise ValueError(
+                        "Mixin '%s' is already present in the class hierarchy of '%s'. "
+                        "Please remove it from the mixins list to avoid duplication."
+                        % (getattr(m, "__name__", str(m)), cls.__name__)
+                    )
         name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
         # adjust entry point if __init__ available in some mixin
         nms = dict(cls.__dict__)
