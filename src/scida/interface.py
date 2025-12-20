@@ -507,17 +507,17 @@ def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
         # check whether any mixin already in cls recursively
         remove = False  # if False, raise an error instead of removing the mixin (safer approach)
 
-        def check_mixins(cls, m):
+        def has_mixin_in_hierarchy(cls, m):
             if m in cls.__bases__:
                 return True
             for b in cls.__bases__:
-                if check_mixins(b, m):
+                if has_mixin_in_hierarchy(b, m):
                     return True
             return False
 
         mixins_tmp = list(mixins)
         for m in mixins_tmp:
-            if check_mixins(cls, m):
+            if has_mixin_in_hierarchy(cls, m):
                 if remove:
                     mixins.remove(m)
                 else:
