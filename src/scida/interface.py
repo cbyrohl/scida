@@ -505,7 +505,7 @@ def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
     newcls = cls
     if isinstance(mixins, list) and len(mixins) > 0:
         # check whether any mixin already in cls recursively
-        remove = False  # if false, we just raise an error an make it fail instead of removing the mixin; false should be safer...
+        remove = False  # if False, raise an error instead of removing the mixin (safer approach)
 
         def check_mixins(cls, m):
             if m in cls.__bases__:
