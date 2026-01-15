@@ -2,11 +2,12 @@
 This module contains the base class for DataSeries, which is a container for collections of dataset instances.
 """
 
+from __future__ import annotations
+
 import inspect
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -97,13 +98,13 @@ class DatasetSeries(object):
 
     def __init__(
         self,
-        paths: Union[List[str], List[Path]],
+        paths: list[str] | list[Path],
         *interface_args,
         datasetclass=None,
         overwrite_cache=False,
         lazy=True,  # lazy will only initialize data sets on demand.
         names=None,
-        **interface_kwargs
+        **interface_kwargs,
     ):
         """
 
@@ -256,7 +257,7 @@ class DatasetSeries(object):
             "Series do not have 'data' attribute. Load a dataset from series.get_dataset()."
         )
 
-    def _repr_dict(self) -> Dict[str, str]:
+    def _repr_dict(self) -> dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
 
@@ -317,7 +318,7 @@ class DatasetSeries(object):
             path to directory
         interface_args:
             arguments to pass to interface class
-        datasetclass: Optional[Dataset]
+        datasetclass: Dataset | None
             force class to use for dataset instances
         pattern:
             pattern to match files in directory
@@ -340,10 +341,10 @@ class DatasetSeries(object):
 
     def get_dataset(
         self,
-        index: Optional[int] = None,
-        name: Optional[str] = None,
+        index: int | None = None,
+        name: str | None = None,
         reltol=1e-2,
-        **kwargs
+        **kwargs,
     ):
         """
         Get dataset by some metadata property. In the base class, we go by list index.

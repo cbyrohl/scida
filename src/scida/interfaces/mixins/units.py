@@ -2,11 +2,12 @@
 Functionality to handle units.
 """
 
+from __future__ import annotations
+
 import contextlib
 import logging
 import tokenize
 from enum import Enum
-from typing import Optional, Union
 
 import numpy as np
 import pint
@@ -30,9 +31,7 @@ UnitState = Enum(
 )
 
 
-def str_to_unit(
-    unitstr: Optional[str], ureg: pint.UnitRegistry
-) -> Union[pint.Unit, str]:
+def str_to_unit(unitstr: str | None, ureg: pint.UnitRegistry) -> pint.Unit | str:
     """
     Convert a string to a unit.
     Parameters
@@ -68,7 +67,7 @@ def str_to_unit(
     return unit
 
 
-def get_unitstr_from_attrs(attrs: dict) -> Optional[str]:
+def get_unitstr_from_attrs(attrs: dict) -> str | None:
     """
     Get the unit string from the given attributes.
 
@@ -119,7 +118,7 @@ def extract_units_from_attrs(
     attrs: dict,
     require: bool = False,
     mode: str = "cgs",
-    ureg: Optional[pint.UnitRegistry] = None,
+    ureg: pint.UnitRegistry | None = None,
 ) -> pint.Quantity:
     """
     Extract units from given attributes.
@@ -621,7 +620,7 @@ class UnitMixin(Mixin):
             )
         return count > 0
 
-    # def save(self, *args, fields: Union[str, Dict[str, Union[List[str], Dict[str, da.Array]]]] = "all", **kwargs):
+    # def save(self, *args, fields: str | Dict[str, Union[List[str, Dict[str, da.Array]]]] = "all", **kwargs):
     #    print("Wrapping save call with UnitMixin")
     #    if fields == "all":
     #        fields = dict()
@@ -666,9 +665,9 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
     ----------
     logger: logging.Logger
         The logger to use.
-    unit: Union[pint.Unit, str]
+    unit: pint.Unit | str
         The unit from the unit file.
-    unit_metadata: Union[pint.Unit, str]
+    unit_metadata: pint.Unit | str
         The unit from the metadata.
     override: bool
         Whether to override the metadata units.
@@ -720,7 +719,7 @@ def check_missing_units(unit, missing_units, path, logger=log):
     Check whether units are missing and raise/warn as needed.
     Parameters
     ----------
-    unit: Union[pint.Unit, str]
+    unit: pint.Unit | str
     missing_units: str
     path: str
     logger: logging.Logger

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import hashlib
 import logging
@@ -7,9 +9,14 @@ import shutil
 import sys
 import tarfile
 import time
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import requests
+
+from scida.series import DatasetSeries
+
+if TYPE_CHECKING:
+    from scida.interface import BaseDataset
 
 from scida.config import get_config
 from scida.discovertypes import (
@@ -20,7 +27,6 @@ from scida.discovertypes import (
 from scida.interfaces.mixins import UnitMixin
 from scida.io import load_metadata
 from scida.registries import dataseries_type_registry, dataset_type_registry
-from scida.series import DatasetSeries
 
 log = logging.getLogger(__name__)
 
@@ -100,7 +106,7 @@ def get_testdata(name: str) -> str:
     str
     """
     config = get_config()
-    tdpath: Optional[str] = config.get("testdata_path", None)
+    tdpath: str | None = config.get("testdata_path", None)
     if tdpath is None:
         raise ValueError("Test data directory not specified in configuration")
     if not os.path.isdir(tdpath):
@@ -208,12 +214,12 @@ def find_path(path, overwrite=False) -> str:
 
 def load(
     path: str,
-    units: Union[bool, str] = True,
+    units: bool | str = True,
     unitfile: str = "",
     overwrite: bool = False,
-    force_class: Optional[object] = None,
-    **kwargs
-):
+    force_class: type | None = None,
+    **kwargs: Any,
+) -> BaseDataset | DatasetSeries:
     """
     Load a dataset or dataset series from a given path.
     This function will automatically determine the best-matching
@@ -318,7 +324,7 @@ def load(
     return instance
 
 
-def get_dataset_by_name(name: str) -> Optional[str]:
+def get_dataset_by_name(name: str) -> str | None:
     """
     Get dataset name from alias or name found in the configuration files.
 
@@ -389,9 +395,9 @@ def get_dataset_candidates(name=None, props=None):
 
     Parameters
     ----------
-    name: Optional[str]
+    name: str | None
         Name or alias of dataset.
-    props: Optional[dict]
+    props: dict | None
         Properties to match.
 
     Returns
@@ -414,9 +420,9 @@ def get_dataset(name=None, props=None):
     Get dataset by name or properties.
     Parameters
     ----------
-    name: Optional[str]
+    name: str | None
         Name or alias of dataset.
-    props: Optional[dict]
+    props: dict | None
         Properties to match.
 
     Returns

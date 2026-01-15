@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .cosmology import CosmologyMixin
 from .spatial import SpatialCartesian3DMixin
 from .units import UnitMixin

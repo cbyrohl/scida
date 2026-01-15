@@ -81,3 +81,25 @@ minversion = "6.0"
 filterwarnings = [
     "error::DeprecationWarning"
 ]
+
+[tool.mypy]
+python_version = "3.9"
+packages = ["scida"]
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+# Start with permissive settings for gradual typing
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "scida.interface",
+    "scida.fields",
+    "scida.convenience",
+    "scida.series",
+]
+# Stricter settings for core modules
+disallow_untyped_defs = false
+warn_unused_ignores = true

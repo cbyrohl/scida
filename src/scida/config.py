@@ -2,10 +2,13 @@
 Configuration handling.
 """
 
+from __future__ import annotations
+
 import importlib.resources
 import os
 import pathlib
-from typing import Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 import yaml
 
@@ -77,7 +80,9 @@ def get_config(reload: bool = False, update_global=True) -> dict:
     return config
 
 
-def combine_configs(configs: List[Dict], mode="overwrite_keys") -> Dict:
+def combine_configs(
+    configs: list[dict[str, Any]], mode: str = "overwrite_keys"
+) -> dict[str, Any]:
     """
     Combine multiple configurations recursively.
     Replacing entries in the first config with entries from the latter
@@ -124,7 +129,7 @@ def combine_configs(configs: List[Dict], mode="overwrite_keys") -> Dict:
     return conf
 
 
-def _get_simulationconfig_user() -> Optional[dict]:
+def _get_simulationconfig_user() -> dict[str, Any] | None:
     """
     Get the user's simulation configuration.
     Returns
@@ -197,7 +202,7 @@ def copy_defaultconfig(overwrite=False) -> None:
             newfile.write(content)
 
 
-def get_config_fromfile(resource: str) -> Dict:
+def get_config_fromfile(resource: str) -> dict[str, Any]:
     """
     Load config from a YAML file.
     Parameters
@@ -244,12 +249,12 @@ def get_config_fromfile(resource: str) -> Dict:
 
 
 def merge_dicts_recursively(
-    dict_a: Dict,
-    dict_b: Dict,
-    path: Optional[List] = None,
-    mergefunc_keys: Optional[callable] = None,
-    mergefunc_values: Optional[callable] = None,
-) -> Dict:
+    dict_a: dict[str, Any],
+    dict_b: dict[str, Any],
+    path: list[str] | None = None,
+    mergefunc_keys: Callable[[Any, Any], Any] | None = None,
+    mergefunc_values: Callable[[Any, Any], Any] | None = None,
+) -> dict[str, Any]:
     """
     Merge two dictionaries recursively.
     Parameters
@@ -297,7 +302,9 @@ def merge_dicts_recursively(
     return dict_a
 
 
-def get_config_fromfiles(paths: List[str], subconf_keys: Optional[List[str]] = None):
+def get_config_fromfiles(
+    paths: list[str], subconf_keys: list[str] | None = None
+) -> dict[str, Any]:
     """
     Load and merge multiple YAML config files
     Parameters

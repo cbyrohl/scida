@@ -2,10 +2,11 @@
 Helper functions for hdf5 and zarr file processing.
 """
 
+from __future__ import annotations
+
 import logging
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
-from typing import Optional, List
 
 import h5py
 import numpy as np
@@ -135,9 +136,7 @@ def walk_hdf5file(fn, tree, get_attrs=True):
 
 def virtual_concat(field, hf, chunks, shapes, dtypes, files):
     totentries = np.array([k[1] for k in chunks[field]]).sum()
-    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][
-                               1:
-                               ]
+    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
 
     # create virtual sources
     vsources = []
@@ -150,24 +149,25 @@ def virtual_concat(field, hf, chunks, shapes, dtypes, files):
                 dtype=dtypes[field],
             )
         )
-    layout = h5py.VirtualLayout(
-        shape=tuple(newshape), dtype=dtypes[field]
-    )
+    layout = h5py.VirtualLayout(shape=tuple(newshape), dtype=dtypes[field])
 
     # fill virtual dataset
     offset = 0
     for vsource in vsources:
         length = vsource.shape[0]
-        layout[offset: offset + length] = vsource
+        layout[offset : offset + length] = vsource
         offset += length
-    assert (
-            newshape[0] == offset
-    )  # make sure we filled the array up fully.
+    assert newshape[0] == offset  # make sure we filled the array up fully.
     hf.create_virtual_dataset(field, layout)
 
+
 def create_mergedhdf5file(
-    fn, files, max_workers=None, virtual=True, groupwise_shape=False,
-    nonvirtual_datasets: Optional[List[str]] = None,
+    fn,
+    files,
+    max_workers=None,
+    virtual=True,
+    groupwise_shape=False,
+    nonvirtual_datasets: list[str | None] = None,
 ):
     """
     Creates a virtual hdf5 file from list of given files. Virtual by default.
@@ -268,7 +268,6 @@ def create_mergedhdf5file(
             ]
             if len(groupfields) == 0:
                 continue
-
 
             # create virtual datasets as requested
             for field in groupfields:
