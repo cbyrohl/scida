@@ -8,7 +8,7 @@ import importlib.resources
 import os
 import pathlib
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -141,8 +141,7 @@ def _get_simulationconfig_user() -> dict[str, Any] | None:
     path_confdir = _access_confdir()
     p = pathlib.Path(path_confdir) / "simulations.yaml"
     if p.exists():
-        p = str(p)
-        conf_sims_user = get_config_fromfile(p)
+        conf_sims_user = get_config_fromfile(str(p))
     return conf_sims_user
 
 
@@ -221,21 +220,18 @@ def get_config_fromfile(resource: str) -> dict[str, Any]:
     path = os.path.expanduser(resource)
     if os.path.isabs(path):
         with open(path, "r") as file:
-            conf = yaml.safe_load(file)
-        return conf
+            return cast(dict[str, Any], yaml.safe_load(file))
     # 2. non-absolute path?
     # 2.1. check local (project-specific) path
     if os.path.isfile(resource):
         with open(resource, "r") as file:
-            conf = yaml.safe_load(file)
-        return conf
+            return cast(dict[str, Any], yaml.safe_load(file))
     # 2.2. check ~/.config/scida/
     bpath = os.path.expanduser("~/.config/scida")
     path = os.path.join(bpath, resource)
     if os.path.isfile(path):
         with open(path, "r") as file:
-            conf = yaml.safe_load(file)
-        return conf
+            return cast(dict[str, Any], yaml.safe_load(file))
     # 2.3. check scida package resources
     resource_path = "scida.configfiles"
     resource_elements = resource.split("/")
@@ -244,8 +240,7 @@ def get_config_fromfile(resource: str) -> dict[str, Any]:
         resource_path += "." + ".".join(resource_elements[:-1])
     resource = importlib.resources.files(resource_path).joinpath(rname)
     with resource.open("r") as file:
-        conf = yaml.safe_load(file)
-    return conf
+        return cast(dict[str, Any], yaml.safe_load(file))
 
 
 def merge_dicts_recursively(
