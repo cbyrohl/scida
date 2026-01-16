@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 def get_container_from_path(
-    element: str, container: FieldContainer = None, create_missing: bool = False
+    element: str, container: FieldContainer | None = None, create_missing: bool = False
 ) -> FieldContainer:
     """
     Get a container from a path.

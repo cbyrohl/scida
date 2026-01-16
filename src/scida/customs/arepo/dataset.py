@@ -283,7 +283,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             self.catalog = candidate
             break
 
-    def register_field(self, parttype: str, name: str = None, construct: bool = False):
+    def register_field(
+        self, parttype: str, name: str | None = None, construct: bool = False
+    ):
         """
         Register a field.
         Parameters

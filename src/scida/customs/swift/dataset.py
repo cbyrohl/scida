@@ -45,9 +45,10 @@ class SwiftSnapshot(GadgetStyleSnapshot):
         CandidateStatus
         """
         valid = super().validate_path(path, *args, **kwargs)
-        if not valid:
-            return False
+        if valid == CandidateStatus.NO:
+            return CandidateStatus.NO
         metadata_raw = load_metadata(path, **kwargs)
         comparestr = metadata_raw.get("/Code", {}).get("Code", b"").decode()
-        valid = "SWIFT" in comparestr
-        return valid
+        if "SWIFT" not in comparestr:
+            return CandidateStatus.NO
+        return CandidateStatus.MAYBE
