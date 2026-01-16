@@ -369,14 +369,17 @@ class UnitMixin(Mixin):
             for uf in self._defaultunitfiles:
                 unitdefs.update(get_config_fromfile(uf).get("units", {}))
 
-        if isinstance(unitfile, str) and unitfile != "":
-            if isinstance(unitfile, list):
-                unithints = combine_configs(
-                    [get_config_fromfile(uf) for uf in unitfile],
-                    mode="overwrite_values",
-                )
-            else:
-                unithints = get_config_fromfile(unitfile)
+        if isinstance(unitfile, list):
+            unithints = combine_configs(
+                [get_config_fromfile(uf) for uf in unitfile],
+                mode="overwrite_values",
+            )
+            newdefs = unithints.get("units", {})
+            if newdefs is None:
+                newdefs = {}
+            unitdefs.update(**newdefs)
+        elif isinstance(unitfile, str) and unitfile != "":
+            unithints = get_config_fromfile(unitfile)
             newdefs = unithints.get("units", {})
             if newdefs is None:
                 newdefs = {}
