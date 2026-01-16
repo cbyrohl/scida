@@ -122,7 +122,7 @@ class FieldContainer(MutableMapping):
         self.name = name
         self._fields: dict[str, da.Array] = {}
         self._fields.update(*args, **kwargs)
-        self._fieldrecipes = {}
+        self._fieldrecipes: dict[str, FieldRecipe] = {}
         self._fieldlength = None
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
@@ -324,7 +324,7 @@ class FieldContainer(MutableMapping):
 
         """
         fieldkeys = []
-        recipekeys = []
+        recipekeys: list[str] = []
         if withfields:
             fieldkeys = list(self._fields.keys())
             if not withinternal:

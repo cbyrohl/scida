@@ -11,6 +11,7 @@ import pathlib
 import tempfile
 from functools import partial
 from os.path import join
+from typing import Any
 
 import dask.array as da
 import h5py
@@ -126,7 +127,7 @@ class FITSLoader(Loader):
         for name, darr in darrs.items():
             rootcontainer[name] = darr
 
-        metadata = {}
+        metadata: dict[str, Any] = {}
         return rootcontainer, metadata
 
     def load_metadata(self, **kwargs):
@@ -217,7 +218,7 @@ class HDF5Loader(Loader):
 
         """
         self.location = self.path
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(self.location, tree=tree)
         file = h5py.File(self.location, "r")
         kwargs.pop("nonvirtual_datasets", None)
@@ -241,7 +242,7 @@ class HDF5Loader(Loader):
             Dictionary of attributes.
 
         """
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(self.path, tree)
         return tree["attrs"]
 
@@ -258,7 +259,7 @@ class HDF5Loader(Loader):
         dict
             Dictionary of attributes.
         """
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(self.path, tree)
         return tree
 
@@ -312,7 +313,7 @@ class ZarrLoader(Loader):
             Tuple of data and metadata.
         """
         self.location = self.path
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
         kwargs.pop("nonvirtual_datasets", None)
@@ -339,7 +340,7 @@ class ZarrLoader(Loader):
             Dictionary of attributes.
 
         """
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_zarrfile(self.path, tree)
         return tree["attrs"]
 
@@ -391,7 +392,7 @@ class ChunkedHDF5Loader(Loader):
             if len(paths) == 0:
                 raise ValueError("No files for prefix '%s' found." % fileprefix)
             path = paths[0]
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(path, tree)
         return tree["attrs"]
 
@@ -643,8 +644,8 @@ def load_datadict_old(
     if isinstance(file, h5py.File):
         inline_array = False
 
-    data = {}
-    tree = {}
+    data: dict[str, Any] = {}
+    tree: dict[str, Any] = {}
     if filetype == "hdf5":
         walk_hdf5file(location, tree)
     elif filetype == "zarr":

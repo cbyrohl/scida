@@ -12,7 +12,7 @@ from typing import Any
 
 import yaml
 
-_conf = dict()
+_conf: dict[str, Any] = dict()
 
 
 def _access_confdir() -> str:
@@ -321,7 +321,7 @@ def get_config_fromfiles(
     confs = []
     for path in paths:
         confs.append(get_config_fromfile(path))
-    conf = {}
+    conf: dict[str, Any] = {}
     for confdict in confs:
         conf = merge_dicts_recursively(conf, confdict)
     return conf

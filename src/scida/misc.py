@@ -252,7 +252,7 @@ def check_config_for_dataset(metadata, path: str | None = None, unique: bool = T
     """
     c = get_simulationconfig()
 
-    candidates = []
+    candidates: list[str] = []
     if "data" not in c:
         return candidates
     simdct = c["data"]

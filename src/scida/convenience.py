@@ -259,7 +259,7 @@ def load(
             kwargs["catalog"] = find_path(c, overwrite=overwrite)
 
     # determine dataset class
-    reg = dict()
+    reg: dict[str, type] = dict()
     reg.update(**dataset_type_registry)
     reg.update(**dataseries_type_registry)
 
@@ -369,7 +369,7 @@ def get_datasets_by_props(**kwargs):
     list[str]:
         List of dataset names.
     """
-    dnames = []
+    dnames: list[str] = []
     c = get_config()
     if "datasets" not in c:
         return dnames

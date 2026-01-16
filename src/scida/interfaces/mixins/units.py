@@ -8,6 +8,7 @@ import contextlib
 import logging
 import tokenize
 from enum import Enum
+from typing import Any
 
 import numpy as np
 import pint
@@ -334,11 +335,11 @@ class UnitMixin(Mixin):
         args
         kwargs
         """
-        self.units = {}
-        self.data = {}
-        self._metadata_raw = {}
+        self.units: dict[str, Any] = {}
+        self.data: dict[str, Any] = {}
+        self._metadata_raw: dict[str, Any] = {}
         self._logger_missingunits = log.getChild("missing_units")
-        self._unitstates = dict()
+        self._unitstates: dict[str, Any] = dict()
 
         ureg = kwargs.pop("ureg", None)
         if ureg is None and hasattr(self, "ureg"):

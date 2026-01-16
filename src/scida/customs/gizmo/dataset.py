@@ -5,6 +5,7 @@ Defines the GizmoSnapshot class. Code information: http://www.tapir.caltech.edu/
 from __future__ import annotations
 
 import os
+from typing import Any
 
 from scida import GadgetStyleSnapshot
 from scida.convenience import load
@@ -36,11 +37,11 @@ class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             Additional keyword arguments.
         """
         self.iscatalog = kwargs.pop("iscatalog", False)
-        self.header = {}
-        self.config = {}
-        self.parameters = {}
+        self.header: dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
+        self.parameters: dict[str, Any] = {}
         self._defaultunitfiles: list[str] = ["units/gizmo.yaml"]
-        self._grouplengths = {}
+        self._grouplengths: dict[str, Any] = {}
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:
             prfx = self._get_fileprefix(path)

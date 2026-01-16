@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
+from typing import Any
 
 import h5py
 import numpy as np
@@ -198,7 +199,7 @@ def create_mergedhdf5file(
         config = get_config()
         max_workers = config.get("nthreads", 16)
     # first obtain all datasets and groups
-    trees = [{} for i in range(len(files))]
+    trees: list[dict[str, Any]] = [{} for i in range(len(files))]
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         result = executor.map(walk_hdf5file, files, trees)
@@ -321,8 +322,8 @@ def create_mergedhdf5file(
                     "Some attribute paths not present in each partial data file."
                 )
         # check for common key+values across all files
-        attrs_same = {}
-        attrs_differ = {}
+        attrs_same: dict[str, Any] = {}
+        attrs_differ: dict[str, Any] = {}
 
         nfiles = len(files)
 

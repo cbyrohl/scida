@@ -171,7 +171,7 @@ def _determine_type(
     """
     available_dtypes: list[str] = []
     dtypes_status: list[CandidateStatus] = []
-    reg = dict()
+    reg: dict[str, type] = dict()
     if test_datasets:
         reg.update(**dataset_type_registry)
     if test_dataseries:

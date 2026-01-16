@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import numpy as np
 
@@ -36,7 +37,7 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         kwargs
         """
         if not hasattr(self, "hints"):
-            self.hints = {}
+            self.hints: dict[str, Any] = {}
         super().__init__(*args, **kwargs)
         # TODO: determine whether periodic?
         self.pbc = True

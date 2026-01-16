@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import os
+from typing import Any
 
 import dask
 import numpy as np
@@ -55,18 +56,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             Additional keyword arguments.
         """
         self.iscatalog = kwargs.pop("iscatalog", False)
-        self.header = {}
-        self.config = {}
+        self.header: dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
         # check whether we have a cosmology mixin
         self._defaultunitfiles: list[str] = ["units/gadget_base.yaml"]
         if hasattr(self, "_mixins") and "cosmology" in self._mixins:
             self._defaultunitfiles += ["units/gadget_cosmological.yaml"]
-        self.parameters = {}
-        self._grouplengths = {}
-        self._subhalolengths = {}
+        self.parameters: dict[str, Any] = {}
+        self._grouplengths: dict[str, Any] = {}
+        self._subhalolengths: dict[str, Any] = {}
         # not needed for group catalogs as entries are back-to-back there, we will provide a property for this
-        self._subhalooffsets = {}
-        self.misc = {}  # for storing misc info
+        self._subhalooffsets: dict[str, Any] = {}
+        self.misc: dict[str, Any] = {}  # for storing misc info
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:
             prfx = self._get_fileprefix(path)
@@ -855,7 +856,7 @@ class GroupAwareOperation:
         self.offsets = offsets
         self.lengths = lengths
         self.arrs = arrs
-        self.opfuncs_custom = {}
+        self.opfuncs_custom: dict[str, Any] = {}
         self.final = False
         self.inputfields = inputfields
         if ops is None:
@@ -982,7 +983,7 @@ class GroupAwareOperation:
         # TODO: figure out return type
         # final operations: those that can only be at end of chain
         # intermediate operations: those that can only be prior to end of chain
-        funcdict = dict()
+        funcdict: dict[str, Any] = dict()
         funcdict.update(**self.opfuncs)
         funcdict.update(**self.opfuncs_custom)
 
@@ -1635,9 +1636,9 @@ def map_group_operation(
 
     assert np.all(arrdims == arrdims[0])  # Cannot handle different input dims for now
 
-    drop_axis = []
+    drop_axis: list[int] = []
     if arrdims[0] > 1:
-        drop_axis = np.arange(1, arrdims[0])
+        drop_axis = list(np.arange(1, arrdims[0]))
 
     if dtype is None:
         raise ValueError(

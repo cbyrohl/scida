@@ -8,6 +8,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -395,7 +396,7 @@ class DatasetSeries(object):
 
         # find candidates from metadata
         candidates = []
-        candidates_props = {}
+        candidates_props: dict[str, Any] = {}
         props_compare = set()  # save names of fields we want to compare
         for k, v in kwargs.items():
             candidates_props[k] = []

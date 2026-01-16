@@ -84,8 +84,8 @@ class BaseDataset(metaclass=MixinMeta):
         self.withunits = kwargs.get("units", False)
 
         # Let's find the data and metadata for the object at 'path'
-        self.metadata = {}
-        self._metadata_raw = {}
+        self.metadata: dict[str, Any] = {}
+        self._metadata_raw: dict[str, Any] = {}
         self.data = FieldContainer(withunits=self.withunits)
 
         if not os.path.exists(self.path):
