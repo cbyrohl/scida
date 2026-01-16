@@ -40,7 +40,7 @@ dependencies = [
 dev = [
     "pytest>=6.2.5",
     "pre-commit>=2.17.0",
-    "black>=22.1.0",
+    "black==24.4.2",
     "requests>=2.2.7",
     "coverage>=7.0.1",
     "pytest-xdist[psutil]>=3.1.0",
@@ -53,7 +53,7 @@ dev = [
     "ipykernel>=6.19.4",
     "matplotlib>=3.6.2",
     "ipywidgets>=8.0.4",
-    "isort>=5.11.4",
+    "isort==5.13.2",
     "flake8>=6.0.0",
     "line-profiler>=4.0.2",
     "memory-profiler>=0.61.0",
@@ -101,6 +101,13 @@ minversion = "6.0"
 filterwarnings = [
     "error::DeprecationWarning"
 ]
+
+[tool.black]
+# Explicitly disable target-version inference from requires-python.
+# Black 24.x auto-infers target_version from [project].requires-python, which
+# changes formatting (e.g., trailing commas) compared to Poetry's format where
+# [tool.poetry.dependencies].python wasn't read by black.
+target-version = []
 
 [tool.isort]
 profile = "black"
