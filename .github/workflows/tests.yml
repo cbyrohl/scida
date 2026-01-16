@@ -44,38 +44,19 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
-      - name: Upgrade pip
-        run: |
-          pip install --constraint=${PWD}/.github/workflows/constraints.txt pip
-          pip --version
-
-      - name: Upgrade pip in virtual environments
-        shell: python
-        run: |
-          import os
-          import pip
-
-          with open(os.environ["GITHUB_ENV"], mode="a") as io:
-              print(f"VIRTUALENV_PIP={pip.__version__}", file=io)
-
-      - name: Install Poetry
-        run: |
-          pipx install --pip-args=--constraint=${PWD}/.github/workflows/constraints.txt poetry
-          pipx inject --pip-args=--constraint=${PWD}/.github/workflows/constraints.txt poetry poetry-plugin-export
-          poetry --version
-
-      - name: Install Nox
-        run: |
-          pipx install --pip-args=--constraint=${PWD}/.github/workflows/constraints.txt nox
-          pipx inject --pip-args=--constraint=${PWD}/.github/workflows/constraints.txt nox nox-poetry
-          nox --version
+      - name: Install nox
+        run: uv tool install nox --with nox-uv
 
       - name: Compute pre-commit cache key
         if: matrix.session == 'pre-commit'
@@ -93,7 +74,7 @@ jobs:
           print("::set-output name=result::{}".format(result))
 
       - name: Restore pre-commit cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: matrix.session == 'pre-commit'
         with:
           path: ~/.cache/pre-commit
@@ -139,28 +120,19 @@ jobs:
     needs: tests
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
+        run: uv python install 3.10
 
-      - name: Upgrade pip
-        run: |
-          pip install --constraint=${PWD}/.github/workflows/constraints.txt pip
-          pip --version
-
-      - name: Install Poetry
-        run: |
-          pipx install --pip-args=--constraint=${PWD}/.github/workflows/constraints.txt poetry
-          poetry --version
-
-      - name: Install Nox
-        run: |
-          pipx install --pip-args=--constraint=${PWD}/.github/workflows/constraints.txt nox
-          pipx inject --pip-args=--constraint=${PWD}/.github/workflows/constraints.txt nox nox-poetry
-          nox --version
+      - name: Install nox
+        run: uv tool install nox --with nox-uv
 
       - name: Download coverage data
         uses: actions/download-artifact@v4
