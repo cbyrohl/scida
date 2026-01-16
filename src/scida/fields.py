@@ -390,7 +390,7 @@ class FieldContainer(MutableMapping):
 
         Parameters
         ----------
-        containernames: str | list[str | None]
+        containernames: str | list[str] | None
             Name of the sub-container(s) to register to, or "all" for all, or None for self.
         name: str | None
             Name of the field. If None, the function name is used.
@@ -481,7 +481,7 @@ class FieldContainer(MutableMapping):
 
         Parameters
         ----------
-        fields: list[str | None]
+        fields: list[str] | None
             List of fields to include. If None, include all.
 
         Returns

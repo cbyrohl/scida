@@ -1441,7 +1441,7 @@ def map_group_operation(
     nchunks_min: int | None = None,
     chunksize_bytes: int | None = None,
     entry_nbytes_in: int | None = 4,
-    fieldnames: list[str | None] = None,
+    fieldnames: list[str] | None = None,
     nmax: int | None = None,
     idxlist: np.ndarray | None = None,
 ) -> da.Array:

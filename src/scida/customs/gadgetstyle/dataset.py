@@ -150,7 +150,7 @@ class GadgetStyleSnapshot(Dataset):
 
         Parameters
         ----------
-        parttype: str | list[str | None]
+        parttype: str | list[str] | None
             Particle type name to register with. If None, register for the base field container.
         name: str | None
             Name of the field to register.

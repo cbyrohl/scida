@@ -167,7 +167,7 @@ def create_mergedhdf5file(
     max_workers=None,
     virtual=True,
     groupwise_shape=False,
-    nonvirtual_datasets: list[str | None] = None,
+    nonvirtual_datasets: list[str] | None = None,
 ):
     """
     Creates a virtual hdf5 file from list of given files. Virtual by default.

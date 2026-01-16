@@ -444,7 +444,7 @@ class ChunkedHDF5Loader(Loader):
             # 3. cachefile exists, but overwrite=True
             create = True
 
-        nonvirtual_datasets: list | None = kwargs.pop("nonvirtual_datasets", None)
+        nonvirtual_datasets: list[str] | None = kwargs.pop("nonvirtual_datasets", None)
 
         if create:
             print_cachefile_creation = kwargs.get("print_cachefile_creation", True)
