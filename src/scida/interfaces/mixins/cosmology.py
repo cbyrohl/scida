@@ -253,7 +253,7 @@ def _try_cosmology_from_alternative_files(path):
     # Find which alternative prefixes exist
     available_prefixes = set()
     for fn in files:
-        match = re.search(r"^(\w+)_\d+", fn)
+        match = re.search(r"^(\w*)_(\d*)", fn)
         if match:
             available_prefixes.add(match.group(1))
 
