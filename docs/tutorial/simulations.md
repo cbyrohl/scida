@@ -199,6 +199,11 @@ which is analogous to [numpy.histogram2d()](https://numpy.org/doc/stable/referen
 except that it operates on a dask array.
 We discuss more advanced and interactive visualization methods [here](../visualization.md).
 
+!!! tip "Memory Management for Large Datasets"
+
+    For large datasets, `histogram2d()` operations can consume significant memory and may cause kernel crashes.
+    Use `scida.init_resources()` at the beginning of your script/notebook with memory limits to prevent crashes for memory intensive applications. See [here](../largedatasets.md) for more information.
+
 ```pycon
 >>> import dask.array as da
 >>> import numpy as np
