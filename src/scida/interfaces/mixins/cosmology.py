@@ -38,6 +38,10 @@ class CosmologyMixin(Mixin):
         # sometimes, we want to inherit the cosmology from the parent dataset (e.g. catalogs for snapshots)
         if c is None and "metadata_raw_parent" in kwargs:
             c = get_cosmology_from_rawmetadata(kwargs["metadata_raw_parent"])
+        # if still no cosmology, try alternative file prefixes in the same directory
+        # (e.g., groups_* files may lack cosmology params but fof_subhalo_tab_* have them)
+        if c is None and hasattr(self, "path"):
+            c = _try_cosmology_from_alternative_files(self.path)
         self.cosmology = c
         if c is not None:
             self.hints["cosmology"] = c
@@ -212,3 +216,62 @@ def get_cosmology_from_rawmetadata(metadata_raw):
     hubble0 = 100.0 * h * u.km / u.s / u.Mpc
     cosmology = FlatLambdaCDM(H0=hubble0, Om0=om0, Ob0=ob0)
     return cosmology
+
+
+def _try_cosmology_from_alternative_files(path):
+    """
+    Try to infer cosmology from alternative file prefixes in the same directory.
+
+    Some file formats (e.g., Illustris 'groups_*' files) don't contain cosmological
+    parameters in their header, but other files in the same directory
+    (e.g., 'fof_subhalo_tab_*') do. This function tries those alternatives.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        Path to the dataset directory.
+
+    Returns
+    -------
+    astropy.cosmology.Cosmology or None
+        The inferred cosmology, or None if not found.
+    """
+    import os
+    import re
+
+    if not os.path.isdir(path):
+        return None
+
+    # Alternative prefixes to try (in order of preference)
+    alternative_prefixes = ["fof_subhalo_tab", "fof_subhalo", "snap"]
+
+    try:
+        files = os.listdir(path)
+    except OSError:
+        return None
+
+    # Find which alternative prefixes exist
+    available_prefixes = set()
+    for fn in files:
+        match = re.search(r"^(\w*)_(\d*)", fn)
+        if match:
+            available_prefixes.add(match.group(1))
+
+    # Try each alternative prefix
+    for prefix in alternative_prefixes:
+        if prefix not in available_prefixes:
+            continue
+
+        try:
+            from scida.io import load_metadata
+
+            alt_metadata = load_metadata(path, fileprefix=prefix)
+            c = get_cosmology_from_rawmetadata(alt_metadata)
+            if c is not None:
+                log.debug(f"Inferred cosmology from alternative file prefix '{prefix}'")
+                return c
+        except Exception as e:
+            log.debug(f"Failed to load cosmology from prefix '{prefix}': {e}")
+            continue
+
+    return None
