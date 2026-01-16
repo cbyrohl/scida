@@ -63,6 +63,7 @@ pytest-mock = "^3.11.1"
 notebook = "^6.4.12"
 mkdocs-glightbox = "^0.3.4"
 markdown-include = "^0.8.1"
+types-pyyaml = "^6.0.12.20250915"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
