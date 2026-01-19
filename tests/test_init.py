@@ -60,15 +60,15 @@ class TestDefaultMemoryLimit:
         mock_memory = Mock()
         mock_memory.total = 16 * 1024**3  # 16GB
 
-        with patch("psutil.virtual_memory") as mock_virtual_memory:
+        with patch("scida.init.psutil.virtual_memory") as mock_virtual_memory:
             mock_virtual_memory.return_value = mock_memory
             result = _get_default_memory_limit()
-            # Should be 50% of 16GB = 8GB, which is at the cap
+            # Should be 50% of 16GB = 8GB
             assert result == "8589934592B"  # 8GB in bytes
 
     def test_get_default_memory_limit_without_psutil(self):
         """Test fallback when psutil not available."""
-        with patch.dict("sys.modules", {"psutil": None}):
+        with patch("scida.init.PSUTIL_AVAILABLE", False):
             result = _get_default_memory_limit()
             assert result == "4GB"
 
@@ -77,11 +77,11 @@ class TestDefaultMemoryLimit:
         mock_memory = Mock()
         mock_memory.total = 64 * 1024**3  # 64GB
 
-        with patch("psutil.virtual_memory") as mock_virtual_memory:
+        with patch("scida.init.psutil.virtual_memory") as mock_virtual_memory:
             mock_virtual_memory.return_value = mock_memory
             result = _get_default_memory_limit()
-            # Should be capped at 8GB per worker
-            assert result == "8589934592B"  # 8GB in bytes
+            # Should be 50% of 64GB = 32GB
+            assert result == "34359738368B"  # 32GB in bytes
 
 
 class TestInit:

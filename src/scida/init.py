@@ -6,6 +6,14 @@ import logging
 import os
 from typing import Optional, Union
 
+try:
+    import psutil
+
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    psutil = None  # type: ignore[assignment]
+    PSUTIL_AVAILABLE = False
+
 from scida.helpers_misc import parse_humansize
 
 log = logging.getLogger(__name__)
@@ -158,16 +166,15 @@ def _get_default_memory_limit() -> str:
     """
     Get a reasonable default memory limit based on system resources.
     """
-    try:
-        import psutil
-
-        total_memory = psutil.virtual_memory().total
-        # Use about 50% of system memory, but cap at 8GB per worker
-        memory_per_worker = total_memory * 0.5
-        return f"{int(memory_per_worker)}B"
-    except ImportError:
+    if not PSUTIL_AVAILABLE:
         log.warning("psutil not available for memory detection, using 4GB default")
         return "4GB"
+
+    try:
+        total_memory = psutil.virtual_memory().total
+        # Use about 50% of system memory
+        memory_per_worker = total_memory * 0.5
+        return f"{int(memory_per_worker)}B"
     except Exception:
         log.warning("Could not detect system memory, using 4GB default")
         return "4GB"
