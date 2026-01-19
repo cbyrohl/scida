@@ -1,9 +1,12 @@
 import time
 
 import numpy as np
+import pytest
 
 from scida.convenience import load
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
+from scida.interface import BaseDataset, create_datasetclass_with_mixins
+from scida.interfaces.mixins.base import Mixin
 from scida.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
@@ -130,3 +133,69 @@ def test_areposnapshot_map_hquantity(testdata_illustrissnapshot_withcatalog):
     partarr = snp.data["PartType0"]["GroupSFR"]
     haloarr = snp.data["Group"]["GroupSFR"]
     assert np.isclose(partarr[0].compute(), haloarr[0].compute())
+
+
+# Tests for mixin duplication check
+
+
+class DummyMixinA(Mixin):
+    """Dummy mixin for testing."""
+
+    pass
+
+
+class DummyMixinB(Mixin):
+    """Another dummy mixin for testing."""
+
+    pass
+
+
+def test_create_datasetclass_with_mixins_normal():
+    """Test that normal mixin addition works correctly."""
+    newcls = create_datasetclass_with_mixins(BaseDataset, [DummyMixinA])
+    assert DummyMixinA in newcls.__bases__
+    assert "BaseDatasetWithDummyMixinA" == newcls.__name__
+
+
+def test_create_datasetclass_with_mixins_multiple():
+    """Test that adding multiple mixins works correctly."""
+    newcls = create_datasetclass_with_mixins(BaseDataset, [DummyMixinA, DummyMixinB])
+    assert DummyMixinA in newcls.__bases__
+    assert DummyMixinB in newcls.__bases__
+    assert "BaseDatasetWithDummyMixinAAndDummyMixinB" == newcls.__name__
+
+
+def test_create_datasetclass_with_mixins_duplicate_in_list():
+    """Test that ValueError is raised when the same mixin appears multiple times in the list."""
+    with pytest.raises(ValueError, match="appears multiple times"):
+        create_datasetclass_with_mixins(BaseDataset, [DummyMixinA, DummyMixinA])
+
+
+def test_create_datasetclass_with_mixins_duplicate_in_hierarchy():
+    """Test that ValueError is raised when a mixin already exists in the class hierarchy."""
+    # First create a class with DummyMixinA
+    cls_with_mixin = create_datasetclass_with_mixins(BaseDataset, [DummyMixinA])
+    # Now try to add DummyMixinA again
+    with pytest.raises(ValueError, match="already present in the class hierarchy"):
+        create_datasetclass_with_mixins(cls_with_mixin, [DummyMixinA])
+
+
+def test_create_datasetclass_with_mixins_different_mixin_to_mixed_class():
+    """Test that adding a different mixin to an already-mixed class works."""
+    # First create a class with DummyMixinA
+    cls_with_mixin_a = create_datasetclass_with_mixins(BaseDataset, [DummyMixinA])
+    # Now add DummyMixinB - this should work
+    cls_with_both = create_datasetclass_with_mixins(cls_with_mixin_a, [DummyMixinB])
+    assert DummyMixinB in cls_with_both.__bases__
+
+
+def test_create_datasetclass_with_mixins_empty_list():
+    """Test that passing an empty list returns the original class."""
+    result = create_datasetclass_with_mixins(BaseDataset, [])
+    assert result is BaseDataset
+
+
+def test_create_datasetclass_with_mixins_none():
+    """Test that passing None returns the original class."""
+    result = create_datasetclass_with_mixins(BaseDataset, None)
+    assert result is BaseDataset
