@@ -241,7 +241,7 @@ class BaseDataset(metaclass=MixinMeta):
         -------
         int
         """
-        # determinstic hash; note that hash() on a string is no longer deterministic in python3.
+        # deterministic hash; note that hash() on a string is no longer deterministic in python3.
         hash_value = (
             int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16) % 10**10
         )
@@ -507,6 +507,32 @@ def create_datasetclass_with_mixins(cls: type, mixins: list | None) -> type:
     """
     newcls = cls
     if isinstance(mixins, list) and len(mixins) > 0:
+        # check for duplicates within the mixins list itself
+        seen = set()
+        for m in mixins:
+            if m in seen:
+                raise ValueError(
+                    "Mixin '%s' appears multiple times in the mixins list. "
+                    "Please remove duplicates." % getattr(m, "__name__", str(m))
+                )
+            seen.add(m)
+
+        # check whether any mixin already in cls hierarchy recursively
+        def has_mixin_in_hierarchy(cls, m):
+            if m in cls.__bases__:
+                return True
+            for b in cls.__bases__:
+                if has_mixin_in_hierarchy(b, m):
+                    return True
+            return False
+
+        for m in mixins:
+            if has_mixin_in_hierarchy(cls, m):
+                raise ValueError(
+                    "Mixin '%s' is already present in the class hierarchy of '%s'. "
+                    "Please remove it from the mixins list to avoid duplication."
+                    % (getattr(m, "__name__", str(m)), cls.__name__)
+                )
         name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
         # adjust entry point if __init__ available in some mixin
         nms = dict(cls.__dict__)
