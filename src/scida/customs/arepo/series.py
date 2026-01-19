@@ -2,6 +2,8 @@
 Contains Series class for Arepo simulations.
 """
 
+from __future__ import annotations
+
 import os
 import pathlib
 from os.path import join
@@ -40,7 +42,7 @@ class ArepoSimulation(GadgetStyleSimulation):
             prefix_dict=prefix_dict,
             arg_dict=arg_dict,
             lazy=lazy,
-            **interface_kwargs
+            **interface_kwargs,
         )
 
     @classmethod

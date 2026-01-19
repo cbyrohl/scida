@@ -1,8 +1,11 @@
 """
 Defines the GizmoSnapshot class. Code information: http://www.tapir.caltech.edu/~phopkins/Site/GIZMO.html
 """
+
+from __future__ import annotations
+
 import os
-from typing import List, Union
+from typing import Any
 
 from scida import GadgetStyleSnapshot
 from scida.convenience import load
@@ -34,11 +37,11 @@ class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             Additional keyword arguments.
         """
         self.iscatalog = kwargs.pop("iscatalog", False)
-        self.header = {}
-        self.config = {}
-        self.parameters = {}
-        self._defaultunitfiles: List[str] = ["units/gizmo.yaml"]
-        self._grouplengths = {}
+        self.header: dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
+        self.parameters: dict[str, Any] = {}
+        self._defaultunitfiles: list[str] = ["units/gizmo.yaml"]
+        self._grouplengths: dict[str, Any] = {}
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:
             prfx = self._get_fileprefix(path)
@@ -56,9 +59,7 @@ class GizmoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             self.merge_data(rs, root_group="rockstar_star")
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for Gizmo snapshot class.
 

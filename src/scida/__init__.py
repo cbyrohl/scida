@@ -2,6 +2,8 @@
 Scida is a python package for reading and analyzing scientific big data.
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 

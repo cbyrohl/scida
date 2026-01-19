@@ -1,5 +1,7 @@
 """Helper functions for arepo snapshots/simulations."""
 
+from __future__ import annotations
+
 
 def grp_type_str(gtype):
     """Mapping between common group names and numeric group types."""

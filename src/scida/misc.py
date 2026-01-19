@@ -2,13 +2,14 @@
 Miscellaneous helper functions.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import pathlib
 import re
 from collections import defaultdict
 from collections.abc import MutableMapping
-from typing import Optional
 
 import dask.array as da
 import numpy as np
@@ -21,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 def get_container_from_path(
-    element: str, container: FieldContainer = None, create_missing: bool = False
+    element: str, container: FieldContainer | None = None, create_missing: bool = False
 ) -> FieldContainer:
     """
     Get a container from a path.
@@ -50,7 +51,7 @@ def get_container_from_path(
     return rv
 
 
-def return_hdf5cachepath(path, fileprefix: Optional[str] = None) -> str:
+def return_hdf5cachepath(path, fileprefix: str | None = None) -> str:
     """
     Returns the path to the cache file for a given path.
 
@@ -58,7 +59,7 @@ def return_hdf5cachepath(path, fileprefix: Optional[str] = None) -> str:
     ----------
     path: str
         path to the dataset
-    fileprefix: Optional[str]
+    fileprefix: str | None
         Can be used to specify the fileprefix used for the dataset.
 
     Returns
@@ -93,7 +94,7 @@ def path_hdf5cachefile_exists(path, **kwargs) -> bool:
     return False
 
 
-def return_cachefile_path(fname: str) -> Optional[str]:
+def return_cachefile_path(fname: str) -> str | None:
     """
     Return the path to the cache file, return None if path cannot be generated.
 
@@ -230,7 +231,7 @@ def rectangular_cutout_mask(
     return mask
 
 
-def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool = True):
+def check_config_for_dataset(metadata, path: str | None = None, unique: bool = True):
     """
     Check whether the given dataset can be identified to be a certain simulation (type) by its metadata.
 
@@ -251,7 +252,7 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
     """
     c = get_simulationconfig()
 
-    candidates = []
+    candidates: list[str] = []
     if "data" not in c:
         return candidates
     simdct = c["data"]

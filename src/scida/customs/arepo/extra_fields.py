@@ -1,4 +1,6 @@
-# convenience file to add common fields whenever applicable
+"""convenience file to add common fields whenever applicable"""
+
+from __future__ import annotations
 
 
 class FieldDef:

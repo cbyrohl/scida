@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 
 from scida.registries import mixin_type_registry

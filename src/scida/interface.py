@@ -2,11 +2,13 @@
 Base dataset class and its handling.
 """
 
+from __future__ import annotations
+
 import abc
 import hashlib
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any
 
 import dask
 import dask.array as da
@@ -41,14 +43,14 @@ class BaseDataset(metaclass=MixinMeta):
 
     def __init__(
         self,
-        path,
-        chunksize="auto",
-        virtualcache=True,
-        overwrite_cache=False,
-        fileprefix="",
-        hints=None,
-        **kwargs
-    ):
+        path: str,
+        chunksize: str | int = "auto",
+        virtualcache: bool = True,
+        overwrite_cache: bool = False,
+        fileprefix: str = "",
+        hints: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize a dataset object.
 
@@ -82,8 +84,8 @@ class BaseDataset(metaclass=MixinMeta):
         self.withunits = kwargs.get("units", False)
 
         # Let's find the data and metadata for the object at 'path'
-        self.metadata = {}
-        self._metadata_raw = {}
+        self.metadata: dict[str, Any] = {}
+        self._metadata_raw: dict[str, Any] = {}
         self.data = FieldContainer(withunits=self.withunits)
 
         if not os.path.exists(self.path):
@@ -151,7 +153,7 @@ class BaseDataset(metaclass=MixinMeta):
         rep += sprint("============")
         print(rep)
 
-    def _repr_dict(self) -> Dict[str, str]:
+    def _repr_dict(self) -> dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
 
@@ -241,8 +243,7 @@ class BaseDataset(metaclass=MixinMeta):
         """
         # determinstic hash; note that hash() on a string is no longer deterministic in python3.
         hash_value = (
-            int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16)
-            % 10**10
+            int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16) % 10**10
         )
         return hash_value
 
@@ -271,14 +272,14 @@ class BaseDataset(metaclass=MixinMeta):
 
     def save(
         self,
-        fname,
-        fields: Union[
-            str, Dict[str, Union[List[str], Dict[str, da.Array]]], FieldContainer
-        ] = "all",
+        fname: str,
+        fields: (
+            str | dict[str, list[str] | dict[str, da.Array]] | FieldContainer
+        ) = "all",
         overwrite: bool = True,
-        zarr_kwargs: Optional[dict] = None,
+        zarr_kwargs: dict[str, Any] | None = None,
         cast_uints: bool = False,
-        extra_attrs: Optional[dict] = None,
+        extra_attrs: dict[str, Any] | None = None,
     ) -> None:
         """
         Save the dataset to a file using the 'zarr' format.
@@ -488,7 +489,7 @@ class Selector(object):
         args[0].data = self.data_backup
 
 
-def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
+def create_datasetclass_with_mixins(cls: type, mixins: list | None) -> type:
     """
     Create a new class from a given class and a list of mixins.
 

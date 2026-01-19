@@ -2,6 +2,8 @@
 Basic IO functionality for scida.
 """
 
+from __future__ import annotations
+
 import abc
 import logging
 import os
@@ -9,7 +11,7 @@ import pathlib
 import tempfile
 from functools import partial
 from os.path import join
-from typing import Optional, Union, List
+from typing import Any
 
 import dask.array as da
 import h5py
@@ -84,7 +86,7 @@ class FITSLoader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Load data from FITS file.
@@ -125,7 +127,7 @@ class FITSLoader(Loader):
         for name, darr in darrs.items():
             rootcontainer[name] = darr
 
-        metadata = {}
+        metadata: dict[str, Any] = {}
         return rootcontainer, metadata
 
     def load_metadata(self, **kwargs):
@@ -190,7 +192,7 @@ class HDF5Loader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Load data from HDF5 file.
@@ -216,7 +218,7 @@ class HDF5Loader(Loader):
 
         """
         self.location = self.path
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(self.location, tree=tree)
         file = h5py.File(self.location, "r")
         kwargs.pop("nonvirtual_datasets", None)
@@ -240,7 +242,7 @@ class HDF5Loader(Loader):
             Dictionary of attributes.
 
         """
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(self.path, tree)
         return tree["attrs"]
 
@@ -257,7 +259,7 @@ class HDF5Loader(Loader):
         dict
             Dictionary of attributes.
         """
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(self.path, tree)
         return tree
 
@@ -285,7 +287,7 @@ class ZarrLoader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Load data from Zarr file.
@@ -311,7 +313,7 @@ class ZarrLoader(Loader):
             Tuple of data and metadata.
         """
         self.location = self.path
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_zarrfile(self.location, tree=tree)
         self.file = zarr.open(self.location)
         kwargs.pop("nonvirtual_datasets", None)
@@ -321,7 +323,7 @@ class ZarrLoader(Loader):
             token=token,
             chunksize=chunksize,
             filetype="zarr",
-            **kwargs
+            **kwargs,
         )
         return data, metadata
 
@@ -338,7 +340,7 @@ class ZarrLoader(Loader):
             Dictionary of attributes.
 
         """
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_zarrfile(self.path, tree)
         return tree["attrs"]
 
@@ -390,7 +392,7 @@ class ChunkedHDF5Loader(Loader):
             if len(paths) == 0:
                 raise ValueError("No files for prefix '%s' found." % fileprefix)
             path = paths[0]
-        tree = {}
+        tree: dict[str, Any] = {}
         walk_hdf5file(path, tree)
         return tree["attrs"]
 
@@ -402,7 +404,7 @@ class ChunkedHDF5Loader(Loader):
         token="",
         chunksize="auto",
         virtualcache=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Load data from chunked HDF5 file.
@@ -443,7 +445,7 @@ class ChunkedHDF5Loader(Loader):
             # 3. cachefile exists, but overwrite=True
             create = True
 
-        nonvirtual_datasets: Optional[List] = kwargs.pop("nonvirtual_datasets", None)
+        nonvirtual_datasets: list[str] | None = kwargs.pop("nonvirtual_datasets", None)
 
         if create:
             print_cachefile_creation = kwargs.get("print_cachefile_creation", True)
@@ -463,22 +465,25 @@ class ChunkedHDF5Loader(Loader):
             # if we get an error, we try to create a new cache file (once)
             log.info("Invalid cache file, attempting to create new one.")
             os.remove(cachefp)
-            self.create_cachefile(fileprefix=fileprefix, virtualcache=virtualcache,
-                                  nonvirtual_datasets=nonvirtual_datasets)
+            self.create_cachefile(
+                fileprefix=fileprefix,
+                virtualcache=virtualcache,
+                nonvirtual_datasets=nonvirtual_datasets,
+            )
             data, metadata = self.load_cachefile(
                 cachefp, token=token, chunksize=chunksize, **kwargs
             )
         return data, metadata
 
     def get_chunkedfiles(
-        self, fileprefix: Optional[str] = "", choose_prefix=False
+        self, fileprefix: str | None = "", choose_prefix=False
     ) -> list:
         """
         Get all files in directory with given prefix.
         Parameters
         ----------
         choose_prefix
-        fileprefix: Optional[str]
+        fileprefix: str | None
             Prefix of files to be loaded. If None, we take the first prefix.
 
         Returns
@@ -490,8 +495,12 @@ class ChunkedHDF5Loader(Loader):
         )
 
     def create_cachefile(
-        self, fileprefix="", virtualcache=False, verbose=None, choose_prefix=False,
-        nonvirtual_datasets=None
+        self,
+        fileprefix="",
+        virtualcache=False,
+        verbose=None,
+        choose_prefix=False,
+        nonvirtual_datasets=None,
     ):
         """
         Create a cache file from the chunked HDF5 files.
@@ -531,7 +540,12 @@ class ChunkedHDF5Loader(Loader):
             )
 
         try:
-            create_mergedhdf5file(cachefp, files, virtual=virtualcache, nonvirtual_datasets=nonvirtual_datasets)
+            create_mergedhdf5file(
+                cachefp,
+                files,
+                virtual=virtualcache,
+                nonvirtual_datasets=nonvirtual_datasets,
+            )
         except Exception as ex:
             if os.path.exists(cachefp):
                 os.remove(cachefp)  # remove failed attempt at merging file
@@ -602,7 +616,7 @@ def load_datadict_old(
     ----------
     location: str
         Location of resource.
-    file: Union[h5py.File, zarr.hierarchy.Group]
+    file: h5py.File | zarr.hierarchy.Group
         File handle.
     groups_load: list
         List of groups to load.
@@ -630,8 +644,8 @@ def load_datadict_old(
     if isinstance(file, h5py.File):
         inline_array = False
 
-    data = {}
-    tree = {}
+    data: dict[str, Any] = {}
+    tree: dict[str, Any] = {}
     if filetype == "hdf5":
         walk_hdf5file(location, tree)
     elif filetype == "zarr":
@@ -841,20 +855,20 @@ def load(path, **kwargs):
 
 
 def _cachefile_available_in_path(
-    path: str, fileprefix: Optional[str] = "", **kwargs
-) -> Union[bool, str]:
+    path: str, fileprefix: str | None = "", **kwargs
+) -> bool | str:
     """
     Check whether a virtual merged HDF5 file is present in folder.
     Parameters
     ----------
     path: str
-    fileprefix: Optional[str]
+    fileprefix: str | None
     kwargs: dict
         Additional keyword arguments.
 
     Returns
     -------
-    Union[bool, str]
+    bool | str
         False if no cache file is available, otherwise the path to the cache file.
 
     """
@@ -930,7 +944,7 @@ def _add_hdf5arr_to_fieldcontainer(
         name="",
         inline_array=False,
         file=None,
-        **kwargs
+        **kwargs,
     ):
         """
         helper function to load resource field into dask array
@@ -957,15 +971,13 @@ def _add_hdf5arr_to_fieldcontainer(
     )(fnc)
 
 
-def _get_chunkedfiles(
-    path, fileprefix: Optional[str] = "", choose_prefix=False
-) -> list:
+def _get_chunkedfiles(path, fileprefix: str | None = "", choose_prefix=False) -> list:
     """
     Get all files in directory with given prefix.
     Parameters
     ----------
     choose_prefix
-    fileprefix: Optional[str]
+    fileprefix: str | None
         Prefix of files to be loaded. If None, we take the first prefix.
 
     Returns
