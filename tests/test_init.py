@@ -88,9 +88,10 @@ class TestInit:
     """Test scida.init_resources() function."""
 
     def test_init_disabled(self):
-        """Test init with distributed computing disabled."""
-        result = init_resources(use_distributed=False)
-        assert result is None
+        """Test init with no parameters returns None (uses default scheduler)."""
+        with patch("scida.init._detect_tnglab_environment", return_value=False):
+            result = init_resources()
+            assert result is None
 
     def test_init_no_params_no_tnglab(self):
         """Test init with no parameters outside TNGLab uses default scheduler."""

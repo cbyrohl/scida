@@ -58,7 +58,7 @@ def init_resources(
     -----
     - Once initialized, all subsequent dask operations will use the configured scheduler
     - Call this function before loading datasets for results
-    - On TNGLab, we force a memory limit of 4GB and 4 workers.
+    - On TNGLab, we default to a memory limit of 4GB and 4 workers (can be overridden).
     - The dashboard can be accessed at http://localhost:{dashboard_port} (if enabled)
     - To reset or change configuration, restart your Python session
     """
@@ -67,7 +67,7 @@ def init_resources(
     is_tnglab = _detect_tnglab_environment()
     if is_tnglab:
         log.info(
-            "TNGLab environment detected, forcing memory_limit=4GB and n_workers=4"
+            "TNGLab environment detected, defaulting to memory_limit=4GB and n_workers=4"
         )
         memory_limit = memory_limit or "4GB"
         n_workers = n_workers or 4
@@ -123,7 +123,11 @@ def init_resources(
     else:
         cluster_args["dashboard_address"] = None
 
-    memory_limit_bytes = parse_humansize(memory_limit)
+    # Handle integer memory_limit (already in bytes)
+    if isinstance(memory_limit, int):
+        memory_limit_bytes = memory_limit
+    else:
+        memory_limit_bytes = parse_humansize(memory_limit)
 
     try:
         log.info(

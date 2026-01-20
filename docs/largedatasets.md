@@ -14,9 +14,17 @@ However, what if we are working with a very large data set
 First, we need to inform scida/dask about the resources it is allowed to use or allocate.
 By default, scida would use all available memory and CPU cores, which is not always desired, particularly on shared systems such as HPC clusters or [TNGLab](https://www.tng-project.org/data/lab/).
 
-scida provides a convenient `init_resources()` function that set up reasonable local resource defaults.
-**Call `scida.init_resources()` immediately after importing scida** and before any other dask operations .
-For TNGLab, we impose a default memory limit of 4GB via this mechanism. Monitor memory usage via the [dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
+scida provides a convenient `init_resources()` function that sets up reasonable local resource defaults.
+**Call `scida.init_resources()` immediately after importing scida** and before any other dask operations.
+
+```python
+import scida
+scida.init_resources()  # Use defaults
+# Or with explicit settings:
+# scida.init_resources(memory_limit="4GB", n_workers=4)
+```
+
+For TNGLab, this mechanism configures a default memory limit of 4GB, which you can override by passing `memory_limit` (and optionally `n_workers`) to `scida.init_resources()`. Monitor memory usage via the [dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
 
 
 ## Starting simple: computing in chunks
