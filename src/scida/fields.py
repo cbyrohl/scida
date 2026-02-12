@@ -8,7 +8,6 @@ import inspect
 import logging
 from collections.abc import MutableMapping
 from enum import Enum
-from typing import Dict, Optional
 
 import dask.array as da
 import dask.dataframe as dd
@@ -44,13 +43,13 @@ class FieldRecipe(object):
         ----------
         name: str
             Name of the field.
-        func: Optional[callable]
+        func: callable | None
             Function to construct array of the field.
-        arr: Optional[da.Array]
+        arr: da.Array | None
             Array to construct the field.
         description: str
             Description of the field.
-        units: Optional[Union[pint.Unit, str]]
+        units: pint.Unit | str | None
             Units of the field.
         ftype: FieldType
             Type of the field.
@@ -93,8 +92,8 @@ class FieldContainer(MutableMapping):
         aliases=None,
         withunits=False,
         ureg=None,
-        parent: Optional[FieldContainer] = None,
-        name: Optional[str] = None,
+        parent: FieldContainer | None = None,
+        name: str | None = None,
         **kwargs,
     ):
         """
@@ -105,13 +104,13 @@ class FieldContainer(MutableMapping):
         args
         fieldrecipes_kwargs: dict
             default kwargs used for field recipes
-        containers: List[FieldContainer, str]
+        containers: list[FieldContainer, str]
             list of containers to add. FieldContainers in the list will be deep copied.
             If a list element is a string, a new FieldContainer with the given name will be created.
         aliases
         withunits
         ureg
-        parent: Optional[FieldContainer]
+        parent: FieldContainer | None
             parent container
         kwargs
         """
@@ -121,14 +120,14 @@ class FieldContainer(MutableMapping):
             fieldrecipes_kwargs = {}
         self.aliases = aliases
         self.name = name
-        self._fields: Dict[str, da.Array] = {}
+        self._fields: dict[str, da.Array] = {}
         self._fields.update(*args, **kwargs)
-        self._fieldrecipes = {}
+        self._fieldrecipes: dict[str, FieldRecipe] = {}
         self._fieldlength = None
         self.fieldrecipes_kwargs = fieldrecipes_kwargs
         self.withunits = withunits
-        self._ureg: Optional[pint.UnitRegistry] = ureg
-        self._containers: Dict[str, FieldContainer] = (
+        self._ureg: pint.UnitRegistry | None = ureg
+        self._containers: dict[str, FieldContainer] = (
             dict()
         )  # other containers as subgroups
         if containers is not None:
@@ -187,7 +186,7 @@ class FieldContainer(MutableMapping):
             res[k] = cntr.copy_skeleton()
         return res
 
-    def info(self, level=0, name: Optional[str] = None) -> str:
+    def info(self, level=0, name: str | None = None) -> str:
         """
         Return a string representation of the object.
 
@@ -325,7 +324,7 @@ class FieldContainer(MutableMapping):
 
         """
         fieldkeys = []
-        recipekeys = []
+        recipekeys: list[str] = []
         if withfields:
             fieldkeys = list(self._fields.keys())
             if not withinternal:
@@ -382,7 +381,7 @@ class FieldContainer(MutableMapping):
     def register_field(
         self,
         containernames=None,
-        name: Optional[str] = None,
+        name: str | None = None,
         description="",
         units=None,
     ):
@@ -391,13 +390,13 @@ class FieldContainer(MutableMapping):
 
         Parameters
         ----------
-        containernames: Optional[Union[str, List[str]]]
+        containernames: str | list[str] | None
             Name of the sub-container(s) to register to, or "all" for all, or None for self.
-        name: Optional[str]
+        name: str | None
             Name of the field. If None, the function name is used.
         description: str
             Description of the field.
-        units: Optional[Union[pint.Unit, str]]
+        units: pint.Unit | str | None
             Units of the field.
 
         Returns
@@ -482,7 +481,7 @@ class FieldContainer(MutableMapping):
 
         Parameters
         ----------
-        fields: Optional[List[str]]
+        fields: list[str] | None
             List of fields to include. If None, include all.
 
         Returns

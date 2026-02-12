@@ -2,14 +2,17 @@
 Configuration handling.
 """
 
+from __future__ import annotations
+
 import importlib.resources
 import os
 import pathlib
-from typing import Dict, List, Optional
+from collections.abc import Callable
+from typing import Any, cast
 
 import yaml
 
-_conf = dict()
+_conf: dict[str, Any] = dict()
 
 
 def _access_confdir() -> str:
@@ -77,7 +80,9 @@ def get_config(reload: bool = False, update_global=True) -> dict:
     return config
 
 
-def combine_configs(configs: List[Dict], mode="overwrite_keys") -> Dict:
+def combine_configs(
+    configs: list[dict[str, Any]], mode: str = "overwrite_keys"
+) -> dict[str, Any]:
     """
     Combine multiple configurations recursively.
     Replacing entries in the first config with entries from the latter
@@ -124,7 +129,7 @@ def combine_configs(configs: List[Dict], mode="overwrite_keys") -> Dict:
     return conf
 
 
-def _get_simulationconfig_user() -> Optional[dict]:
+def _get_simulationconfig_user() -> dict[str, Any] | None:
     """
     Get the user's simulation configuration.
     Returns
@@ -136,8 +141,7 @@ def _get_simulationconfig_user() -> Optional[dict]:
     path_confdir = _access_confdir()
     p = pathlib.Path(path_confdir) / "simulations.yaml"
     if p.exists():
-        p = str(p)
-        conf_sims_user = get_config_fromfile(p)
+        conf_sims_user = get_config_fromfile(str(p))
     return conf_sims_user
 
 
@@ -197,7 +201,7 @@ def copy_defaultconfig(overwrite=False) -> None:
             newfile.write(content)
 
 
-def get_config_fromfile(resource: str) -> Dict:
+def get_config_fromfile(resource: str) -> dict[str, Any]:
     """
     Load config from a YAML file.
     Parameters
@@ -216,21 +220,18 @@ def get_config_fromfile(resource: str) -> Dict:
     path = os.path.expanduser(resource)
     if os.path.isabs(path):
         with open(path, "r") as file:
-            conf = yaml.safe_load(file)
-        return conf
+            return cast(dict[str, Any], yaml.safe_load(file))
     # 2. non-absolute path?
     # 2.1. check local (project-specific) path
     if os.path.isfile(resource):
         with open(resource, "r") as file:
-            conf = yaml.safe_load(file)
-        return conf
+            return cast(dict[str, Any], yaml.safe_load(file))
     # 2.2. check ~/.config/scida/
     bpath = os.path.expanduser("~/.config/scida")
     path = os.path.join(bpath, resource)
     if os.path.isfile(path):
         with open(path, "r") as file:
-            conf = yaml.safe_load(file)
-        return conf
+            return cast(dict[str, Any], yaml.safe_load(file))
     # 2.3. check scida package resources
     resource_path = "scida.configfiles"
     resource_elements = resource.split("/")
@@ -239,17 +240,16 @@ def get_config_fromfile(resource: str) -> Dict:
         resource_path += "." + ".".join(resource_elements[:-1])
     resource = importlib.resources.files(resource_path).joinpath(rname)
     with resource.open("r") as file:
-        conf = yaml.safe_load(file)
-    return conf
+        return cast(dict[str, Any], yaml.safe_load(file))
 
 
 def merge_dicts_recursively(
-    dict_a: Dict,
-    dict_b: Dict,
-    path: Optional[List] = None,
-    mergefunc_keys: Optional[callable] = None,
-    mergefunc_values: Optional[callable] = None,
-) -> Dict:
+    dict_a: dict[str, Any],
+    dict_b: dict[str, Any],
+    path: list[str] | None = None,
+    mergefunc_keys: Callable[[Any, Any], Any] | None = None,
+    mergefunc_values: Callable[[Any, Any], Any] | None = None,
+) -> dict[str, Any]:
     """
     Merge two dictionaries recursively.
     Parameters
@@ -297,7 +297,9 @@ def merge_dicts_recursively(
     return dict_a
 
 
-def get_config_fromfiles(paths: List[str], subconf_keys: Optional[List[str]] = None):
+def get_config_fromfiles(
+    paths: list[str], subconf_keys: list[str] | None = None
+) -> dict[str, Any]:
     """
     Load and merge multiple YAML config files
     Parameters
@@ -314,7 +316,7 @@ def get_config_fromfiles(paths: List[str], subconf_keys: Optional[List[str]] = N
     confs = []
     for path in paths:
         confs.append(get_config_fromfile(path))
-    conf = {}
+    conf: dict[str, Any] = {}
     for confdict in confs:
         conf = merge_dicts_recursively(conf, confdict)
     return conf

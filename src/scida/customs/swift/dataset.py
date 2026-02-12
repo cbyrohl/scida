@@ -2,8 +2,9 @@
 Defines the SwiftSnapshot class for the SWIFT code, see https://gitlab.cosma.dur.ac.uk/swift/swiftsim
 """
 
+from __future__ import annotations
+
 import os
-from typing import Union
 
 from scida import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus
@@ -28,9 +29,7 @@ class SwiftSnapshot(GadgetStyleSnapshot):
         super().__init__(path, chunksize=chunksize, virtualcache=virtualcache, **kwargs)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Check if path is valid for this dataset class.
 
@@ -46,9 +45,10 @@ class SwiftSnapshot(GadgetStyleSnapshot):
         CandidateStatus
         """
         valid = super().validate_path(path, *args, **kwargs)
-        if not valid:
-            return False
+        if valid == CandidateStatus.NO:
+            return CandidateStatus.NO
         metadata_raw = load_metadata(path, **kwargs)
         comparestr = metadata_raw.get("/Code", {}).get("Code", b"").decode()
-        valid = "SWIFT" in comparestr
-        return valid
+        if "SWIFT" not in comparestr:
+            return CandidateStatus.NO
+        return CandidateStatus.MAYBE

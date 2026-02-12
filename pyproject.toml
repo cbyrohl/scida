@@ -73,6 +73,7 @@ dev = [
     "markdown-include>=0.8.1",
     "nox>=2024.4.15",
     "nox-uv>=0.2.0",
+    "types-pyyaml>=6.0.12.20250915",
 ]
 
 [build-system]
@@ -111,3 +112,25 @@ target-version = []
 
 [tool.isort]
 profile = "black"
+
+[tool.mypy]
+python_version = "3.9"
+packages = ["scida"]
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+# Start with permissive settings for gradual typing
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "scida.interface",
+    "scida.fields",
+    "scida.convenience",
+    "scida.series",
+]
+# Stricter settings for core modules
+disallow_untyped_defs = false
+warn_unused_ignores = true

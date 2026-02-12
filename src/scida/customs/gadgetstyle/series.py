@@ -2,11 +2,12 @@
 Defines a series representing a Gadget-style simulation.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import pathlib
 from pathlib import Path
-from typing import Dict, Optional
 
 from scida.discovertypes import _determine_mixins, _determine_type
 from scida.interface import create_datasetclass_with_mixins
@@ -21,11 +22,11 @@ class GadgetStyleSimulation(DatasetSeries):
     def __init__(
         self,
         path,
-        prefix_dict: Optional[Dict] = None,
-        subpath_dict: Optional[Dict] = None,
-        arg_dict: Optional[Dict] = None,
+        prefix_dict: dict | None = None,
+        subpath_dict: dict | None = None,
+        arg_dict: dict | None = None,
         lazy=True,
-        **interface_kwargs
+        **interface_kwargs,
     ):
         """
         Initialize a GadgetStyleSimulation object.

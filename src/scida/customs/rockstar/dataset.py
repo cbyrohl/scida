@@ -1,8 +1,10 @@
 """
 Defines the RockstarCatalog class.
 """
+
+from __future__ import annotations
+
 import os
-from typing import Union
 
 from scida.interface import Dataset
 from scida.interfaces.mixins import CosmologyMixin
@@ -28,7 +30,7 @@ class RockstarCatalog(CosmologyMixin, Dataset):
         super().__init__(path, **kwargs)
 
     @classmethod
-    def validate_path(cls, path: Union[str, os.PathLike], *args, **kwargs) -> bool:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> bool:
         """
         Check if path is valid for this interface.
         Parameters

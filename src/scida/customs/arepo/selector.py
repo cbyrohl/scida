@@ -2,7 +2,9 @@
 Selector for ArepoSnapshot
 """
 
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from scida.customs.arepo.helpers import grp_type_str
 from scida.interface import Selector
@@ -28,7 +30,7 @@ class ArepoSelector(Selector):
         snap: ArepoSnapshot = args[0]
         halo_id = kwargs.get("haloID", None)
         subhalo_id = kwargs.get("subhaloID", None)
-        subhalo_id_local: Optional[int] = kwargs.get("localSubhaloID", None)
+        subhalo_id_local: int | None = kwargs.get("localSubhaloID", None)
         unbound = kwargs.get("unbound", None)
 
         if halo_id is not None and subhalo_id is not None:

@@ -2,13 +2,14 @@
 Functionality to determine the dataset or dataseries type of a given path.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 from collections import Counter
 from enum import Enum
 from functools import reduce
 from inspect import getmro
-from typing import List, Union
 
 from scida.config import get_simulationconfig
 from scida.io import load_metadata
@@ -135,12 +136,12 @@ def _determine_type_from_simconfig(path, classtype="dataset", reg=None):
 
 
 def _determine_type(
-    path: Union[str, os.PathLike],
+    path: str | os.PathLike,
     test_datasets: bool = True,
     test_dataseries: bool = True,
     strict: bool = False,
     catch_exception: bool = True,
-    **kwargs
+    **kwargs,
 ):
     """
     Determine type of dataset or dataseries.
@@ -162,15 +163,15 @@ def _determine_type(
 
     Returns
     -------
-    names: List[str]
+    names: list[str]
         List of names of types that are candidates.
-    types: List[type]
+    types: list[type]
         List of classes that are candidates.
 
     """
-    available_dtypes: List[str] = []
-    dtypes_status: List[CandidateStatus] = []
-    reg = dict()
+    available_dtypes: list[str] = []
+    dtypes_status: list[CandidateStatus] = []
+    reg: dict[str, type] = dict()
     if test_datasets:
         reg.update(**dataset_type_registry)
     if test_dataseries:

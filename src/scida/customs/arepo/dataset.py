@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import copy
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any
 
 import dask
 import numpy as np
@@ -54,18 +56,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             Additional keyword arguments.
         """
         self.iscatalog = kwargs.pop("iscatalog", False)
-        self.header = {}
-        self.config = {}
+        self.header: dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
         # check whether we have a cosmology mixin
-        self._defaultunitfiles: List[str] = ["units/gadget_base.yaml"]
+        self._defaultunitfiles: list[str] = ["units/gadget_base.yaml"]
         if hasattr(self, "_mixins") and "cosmology" in self._mixins:
             self._defaultunitfiles += ["units/gadget_cosmological.yaml"]
-        self.parameters = {}
-        self._grouplengths = {}
-        self._subhalolengths = {}
+        self.parameters: dict[str, Any] = {}
+        self._grouplengths: dict[str, Any] = {}
+        self._subhalolengths: dict[str, Any] = {}
         # not needed for group catalogs as entries are back-to-back there, we will provide a property for this
-        self._subhalooffsets = {}
-        self.misc = {}  # for storing misc info
+        self._subhalooffsets: dict[str, Any] = {}
+        self.misc: dict[str, Any] = {}  # for storing misc info
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:
             prfx = self._get_fileprefix(path)
@@ -169,8 +171,14 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             ureg = self.ureg
 
         # non-virtual catalog fields for better performance
-        nonvirtual_datasets = ["Group/GroupFirstSub", "Group/GroupLenType", "Group/GroupNsubs",
-                               "Subhalo/SubhaloGrNr", "Subhalo/SubhaloGroupNr", "Subhalo/SubhaloLenType"]
+        nonvirtual_datasets = [
+            "Group/GroupFirstSub",
+            "Group/GroupLenType",
+            "Group/GroupNsubs",
+            "Subhalo/SubhaloGrNr",
+            "Subhalo/SubhaloGroupNr",
+            "Subhalo/SubhaloLenType",
+        ]
 
         self.catalog = cls(
             self.catalog,
@@ -205,9 +213,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.merge_hints(self.catalog)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path to use for instantiation of this class.
 
@@ -278,7 +284,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             self.catalog = candidate
             break
 
-    def register_field(self, parttype: str, name: str = None, construct: bool = False):
+    def register_field(
+        self, parttype: str, name: str | None = None, construct: bool = False
+    ):
         """
         Register a field.
         Parameters
@@ -465,17 +473,17 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         ----------
         objtype: str
             Type of object to process. Can be "halo" or "subhalo". Default: "halo"
-        idxlist: Optional[np.ndarray]
+        idxlist: np.ndarray | None
             List of halo indices to process. If not provided, all halos are processed.
         func: function
             Function to apply to each halo. Must take a dictionary of arrays as input.
         cpucost_halo:
             "CPU cost" of processing a single halo. This is a relative value to the processing time per input particle
             used for calculating the dask chunks. Default: 1e4
-        nchunks_min: Optional[int]
+        nchunks_min: int | None
             Minimum number of particles in a halo to process it. Default: None
-        chunksize_bytes: Optional[int]
-        nmax: Optional[int]
+        chunksize_bytes: int | None
+        nmax: int | None
             Only process the first nmax halos.
 
         Returns
@@ -658,7 +666,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
     def grouped(
         self,
-        fields: Union[str, da.Array, List[str], Dict[str, da.Array]] = "",
+        fields: str | list[str] | dict[str, da.Array] = "",
         parttype="PartType0",
         objtype="halo",
     ):
@@ -667,7 +675,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         Parameters
         ----------
-        fields: Union[str, da.Array, List[str], Dict[str, da.Array]]
+        fields: str | list[str] | dict[str, da.Array]
             Fields to pass to the operation. Can be a string, a dask array, a list of strings or a dictionary of dask arrays.
         parttype: str
             Particle type to operate on.
@@ -764,9 +772,7 @@ class ArepoCatalog(ArepoSnapshot):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path to use for instantiation of this class.
 
@@ -796,7 +802,7 @@ class ChainOps:
 
         Parameters
         ----------
-        funcs: List[function]
+        funcs: list[function]
             Functions to chain together.
         """
         self.funcs = funcs
@@ -843,14 +849,14 @@ class GroupAwareOperation:
         self,
         offsets: NDArray,
         lengths: NDArray,
-        arrs: Dict[str, da.Array],
+        arrs: dict[str, da.Array],
         ops=None,
         inputfields=None,
     ):
         self.offsets = offsets
         self.lengths = lengths
         self.arrs = arrs
-        self.opfuncs_custom = {}
+        self.opfuncs_custom: dict[str, Any] = {}
         self.final = False
         self.inputfields = inputfields
         if ops is None:
@@ -963,9 +969,9 @@ class GroupAwareOperation:
 
         Parameters
         ----------
-        nmax: Optional[int]
+        nmax: int | None
             Maximum number of halos to process.
-        idxlist: Optional[np.ndarray]
+        idxlist: np.ndarray | None
             List of halo indices to process. If not provided, (and nmax not set) all halos are processed.
         compute: bool
             Whether to compute the result immediately or return a dask object to compute later.
@@ -977,7 +983,7 @@ class GroupAwareOperation:
         # TODO: figure out return type
         # final operations: those that can only be at end of chain
         # intermediate operations: those that can only be prior to end of chain
-        funcdict = dict()
+        funcdict: dict[str, Any] = dict()
         funcdict.update(**self.opfuncs)
         funcdict.update(**self.opfuncs_custom)
 
@@ -1435,20 +1441,20 @@ def map_group_operation(
     lengths,
     arrdict,
     cpucost_halo=1e4,
-    nchunks_min: Optional[int] = None,
-    chunksize_bytes: Optional[int] = None,
-    entry_nbytes_in: Optional[int] = 4,
-    fieldnames: Optional[List[str]] = None,
-    nmax: Optional[int] = None,
-    idxlist: Optional[np.ndarray] = None,
+    nchunks_min: int | None = None,
+    chunksize_bytes: int | None = None,
+    entry_nbytes_in: int | None = 4,
+    fieldnames: list[str] | None = None,
+    nmax: int | None = None,
+    idxlist: np.ndarray | None = None,
 ) -> da.Array:
     """
     Map a function to all halos in a halo catalog.
     Parameters
     ----------
-    idxlist: Optional[np.ndarray]
+    idxlist: np.ndarray | None
         Only process the halos with these indices.
-    nmax: Optional[int]
+    nmax: int | None
         Only process the first nmax halos.
     func
     offsets: np.ndarray
@@ -1457,7 +1463,7 @@ def map_group_operation(
         Number of particles per halo.
     arrdict
     cpucost_halo
-    nchunks_min: Optional[int]
+    nchunks_min: int | None
         Lower bound on the number of halos per chunk.
     chunksize_bytes
     entry_nbytes_in
@@ -1630,9 +1636,9 @@ def map_group_operation(
 
     assert np.all(arrdims == arrdims[0])  # Cannot handle different input dims for now
 
-    drop_axis = []
+    drop_axis: list[int] = []
     if arrdims[0] > 1:
-        drop_axis = np.arange(1, arrdims[0])
+        drop_axis = list(np.arange(1, arrdims[0]))
 
     if dtype is None:
         raise ValueError(
