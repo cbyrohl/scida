@@ -12,7 +12,8 @@ version:
 	esac; \
 	new="$$major.$$minor.$$patch"; \
 	sed -i "s/^version = \".*\"/version = \"$$new\"/" pyproject.toml; \
-	git add pyproject.toml; \
+	uv lock; \
+	git add pyproject.toml uv.lock; \
 	git commit -m "v$$new"; \
 	git tag "v$$new"; \
 	git push; \
