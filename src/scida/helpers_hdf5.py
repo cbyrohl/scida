@@ -206,7 +206,10 @@ def create_mergedhdf5file(
     result = list(result)
 
     groups = set([item for r in result for item in r["groups"]])
+    # filter out internal scida metadata groups/datasets from source files
+    groups = {g for g in groups if not g.lstrip("/").startswith("_chunks")}
     datasets = set([item[0] for r in result for item in r["datasets"]])
+    datasets = {d for d in datasets if not d.lstrip("/").startswith("_chunks")}
 
     def todct(lst):
         """helper func"""
