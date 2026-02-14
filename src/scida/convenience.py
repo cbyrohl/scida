@@ -31,11 +31,12 @@ from scida.registries import dataseries_type_registry, dataset_type_registry
 log = logging.getLogger(__name__)
 
 
-def download_and_extract(
+def _download(
     url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False
 ):
     """
-    Download and extract a file from a given url.
+    Download a file from a given url.
+
     Parameters
     ----------
     url: str
@@ -46,10 +47,6 @@ def download_and_extract(
         Whether to show a progress bar.
     overwrite: bool
         Whether to overwrite an existing file.
-    Returns
-    -------
-    str
-        The path to the downloaded and extracted file(s).
     """
     if path.exists() and not overwrite:
         raise ValueError("Target path '%s' already exists." % path)
@@ -76,6 +73,30 @@ def download_and_extract(
                     )
                     sys.stdout.flush()
         sys.stdout.write("\n")
+
+
+def download_and_extract(
+    url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False
+):
+    """
+    Download and extract a tar.gz archive from a given url.
+
+    Parameters
+    ----------
+    url: str
+        The url to download from.
+    path: pathlib.Path
+        The path to download to.
+    progressbar: bool
+        Whether to show a progress bar.
+    overwrite: bool
+        Whether to overwrite an existing file.
+    Returns
+    -------
+    str
+        The path to the extracted file(s).
+    """
+    _download(url, path, progressbar=progressbar, overwrite=overwrite)
     tar = tarfile.open(path, "r:gz")
     for t in tar:
         if t.isdir():
@@ -156,7 +177,10 @@ def find_path(path, overwrite=False) -> str:
                 int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8
             )
             savepath = savepath / ("download" + urlhash)
-            filename = "archive.tar.gz"
+            # determine filename and whether this is an archive
+            url_basename = os.path.basename(path.split("?")[0].rstrip("/"))
+            is_archive = url_basename.endswith((".tar.gz", ".tgz"))
+            filename = "archive.tar.gz" if is_archive else (url_basename or "download")
             if not savepath.exists():
                 os.makedirs(savepath, exist_ok=True)
             elif overwrite:
@@ -169,10 +193,16 @@ def find_path(path, overwrite=False) -> str:
                         shutil.rmtree(fp)
             foldercontent = [f for f in savepath.glob("*")]
             if len(foldercontent) == 0:
-                savepath = savepath / filename
-                extractpath = download_and_extract(
-                    path, savepath, progressbar=True, overwrite=overwrite
-                )
+                filepath = savepath / filename
+                if is_archive:
+                    extractpath = download_and_extract(
+                        path, filepath, progressbar=True, overwrite=overwrite
+                    )
+                else:
+                    _download(
+                        path, filepath, progressbar=True, overwrite=overwrite
+                    )
+                    extractpath = savepath
             else:
                 extractpath = savepath
             extractpath = pathlib.Path(extractpath)
