@@ -3,7 +3,10 @@ Tests for scida.init() function
 """
 
 import os
+import sys
 from unittest.mock import Mock, patch
+
+import pytest
 
 from scida.helpers_misc import parse_humansize
 from scida.init import (
@@ -21,6 +24,19 @@ class TestMemoryParsing:
         assert parse_humansize("1GIB") == 1024**3
         assert parse_humansize("1.5GIB") == int(1.5 * 1024**3)
         assert parse_humansize("500MIB") == 500 * 1024**2
+
+    def test_parse_humansize_decimal_units(self):
+        """Test parsing decimal (SI) units: GB, MB, KB, TB, B."""
+        assert parse_humansize("4GB") == 4 * 10**9
+        assert parse_humansize("100MB") == 100 * 10**6
+        assert parse_humansize("512KB") == 512 * 10**3
+        assert parse_humansize("2TB") == 2 * 10**12
+        assert parse_humansize("1024B") == 1024
+
+    def test_parse_humansize_fractional_decimal(self):
+        """Test fractional values with decimal units."""
+        assert parse_humansize("1.5GB") == int(1.5 * 10**9)
+        assert parse_humansize("2.5MB") == int(2.5 * 10**6)
 
 
 class TestTNGLabDetection:
@@ -145,11 +161,12 @@ class TestInit:
             assert kwargs["memory_limit"] == "8GB"  # Should keep user-specified value
             assert kwargs["n_workers"] == 2  # Should keep user-specified value
 
-    @patch("dask.distributed.Client", side_effect=ImportError)
-    def test_init_no_dask_distributed(self, mock_client):
+    def test_init_no_dask_distributed(self):
         """Test init when dask.distributed is not available."""
-        result = init_resources(memory_limit="4GB")
-        assert result is None
+        # Patch sys.modules so that `from dask.distributed import ...` raises ImportError
+        with patch.dict(sys.modules, {"dask.distributed": None}):
+            result = init_resources(memory_limit="4GB")
+            assert result is None
 
     @patch("dask.distributed.LocalCluster")
     @patch("dask.distributed.Client")
@@ -215,3 +232,136 @@ class TestInit:
 
         args, kwargs = mock_cluster.call_args
         assert kwargs["dashboard_address"] is None
+
+    @patch("dask.distributed.LocalCluster")
+    @patch("dask.distributed.Client")
+    def test_init_integer_memory_limit(self, mock_client, mock_cluster):
+        """Test init with integer memory_limit (bytes)."""
+        init_resources(memory_limit=4_000_000_000, n_workers=2)
+
+        args, kwargs = mock_cluster.call_args
+        assert kwargs["memory_limit"] == 4_000_000_000
+        assert kwargs["n_workers"] == 2
+
+    @patch("dask.distributed.LocalCluster")
+    @patch("dask.distributed.Client")
+    def test_init_cluster_kwargs_forwarded(self, mock_client, mock_cluster):
+        """Test that extra **cluster_kwargs are forwarded to LocalCluster."""
+        init_resources(
+            memory_limit="4GB", n_workers=2, silence_logs=True, protocol="tcp"
+        )
+
+        args, kwargs = mock_cluster.call_args
+        assert kwargs["silence_logs"] is True
+        assert kwargs["protocol"] == "tcp"
+
+    @patch("dask.distributed.LocalCluster")
+    @patch("dask.distributed.Client")
+    def test_init_explicit_threads_per_worker(self, mock_client, mock_cluster):
+        """Test that explicit threads_per_worker overrides the default of 1."""
+        init_resources(memory_limit="4GB", n_workers=2, threads_per_worker=4)
+
+        args, kwargs = mock_cluster.call_args
+        assert kwargs["threads_per_worker"] == 4
+
+
+@pytest.mark.slow
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+class TestInitIntegration:
+    """Integration tests with real dask distributed clusters."""
+
+    def test_histogram2d_with_memory_limited_cluster(self):
+        """Test that da.histogram2d works with a memory-limited cluster.
+
+        Creates a cluster with strict per-worker memory limits, verifies
+        the limits are applied, then runs histogram2d on data that exceeds
+        a single worker's memory to confirm chunked processing works.
+        """
+        import dask.array as da
+        import numpy as np
+        from dask.distributed import Client, LocalCluster
+
+        memory_limit_mb = 200
+        memory_limit_bytes = memory_limit_mb * 10**6
+        cluster = None
+        client = None
+        try:
+            cluster = LocalCluster(
+                n_workers=2,
+                threads_per_worker=1,
+                memory_limit=f"{memory_limit_mb}MB",
+                dashboard_address=None,
+            )
+            client = Client(cluster)
+
+            # Verify memory limits are actually applied to workers
+            info = client.scheduler_info()
+            for worker_info in info["workers"].values():
+                assert worker_info["memory_limit"] == memory_limit_bytes, (
+                    f"Worker memory limit {worker_info['memory_limit']} != "
+                    f"expected {memory_limit_bytes}"
+                )
+
+            rng = np.random.default_rng(42)
+            n = 5_000_000
+            x_np = rng.standard_normal(n)
+            y_np = rng.standard_normal(n)
+
+            x_da = da.from_array(x_np, chunks=500_000)
+            y_da = da.from_array(y_np, chunks=500_000)
+
+            bins = 50
+            data_range = [
+                [float(x_np.min()), float(x_np.max())],
+                [float(y_np.min()), float(y_np.max())],
+            ]
+            h_dask, xedges_dask, yedges_dask = da.histogram2d(
+                x_da, y_da, bins=bins, range=data_range
+            )
+            h_dask = h_dask.compute()
+
+            h_np, xedges_np, yedges_np = np.histogram2d(
+                x_np, y_np, bins=bins, range=data_range
+            )
+
+            np.testing.assert_array_equal(h_dask, h_np)
+            np.testing.assert_allclose(xedges_dask, xedges_np)
+            np.testing.assert_allclose(yedges_dask, yedges_np)
+
+            assert h_dask.shape == (bins, bins)
+            assert h_dask.sum() == n
+        finally:
+            if client is not None:
+                client.close()
+            if cluster is not None:
+                cluster.close()
+
+    def test_init_resources_creates_working_cluster(self):
+        """Test that init_resources returns a functional dask client
+        with the requested memory limits applied to workers."""
+        import dask.array as da
+
+        memory_limit_mb = 200
+        memory_limit_bytes = memory_limit_mb * 10**6
+        client = None
+        try:
+            client = init_resources(
+                memory_limit=f"{memory_limit_mb}MB",
+                n_workers=2,
+                dashboard_port=None,
+            )
+            assert client is not None
+
+            # Verify the cluster is functional
+            result = da.ones(1000).sum().compute()
+            assert result == 1000.0
+
+            # Verify worker count and memory limits
+            info = client.scheduler_info()
+            assert len(info["workers"]) == 2
+            for worker_info in info["workers"].values():
+                assert worker_info["memory_limit"] == memory_limit_bytes
+        finally:
+            if client is not None:
+                client.close()
+                client.cluster.close()
