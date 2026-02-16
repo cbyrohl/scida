@@ -1,4 +1,4 @@
-# tests for gh issues. to be cleaned up and moved to the right place eventually
+"""Regression tests for specific GitHub issues."""
 import os
 import pathlib
 
@@ -12,29 +12,40 @@ from tests.helpers import write_gadget_testfile
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.unit
+def test_find_path_nonexistent():
+    """Regression test for GitHub issue #78.
+
+    Ensure that non-existent paths in default datafolders do not cause errors,
+    and that looking up a non-existent dataset raises a proper ValueError.
+    """
+    path = "SomeDataset"
+    with pytest.raises(ValueError) as e:
+        find_path(path)
+    assert "unknown" in str(e.value)
+
+
 @pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_issue_59(testdatapath):
-    # current testing of interface did not include units=True yet.
+def test_selector_with_pint_units(testdatapath):
+    """Regression test for GitHub issue #59.
+
+    Selector must handle pint Quantities when units=True.
+    """
     obj = load(testdatapath, units=False)
     _ = obj.return_data(haloID=42)
-    # for units=True, this would be a pint.Quantity, so we need to check for that
-    # in the Selector
     obj = load(testdatapath, units=True)
     _ = obj.return_data(haloID=42)
 
 
 @pytest.mark.external
 @require_testdata_path("interface", only=["TNG100-3_snapshot_z0_minimal"])
-def test_issue_63(testdatapath, tmp_path):
-    # underlying problem of issue 63 was that TNG100-2/TNG100-3 was not identified
-    # subsequently, the group catalog had no units
-    # identification of TNG100-2/TNG100-3 was broken but already fixed on main by now
-    # however, we want to
-    # 1. change "dimensionless" to "unknown" for fields with unknown units.
-    # 2. IDs should not be pint quantities
+def test_tng_unit_identification(testdatapath, tmp_path):
+    """Regression test for GitHub issue #63.
 
-    # check that units work for TNG100-3
+    TNG100-2/TNG100-3 identification was broken, causing missing units in catalogs.
+    Also verifies: 1) unknown units labeled 'unknown', 2) IDs are not pint quantities.
+    """
     ds = load(testdatapath, units=True)
     assert isinstance(ds, ArepoSnapshot)
     gas = ds.data["PartType0"]
@@ -43,11 +54,8 @@ def test_issue_63(testdatapath, tmp_path):
     grp = ds.data["Group"]
     coords = grp["GroupPos"]
     assert coords.to_base_units().units == ds.ureg("centimeter")
-
-    # assert that IDs are not pint quantities
     assert not hasattr(ds.data["PartType0"]["ParticleIDs"], "units")
 
-    # assert "unknown" units when no units known
     p = pathlib.Path(tmp_path) / "test.hdf5"
     write_gadget_testfile(p)
     with h5py.File(p, "r+") as hf:
@@ -58,69 +66,57 @@ def test_issue_63(testdatapath, tmp_path):
 
 @pytest.mark.external
 @require_testdata_path("series", only=["TNGvariation_simulation"])
-def test_issue_88(testdatapath, tmp_path):
-    # pass "output" folder instead of base folder of simulation
+def test_series_output_subfolder(testdatapath, tmp_path):
+    """Regression test for GitHub issue #88.
+
+    Passing "output" subfolder instead of base folder should still work.
+    Also verifies ~ is resolved as home folder.
+    """
     srs = load(testdatapath, units=True)
     assert isinstance(srs, ArepoSimulation)
-
     testdatapath += "/output"
     srs = load(testdatapath, units=True)
     assert isinstance(srs, ArepoSimulation)
-
-    # make sure ~ is resolved as home folder
     path = "~/tmp_test"
-    # create a test file
     abspath = os.path.expanduser(path)
     os.makedirs(abspath, exist_ok=True)
     assert find_path(path).startswith("/")
 
 
-@pytest.mark.unit
-def test_issue_78():
-    # some of the default "datafolders" in config.yaml do not exist on test user
-    # check that is does not matter
-    path = "SomeDataset"
-    with pytest.raises(ValueError) as e:
-        # this dataset does not exist, so should still raise proper exception
-        find_path(path)
-    assert "unknown" in str(e.value)
-
-
 @pytest.mark.external
 @require_testdata_path("interface", only=["MCST_ST8_snapshot_z3"])
-def test_issue185(testdatapath, capsys):
-    # check that we can load a snapshot with a different snapshot class
+def test_info_cosmological_output(testdatapath, capsys):
+    """Regression test for GitHub issue #185.
+
+    Verify info() output includes cosmological information for cosmological snapshots.
+    """
     obj = load(testdatapath, units=True)
     particles = obj.return_data(haloID=0)
     print(particles)
-
     obj.info()
     captured = capsys.readouterr()
     assert "=== Cosmological Simulation ===" in captured.out
-    assert "z =" in captured.out  # cosmological dataset (in contrast to issue187)
+    assert "z =" in captured.out
 
 
 @pytest.mark.external
 @require_testdata_path("series", only=["arepoturbbox_series"])
-def test_issue187(testdatapath, capsys):
+def test_noncosmo_simulation(testdatapath, capsys):
+    """Regression test for GitHub issue #187.
+
+    Non-cosmological simulations should not show redshift info.
+    """
     sim = load(testdatapath)
     assert isinstance(sim, ArepoSimulation)
     ds = sim.get_dataset(0)
     assert isinstance(ds, ArepoSnapshot)
-    # just load some data...
     veldiv = ds.data["PartType0"]["VelocityDivergence"][0].compute()
-    assert veldiv == 0.0  # is zero at the beginning...
-
-    # make sure this is not cosmological
+    assert veldiv == 0.0
     assert "Cosmology" not in str(type(ds))
-
-    # make sure "redshift" is not in info output
     sim.info()
-
     captured = capsys.readouterr()
     assert "=== metadata ===" in captured.out
     assert "redshift: " not in captured.out
-
     ds.info()
     captured = capsys.readouterr()
     assert "=== Cosmological Simulation ===" not in captured.out
@@ -129,14 +125,14 @@ def test_issue187(testdatapath, capsys):
 
 @pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
-def test_issue196(testdatapath, capsys, cachedir):
+def test_virtual_cache_catalog(testdatapath, capsys, cachedir):
+    """Regression test for GitHub issue #196.
+
+    Verify virtual caching for catalog fields works correctly.
+    """
     ds = load(testdatapath, units=True)
     h5file_catalog = ds.catalog.file
-    # fn_catalog = h5file_catalog.filename
-    # size_catalog = os.path.getsize(fn_catalog)
-    # print("size_catalog (in MB):", size_catalog / 1024 / 1024)
     dataset = h5file_catalog["Group"]["GroupPos"]
     assert dataset.is_virtual
-    # now check one of the fields we do not want to have virtual...
     dataset = h5file_catalog["Group"]["GroupLenType"]
     assert not dataset.is_virtual

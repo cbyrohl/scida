@@ -30,13 +30,12 @@ def return_intended_stype(name) -> Type[DatasetSeries]:
         return ArepoSimulation
     print("No intended type found for %s" % name)
     return DatasetSeries
-    # raise ValueError("Have not specified intended type for %s" % name)
 
 
 def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
     name = name.lower()
     if any(k in name for k in ["mtnggadget4"]):
-        return None  # TODO: Gadget4 snapshot
+        return None
     elif "mtngarepo" in name:
         if "group" in name:
             return MTNGArepoCatalog
@@ -50,28 +49,21 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
         else:
             return ArepoSnapshot
     elif any(k in name for k in ["eagle"]):
-        return ArepoSnapshot  # TODO: Change once we abstracted a GadgetSnapshot class
+        return ArepoSnapshot
     elif any(k in name for k in ["gaia", "lgal"]):
         return Dataset
     elif any(k in name for k in ["swift", "flamingo"]):
         return SwiftSnapshot
     elif any(k in name for k in ["simba"]):
-        # these are GizmoSnapshots. Current public Gizmo code has an identifying
-        # attribute "GIZMO_VERSION" in "/Header"
-        # unfortunately, this is not yet the case for fire2
-        # hence fire2 might be identified GadgetStyleSnapshot as GizmoSnapshot
-        # via the configuration files (which is not tested against here)
         return GizmoSnapshot
     elif any(k in name for k in ["fire2"]):
         return GizmoSnapshot
     elif any(k in name for k in ["rockstar"]):
         return RockstarCatalog
 
-    # alternative check testdata.yaml metadata
     tdprops = get_testdata_yaml_config()
     dname = name.split("/")[-1]
     for k in tdprops:
-        # remove extension if present
         dname_without_ext = dname
         if dname.endswith(".hdf5"):
             dname_without_ext = dname[:-5]
@@ -82,22 +74,17 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
 
     print("No intended type found for %s" % name)
     return Dataset
-    # raise ValueError("Have not specified intended type for %s" % name)
 
 
 @pytest.mark.external
 @require_testdata_path("series")
 def test_load_check_seriestype(testdatapath):
-    # this test intentionally ignores all additional hints from config files
-    # catch_exception = True allows us better control for debugging
     check_type(testdatapath, catch_exception=True, classtype="series")
 
 
 @pytest.mark.external
 @require_testdata_path("interface")
 def test_load_check_datasettype(testdatapath):
-    # this test intentionally ignores all additional hints from config files
-    # catch_exception = True allows us better control for debugging
     check_type(
         testdatapath,
         catch_exception=True,
@@ -146,14 +133,12 @@ def check_type(
     print("Intended type (1) vs determined type (2):")
     print("(1)", cls_intended)
     print("(2)", cls)
-    # get MRO
     print("=== MRO (1) ===")
     mro = [c.__name__ for c in cls_intended.mro()]
     print(mro)
     print("=== MRO (2) ===")
     mro = [c.__name__ for c in cls.mro()]
     print(mro)
-
     if allow_more_specific:
         assert issubclass(cls, cls_intended)
     else:
@@ -194,5 +179,4 @@ def test_simconf_detection(testdatapath):
     elif "LGal" in testdatapath:
         assert tp[0] == "LGalaxies"
     else:
-        pass  # no special type here.
-    # print(testdatapath, tp)
+        pass

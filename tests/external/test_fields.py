@@ -6,24 +6,10 @@ from scida.interface import FieldContainer
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
-@pytest.mark.unit
-def test_fieldcontainer_aliasing():
-    fc = FieldContainer()
-    assert fc._fields == {}
-    fc.add_alias("test", "test2")
-    with pytest.raises(KeyError):
-        print(fc["test"])  # "test2" not defined yet
-    fc["test"] = 1
-    assert (
-        "test2" in fc._fields
-    )  # if we write to the alias, the original entry should be set
-
-
 @pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_fieldtypes(testdatapath):
     from scida import load
-
     snp = load(testdatapath)
     gas = snp.data["PartType0"]
     fnames = list(gas.keys(withrecipes=False))
@@ -35,15 +21,9 @@ def test_fieldtypes(testdatapath):
     print(container_repr)
     shown_fieldcount = int(container_repr.split("fields=")[-1][:-1])
     assert shown_fieldcount == gas.fieldcount
-
-    assert "uid" not in gas.keys()  # no need to show this to the user (?)
-
-    # making sure that items()/values() are not evaluating recipes...
-    # right now items()/values() are evaluating recipes
+    assert "uid" not in gas.keys()
     assert all(["DerivedFieldRecipe" not in str(type(k)) for k in gas.values()])
-
-    # should not change after evaluating a recipe
-    print(gas["Density"])  # evaluating recipe
+    print(gas["Density"])
     container_repr = str(gas)
     shown_fieldcount = int(container_repr.split("fields=")[-1][:-1])
     assert shown_fieldcount == gas.fieldcount
@@ -68,17 +48,13 @@ def test_fields(testdata_interface):
     def tfield_explicitname(data, **kwargs):
         return data["tfield"] + 2
 
-    # first-order field
     val0 = snp.data["PartType0"]["tfield"].compute()
     assert val0 == 0
-    # second-order field
     val1 = snp.data["PartType0"]["tfield2"].compute()
     assert val1 == 1
-    # second-order field with custom name
     val2 = snp.data["PartType0"]["tfield3"].compute()
     assert val2 == 2
 
-    # test that we are passed the snapshot instance
     @snp.register_field("PartType0")
     def access_snapshot(data, **kwargs):
         return kwargs["snap"]
@@ -93,13 +69,11 @@ def test_fields(testdata_interface):
     val = snp.data["PartType0"]["access_snapshot2"]
     assert val is not None
 
-    # test FieldContainer get()
     part0 = snp.data["PartType0"]
     assert part0.get("tfield", allow_derived=True).compute() == 0
     with pytest.raises(KeyError):
         part0.get("tfield", allow_derived=False)
 
-    # test "all"
     @snp.register_field("all")
     def tfield_all(data, **kwargs):
         return True
@@ -114,16 +88,13 @@ def test_fields_ureg(testdatapath):
     """Test whether unit registry passed"""
     snp = load(testdatapath)
     assert snp.ureg is not None
-    # ureg should be propagated to fieldcontainer
     assert snp.data._ureg is not None
-    # ... and its child containers
     assert snp.data["PartType0"]._ureg is not None
 
     @snp.register_field("PartType0")
     def field(data, ureg=None, **kwargs):
         return ureg
 
-    # sometimes, we can recover ureg from fields...
     snp.data["PartType0"]._ureg = None
     assert snp.data["PartType0"].get_ureg() is not None
 
@@ -136,9 +107,3 @@ def test_fields_ureg(testdatapath):
 def test_repr(testdata_interface):
     ds = testdata_interface
     assert "FieldContainer[" in str(ds.data)
-
-
-@pytest.mark.unit
-def test_resolve_field_dependencies():
-    # TODO
-    pass

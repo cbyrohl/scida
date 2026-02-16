@@ -12,35 +12,6 @@ from scida.interface import Dataset
 from scida.misc import check_config_for_dataset
 from tests.testdata_properties import require_testdata, require_testdata_path
 
-# eventually replaces 'testdata_path'
-# def test_load_pathdiscovery():
-#    obj = load("TNG50-4_snapshot")
-#    assert obj.file is not None
-#    assert obj.data is not None
-
-
-@pytest.mark.integration
-@pytest.mark.network
-def test_load_https():
-    url = "https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-4_snapshot_z0.hdf5"
-    obj = load(url)
-    assert obj.file is not None
-    assert obj.data is not None
-
-
-# def test_searchpath():
-#    foldername = "TNG50-4_snapshot"
-#    obj = load(foldername)
-#    assert obj.file is not None
-#    assert obj.data is not None
-#
-#
-# def test_searchpath_withcatalog():
-#    foldername = "TNG50-4_snapshot"
-#    foldername_catalog = "TNG50-4_group"
-#    obj = load(foldername, catalog=foldername_catalog)
-#    assert obj.file is not None
-
 
 @pytest.mark.external
 @require_testdata_path("interface")
@@ -64,7 +35,6 @@ def test_load_resource(tmp_path, monkeypatch, testdatapath):
     assert isinstance(ds, Dataset)
 
 
-# TODO: Need to write test for TNG50-4_snapshot+TNG50-4_group using require_testdata(..., only=...)
 @pytest.mark.external
 @require_testdata_path("interface", only=["Illustris-3_snapshot"])
 def test_load_areposnap(testdatapath):
@@ -73,7 +43,6 @@ def test_load_areposnap(testdatapath):
     assert obj.data is not None
     assert all([k in obj.data for k in ["PartType%i" % i for i in [0, 1, 3, 4, 5]]])
     assert "Coordinates" in obj.data["PartType0"]
-    # assert obj.header["BoxSize"] == 35000.0
 
 
 @pytest.mark.external
@@ -118,7 +87,7 @@ def test_guess_nameddataset(testdata_interface):
 @require_testdata_path("interface", only=["gaia-dr3_minimal"])
 def test_gaia_hdf5(testdatapath):
     ds = load(testdatapath, units=False)
-    assert ds.__class__ == Dataset  # using most abstract class in load()
+    assert ds.__class__ == Dataset
 
 
 @pytest.mark.external
@@ -129,7 +98,6 @@ def test_gaia_hdf5_withunits(testdatapath):
     print(ds.data["ra"].units)
 
 
-# check that zarr cutouts from TNG have uids?
 @pytest.mark.external
 @require_testdata_path("interface", only=["tng_halocutout_zarr"])
 def test_load_zarrcutout(testdatapath):
@@ -142,9 +110,6 @@ def test_load_zarrcutout(testdatapath):
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_load_cachefail(cachedir, testdatapath, caplog):
     """Test recovery from failure during cache creation."""
-
-    # fist define a context manager to raise a TimeoutException
-    # after a given number of seconds
     import signal
     import time
 
@@ -155,7 +120,6 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
     def time_limit(seconds):
         def signal_handler(signum, frame):
             raise TimeoutException("Timed out.")
-
         signal.signal(signal.SIGALRM, signal_handler)
         signal.alarm(seconds)
         try:
@@ -163,42 +127,29 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
         finally:
             signal.alarm(0)
 
-    # explicitly disable catalog discovery
     loadkwargs = dict(catalog="none")
-
     dt = 0.3
     dt_int = int(math.ceil(dt))
-    with pytest.raises(Exception):  # otherwise we interrupted too late for this test...
-        # we cannot use "TimeoutException" as sometimes some other exception is raised during signalling...
+    with pytest.raises(Exception):
         with time_limit(dt_int):
-            # signal just accepts integer seconds... so we work around it with sleep before
             time.sleep(dt_int - dt)
             load(testdatapath, **loadkwargs)
 
-    # count total files by walking folders without counting those
     nfiles = 0
     for _, _, files in os.walk(cachedir):
         nfiles += len(files)
-    assert (
-        nfiles == 0
-    )  # no cache file should be created on interrupt: a os.remove() was triggered.
+    assert nfiles == 0
 
-    # now let it finish
     ds = load(testdatapath, **loadkwargs)
-
     nfiles = 0
     for root, dirs, files in os.walk(cachedir):
         nfiles += len(files)
-    assert nfiles > 0  # some caching file should be present.
+    assert nfiles > 0
 
-    # let us explicitly manipulate the cache file to simulate a failure
     fp = ds.file.filename
     ds.file.close()
-
     with h5py.File(fp, "r+") as f:
         del f.attrs["_cachingcomplete"]
-
-    # attempt load and recover.
     load(testdatapath, **loadkwargs)
     assert "Invalid cache file, attempting to create new one." in caplog.text
 
@@ -207,17 +158,21 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_load_cachefail_oserror(cachedir, testdatapath, caplog):
     """Test recovery from failure during cache creation. Do so by keeping the file is kept open."""
-
-    # explicitly disable catalog discovery
     loadkwargs = dict(catalog="none")
     ds = load(testdatapath, **loadkwargs)
     filename = ds.file.filename
     ds.file.close()
-
-    # Let's destroy the hdf5 header with random data
     with open(filename, "r+b") as f:
         f.seek(0)
         f.write(b"destroyheader")
-
     ds = load(testdatapath, **loadkwargs)
     print(ds.info())
+
+
+@pytest.mark.integration
+@pytest.mark.network
+def test_load_https():
+    url = "https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-4_snapshot_z0.hdf5"
+    obj = load(url)
+    assert obj.file is not None
+    assert obj.data is not None

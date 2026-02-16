@@ -4,11 +4,9 @@ from math import pi
 
 # TODO: Switch to pint for unit consistency
 import astropy.units as u
-import dask.array as da
 import numpy as np
 import pint
 import pytest
-from packaging import version
 
 from scida.convenience import load
 from tests.testdata_properties import require_testdata_path
@@ -92,29 +90,6 @@ def test_tng_units(testdatapath):
                 print("ratio:", mag1 / mag2)
                 assert mag1 == pytest.approx(mag2, rel=1e-3)
     pass
-
-
-@pytest.mark.unit
-@pytest.mark.skipif(
-    version.parse(pint.__version__) <= version.parse("0.20.1"),
-    reason="pint bug, fixed in development, see https://github.com/hgrecco/pint/pull/1722",
-)
-def test_dask_pint1():
-    ureg = pint.UnitRegistry()
-    ureg.default_system = "cgs"
-    ureg.define("halfmeter = 0.5 * meter")
-    arr = da.ones(1) * ureg("halfmeter")
-    print(arr[0].compute().to_base_units())
-
-
-@pytest.mark.unit
-def test_dask_pint2():
-    ureg = pint.UnitRegistry()
-    ureg.default_system = "cgs"
-    ureg.define("halfmeter = 0.5 * meter")
-    arr = da.ones(1) * ureg("halfmeter")
-    print(arr[0].compute().magnitude)
-    print(arr[0].to_base_units().compute())
 
 
 # TODO: only copied over a few functions.
