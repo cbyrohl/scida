@@ -8,24 +8,9 @@ from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.series import DatasetSeries
 from tests.helpers import DummyGadgetCatalogFile, DummyGadgetSnapshotFile, DummyTNGFile
 
-flag_test_long = False  # Set to true to run time-taking tests.
-flag_test_big = False  # Set to true to run memory-taking tests.
-
-scope_snapshot = "function"
-
 
 numba_logger = logging.getLogger("numba")
 numba_logger.setLevel(logging.WARNING)
-
-
-def pytest_configure(config):
-    config.addinivalue_line("markers", "slow: mark test as slow to run")
-    config.addinivalue_line("markers", "big: mark test as big")
-
-
-@pytest.fixture(scope="session", autouse=True)
-def set_logging():
-    logging.root.setLevel(logging.DEBUG)
 
 
 @pytest.fixture(scope="function")
@@ -62,16 +47,11 @@ def testdata_illustrissnapshot_withcatalog(request) -> ArepoSnapshot:
 
 @pytest.fixture(scope="function", autouse=True)
 def cachedir(monkeypatch, tmp_path_factory):
+    """Isolate cache for every test and reload config."""
     path = tmp_path_factory.mktemp("cache")
     monkeypatch.setenv("SCIDA_CACHE_PATH", str(path))
-    return path
-
-
-@pytest.fixture(scope="function", autouse=True)
-def cleancache(cachedir):
-    """Always start with empty cache."""
     get_config(reload=True)
-    return cachedir
+    return path
 
 
 # dummy gadgetstyle snapshot fixtures
