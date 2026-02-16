@@ -1,10 +1,12 @@
 import dask.array as da
+import pytest
 
 from scida import load
 from scida.io.fits import fitsrecords_to_daskarrays
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("fits", only=["SDSS_DR16_fits"])
 def test_fitsread(testdatapath):
     path = testdatapath
@@ -20,6 +22,7 @@ def test_fitsread(testdatapath):
         assert isinstance(darr, da.Array)
 
 
+@pytest.mark.external
 @require_testdata_path("fits", only=["SDSS_DR16_fits"])
 def test_fitsdataset(testdatapath):
     path = testdatapath

@@ -11,12 +11,14 @@ from scida.io import ChunkedHDF5Loader
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_interface_load(testdatapath):
     snp = GadgetStyleSnapshot(testdatapath)
     assert snp.file is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_interface_loadmetadata(testdatapath):
     loader = ChunkedHDF5Loader(testdatapath)
@@ -28,6 +30,7 @@ def test_interface_loadmetadata(testdatapath):
     assert metadata2.get("/_chunks", None) is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_snapshot_load_usecache(testdatapath):
     tstart = time.process_time()
@@ -40,6 +43,7 @@ def test_snapshot_load_usecache(testdatapath):
     assert snp.file is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_group"])
 def test_load_nonvirtual(testdatapath):
     snp = GadgetStyleSnapshot(testdatapath, virtualcache=False)
@@ -47,12 +51,14 @@ def test_load_nonvirtual(testdatapath):
 
 
 # TODO: setup and teardown savepath correctly
+@pytest.mark.external
 @require_testdata("interface", only=["TNG50-4_group"])
 def test_snapshot_save(testdata_interface):
     snp = testdata_interface
     snp.save("test.zarr")
 
 
+@pytest.mark.external
 @require_testdata("interface", only=["TNG50-4_group"])
 def test_snapshot_loadsaved(testdata_interface):
     snp = testdata_interface
@@ -74,6 +80,7 @@ def test_snapshot_loadsaved(testdata_interface):
 #            assert u.shape == snp_zarr.data[k][l].shape
 
 
+@pytest.mark.external
 @require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
 def test_areposnapshot_load(testdata_areposnapshot):
     snp = testdata_areposnapshot
@@ -83,6 +90,7 @@ def test_areposnapshot_load(testdata_areposnapshot):
     print("chunks", list(snp.file["_chunks"].attrs.keys()))
 
 
+@pytest.mark.external
 @require_testdata("areposnapshot", only=["TNG50-1_snapshot_z0_minimal"])
 def test_interface_fieldaccess(testdata_areposnapshot):
     # check that we can directly access fields from the interface
@@ -90,6 +98,7 @@ def test_interface_fieldaccess(testdata_areposnapshot):
     assert testdata_areposnapshot["PartType0"]["Coordinates"] is not None
 
 
+@pytest.mark.external
 @require_testdata("illustrisgroup")
 def test_illustrisgroup_load(testdata_illustrisgroup):
     grp = testdata_illustrisgroup
@@ -97,6 +106,7 @@ def test_illustrisgroup_load(testdata_illustrisgroup):
     assert "Subhalo" in grp.data.keys()
 
 
+@pytest.mark.external
 @require_testdata("illustrissnapshot_withcatalog")
 def test_areposnapshot_load_withcatalog(testdata_illustrissnapshot_withcatalog):
     snp = testdata_illustrissnapshot_withcatalog
@@ -118,12 +128,14 @@ def test_areposnapshot_load_withcatalog(testdata_illustrissnapshot_withcatalog):
     print(snp.data["Group"].keys())
 
 
+@pytest.mark.external
 @require_testdata("areposnapshot_withcatalog")
 def test_areposnapshot_load_withcatalogandunits(testdata_areposnapshot_withcatalog):
     snp = testdata_areposnapshot_withcatalog
     assert snp.file is not None
 
 
+@pytest.mark.external
 @require_testdata(
     "illustrissnapshot_withcatalog", exclude=["minimal", "z127"], exclude_substring=True
 )
@@ -150,6 +162,7 @@ class DummyMixinB(Mixin):
     pass
 
 
+@pytest.mark.unit
 def test_create_datasetclass_with_mixins_normal():
     """Test that normal mixin addition works correctly."""
     newcls = create_datasetclass_with_mixins(BaseDataset, [DummyMixinA])
@@ -157,6 +170,7 @@ def test_create_datasetclass_with_mixins_normal():
     assert "BaseDatasetWithDummyMixinA" == newcls.__name__
 
 
+@pytest.mark.unit
 def test_create_datasetclass_with_mixins_multiple():
     """Test that adding multiple mixins works correctly."""
     newcls = create_datasetclass_with_mixins(BaseDataset, [DummyMixinA, DummyMixinB])
@@ -165,12 +179,14 @@ def test_create_datasetclass_with_mixins_multiple():
     assert "BaseDatasetWithDummyMixinAAndDummyMixinB" == newcls.__name__
 
 
+@pytest.mark.unit
 def test_create_datasetclass_with_mixins_duplicate_in_list():
     """Test that ValueError is raised when the same mixin appears multiple times in the list."""
     with pytest.raises(ValueError, match="appears multiple times"):
         create_datasetclass_with_mixins(BaseDataset, [DummyMixinA, DummyMixinA])
 
 
+@pytest.mark.unit
 def test_create_datasetclass_with_mixins_duplicate_in_hierarchy():
     """Test that ValueError is raised when a mixin already exists in the class hierarchy."""
     # First create a class with DummyMixinA
@@ -180,6 +196,7 @@ def test_create_datasetclass_with_mixins_duplicate_in_hierarchy():
         create_datasetclass_with_mixins(cls_with_mixin, [DummyMixinA])
 
 
+@pytest.mark.unit
 def test_create_datasetclass_with_mixins_different_mixin_to_mixed_class():
     """Test that adding a different mixin to an already-mixed class works."""
     # First create a class with DummyMixinA
@@ -189,12 +206,14 @@ def test_create_datasetclass_with_mixins_different_mixin_to_mixed_class():
     assert DummyMixinB in cls_with_both.__bases__
 
 
+@pytest.mark.unit
 def test_create_datasetclass_with_mixins_empty_list():
     """Test that passing an empty list returns the original class."""
     result = create_datasetclass_with_mixins(BaseDataset, [])
     assert result is BaseDataset
 
 
+@pytest.mark.unit
 def test_create_datasetclass_with_mixins_none():
     """Test that passing None returns the original class."""
     result = create_datasetclass_with_mixins(BaseDataset, None)

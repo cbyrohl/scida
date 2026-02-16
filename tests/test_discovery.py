@@ -1,6 +1,8 @@
 import pathlib
 from typing import Type
 
+import pytest
+
 from scida import ArepoSnapshot, MTNGArepoSnapshot, TNGClusterSnapshot
 from scida.customs.arepo.dataset import ArepoCatalog
 from scida.customs.arepo.MTNG.dataset import MTNGArepoCatalog
@@ -83,6 +85,7 @@ def return_intended_dstype(name, simconf=False) -> Type[Dataset]:
     # raise ValueError("Have not specified intended type for %s" % name)
 
 
+@pytest.mark.external
 @require_testdata_path("series")
 def test_load_check_seriestype(testdatapath):
     # this test intentionally ignores all additional hints from config files
@@ -90,6 +93,7 @@ def test_load_check_seriestype(testdatapath):
     check_type(testdatapath, catch_exception=True, classtype="series")
 
 
+@pytest.mark.external
 @require_testdata_path("interface")
 def test_load_check_datasettype(testdatapath):
     # this test intentionally ignores all additional hints from config files
@@ -102,6 +106,7 @@ def test_load_check_datasettype(testdatapath):
     )
 
 
+@pytest.mark.external
 @require_testdata_path("interface")
 def test_load_check_datasettype_simconf(testdatapath):
     check_type(
@@ -155,6 +160,7 @@ def check_type(
         assert cls == cls_intended
 
 
+@pytest.mark.external
 @require_testdata_path("interface")
 def test_simconf_detection(testdatapath):
     metadata_raw = load_metadata(testdatapath, fileprefix=None)

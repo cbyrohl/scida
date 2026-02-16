@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from astropy.cosmology import FlatLambdaCDM
 
 from scida.convenience import load
@@ -9,6 +10,7 @@ from tests.testdata_properties import require_testdata_path
 # ureg.define("h = 0.6774")
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_simulation_tng50(testdatapath):
     snp = load(testdatapath, units="cgs")

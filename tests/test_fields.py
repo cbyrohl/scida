@@ -6,6 +6,7 @@ from scida.interface import FieldContainer
 from tests.testdata_properties import require_testdata, require_testdata_path
 
 
+@pytest.mark.unit
 def test_fieldcontainer_aliasing():
     fc = FieldContainer()
     assert fc._fields == {}
@@ -18,6 +19,7 @@ def test_fieldcontainer_aliasing():
     )  # if we write to the alias, the original entry should be set
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_fieldtypes(testdatapath):
     from scida import load
@@ -47,6 +49,7 @@ def test_fieldtypes(testdatapath):
     assert shown_fieldcount == gas.fieldcount
 
 
+@pytest.mark.external
 @require_testdata("interface", only=["TNG50-4_snapshot"])
 def test_fields(testdata_interface):
     snp = testdata_interface
@@ -105,6 +108,7 @@ def test_fields(testdata_interface):
     assert all([snp.data[k]["tfield_all"] for k in snp.data.keys()])
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_fields_ureg(testdatapath):
     """Test whether unit registry passed"""
@@ -127,12 +131,14 @@ def test_fields_ureg(testdatapath):
     assert ureg is not None
 
 
+@pytest.mark.external
 @require_testdata("interface", only=["TNG50-4_snapshot"])
 def test_repr(testdata_interface):
     ds = testdata_interface
     assert "FieldContainer[" in str(ds.data)
 
 
+@pytest.mark.unit
 def test_resolve_field_dependencies():
     # TODO
     pass

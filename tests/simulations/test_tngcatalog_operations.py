@@ -1,7 +1,10 @@
+import pytest
+
 from scida import load
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_groupids_for_particles(testdatapath):
     obj = load(testdatapath, units=True)

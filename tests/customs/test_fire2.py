@@ -8,6 +8,7 @@ from scida.customs.gizmo.series import GizmoSimulation
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("series", only=["FIRE2_series_minimal"])
 def test_series(testdatapath):
     obj = load(testdatapath)
@@ -85,6 +86,7 @@ def check_firesnap(obj: GizmoSnapshot):
     # TODO: Test BH units; need massive halo snapshot for this.
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["FIRE2_snapshot_z1_minimal"])
 def test_snapshot(testdatapath):
     """Test loading of a full snapshot"""

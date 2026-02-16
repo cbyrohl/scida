@@ -14,6 +14,7 @@ from scida.convenience import load
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_tng_units(testdatapath):
     # TODO: TNG50-4_group needs to be a fixture, not just hacked in as here
@@ -93,6 +94,7 @@ def test_tng_units(testdatapath):
     pass
 
 
+@pytest.mark.unit
 @pytest.mark.skipif(
     version.parse(pint.__version__) <= version.parse("0.20.1"),
     reason="pint bug, fixed in development, see https://github.com/hgrecco/pint/pull/1722",
@@ -105,6 +107,7 @@ def test_dask_pint1():
     print(arr[0].compute().to_base_units())
 
 
+@pytest.mark.unit
 def test_dask_pint2():
     ureg = pint.UnitRegistry()
     ureg.default_system = "cgs"

@@ -7,6 +7,7 @@ from scida import load
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
 def test_redshift_mismatch(testdatapath):
     # this should work
@@ -20,6 +21,7 @@ def test_redshift_mismatch(testdatapath):
     assert str(exc_info.value).startswith("Redshift mismatch")
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
 def test_scalefactor_in_unitreg(testdatapath):
     ds = load(testdatapath, units=True)
@@ -29,6 +31,7 @@ def test_scalefactor_in_unitreg(testdatapath):
     assert h == pytest.approx(0.6774)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
 def test_scalefactor_in_units(testdatapath):
     ds_nounits = load(testdatapath, units=False)
@@ -51,6 +54,7 @@ def test_scalefactor_in_units(testdatapath):
     assert pos_cgs == pytest.approx(pos_nounits_cgs)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
 def test_discover_groupcatalog(testdatapath):
     ds = load(testdatapath)
@@ -58,6 +62,7 @@ def test_discover_groupcatalog(testdatapath):
     print(ds.catalog)
 
 
+@pytest.mark.external
 @require_testdata_path("series", only=["TNG50-4"])
 def test_discover_groupcatalog2(testdatapath):
     # same but with actual paths as in TNG
@@ -67,6 +72,7 @@ def test_discover_groupcatalog2(testdatapath):
     assert ds.catalog is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
 def test_aliases(testdatapath):
     ds = load(testdatapath)
@@ -79,6 +85,7 @@ def test_aliases(testdatapath):
     assert ds.data["Group"]["Coordinates"] is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
 def test_aliases_bydefault(testdatapath):
     ds = load(testdatapath)
@@ -92,6 +99,7 @@ def test_aliases_bydefault(testdatapath):
     assert d["PartType5"] == d["bh"]
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-1_snapshot_z3_minimal"])
 def test_additionalfields(testdatapath):
     ds = load(testdatapath)
@@ -102,6 +110,7 @@ def test_additionalfields(testdatapath):
     # TODO: Test how newly defined fields play with units
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot_z127"])
 def test_emptycatalog(testdatapath):
     ds = load(testdatapath)

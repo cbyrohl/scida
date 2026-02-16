@@ -19,6 +19,8 @@ from tests.testdata_properties import require_testdata, require_testdata_path
 #    assert obj.data is not None
 
 
+@pytest.mark.integration
+@pytest.mark.network
 def test_load_https():
     url = "https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-4_snapshot_z0.hdf5"
     obj = load(url)
@@ -40,6 +42,7 @@ def test_load_https():
 #    assert obj.file is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface")
 def test_load(testdatapath):
     obj = load(testdatapath)
@@ -48,6 +51,7 @@ def test_load(testdatapath):
     assert obj.data is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_load_resource(tmp_path, monkeypatch, testdatapath):
     p = tmp_path / "conf.yaml"
@@ -61,6 +65,7 @@ def test_load_resource(tmp_path, monkeypatch, testdatapath):
 
 
 # TODO: Need to write test for TNG50-4_snapshot+TNG50-4_group using require_testdata(..., only=...)
+@pytest.mark.external
 @require_testdata_path("interface", only=["Illustris-3_snapshot"])
 def test_load_areposnap(testdatapath):
     obj = load(testdatapath)
@@ -71,30 +76,35 @@ def test_load_areposnap(testdatapath):
     # assert obj.header["BoxSize"] == 35000.0
 
 
+@pytest.mark.external
 @require_testdata_path("series", only=["TNGvariation_simulation"])
 def test_load_areposim(testdatapath):
     obj = load(testdatapath, units="cgs")
     assert obj is not None
 
 
+@pytest.mark.external
 @require_testdata_path("interface", exclude=["gaia"], exclude_substring=True)
 def test_load_units_codeunits(testdatapath):
     obj = load(testdatapath, units="code")
     assert "UnitMixin" in type(obj).__name__
 
 
+@pytest.mark.external
 @require_testdata_path("interface", exclude=["gaia"], exclude_substring=True)
 def test_load_units_cgs(testdatapath):
     obj = load(testdatapath, units="cgs")
     assert "UnitMixin" in type(obj).__name__
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["EAGLEsmall_snapshot"])
 def test_load_units_manualpath(testdatapath):
     obj = load(testdatapath, units="cgs", unitfile="units/eagle.yaml")
     assert "UnitMixin" in type(obj).__name__
 
 
+@pytest.mark.external
 @require_testdata("interface", only=["TNG50-4_snapshot", "Illustris-3_snapshot"])
 def test_guess_nameddataset(testdata_interface):
     snp = testdata_interface
@@ -104,12 +114,14 @@ def test_guess_nameddataset(testdata_interface):
     print("cds", candidates)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["gaia-dr3_minimal"])
 def test_gaia_hdf5(testdatapath):
     ds = load(testdatapath, units=False)
     assert ds.__class__ == Dataset  # using most abstract class in load()
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["gaia-dr3_minimal"])
 def test_gaia_hdf5_withunits(testdatapath):
     ds = load(testdatapath, units=True)
@@ -118,6 +130,7 @@ def test_gaia_hdf5_withunits(testdatapath):
 
 
 # check that zarr cutouts from TNG have uids?
+@pytest.mark.external
 @require_testdata_path("interface", only=["tng_halocutout_zarr"])
 def test_load_zarrcutout(testdatapath):
     obj = load(testdatapath)
@@ -125,6 +138,7 @@ def test_load_zarrcutout(testdatapath):
     assert obj.data["Group"]["uid"][0] == 0
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_load_cachefail(cachedir, testdatapath, caplog):
     """Test recovery from failure during cache creation."""
@@ -189,6 +203,7 @@ def test_load_cachefail(cachedir, testdatapath, caplog):
     assert "Invalid cache file, attempting to create new one." in caplog.text
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_load_cachefail_oserror(cachedir, testdatapath, caplog):
     """Test recovery from failure during cache creation. Do so by keeping the file is kept open."""

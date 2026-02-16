@@ -1,6 +1,9 @@
+import pytest
+
 from scida.config import get_config, get_config_fromfiles, get_simulationconfig
 
 
+@pytest.mark.unit
 def test_load_defaultconf():
     # We use some available resource to test against
     conf = get_config()
@@ -8,6 +11,7 @@ def test_load_defaultconf():
     assert "cache_path" in conf
 
 
+@pytest.mark.unit
 def test_load_multiple_confs():
     conf = get_config_fromfiles(["config.yaml", "units/gadget_cosmological.yaml"])
     assert conf is not None
@@ -15,6 +19,7 @@ def test_load_multiple_confs():
     assert "cache_path" in conf
 
 
+@pytest.mark.unit
 def test_usersimconf(mocker):
     usersimconf = {"data": {"NewSim": dict()}}
     mocker.patch("scida.config._get_simulationconfig_user", return_value=usersimconf)

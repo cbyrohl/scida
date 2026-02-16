@@ -8,6 +8,7 @@ from scida.convenience import load
 from scida.interfaces.mixins.units import update_unitregistry
 
 
+@pytest.mark.integration
 def test_load_cgs(tngfile_dummy):
     p = tngfile_dummy.path
     ds = load(p, units="cgs")
@@ -23,6 +24,7 @@ def test_load_cgs(tngfile_dummy):
     assert sfr.units == u.g / u.s
 
 
+@pytest.mark.integration
 def test_load_codeunits(tngfile_dummy):
     p = tngfile_dummy.path
     ds = load(p, units=True)
@@ -53,6 +55,7 @@ def test_load_codeunits(tngfile_dummy):
     assert not hasattr(gas["ParticleIDs"], "units")
 
 
+@pytest.mark.unit
 def test_update_unitregistry():
     # update fields with units
     ureg = UnitRegistry()
@@ -65,6 +68,7 @@ def test_update_unitregistry():
     )  # 1/h for a=1.0
 
 
+@pytest.mark.integration
 def test_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     p = gadgetfile_dummy.path
     with h5py.File(p, "r+") as f:
@@ -90,6 +94,7 @@ def test_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     assert "Cannot determine units" in caplog.text
 
 
+@pytest.mark.integration
 def test_check_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     p = gadgetfile_dummy.path
     with h5py.File(p, "r+") as f:
@@ -103,6 +108,7 @@ def test_check_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     print(ds)
 
 
+@pytest.mark.unit
 def test_misc():
     ureg = UnitRegistry()
     print(ureg("dimensionless"))

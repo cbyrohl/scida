@@ -1,10 +1,13 @@
 import pathlib
 
+import pytest
+
 from scida.io import load
 
 from .helpers import write_gadget_testfile, write_hdf5flat_testfile
 
 
+@pytest.mark.integration
 def test_ioload_hdf5flat(tmp_path):
     # the flat test file is a single hdf5 file with fields in the root group
     p = pathlib.Path(tmp_path) / "test.hdf5"
@@ -17,6 +20,7 @@ def test_ioload_hdf5flat(tmp_path):
     assert "field2" in fcc
 
 
+@pytest.mark.integration
 def test_ioload_gadget(tmp_path):
     # the gadgetstyle test file is a single hdf5 file with fields nested into groups
     p = pathlib.Path(tmp_path) / "test.hdf5"

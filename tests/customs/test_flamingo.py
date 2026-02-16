@@ -52,6 +52,7 @@ def check_flamingosnap(obj: SwiftSnapshot, obj_wu: SwiftSnapshot):
             assert not hasattr(d[k], "units")  # we do not want units for IDs
 
 
+@pytest.mark.external
 @require_testdata_path(
     "interface", only=["FLAMINGO_snapshot_reduced", "FLAMINGO_snapshot_minimal"]
 )
@@ -63,6 +64,7 @@ def test_snapshot(testdatapath):
     check_flamingosnap(obj, obj_wu)
 
 
+@pytest.mark.external
 @require_testdata_path("series", only=["FLAMINGO_simulation_minimal"])
 def test_series(testdatapath):
     obj: SwiftSimulation = load(testdatapath, units=True)

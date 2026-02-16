@@ -1,6 +1,9 @@
+import pytest
+
 from tests.testdata_properties import require_testdata
 
 
+@pytest.mark.external
 @require_testdata("areposnapshot_withcatalog")
 def test_coordsalias(testdata_areposnapshot_withcatalog):
     obj = testdata_areposnapshot_withcatalog

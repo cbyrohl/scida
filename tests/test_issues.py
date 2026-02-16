@@ -1,6 +1,6 @@
 # tests for gh issues. to be cleaned up and moved to the right place eventually
-import pathlib
 import os
+import pathlib
 
 import h5py
 import numpy as np
@@ -12,6 +12,7 @@ from tests.helpers import write_gadget_testfile
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_issue_59(testdatapath):
     # current testing of interface did not include units=True yet.
@@ -23,6 +24,7 @@ def test_issue_59(testdatapath):
     _ = obj.return_data(haloID=42)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG100-3_snapshot_z0_minimal"])
 def test_issue_63(testdatapath, tmp_path):
     # underlying problem of issue 63 was that TNG100-2/TNG100-3 was not identified
@@ -54,6 +56,7 @@ def test_issue_63(testdatapath, tmp_path):
     assert ds.data["PartType0"]["ExtraField"].units == "unknown"
 
 
+@pytest.mark.external
 @require_testdata_path("series", only=["TNGvariation_simulation"])
 def test_issue_88(testdatapath, tmp_path):
     # pass "output" folder instead of base folder of simulation
@@ -72,6 +75,7 @@ def test_issue_88(testdatapath, tmp_path):
     assert find_path(path).startswith("/")
 
 
+@pytest.mark.unit
 def test_issue_78():
     # some of the default "datafolders" in config.yaml do not exist on test user
     # check that is does not matter
@@ -82,6 +86,7 @@ def test_issue_78():
     assert "unknown" in str(e.value)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["MCST_ST8_snapshot_z3"])
 def test_issue185(testdatapath, capsys):
     # check that we can load a snapshot with a different snapshot class
@@ -95,6 +100,7 @@ def test_issue185(testdatapath, capsys):
     assert "z =" in captured.out  # cosmological dataset (in contrast to issue187)
 
 
+@pytest.mark.external
 @require_testdata_path("series", only=["arepoturbbox_series"])
 def test_issue187(testdatapath, capsys):
     sim = load(testdatapath)
@@ -121,6 +127,7 @@ def test_issue187(testdatapath, capsys):
     assert "z =" not in captured.out
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_issue196(testdatapath, capsys, cachedir):
     ds = load(testdatapath, units=True)

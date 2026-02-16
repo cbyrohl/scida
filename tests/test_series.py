@@ -12,6 +12,7 @@ from scida.series import delay_init
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_load(testdatapath):
     bs = ArepoSimulation(testdatapath)
@@ -39,6 +40,7 @@ def test_areposimulation_load(testdatapath):
         bs.get_dataset(snapshot=1, snap=1)
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_load_property_tolerance(testdatapath):
     bs = ArepoSimulation(testdatapath)
@@ -49,6 +51,7 @@ def test_areposimulation_load_property_tolerance(testdatapath):
         bs.get_dataset(redshift=2.5)
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_asynccaching(cachedir, testdatapath):
     mstart = psutil.Process().memory_info().rss
@@ -66,6 +69,7 @@ def test_areposimulation_asynccaching(cachedir, testdatapath):
     print(bs)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_delay_obj(testdatapath):
     # lazy loading
@@ -87,6 +91,7 @@ def test_delay_obj(testdatapath):
     assert "Delay" not in str(type(snp))
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
 def test_areposimulation_lazy_message(cachedir, testdatapath):
     tstart = time.process_time()
@@ -98,6 +103,7 @@ def test_areposimulation_lazy_message(cachedir, testdatapath):
     assert dt0 < 4.0  # should be fast
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
 def test_areposimulation_lazy(cachedir, testdatapath):
     tstart = time.process_time()
@@ -109,6 +115,7 @@ def test_areposimulation_lazy(cachedir, testdatapath):
     assert dt0 < 4.0  # should be fast
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_lazy2(cachedir, testdatapath):
     # first load of simulation in lazy mode
@@ -135,6 +142,7 @@ def test_areposimulation_lazy2(cachedir, testdatapath):
     assert type(bs1.datasets[1]).__name__ != "Delay"
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_caching(cachedir, testdatapath):
     # first call to cache datasets
@@ -174,6 +182,7 @@ def test_areposimulation_caching(cachedir, testdatapath):
     assert ds2.header is not None
 
 
+@pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation"])
 def test_areposimulation_mixins(cachedir, testdatapath):
     bs = ArepoSimulation(testdatapath)

@@ -9,6 +9,7 @@ from scida.customs.arepo.dataset import part_type_num
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_selector(testdatapath):
     parttype = "PartType0"
@@ -50,6 +51,7 @@ def test_selector(testdatapath):
 
 # test catalog calculation off (sub)halo lengths and offsets
 # for particle data fields and selections
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_subhalolengths(testdatapath):
     pass
@@ -130,11 +132,13 @@ def halooperations(path, catalogpath=None):
 #     halooperations(path, catalogpath)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_areposnapshot_selector_halos_realdata(testdatapath):
     halooperations(testdatapath)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_areposnapshot_selector_subhalos_realdata(testdatapath):
     snap = load(testdatapath)
@@ -224,6 +228,7 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
     assert np.all(partcount[mask] == shlengths[mask])
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_interface_groupedoperations(testdatapath):
     snp = load(testdatapath, units=True)
@@ -296,6 +301,7 @@ def test_interface_groupedoperations(testdatapath):
     assert np.allclose(v1, v2)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_interface_groupedoperations_subhalo(testdatapath):
     snp = load(testdatapath)
@@ -325,6 +331,7 @@ def test_interface_groupedoperations_subhalo(testdatapath):
     assert np.allclose(v1, v2)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_interface_groupedoperations_nonscalar(testdatapath, caplog):
     """Test grouped operations with non-scalar function outputs."""
@@ -367,6 +374,7 @@ def test_interface_groupedoperations_nonscalar(testdatapath, caplog):
     assert "Exception during shape inference" in caplog.text
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_default_recipes(testdatapath):
     obj = load(testdatapath)
@@ -377,6 +385,7 @@ def test_default_recipes(testdatapath):
     assert np.allclose(v1, v2)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_allunitsdiscovered(testdatapath, caplog):
     load(testdatapath)

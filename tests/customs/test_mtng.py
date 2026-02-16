@@ -5,6 +5,7 @@ from scida.convenience import load
 from tests.testdata_properties import require_testdata_path
 
 
+@pytest.mark.external
 @require_testdata_path("series", only=["MTNGarepo_1080hydro_simulation"])
 def test_fullsimulation(testdatapath):
     series = load(
@@ -20,6 +21,7 @@ def test_fullsimulation(testdatapath):
     print(ds.cosmology)
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["MTNGarepo_270hydro_snapshot_z2"])
 def test_fullsnapshot(testdatapath):
     """Test loading of a full snapshot"""
@@ -37,6 +39,7 @@ def test_fullsnapshot(testdatapath):
     assert all([k in obj.data for k in containernames])
 
 
+@pytest.mark.external
 @require_testdata_path("interface", only=["MTNGarepo_270hydro_snapshot_z10"])
 def test_partialsnapshot(testdatapath):
     """Test loading of a partial snapshot"""
