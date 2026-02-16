@@ -347,34 +347,34 @@ _sizeunits = {
     "MB": 10**6,
     "GB": 10**9,
     "TB": 10**12,
-    "KiB": 1024,
-    "MiB": 1024**2,
-    "GiB": 1024**3,
+    "KIB": 2**10,
+    "MIB": 2**20,
+    "GIB": 2**30,
+    "TIB": 2**40,
 }
-
-_sizeunits = {k.lower(): v for k, v in _sizeunits.items()}
 
 
 def parse_size(size):
     """
-    Parse a size string to a number in bytes.
+    Parse a human-readable size string to a number in bytes.
+
+    Supports both SI units (KB, MB, GB, TB) and binary units (KiB, MiB, GiB, TiB).
+
     Parameters
     ----------
-    size: str
+    size : str
+        Human-readable size string, e.g. "128MiB", "1.5 GiB", "500MB".
 
     Returns
     -------
     int
-        size in bytes
+        Size in bytes.
     """
-    idx = 0
-    for c in size:
-        if c.isnumeric():
-            continue
-        idx += 1
-    number = size[:idx]
-    unit = size[idx:]
-    return int(float(number) * _sizeunits[unit.lower().strip()])
+    size = size.upper()
+    if not re.match(r" ", size):
+        size = re.sub(r"([KMGT]?I*B)", r" \1", size)
+    number, unit = [string.strip() for string in size.split()]
+    return int(float(number) * _sizeunits[unit])
 
 
 def is_scalar(value):
