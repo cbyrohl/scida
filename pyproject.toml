@@ -103,6 +103,12 @@ minversion = "6.0"
 filterwarnings = [
     "error::DeprecationWarning"
 ]
+markers = [
+    "unit: Pure unit tests with no I/O (always run in CI)",
+    "integration: Tests using dummy/synthetic files (always run in CI)",
+    "external: Tests requiring SCIDA_TESTDATA_PATH (skipped without data)",
+    "network: Tests requiring network access",
+]
 
 [tool.black]
 # Explicitly disable target-version inference from requires-python.
