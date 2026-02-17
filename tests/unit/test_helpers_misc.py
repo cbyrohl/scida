@@ -6,9 +6,9 @@ from scida.helpers_misc import (
     get_kwargs,
     hash_path,
     make_serializable,
-    parse_humansize,
     sprint,
 )
+from scida.misc import parse_size
 
 
 @pytest.mark.unit
@@ -94,19 +94,19 @@ class TestGetArgs:
 @pytest.mark.unit
 class TestParseHumansize:
     def test_bytes(self):
-        assert parse_humansize("100B") == 100
+        assert parse_size("100B") == 100
 
     def test_kibibytes(self):
-        assert parse_humansize("1KiB") == 1024
+        assert parse_size("1KiB") == 1024
 
     def test_mebibytes(self):
-        assert parse_humansize("2MiB") == 2 * 1024**2
+        assert parse_size("2MiB") == 2 * 1024**2
 
     def test_gibibytes(self):
-        assert parse_humansize("1GiB") == 1024**3
+        assert parse_size("1GiB") == 1024**3
 
     def test_with_space(self):
-        assert parse_humansize("1 GiB") == 1024**3
+        assert parse_size("1 GiB") == 1024**3
 
 
 @pytest.mark.unit
