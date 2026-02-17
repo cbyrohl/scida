@@ -115,7 +115,7 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
     def calculate_pindex_min(uid, parttype=parttype):
         try:
             return uid.min()
-        except:  # noqa
+        except (AttributeError, ValueError):
             return -21
 
     def calculate_subhalocount(SubhaloID, parttype=parttype):

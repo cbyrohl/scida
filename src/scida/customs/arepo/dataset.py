@@ -24,8 +24,8 @@ from scida.helpers_misc import (
     get_args,
     get_kwargs,
     map_blocks,
-    parse_humansize,
 )
+from scida.misc import parse_size
 from scida.interface import create_datasetclass_with_mixins
 from scida.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin, UnitMixin
 from scida.io import load_metadata
@@ -1399,7 +1399,7 @@ def map_group_operation_get_chunkedges(
 
     # let's allow a maximal chunksize of 16 times the dask default setting for an individual array [here: multiple]
     if chunksize_bytes is None:
-        chunksize_bytes = 16 * parse_humansize(dask.config.get("array.chunk-size"))
+        chunksize_bytes = 16 * parse_size(dask.config.get("array.chunk-size"))
     cost_memory = entry_nbytes_in * lengths + entry_nbytes_out
 
     if not np.max(cost_memory) < chunksize_bytes:
