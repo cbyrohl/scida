@@ -146,7 +146,7 @@ def test_areposnapshot_selector_subhalos_realdata(testdatapath):
         """Minimum particle index to consider."""
         try:
             return uid.min()
-        except:  # noqa
+        except (AttributeError, ValueError):
             return -21
 
     def calculate_subhalocount(SubhaloID, parttype=parttype):
