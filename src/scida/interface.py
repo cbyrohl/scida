@@ -325,6 +325,7 @@ class BaseDataset(metaclass=MixinMeta):
                 root.attrs[k] = v
         # Data
         tasks = []
+        units_to_save = {}
         ptypes = self.data.keys()
         if isinstance(fields, dict):
             ptypes = fields.keys()
@@ -348,7 +349,8 @@ class BaseDataset(metaclass=MixinMeta):
                 else:
                     arr = self.data[p][k]
                 if hasattr(arr, "magnitude"):  # if we have units, remove those here
-                    # TODO: save units in metadata!
+                    if hasattr(arr, "units"):
+                        units_to_save[(p, k)] = str(arr.units)
                     arr = arr.magnitude
                 if np.any(np.isnan(arr.shape)):
                     arr.compute_chunk_sizes()  # very inefficient (have to do it separately for every array)
@@ -363,6 +365,8 @@ class BaseDataset(metaclass=MixinMeta):
                 )
                 tasks.append(task)
         dask.compute(tasks)
+        for (p, k), unit_str in units_to_save.items():
+            root[p][k].attrs["units"] = make_serializable(unit_str)
 
 
 class Dataset(BaseDataset):
