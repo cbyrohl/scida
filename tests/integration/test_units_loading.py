@@ -66,6 +66,26 @@ def test_missingunits(monkeypatch, gadgetfile_dummy, caplog):
 
 
 @pytest.mark.integration
+def test_save_units_roundtrip(tngfile_dummy, tmp_path):
+    """Units saved to zarr metadata should survive a save-reload cycle."""
+    import zarr
+
+    p = tngfile_dummy.path
+    ds = load(p, units="cgs")
+    ptype = "PartType0"
+    orig_coord_units = str(ds.data[ptype]["Coordinates"].units)
+    orig_density_units = str(ds.data[ptype]["Density"].units)
+
+    zarr_path = str(tmp_path / "roundtrip.zarr")
+    ds.save(zarr_path)
+
+    # Verify units were written to zarr metadata
+    root = zarr.open(zarr_path, mode="r")
+    assert root[ptype]["Coordinates"].attrs["units"] == orig_coord_units
+    assert root[ptype]["Density"].attrs["units"] == orig_density_units
+
+
+@pytest.mark.integration
 def test_check_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     p = gadgetfile_dummy.path
     with h5py.File(p, "r+") as f:
