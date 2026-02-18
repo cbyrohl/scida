@@ -308,6 +308,16 @@ class BaseDataset(metaclass=MixinMeta):
         # cast_uints: if true, we cast uints to ints; needed for some compressions (particularly zfp)
         if zarr_kwargs is None:
             zarr_kwargs = {}
+        if overwrite and os.path.exists(fname):
+            if os.path.isdir(fname) and len(os.listdir(fname)) > 0:
+                # check if it is a zarr group/array
+                is_zarr = os.path.exists(os.path.join(fname, ".zgroup"))
+                is_zarr |= os.path.exists(os.path.join(fname, ".zarray"))
+                if not is_zarr:
+                    raise Exception(
+                        f"Directory '{fname}' exists and is not a zarr group. "
+                        "Refusing to overwrite for safety."
+                    )
         store = zarr.DirectoryStore(fname, **zarr_kwargs)
         root = zarr.group(store, overwrite=overwrite)
 
