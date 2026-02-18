@@ -314,7 +314,7 @@ class BaseDataset(metaclass=MixinMeta):
                 is_zarr = os.path.exists(os.path.join(fname, ".zgroup"))
                 is_zarr |= os.path.exists(os.path.join(fname, ".zarray"))
                 if not is_zarr:
-                    raise Exception(
+                    raise ValueError(
                         f"Directory '{fname}' exists and is not a zarr group. "
                         "Refusing to overwrite for safety."
                     )
