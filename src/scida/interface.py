@@ -349,8 +349,7 @@ class BaseDataset(metaclass=MixinMeta):
                 else:
                     arr = self.data[p][k]
                 if hasattr(arr, "magnitude"):  # if we have units, remove those here
-                    if hasattr(arr, "units"):
-                        units_to_save[(p, k)] = str(arr.units)
+                    units_to_save[(p, k)] = str(arr.units)
                     arr = arr.magnitude
                 if np.any(np.isnan(arr.shape)):
                     arr.compute_chunk_sizes()  # very inefficient (have to do it separately for every array)
