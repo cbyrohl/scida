@@ -1,7 +1,45 @@
 import numpy as np
 import pytest
 
-from scida.misc import deepdictkeycopy, is_scalar, get_scalar, parse_size, str_is_float
+from scida.fields import FieldContainer
+from scida.misc import (
+    deepdictkeycopy,
+    get_container_from_path,
+    get_scalar,
+    is_scalar,
+    parse_size,
+    str_is_float,
+)
+
+
+@pytest.mark.unit
+class TestGetContainerFromPath:
+    def test_retrieve_nested(self):
+        root = FieldContainer()
+        root.add_container("a")
+        root["a"].add_container("b")
+
+        res = get_container_from_path("a/b", root)
+        assert res is root["a"]["b"]
+
+    def test_slashes_handling(self):
+        root = FieldContainer()
+        root.add_container("a")
+        root["a"].add_container("b")
+
+        assert get_container_from_path("/a/b/", root) is root["a"]["b"]
+        assert get_container_from_path("a//b", root) is root["a"]["b"]
+
+    def test_create_missing(self):
+        root = FieldContainer()
+        res = get_container_from_path("a/b/c", root, create_missing=True)
+        assert res is root["a"]["b"]["c"]
+
+    def test_missing_raises(self):
+        root = FieldContainer()
+        with pytest.raises(ValueError) as excinfo:
+            get_container_from_path("a/b", root, create_missing=False)
+        assert "Container 'a' not found" in str(excinfo.value)
 
 
 @pytest.mark.unit
