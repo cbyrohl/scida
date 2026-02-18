@@ -44,8 +44,7 @@ source: /home/cbyrohl/data/testdata-scida/gaia_dr3_subset100000.hdf5
 ============
 ```
 
-1. The `units=True` argument will attach code units to all fields (default). Alternative choices are *False* to go without units and *cgs* for cgs units.
-   The current default is *False*, which will change to *True* in the near future.
+1. The `units=True` argument will attach code units to all fields (this is the default). Alternative choices are *False* to go without units and *cgs* for cgs units.
 2. Call to receive some information about the loaded dataset.
 
 The dataset is now loaded, and we can inspect its contents, specifically its container and fields loaded.
