@@ -353,7 +353,7 @@ _sizeunits = {
     "TIB": 2**40,
 }
 
-RE_UNIT_SIZE = re.compile(r"([KMGT]?I*B)")
+_RE_UNIT_SIZE = re.compile(r"([KMGT]?I*B)")
 
 
 def parse_size(size):
@@ -374,7 +374,7 @@ def parse_size(size):
     """
     size = size.upper()
     if not size.startswith(" "):
-        size = RE_UNIT_SIZE.sub(r" \1", size)
+        size = _RE_UNIT_SIZE.sub(r" \1", size)
     number, unit = [string.strip() for string in size.split()]
     return int(float(number) * _sizeunits[unit])
 
@@ -395,14 +395,14 @@ def get_scalar(value):
     return scalar
 
 
-RE_PREFIX_SPLIT = re.compile(r"[_\.]")
+_RE_PREFIX_SPLIT = re.compile(r"[_\.]")
 
 
 def group_by_common_prefix(file_names):
     groups = defaultdict(list)
     for file in file_names:
         # Split by both "_" and "."
-        parts = RE_PREFIX_SPLIT.split(file)
+        parts = _RE_PREFIX_SPLIT.split(file)
         prefix = parts[0]  # Use the first part as the prefix
         groups[prefix].append(file)
 
