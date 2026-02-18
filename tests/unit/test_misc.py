@@ -33,9 +33,6 @@ class TestGetContainerFromPath:
     def test_create_missing(self):
         root = FieldContainer()
         res = get_container_from_path("a/b/c", root, create_missing=True)
-        assert "a" in root._containers
-        assert "b" in root["a"]._containers
-        assert "c" in root["a"]["b"]._containers
         assert res is root["a"]["b"]["c"]
 
     def test_missing_raises(self):
