@@ -6,6 +6,7 @@ from scida.misc import (
     deepdictkeycopy,
     get_container_from_path,
     get_scalar,
+    group_by_common_prefix,
     is_scalar,
     parse_size,
     str_is_float,
@@ -149,3 +150,49 @@ class TestDeepdictkeycopy:
         new = {}
         deepdictkeycopy(old, new)
         assert new == {}
+
+
+@pytest.mark.unit
+class TestGroupByCommonPrefix:
+    def test_basic_underscore(self):
+        files = ["snapshot_001.hdf5", "snapshot_002.hdf5", "groups_001.hdf5"]
+        expected = {
+            "snapshot": ["snapshot_001.hdf5", "snapshot_002.hdf5"],
+            "groups": ["groups_001.hdf5"],
+        }
+        assert group_by_common_prefix(files) == expected
+
+    def test_basic_dot(self):
+        files = ["data.txt", "data.log", "info.txt"]
+        expected = {
+            "data": ["data.txt", "data.log"],
+            "info": ["info.txt"],
+        }
+        assert group_by_common_prefix(files) == expected
+
+    def test_mixed_delimiters(self):
+        files = ["snapshot_001.hdf5", "snapshot.config", "data_test.txt", "data.log"]
+        expected = {
+            "snapshot": ["snapshot_001.hdf5", "snapshot.config"],
+            "data": ["data_test.txt", "data.log"],
+        }
+        assert group_by_common_prefix(files) == expected
+
+    def test_no_delimiters(self):
+        files = ["README", "LICENSE", "Makefile"]
+        expected = {
+            "README": ["README"],
+            "LICENSE": ["LICENSE"],
+            "Makefile": ["Makefile"],
+        }
+        assert group_by_common_prefix(files) == expected
+
+    def test_empty_input(self):
+        assert group_by_common_prefix([]) == {}
+
+    def test_leading_delimiter(self):
+        files = ["_hidden", ".config"]
+        expected = {
+            "": ["_hidden", ".config"],
+        }
+        assert group_by_common_prefix(files) == expected
