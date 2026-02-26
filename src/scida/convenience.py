@@ -240,6 +240,10 @@ def load(
         Initialized dataset or dataset series.
     """
 
+    from scida.init import _ensure_distributed_if_needed
+
+    _ensure_distributed_if_needed()
+
     path = find_path(path, overwrite=overwrite)
 
     if "catalog" in kwargs:

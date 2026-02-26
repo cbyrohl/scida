@@ -11,6 +11,7 @@ import pytest
 from scida.helpers_misc import parse_humansize
 from scida.init import (
     _detect_tnglab_environment,
+    _ensure_distributed_if_needed,
     _get_default_memory_limit,
     init_resources,
 )
@@ -263,6 +264,77 @@ class TestInit:
 
         args, kwargs = mock_cluster.call_args
         assert kwargs["threads_per_worker"] == 4
+
+
+class TestAutoInit:
+    """Test _ensure_distributed_if_needed() auto-init behavior."""
+
+    @pytest.fixture(autouse=True)
+    def reset_auto_init_flag(self):
+        """Reset the module-level _auto_init_done flag before each test."""
+        import scida.init as init_module
+
+        init_module._auto_init_done = False
+        yield
+        init_module._auto_init_done = False
+
+    @patch("scida.init.init_resources")
+    @patch("scida.init._detect_tnglab_environment", return_value=True)
+    @patch("dask.distributed.get_client", side_effect=ValueError)
+    def test_auto_init_on_tnglab(
+        self, mock_get_client, mock_detect, mock_init_resources
+    ):
+        """On TNGLab with no active client, init_resources() should be called."""
+        _ensure_distributed_if_needed()
+        mock_init_resources.assert_called_once()
+
+    @patch("scida.init.init_resources")
+    @patch("scida.init._detect_tnglab_environment", return_value=True)
+    @patch("dask.distributed.get_client")
+    def test_auto_init_skipped_when_client_exists(
+        self, mock_get_client, mock_detect, mock_init_resources
+    ):
+        """When a distributed client already exists, init_resources() should NOT be called."""
+        mock_get_client.return_value = Mock()
+        _ensure_distributed_if_needed()
+        mock_init_resources.assert_not_called()
+
+    @patch("scida.init.init_resources")
+    @patch("scida.init._detect_tnglab_environment", return_value=False)
+    @patch("dask.distributed.get_client", side_effect=ValueError)
+    def test_auto_init_informs_outside_tnglab(
+        self, mock_get_client, mock_detect, mock_init_resources
+    ):
+        """Outside TNGLab with no client, should log debug hint but NOT call init_resources()."""
+        with patch("scida.init.log") as mock_log:
+            _ensure_distributed_if_needed()
+        mock_init_resources.assert_not_called()
+        # Check that a debug-level message was logged with the hint
+        mock_log.debug.assert_called()
+        logged_msg = mock_log.debug.call_args[0][0]
+        assert "init_resources" in logged_msg
+
+    @patch("scida.init.init_resources")
+    @patch("scida.init._detect_tnglab_environment", return_value=True)
+    @patch("dask.distributed.get_client", side_effect=ValueError)
+    def test_auto_init_runs_only_once(
+        self, mock_get_client, mock_detect, mock_init_resources
+    ):
+        """Calling _ensure_distributed_if_needed() twice should only init once."""
+        _ensure_distributed_if_needed()
+        _ensure_distributed_if_needed()
+        mock_init_resources.assert_called_once()
+
+    @patch("scida.init.init_resources")
+    @patch("scida.init._detect_tnglab_environment", return_value=True)
+    def test_auto_init_handles_missing_distributed(
+        self, mock_detect, mock_init_resources
+    ):
+        """When dask.distributed is not installed, should not raise."""
+        with patch.dict(sys.modules, {"dask.distributed": None}):
+            _ensure_distributed_if_needed()
+        # ImportError from get_client means no client → should try to init on TNGLab
+        mock_init_resources.assert_called_once()
 
 
 @pytest.mark.slow

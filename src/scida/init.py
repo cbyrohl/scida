@@ -18,6 +18,51 @@ from scida.helpers_misc import parse_humansize
 
 log = logging.getLogger(__name__)
 
+_auto_init_done = False  # module-level flag to only auto-init/warn once per session
+
+
+def _ensure_distributed_if_needed():
+    """Auto-init distributed scheduler on TNGLab, log debug hint elsewhere.
+
+    Called automatically at the top of ``scida.load()``.  On TNGLab the
+    distributed scheduler is started with default settings (4 GB per
+    worker, 4 workers) so that ``da.histogram2d`` and similar operations
+    don't OOM.  Outside TNGLab a DEBUG-level message nudges users toward
+    ``scida.init_resources()`` for large datasets.
+
+    The function is guarded by a module-level flag so it only runs once
+    per Python session.
+    """
+    global _auto_init_done
+    if _auto_init_done:
+        return
+
+    # Check if a distributed client is already active
+    try:
+        from dask.distributed import get_client
+
+        get_client()
+        _auto_init_done = True
+        return  # client already exists, nothing to do
+    except (ImportError, ValueError):
+        pass  # no client active
+
+    if _detect_tnglab_environment():
+        log.info(
+            "TNGLab detected: auto-initializing distributed scheduler "
+            "with memory limits. Call scida.init_resources() explicitly "
+            "to customize settings."
+        )
+        init_resources()  # uses TNGLab defaults (4GB, 4 workers)
+    else:
+        log.debug(
+            "No dask distributed client found. For large datasets, consider "
+            "calling scida.init_resources(memory_limit=...) to prevent "
+            "out-of-memory errors. See https://scida.io/largedatasets/"
+        )
+
+    _auto_init_done = True
+
 
 def init_resources(
     memory_limit: Optional[Union[str, int]] = None,
