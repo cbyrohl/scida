@@ -138,6 +138,124 @@ def get_testdata(name: str) -> str:
     return res[name]
 
 
+def _find_path_http(path: str, config: dict, overwrite: bool = False) -> pathlib.Path:
+    """
+    Find path to dataset on the internet.
+
+    Parameters
+    ----------
+    path: str
+        The url to the dataset.
+    config: dict
+        The configuration dictionary.
+    overwrite: bool
+        Whether to overwrite an existing download.
+
+    Returns
+    -------
+    pathlib.Path
+        The path to the downloaded dataset.
+    """
+    savepath = config.get("download_path", None)
+    if savepath is None:
+        print(
+            "Have not specified 'download_path' in config. Using 'cache_path' instead."
+        )
+        savepath = config.get("cache_path")
+    savepath = os.path.expanduser(savepath)
+    savepath = pathlib.Path(savepath)
+    savepath.mkdir(parents=True, exist_ok=True)
+    urlhash = str(int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8)
+    savepath = savepath / ("download" + urlhash)
+    # determine filename and whether this is an archive
+    url_basename = os.path.basename(path.split("?")[0].rstrip("/"))
+    is_archive = url_basename.endswith((".tar.gz", ".tgz"))
+    filename = "archive.tar.gz" if is_archive else (url_basename or "download")
+    if not savepath.exists():
+        os.makedirs(savepath, exist_ok=True)
+    elif overwrite:
+        # delete all files in folder
+        for f in os.listdir(savepath):
+            fp = os.path.join(savepath, f)
+            if os.path.isfile(fp):
+                os.unlink(fp)
+            else:
+                shutil.rmtree(fp)
+    foldercontent = [f for f in savepath.glob("*")]
+    if len(foldercontent) == 0:
+        filepath = savepath / filename
+        if is_archive:
+            extractpath = download_and_extract(
+                path, filepath, progressbar=True, overwrite=overwrite
+            )
+        else:
+            _download(path, filepath, progressbar=True, overwrite=overwrite)
+            extractpath = savepath
+    else:
+        extractpath = savepath
+    extractpath = pathlib.Path(extractpath)
+
+    # count folders in savepath
+    nfolders = len([f for f in extractpath.glob("*") if f.is_dir()])
+    nobjects = len([f for f in extractpath.glob("*") if f.is_dir()])
+    if nobjects == 1 and nfolders == 1:
+        extractpath = extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
+    return extractpath
+
+
+def _find_path_resource(databackend: str, dataname: str, config: dict) -> str:
+    """
+    Find path to dataset in custom resources.
+
+    Parameters
+    ----------
+    databackend: str
+        The backend name.
+    dataname: str
+        The dataset name.
+    config: dict
+        The configuration dictionary.
+
+    Returns
+    -------
+    str
+        The path to the dataset.
+    """
+    resources = config.get("resources", {})
+    if databackend not in resources:
+        raise ValueError("Unknown resource '%s'" % databackend)
+    r = resources[databackend]
+    if dataname not in r:
+        raise ValueError(
+            "Unknown dataset '%s' in resource '%s'" % (dataname, databackend)
+        )
+    return os.path.expanduser(r[dataname]["path"])
+
+
+def _find_path_local(path: str, config: dict) -> str:
+    """
+    Find path to dataset in local datafolders.
+
+    Parameters
+    ----------
+    path: str
+        The path or name of the dataset.
+    config: dict
+        The configuration dictionary.
+
+    Returns
+    -------
+    str
+        The path to the dataset.
+    """
+    if "datafolders" in config:
+        for folder in config["datafolders"]:
+            folder = os.path.expanduser(folder)
+            if os.path.exists(os.path.join(folder, path)):
+                return os.path.join(folder, path)
+    raise ValueError("Specified path '%s' unknown." % path)
+
+
 def find_path(path, overwrite=False) -> str:
     """
     Find path to dataset.
@@ -163,83 +281,14 @@ def find_path(path, overwrite=False) -> str:
         databackend = path.split("://")[0]
         dataname = path.split("://")[1]
         if databackend in ["http", "https"]:
-            # dataset on the internet
-            savepath = config.get("download_path", None)
-            if savepath is None:
-                print(
-                    "Have not specified 'download_path' in config. Using 'cache_path' instead."
-                )
-                savepath = config.get("cache_path")
-            savepath = os.path.expanduser(savepath)
-            savepath = pathlib.Path(savepath)
-            savepath.mkdir(parents=True, exist_ok=True)
-            urlhash = str(
-                int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8
-            )
-            savepath = savepath / ("download" + urlhash)
-            # determine filename and whether this is an archive
-            url_basename = os.path.basename(path.split("?")[0].rstrip("/"))
-            is_archive = url_basename.endswith((".tar.gz", ".tgz"))
-            filename = "archive.tar.gz" if is_archive else (url_basename or "download")
-            if not savepath.exists():
-                os.makedirs(savepath, exist_ok=True)
-            elif overwrite:
-                # delete all files in folder
-                for f in os.listdir(savepath):
-                    fp = os.path.join(savepath, f)
-                    if os.path.isfile(fp):
-                        os.unlink(fp)
-                    else:
-                        shutil.rmtree(fp)
-            foldercontent = [f for f in savepath.glob("*")]
-            if len(foldercontent) == 0:
-                filepath = savepath / filename
-                if is_archive:
-                    extractpath = download_and_extract(
-                        path, filepath, progressbar=True, overwrite=overwrite
-                    )
-                else:
-                    _download(
-                        path, filepath, progressbar=True, overwrite=overwrite
-                    )
-                    extractpath = savepath
-            else:
-                extractpath = savepath
-            extractpath = pathlib.Path(extractpath)
-
-            # count folders in savepath
-            nfolders = len([f for f in extractpath.glob("*") if f.is_dir()])
-            nobjects = len([f for f in extractpath.glob("*") if f.is_dir()])
-            if nobjects == 1 and nfolders == 1:
-                extractpath = (
-                    extractpath / [f for f in extractpath.glob("*") if f.is_dir()][0]
-                )
-            path = extractpath
+            path = _find_path_http(path, config, overwrite=overwrite)
         elif databackend == "testdata":
             path = get_testdata(dataname)
         else:
-            # potentially custom dataset.
-            resources = config.get("resources", {})
-            if databackend not in resources:
-                raise ValueError("Unknown resource '%s'" % databackend)
-            r = resources[databackend]
-            if dataname not in r:
-                raise ValueError(
-                    "Unknown dataset '%s' in resource '%s'" % (dataname, databackend)
-                )
-            path = os.path.expanduser(r[dataname]["path"])
+            path = _find_path_resource(databackend, dataname, config)
     else:
-        found = False
-        if "datafolders" in config:
-            for folder in config["datafolders"]:
-                folder = os.path.expanduser(folder)
-                if os.path.exists(os.path.join(folder, path)):
-                    path = os.path.join(folder, path)
-                    found = True
-                    break
-        if not found:
-            raise ValueError("Specified path '%s' unknown." % path)
-    return path
+        path = _find_path_local(path, config)
+    return str(path)
 
 
 def load(
