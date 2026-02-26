@@ -52,6 +52,19 @@ def get_dtype(obj):
         return None
 
 
+def _normalize_node_name(obj):
+    """
+    Get a normalized name for a zarr/h5py node, ensuring leading /.
+
+    zarr v3 uses '' for root and 'PartType0' for children,
+    while h5py uses '/' and '/PartType0'. Normalize to h5py convention.
+    """
+    name = obj.name
+    if not name.startswith("/"):
+        name = "/" + name if name else "/"
+    return name
+
+
 def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
     """
     Walks through a h5py.Group or zarr.Group object and fills the tree dictionary with
@@ -74,16 +87,21 @@ def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
     """
     if len(tree) == 0:
         tree.update(**dict(attrs={}, groups=[], datasets=[]))
+    name = _normalize_node_name(obj)
     if get_attrs and len(obj.attrs) > 0:
-        tree["attrs"][obj.name] = dict(obj.attrs)
+        tree["attrs"][name] = dict(obj.attrs)
     if isinstance(obj, (h5py.Dataset, zarr.Array)):
         dtype = get_dtype(obj)
-        tree["datasets"].append([obj.name, obj.shape, dtype])
+        tree["datasets"].append([name, obj.shape, dtype])
         if scalar_to_attr and len(obj.shape) == 0:
-            tree["attrs"][obj.name] = obj[()]
+            tree["attrs"][name] = obj[()]
     elif isinstance(obj, (h5py.Group, zarr.Group)):
-        tree["groups"].append(obj.name)  # continue the walk
-        for o in obj.values():
+        tree["groups"].append(name)  # continue the walk
+        if isinstance(obj, zarr.Group):
+            children = [child for _, child in obj.members(max_depth=1)]
+        else:
+            children = obj.values()
+        for o in children:
             walk_group(o, tree, get_attrs=get_attrs)
 
 
@@ -106,8 +124,8 @@ def walk_zarrfile(fn, tree, get_attrs=True):
     tree: dict
         filled dictionary
     """
-    with zarr.open(fn) as z:
-        walk_group(z, tree, get_attrs=get_attrs)
+    z = zarr.open(fn, mode="r")
+    walk_group(z, tree, get_attrs=get_attrs)
     return tree
 
 

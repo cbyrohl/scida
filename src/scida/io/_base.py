@@ -315,7 +315,7 @@ class ZarrLoader(Loader):
         self.location = self.path
         tree: dict[str, Any] = {}
         walk_zarrfile(self.location, tree=tree)
-        self.file = zarr.open(self.location)
+        self.file = zarr.open(self.location, mode="r")
         kwargs.pop("nonvirtual_datasets", None)
         data, metadata = load_datadict_old(
             self.path,
@@ -616,7 +616,7 @@ def load_datadict_old(
     ----------
     location: str
         Location of resource.
-    file: h5py.File | zarr.hierarchy.Group
+    file: h5py.File | zarr.Group
         File handle.
     groups_load: list
         List of groups to load.
@@ -769,7 +769,9 @@ def determine_loader(path, **kwargs):
     Loader
     """
     if os.path.isdir(path):
-        if os.path.isfile(os.path.join(path, ".zgroup")):
+        if os.path.isfile(os.path.join(path, ".zgroup")) or os.path.isfile(
+            os.path.join(path, "zarr.json")
+        ):
             # object is a zarr object
             loader = ZarrLoader(path)
             return loader

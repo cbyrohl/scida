@@ -33,8 +33,8 @@ class TestSaveSafetyCheck:
 
         ds = self._make_dataset()
         ds.save(str(emptydir))
-        # Should succeed and create a zarr group marker
-        assert (emptydir / ".zgroup").exists()
+        # Should succeed and create a zarr group marker (v3 uses zarr.json)
+        assert (emptydir / "zarr.json").exists() or (emptydir / ".zgroup").exists()
 
     def test_allows_existing_zarr_group(self, tmp_path):
         zarrdir = tmp_path / "zarrdir"
@@ -43,7 +43,7 @@ class TestSaveSafetyCheck:
 
         ds = self._make_dataset()
         ds.save(str(zarrdir))
-        assert (zarrdir / ".zgroup").exists()
+        assert (zarrdir / "zarr.json").exists() or (zarrdir / ".zgroup").exists()
 
     def test_allows_existing_zarr_array(self, tmp_path):
         zarrdir = tmp_path / "zarrarray"
@@ -72,7 +72,7 @@ class TestSaveSafetyCheck:
 
         ds = self._make_dataset()
         ds.save(str(newdir))
-        assert (newdir / ".zgroup").exists()
+        assert (newdir / "zarr.json").exists() or (newdir / ".zgroup").exists()
 
     def test_preserves_nonempty_nonzarr_dir(self, tmp_path):
         """Verify the directory contents are NOT deleted when save is rejected."""

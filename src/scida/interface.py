@@ -294,7 +294,7 @@ class BaseDataset(metaclass=MixinMeta):
         overwrite
             overwrite existing file
         zarr_kwargs
-            optional arguments to pass to zarr
+            optional arguments to pass to da.to_zarr() for array creation (e.g. compressor settings)
         cast_uints
             need to potentially cast uints to ints for some compressions; TODO: clean this up
 
@@ -313,13 +313,14 @@ class BaseDataset(metaclass=MixinMeta):
                 # check if it is a zarr group/array
                 is_zarr = os.path.exists(os.path.join(fname, ".zgroup"))
                 is_zarr |= os.path.exists(os.path.join(fname, ".zarray"))
+                is_zarr |= os.path.exists(os.path.join(fname, "zarr.json"))
                 if not is_zarr:
                     raise ValueError(
                         f"Directory '{fname}' exists and is not a zarr group. "
                         "Refusing to overwrite for safety."
                     )
-        store = zarr.DirectoryStore(fname, **zarr_kwargs)
-        root = zarr.group(store, overwrite=overwrite)
+        store = zarr.storage.LocalStore(fname)
+        root = zarr.open_group(store=store, mode="w" if overwrite else "a")
 
         # Metadata
         defaultattributes = ["Config", "Header", "Parameters"]
@@ -370,7 +371,11 @@ class BaseDataset(metaclass=MixinMeta):
                     elif arr.dtype == np.uint32:
                         arr = arr.astype(np.int32)
                 task = da.to_zarr(
-                    arr, os.path.join(fname, p, k), overwrite=True, compute=False
+                    arr,
+                    os.path.join(fname, p, k),
+                    compute=False,
+                    mode="w",
+                    **zarr_kwargs,
                 )
                 tasks.append(task)
         dask.compute(tasks)

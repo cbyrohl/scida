@@ -17,12 +17,10 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=1.26",
-    # dask: need >=2024.4.1 for py>=3.11.9 (https://github.com/dask/dask/pull/11035)
-    "dask[array,dataframe,distributed]>=2023; python_version < '3.11.9'",
-    "dask[array,dataframe,distributed]>=2024.4.1; python_version >= '3.11.9'",
+    "dask[array,dataframe,distributed]>=2024.4.1",
     "distributed>=2026.1.1",
     "h5py>=3.7.0",
-    "zarr>=2.10.0,<3",
+    "zarr>=3.0",
     "astropy>=5.0",
     "numba>=0.57",
     "pyyaml>=5.3.1",
