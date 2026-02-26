@@ -148,7 +148,7 @@ class TestInit:
             init_resources()  # No parameters
             mock_cluster.assert_called_once()
             args, kwargs = mock_cluster.call_args
-            assert kwargs["memory_limit"] == "4GB"
+            assert kwargs["memory_limit"] == "2GB"
             assert kwargs["n_workers"] == 4
 
     @patch("dask.distributed.LocalCluster")

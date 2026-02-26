@@ -24,7 +24,7 @@ scida.init_resources()  # Use defaults
 # scida.init_resources(memory_limit="4GB", n_workers=4)
 ```
 
-For TNGLab, this mechanism configures a default memory limit of 4GB, which you can override by passing `memory_limit` (and optionally `n_workers`) to `scida.init_resources()`. Monitor memory usage via the [dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
+For TNGLab, this mechanism configures a default memory limit of 2GB per worker (4 workers, 8GB total), which you can override by passing `memory_limit` (and optionally `n_workers`) to `scida.init_resources()`. Monitor memory usage via the [dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
 
 
 ## Starting simple: computing in chunks

@@ -25,7 +25,7 @@ def _ensure_distributed_if_needed():
     """Auto-init distributed scheduler on TNGLab, log debug hint elsewhere.
 
     Called automatically at the top of ``scida.load()``.  On TNGLab the
-    distributed scheduler is started with default settings (4 GB per
+    distributed scheduler is started with default settings (2 GB per
     worker, 4 workers) so that ``da.histogram2d`` and similar operations
     don't OOM.  Outside TNGLab a DEBUG-level message nudges users toward
     ``scida.init_resources()`` for large datasets.
@@ -53,7 +53,7 @@ def _ensure_distributed_if_needed():
             "with memory limits. Call scida.init_resources() explicitly "
             "to customize settings."
         )
-        init_resources()  # uses TNGLab defaults (4GB, 4 workers)
+        init_resources()  # uses TNGLab defaults (2GB, 4 workers)
     else:
         log.debug(
             "No dask distributed client found. For large datasets, consider "
@@ -103,7 +103,7 @@ def init_resources(
     -----
     - Once initialized, all subsequent dask operations will use the configured scheduler
     - Call this function before loading datasets for results
-    - On TNGLab, we default to a memory limit of 4GB and 4 workers (can be overridden).
+    - On TNGLab, we default to a memory limit of 2GB and 4 workers (can be overridden).
     - The dashboard can be accessed at http://localhost:{dashboard_port} (if enabled)
     - To reset or change configuration, restart your Python session
     """
@@ -112,9 +112,9 @@ def init_resources(
     is_tnglab = _detect_tnglab_environment()
     if is_tnglab:
         log.info(
-            "TNGLab environment detected, defaulting to memory_limit=4GB and n_workers=4"
+            "TNGLab environment detected, defaulting to memory_limit=2GB and n_workers=4"
         )
-        memory_limit = memory_limit or "4GB"
+        memory_limit = memory_limit or "2GB"
         n_workers = n_workers or 4
 
     # Use distributed if:
