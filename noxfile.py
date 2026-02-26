@@ -5,9 +5,9 @@ import nox
 # Use uv as the default venv backend
 nox.options.default_venv_backend = "uv"
 
-python_versions = ["3.12", "3.11", "3.10", "3.9"]
-python_dflt = "3.10"
-numpy_versions = ["1.21", "1.26", "2.0"]
+python_versions = ["3.13", "3.12", "3.11"]
+python_dflt = "3.11"
+numpy_versions = ["1.26", "2.0"]
 
 
 def tests_base(session: nox.Session) -> None:
@@ -37,9 +37,6 @@ def tests(session: nox.Session) -> None:
 @nox.session(python=python_versions)
 @nox.parametrize("numpy", numpy_versions)
 def tests_numpy_versions(session: nox.Session, numpy: str) -> None:
-    # Check for unsupported combination of Python >3.10 with NumPy 1.21 and skip it
-    if session.python in ["3.11", "3.12"] and numpy == "1.21":
-        session.skip("Skipping NumPy 1.21 on Python > 3.10")
     session.install(f"numpy=={numpy}")
     tests_base(session)
 

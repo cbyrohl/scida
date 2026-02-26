@@ -23,17 +23,13 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         session: [tests]
-        python-version: ['3.10']
+        python-version: ['3.11']
         include:
-          - python-version: '3.9'
-            os: ubuntu-latest
-            session: tests
-            if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true' }}
-          - python-version: '3.11'
-            os: ubuntu-latest
-            session: tests
-            if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true' }}
           - python-version: '3.12'
+            os: ubuntu-latest
+            session: tests
+            if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true' }}
+          - python-version: '3.13'
             os: ubuntu-latest
             session: tests
             if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_matrix == 'true' }}
@@ -99,7 +95,7 @@ jobs:
           nox --python=${{ matrix.python-version }}
 
       - name: Upload coverage data
-        if: always() && matrix.session == 'tests' && matrix.python-version == '3.10'
+        if: always() && matrix.session == 'tests' && matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-data
@@ -129,7 +125,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
-        run: uv python install 3.10
+        run: uv python install 3.11
 
       - name: Install nox
         run: uv tool install nox --with nox-uv
