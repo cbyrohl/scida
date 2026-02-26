@@ -7,4 +7,12 @@ notebooks require access to various data sets. You can learn more about most
 datasets [supported data](../supported_data.md) here. For astrophysical simulations, your easiest way to work with the
 data is to use the [TNGLab](../supported_data.md#tnglab) online.
 
-## [Working with the TNG-Cluster simulation](TNG-Cluster/basic.ipynb)
+## Specific Simulation Suites
+
+### [Working with the TNG-Cluster simulation](TNG-Cluster/basic.ipynb)
+
+## Misc
+
+### [Scida on TNGLab](TNGLab/scida.ipynb)
+
+This is the tutorial notebook as used on [TNGLab](https://www.tng-project.org/data/lab/).
