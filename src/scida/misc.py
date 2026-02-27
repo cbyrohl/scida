@@ -20,6 +20,8 @@ from scida.helpers_misc import hash_path
 
 log = logging.getLogger(__name__)
 
+CACHE_FORMAT_VERSION = 1
+
 
 def get_container_from_path(
     element: str, container: FieldContainer | None = None, create_missing: bool = False
@@ -124,6 +126,41 @@ def return_cachefile_path(fname: str) -> str | None:
         except FileExistsError:
             pass  # can happen due to parallel access
     return fp
+
+
+def find_precached_file(hsh, ext, start_path, max_depth=5):
+    """
+    Search parent directories for a pre-placed cache file.
+
+    Looks for ``{ancestor}/postprocessing/scida/{hsh}.{ext}`` walking up from
+    *start_path*.
+
+    Parameters
+    ----------
+    hsh : str
+        Hash string identifying the dataset.
+    ext : str
+        File extension (e.g. ``"hdf5"`` or ``"json"``).
+    start_path : str
+        Path from which to start the upward search.
+    max_depth : int, optional
+        Maximum number of parent levels to search.
+
+    Returns
+    -------
+    str or None
+        Path to the pre-cache file if found, otherwise ``None``.
+    """
+    candidate_name = "%s.%s" % (hsh, ext)
+    p = pathlib.Path(start_path).resolve()
+    if p.is_file():
+        p = p.parent
+    for _ in range(max_depth):
+        p = p.parent
+        candidate = p / "postprocessing" / "scida" / candidate_name
+        if candidate.is_file():
+            return str(candidate)
+    return None
 
 
 def map_interface_args(paths: list, *args, **kwargs):

@@ -6,9 +6,12 @@ from __future__ import annotations
 
 import inspect
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 import numpy as np
 
@@ -19,7 +22,12 @@ from scida.discovertypes import CandidateStatus
 from scida.helpers_misc import hash_path, sprint
 from scida.interface import create_datasetclass_with_mixins
 from scida.io import load_metadata
-from scida.misc import map_interface_args, return_cachefile_path
+from scida.misc import (
+    CACHE_FORMAT_VERSION,
+    find_precached_file,
+    map_interface_args,
+    return_cachefile_path,
+)
 from scida.registries import dataseries_type_registry
 
 
@@ -130,10 +138,21 @@ class DatasetSeries(object):
         self.names = names
         self.hash = hash_path("".join([str(p) for p in paths]))
         self._metadata = None
-        self._metadatafile = return_cachefile_path(os.path.join(self.hash, "data.json"))
+        self._metadatafile_user = return_cachefile_path(
+            os.path.join(self.hash, "data.json")
+        )
+        self._metadatafile = self._metadatafile_user
         self.lazy = lazy
-        if overwrite_cache and os.path.exists(self._metadatafile):
+        if overwrite_cache and self._metadatafile and os.path.exists(self._metadatafile):
             os.remove(self._metadatafile)
+
+        # If no user cache, check dataset-local pre-cache (read-only)
+        if (
+            self._metadatafile is None or not os.path.exists(self._metadatafile)
+        ) and not overwrite_cache:
+            precache_fp = find_precached_file(self.hash, "json", str(paths[0]))
+            if precache_fp is not None:
+                self._metadatafile = precache_fp
         for p in paths:
             if not (isinstance(p, Path)):
                 p = Path(p)
@@ -458,8 +477,23 @@ class DatasetSeries(object):
         if self._metadata is not None:
             return self._metadata
         fp = self._metadatafile
-        if os.path.exists(fp):
-            md = json.load(open(fp, "r"))
+        if fp is not None and os.path.exists(fp):
+            with open(fp, "r") as fh:
+                md = json.load(fh)
+            cache_version = md.pop("_cache_format_version", None)
+            if cache_version != CACHE_FORMAT_VERSION:
+                log.warning("Series cache version mismatch, will recreate.")
+                # Reset to user cache path so the setter writes there.
+                # Only delete the stale file if it *is* the user cache.
+                if fp == self._metadatafile_user:
+                    try:
+                        os.remove(fp)
+                    except OSError:
+                        pass
+                else:
+                    # Pre-cache: never delete; just fall back to user path.
+                    self._metadatafile = self._metadatafile_user
+                return None
             ikeys = sorted([int(k) for k in md.keys()])
             mdnew = {}
             for ik in ikeys:
@@ -519,9 +553,14 @@ class DatasetSeries(object):
                     raise e
 
         self._metadata = dct
-        fp = self._metadatafile
-        if not os.path.exists(fp):
-            json.dump(dct, open(fp, "w"), cls=ComplexEncoder)
+        fp = self._metadatafile_user
+        if fp is not None and not os.path.exists(fp):
+            dct_with_version = {
+                "_cache_format_version": CACHE_FORMAT_VERSION,
+                **{str(k): v for k, v in dct.items()},
+            }
+            with open(fp, "w") as fh:
+                json.dump(dct_with_version, fh, cls=ComplexEncoder)
 
 
 class DirectoryCatalog(object):
