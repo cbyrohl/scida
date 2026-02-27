@@ -211,25 +211,13 @@ def create_mergedhdf5file(
     datasets = set([item[0] for r in result for item in r["datasets"]])
     datasets = {d for d in datasets if not d.lstrip("/").startswith("_chunks")}
 
-    def todct(lst):
-        """helper func"""
-        return {item[0]: (item[1], item[2]) for item in lst["datasets"]}
-
-    dcts = [todct(lst) for lst in result]
     shapes = OrderedDict((d, {}) for d in datasets)
-
-    def shps(i, k, s):
-        """helper func"""
-        return shapes[k].update({i: s[0]}) if s is not None else None
-
-    [shps(i, k, dct.get(k)) for k in datasets for i, dct in enumerate(dcts)]
     dtypes = {}
-
-    def dtps(k, s):
-        """helper func"""
-        return dtypes.update({k: s[1]}) if s is not None else None
-
-    [dtps(k, dct.get(k)) for k in datasets for i, dct in enumerate(dcts)]
+    for i, r in enumerate(result):
+        for name, shape, dtype in r["datasets"]:
+            if name in datasets:
+                shapes[name][i] = shape
+                dtypes[name] = dtype
 
     # get shapes of the respective chunks
     chunks = {}
