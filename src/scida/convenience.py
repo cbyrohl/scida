@@ -50,29 +50,71 @@ def _download(
     """
     if path.exists() and not overwrite:
         raise ValueError("Target path '%s' already exists." % path)
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        totlength = int(r.headers.get("content-length", 0))
-        lread = 0
-        t1 = time.time()
-        with open(path, "wb") as f:
-            for chunk in r.iter_content(chunk_size=2**22):  # chunks of 4MB
-                t2 = time.time()
-                f.write(chunk)
-                lread += len(chunk)
-                if progressbar:
-                    rate = (lread / 2**20) / (t2 - t1)
-                    sys.stdout.write(
-                        "\rDownloaded %.2f/%.2f Megabytes (%.2f%%, %.2f MB/s)"
-                        % (
-                            lread / 2**20,
-                            totlength / 2**20,
-                            100.0 * lread / totlength,
-                            rate,
-                        )
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            with requests.get(url, stream=True) as r:
+                r.raise_for_status()
+                totlength = int(r.headers.get("content-length", 0))
+                lread = 0
+                t1 = time.time()
+                with open(path, "wb") as f:
+                    for chunk in r.iter_content(
+                        chunk_size=2**22
+                    ):  # chunks of 4MB
+                        t2 = time.time()
+                        f.write(chunk)
+                        lread += len(chunk)
+                        if progressbar:
+                            rate = (lread / 2**20) / (t2 - t1)
+                            sys.stdout.write(
+                                "\rDownloaded %.2f/%.2f Megabytes"
+                                " (%.2f%%, %.2f MB/s)"
+                                % (
+                                    lread / 2**20,
+                                    totlength / 2**20,
+                                    100.0 * lread / totlength,
+                                    rate,
+                                )
+                            )
+                            sys.stdout.flush()
+                sys.stdout.write("\n")
+                return
+        except requests.exceptions.HTTPError as e:
+            if e.response is not None and e.response.status_code >= 500:
+                if attempt < max_retries - 1:
+                    delay = 2 ** (attempt + 1)
+                    log.warning(
+                        "Download failed (HTTP %s), retrying in %ds "
+                        "(attempt %d/%d)...",
+                        e.response.status_code,
+                        delay,
+                        attempt + 1,
+                        max_retries,
                     )
-                    sys.stdout.flush()
-        sys.stdout.write("\n")
+                    # Clean up partial download
+                    if path.exists():
+                        path.unlink()
+                    time.sleep(delay)
+                    continue
+            raise
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            if attempt < max_retries - 1:
+                delay = 2 ** (attempt + 1)
+                log.warning(
+                    "Download failed (%s), retrying in %ds "
+                    "(attempt %d/%d)...",
+                    type(e).__name__,
+                    delay,
+                    attempt + 1,
+                    max_retries,
+                )
+                # Clean up partial download
+                if path.exists():
+                    path.unlink()
+                time.sleep(delay)
+                continue
+            raise
 
 
 def download_and_extract(
