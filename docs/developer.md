@@ -17,20 +17,18 @@ cd scida
 
 ### Install
 
-We use [poetry](https://python-poetry.org/) to manage dependencies and the development environment.
-After installing poetry, you can install scida and its dependencies with
+We use [uv](https://docs.astral.sh/uv/) to manage dependencies and the development environment.
+After installing uv, you can install scida and its dependencies with
 
 ``` bash
-poetry install
+uv sync --all-groups
 ```
 
 This will create a virtual environment and install scida and its dependencies,
 including development dependencies.
-All commands, such as `python` and `pytest` will be run in this environment
-by prepending `poetry run ...` to the command.
+All commands, such as `python` and `pytest`, should be run via `uv run ...`.
 
-While using poetry is recommended, you can also install scida with pip
-in a virtual environment of your choice:
+Alternatively, you can install scida with pip in a virtual environment of your choice:
 
 ``` bash
 python -m venv scida_venv
@@ -38,15 +36,15 @@ source scida_venv/bin/activate
 pip install -e .
 ```
 
-Note that in latter case, you will have to manage the dependencies yourself, including development dependencies.
-If choosing this path, remove any `poetry run` prefixes from the commands below accordingly.
+Note that in this case, you will have to manage the dependencies yourself, including development dependencies.
+If choosing this path, remove any `uv run` prefixes from the commands below accordingly.
 
 ### Run tests
 
 To run the tests, use
 
 ``` bash
-poetry run pytest
+uv run pytest
 ```
 
 Many tests require test data sets. These might not be available to you and lead to many tests being skipped.

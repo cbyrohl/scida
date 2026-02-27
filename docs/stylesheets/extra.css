@@ -1,0 +1,358 @@
+/* ========================================
+   General Styles
+   ======================================== */
+
+/* Remove underlines from links for cleaner look */
+.md-typeset a:not(:focus,:hover) {
+    text-decoration: none;
+}
+
+/* ========================================
+   Hero Landing Page
+   ======================================== */
+
+.md-typeset .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    margin: 0;
+    padding: 8rem 2rem 6rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Starfield via layered radial gradients */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        /* Bright stars */
+        radial-gradient(3.5px 3.5px at 12% 18%, rgba(255,255,255,0.95) 0%, transparent 100%),
+        radial-gradient(3px 3px at 48% 12%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 83% 22%, rgba(255,255,255,0.85) 0%, transparent 100%),
+        radial-gradient(3px 3px at 25% 72%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(3.5px 3.5px at 68% 82%, rgba(255,255,255,0.85) 0%, transparent 100%),
+        radial-gradient(4px 4px at 92% 55%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(3px 3px at 38% 48%, rgba(255,255,255,0.88) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 7% 78%, rgba(255,255,255,0.85) 0%, transparent 100%),
+        radial-gradient(3px 3px at 55% 6%, rgba(255,255,255,0.92) 0%, transparent 100%),
+        radial-gradient(3.5px 3.5px at 76% 90%, rgba(255,255,255,0.87) 0%, transparent 100%),
+        /* Medium stars */
+        radial-gradient(2px 2px at 5% 45%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(2px 2px at 35% 38%, rgba(255,255,255,0.65) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 58% 55%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(2px 2px at 78% 68%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(2px 2px at 15% 88%, rgba(255,255,255,0.65) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 42% 8%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(2px 2px at 95% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(2px 2px at 72% 35%, rgba(255,255,255,0.65) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 18% 52%, rgba(255,255,255,0.68) 0%, transparent 100%),
+        radial-gradient(2px 2px at 62% 42%, rgba(255,255,255,0.62) 0%, transparent 100%),
+        radial-gradient(2px 2px at 88% 78%, rgba(255,255,255,0.66) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 30% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        /* Dim stars */
+        radial-gradient(1.5px 1.5px at 20% 30%, rgba(255,255,255,0.45) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 55% 42%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 88% 48%, rgba(255,255,255,0.35) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 32% 58%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.45) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 8% 65%, rgba(255,255,255,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 78%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 75% 92%, rgba(255,255,255,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 95%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 3% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 82% 5%, rgba(255,255,255,0.38) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 28% 85%, rgba(255,255,255,0.42) 0%, transparent 100%),
+        radial-gradient(1px 1px at 47% 32%, rgba(255,255,255,0.36) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 70% 58%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 14% 40%, rgba(255,255,255,0.34) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,0.37) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.hero-body {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.02em;
+}
+
+.hero .hero-tagline {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+}
+
+.hero .hero-subtitle {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 2.5rem 0;
+    line-height: 1.6;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-buttons .md-button {
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 0.35rem;
+}
+
+.hero-buttons .md-button--primary {
+    background-color: var(--md-primary-fg-color);
+    border-color: var(--md-primary-fg-color);
+    color: #ffffff;
+}
+
+.hero-buttons .md-button--primary:hover {
+    background-color: #5c6bc0;
+    border-color: #5c6bc0;
+}
+
+.hero-buttons .md-button:not(.md-button--primary) {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.hero-buttons .md-button:not(.md-button--primary):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Dark header and tabs across all pages */
+.md-header {
+    background-color: #1a1a2e;
+    box-shadow: none;
+}
+
+.md-tabs {
+    background-color: #1a1a2e;
+}
+
+/* Remove content padding and max-width constraints on home page */
+body:has(.hero) .md-main__inner.md-grid {
+    max-width: 100% !important;
+    margin: 0;
+    padding: 0;
+}
+
+body:has(.hero) .md-content {
+    max-width: none;
+}
+
+body:has(.hero) .md-content__inner {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+}
+
+body:has(.hero) .md-content__inner::before {
+    display: none;
+}
+
+/* ========================================
+   Features Section
+   ======================================== */
+
+.features-section {
+    padding: 3rem 1rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.feature-card {
+    padding: 1.5rem;
+    border: 1px solid var(--md-default-fg-color--lightest);
+    border-radius: 0.5rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+    border-color: var(--md-primary-fg-color);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.feature-card .feature-title {
+    margin-top: 0;
+    font-size: 1.1rem;
+}
+
+.feature-card p {
+    font-size: 0.9rem;
+    color: var(--md-default-fg-color--light);
+    line-height: 1.6;
+}
+
+.feature-card pre {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.82rem;
+}
+
+.feature-card a {
+    font-weight: 500;
+}
+
+/* Responsive: stack cards on mobile */
+@media (max-width: 768px) {
+    .hero {
+        padding: 5rem 1.5rem 4rem;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero .hero-tagline {
+        font-size: 1.1rem;
+    }
+
+    .hero .hero-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-buttons .md-button {
+        width: 100%;
+        max-width: 280px;
+        text-align: center;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   Code Block Styles
+   ======================================== */
+
+/* Hide prompt/output selection in pycon blocks */
+.language-pycon .gp, .language-pycon .go {
+    user-select: none;
+}
+.language-pycon .md-clipboard { display: none; }
+
+/* ========================================
+   Grid View Cards (tutorial cards on install page)
+   ======================================== */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid var(--md-default-fg-color--lightest);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card__image-container2 {
+    width: 100%;
+    padding-top: 45%;
+    overflow: hidden;
+    position: relative;
+}
+
+.card__image-container2 img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+}
+
+.card__content {
+    padding: 0.5rem 1rem;
+}
+
+.card__title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+    margin: 0;
+}
+
+.card__info {
+    padding: 0 0.5rem;
+}
+
+.card__info .text--medium {
+    font-size: 0.9rem;
+    color: var(--md-default-fg-color--light);
+}
+
+@media (max-width: 700px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   mkdocstrings API Docs
+   ======================================== */
+
+/* Indentation for nested doc content */
+div.doc-contents:not(.first) {
+    padding-left: 25px;
+    border-left: .05rem solid var(--md-typeset-table-color);
+}
+
+/* Mark external links with arrow icon */
+a.external::after,
+a.autorefs-external::after {
+    mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.25 15.5a.75.75 0 00.75-.75v-9a.75.75 0 00-.75-.75h-9a.75.75 0 000 1.5h7.19L6.22 16.72a.75.75 0 101.06 1.06L17.5 7.56v7.19c0 .414.336.75.75.75z"></path></svg>');
+    -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.25 15.5a.75.75 0 00.75-.75v-9a.75.75 0 00-.75-.75h-9a.75.75 0 000 1.5h7.19L6.22 16.72a.75.75 0 101.06 1.06L17.5 7.56v7.19c0 .414.336.75.75.75z"></path></svg>');
+    content: ' ';
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    height: 1em;
+    width: 1em;
+    background-color: var(--md-typeset-a-color);
+}
+
+a.external:hover::after,
+a.autorefs-external:hover::after {
+    background-color: var(--md-accent-fg-color);
+}

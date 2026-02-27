@@ -308,6 +308,16 @@ class BaseDataset(metaclass=MixinMeta):
         # cast_uints: if true, we cast uints to ints; needed for some compressions (particularly zfp)
         if zarr_kwargs is None:
             zarr_kwargs = {}
+        if overwrite and os.path.exists(fname):
+            if os.path.isdir(fname) and len(os.listdir(fname)) > 0:
+                # check if it is a zarr group/array
+                is_zarr = os.path.exists(os.path.join(fname, ".zgroup"))
+                is_zarr |= os.path.exists(os.path.join(fname, ".zarray"))
+                if not is_zarr:
+                    raise ValueError(
+                        f"Directory '{fname}' exists and is not a zarr group. "
+                        "Refusing to overwrite for safety."
+                    )
         store = zarr.DirectoryStore(fname, **zarr_kwargs)
         root = zarr.group(store, overwrite=overwrite)
 
@@ -325,6 +335,7 @@ class BaseDataset(metaclass=MixinMeta):
                 root.attrs[k] = v
         # Data
         tasks = []
+        units_to_save = {}
         ptypes = self.data.keys()
         if isinstance(fields, dict):
             ptypes = fields.keys()
@@ -348,7 +359,7 @@ class BaseDataset(metaclass=MixinMeta):
                 else:
                     arr = self.data[p][k]
                 if hasattr(arr, "magnitude"):  # if we have units, remove those here
-                    # TODO: save units in metadata!
+                    units_to_save[(p, k)] = str(arr.units)
                     arr = arr.magnitude
                 if np.any(np.isnan(arr.shape)):
                     arr.compute_chunk_sizes()  # very inefficient (have to do it separately for every array)
@@ -363,6 +374,8 @@ class BaseDataset(metaclass=MixinMeta):
                 )
                 tasks.append(task)
         dask.compute(tasks)
+        for (p, k), unit_str in units_to_save.items():
+            root[p][k].attrs["units"] = make_serializable(unit_str)
 
 
 class Dataset(BaseDataset):

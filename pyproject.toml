@@ -1,6 +1,6 @@
 [project]
 name = "scida"
-version = "0.3.5"
+version = "0.3.6"
 description = "Convenience wrapper around large scientific datasets to process with dask."
 authors = [{ name = "Chris Byrohl" }]
 readme = "README.md"
@@ -102,6 +102,12 @@ source = ["scida", "tests"]
 minversion = "6.0"
 filterwarnings = [
     "error::DeprecationWarning"
+]
+markers = [
+    "unit: Pure unit tests with no I/O (always run in CI)",
+    "integration: Tests using dummy/synthetic files (always run in CI)",
+    "external: Tests requiring SCIDA_TESTDATA_PATH (skipped without data)",
+    "network: Tests requiring network access",
 ]
 
 [tool.black]
