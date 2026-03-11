@@ -16,3 +16,14 @@ def test_groupids_for_particles(testdatapath):
     assert pdata["GroupID"][-1].compute() == obj.misc["unboundID"]
     assert pdata["LocalSubhaloID"][-1].compute() == obj.misc["unboundID"]
     assert pdata["SubhaloID"][-1].compute() == obj.misc["unboundID"]
+
+
+@pytest.mark.external
+@require_testdata_path("interface", only=["TNG50-4_group"])
+def test_load_catalog_direct(testdatapath):
+    """Test that loading a catalog directory via load() populates data."""
+    cat = load(testdatapath)
+    assert "Group" in cat.data.keys()
+    assert "Subhalo" in cat.data.keys()
+    assert len(cat.data["Group"].keys()) > 0
+    assert "GroupPos" in cat.data["Group"].keys()
