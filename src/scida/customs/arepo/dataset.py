@@ -19,16 +19,11 @@ from scida.customs.arepo.selector import ArepoSelector
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
-from scida.helpers_misc import (
-    computedecorator,
-    get_args,
-    get_kwargs,
-    map_blocks,
-)
-from scida.misc import parse_size
+from scida.helpers_misc import computedecorator, get_args, get_kwargs, map_blocks
 from scida.interface import create_datasetclass_with_mixins
 from scida.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin, UnitMixin
 from scida.io import load_metadata
+from scida.misc import parse_size
 
 log = logging.getLogger(__name__)
 
@@ -767,8 +762,6 @@ class ArepoCatalog(ArepoSnapshot):
         kwargs
         """
         kwargs["iscatalog"] = True
-        if "fileprefix" not in kwargs:
-            kwargs["fileprefix"] = "groups"
         super().__init__(*args, **kwargs)
 
     @classmethod
