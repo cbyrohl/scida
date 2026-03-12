@@ -170,6 +170,10 @@ class DatasetSeries(object):
         gen = map_interface_args(paths, *interface_args, **ikw)
         self.datasets = [dec(datasetclass)(p, *a, **kw) for p, a, kw in gen]
 
+        if not lazy:
+            for ds in self.datasets:
+                ds.evaluate_lazy()
+
         if self.metadata is None:
             print("Have not cached this data series. Can take a while.")
             dct = {}
