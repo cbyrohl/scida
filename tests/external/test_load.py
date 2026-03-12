@@ -1,13 +1,16 @@
 import math
 import os
+import pathlib
 from contextlib import contextmanager
+from unittest.mock import MagicMock, patch
 
 import h5py
 import pytest
+import requests
 import yaml
 
 from scida.config import get_config
-from scida.convenience import load
+from scida.convenience import _download, load
 from scida.interface import Dataset
 from scida.misc import check_config_for_dataset
 from tests.testdata_properties import require_testdata, require_testdata_path
@@ -176,3 +179,123 @@ def test_load_https():
     obj = load(url)
     assert obj.file is not None
     assert obj.data is not None
+
+
+def _make_mock_response(status_code=200, content=b"data"):
+    """Create a mock response that works as a context manager."""
+    resp = MagicMock(spec=requests.Response)
+    resp.status_code = status_code
+    resp.headers = {"content-length": str(len(content))}
+    resp.iter_content.return_value = [content]
+    resp.__enter__ = lambda s: s
+    resp.__exit__ = MagicMock(return_value=False)
+
+    if status_code >= 400:
+        http_error = requests.exceptions.HTTPError(response=resp)
+        resp.raise_for_status.side_effect = http_error
+    else:
+        resp.raise_for_status.return_value = None
+
+    return resp
+
+
+class TestDownloadRetry:
+    """Tests for _download retry logic."""
+
+    @patch("scida.convenience.time.sleep")
+    @patch("scida.convenience.requests.get")
+    def test_retry_on_502(self, mock_get, mock_sleep, tmp_path):
+        """Retries on 502 and succeeds on second attempt."""
+        fail_resp = _make_mock_response(502)
+        ok_resp = _make_mock_response(200, content=b"file content")
+        mock_get.side_effect = [fail_resp, ok_resp]
+
+        target = tmp_path / "output.hdf5"
+        _download("http://example.com/file", target, progressbar=False)
+
+        assert target.read_bytes() == b"file content"
+        assert mock_get.call_count == 2
+        mock_sleep.assert_called_once_with(2)
+
+    @patch("scida.convenience.time.sleep")
+    @patch("scida.convenience.requests.get")
+    def test_retry_exhausted_raises(self, mock_get, mock_sleep, tmp_path):
+        """Raises after all retries are exhausted."""
+        fail_resp = _make_mock_response(502)
+        mock_get.return_value = fail_resp
+
+        target = tmp_path / "output.hdf5"
+        with pytest.raises(requests.exceptions.HTTPError):
+            _download("http://example.com/file", target, progressbar=False)
+
+        assert mock_get.call_count == 3
+        assert mock_sleep.call_count == 2
+
+    @patch("scida.convenience.time.sleep")
+    @patch("scida.convenience.requests.get")
+    def test_no_retry_on_404(self, mock_get, mock_sleep, tmp_path):
+        """Client errors (4xx) are not retried."""
+        fail_resp = _make_mock_response(404)
+        mock_get.return_value = fail_resp
+
+        target = tmp_path / "output.hdf5"
+        with pytest.raises(requests.exceptions.HTTPError):
+            _download("http://example.com/file", target, progressbar=False)
+
+        assert mock_get.call_count == 1
+        mock_sleep.assert_not_called()
+
+    @patch("scida.convenience.time.sleep")
+    @patch("scida.convenience.requests.get")
+    def test_retry_on_connection_error(self, mock_get, mock_sleep, tmp_path):
+        """Retries on ConnectionError and succeeds."""
+        ok_resp = _make_mock_response(200, content=b"ok")
+        mock_get.side_effect = [
+            requests.exceptions.ConnectionError("connection reset"),
+            ok_resp,
+        ]
+
+        target = tmp_path / "output.hdf5"
+        _download("http://example.com/file", target, progressbar=False)
+
+        assert target.read_bytes() == b"ok"
+        assert mock_get.call_count == 2
+
+    @patch("scida.convenience.time.sleep")
+    @patch("scida.convenience.requests.get")
+    def test_retry_on_timeout(self, mock_get, mock_sleep, tmp_path):
+        """Retries on Timeout and succeeds."""
+        ok_resp = _make_mock_response(200, content=b"ok")
+        mock_get.side_effect = [
+            requests.exceptions.Timeout("timed out"),
+            ok_resp,
+        ]
+
+        target = tmp_path / "output.hdf5"
+        _download("http://example.com/file", target, progressbar=False)
+
+        assert target.read_bytes() == b"ok"
+        assert mock_get.call_count == 2
+
+    @patch("scida.convenience.time.sleep")
+    @patch("scida.convenience.requests.get")
+    def test_cleans_partial_download_on_retry(self, mock_get, mock_sleep, tmp_path):
+        """Partial files are removed before retrying."""
+        target = tmp_path / "output.hdf5"
+        target.write_bytes(b"partial")
+
+        ok_resp = _make_mock_response(200, content=b"complete")
+        fail_resp = _make_mock_response(502)
+        mock_get.side_effect = [fail_resp, ok_resp]
+
+        _download("http://example.com/file", target, progressbar=False, overwrite=True)
+
+        assert target.read_bytes() == b"complete"
+
+    def test_existing_file_no_overwrite_raises(self, tmp_path):
+        """Raises ValueError if target exists and overwrite=False."""
+        target = tmp_path / "output.hdf5"
+        target.write_bytes(b"existing")
+
+        with pytest.raises(ValueError, match="already exists"):
+            _download("http://example.com/file", target, progressbar=False)

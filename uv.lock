@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -3825,8 +3825,6 @@ dependencies = [
     { name = "dask", extra = ["array", "dataframe", "distributed"] },
     { name = "distributed" },
     { name = "h5py" },
-    { name = "jupyter" },
-    { name = "matplotlib" },
     { name = "numba" },
     { name = "numpy" },
     { name = "pint" },
@@ -3883,8 +3881,6 @@ requires-dist = [
     { name = "dask", extras = ["array", "dataframe", "distributed"], marker = "python_full_version >= '3.12'", specifier = ">=2024.4.1" },
     { name = "distributed", specifier = ">=2026.1.1" },
     { name = "h5py", specifier = ">=3.7.0" },
-    { name = "jupyter", specifier = ">=1.0.0" },
-    { name = "matplotlib", specifier = ">=3.6.0,!=3.9.1" },
     { name = "numba", specifier = ">=0.57" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pint", specifier = ">=0.24" },
@@ -3909,7 +3905,7 @@ dev = [
     { name = "jupyter-contrib-nbextensions", specifier = ">=0.7.0" },
     { name = "line-profiler", specifier = ">=4.0.2" },
     { name = "markdown-include", specifier = ">=0.8.1" },
-    { name = "matplotlib", specifier = ">=3.6.2" },
+    { name = "matplotlib", specifier = ">=3.6.2,!=3.9.1" },
     { name = "memory-profiler", specifier = ">=0.61.0" },
     { name = "memray", specifier = ">=1.6.0" },
     { name = "mkdocs", specifier = ">=1.5.3" },
