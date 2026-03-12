@@ -1,4 +1,4 @@
-"""Tests for cache versioning and dataset-local pre-cache lookup."""
+"""Tests for cache versioning, pre-cache lookup, and deploy utilities."""
 
 import json
 import os
@@ -220,7 +220,6 @@ class TestFindPrecachedFile:
         result = find_precached_file("somehash", "hdf5", str(deep), max_depth=10)
         assert result == str(fp)
 
-
 class TestChunkedLoaderPrecache:
     """Integration tests for ChunkedHDF5Loader pre-cache behavior."""
 
@@ -246,9 +245,7 @@ class TestChunkedLoaderPrecache:
         loader2 = ChunkedHDF5Loader(str(snap_dir))
         data, metadata = loader2.load(fileprefix="snap_000", chunksize="auto")
         assert data is not None
-        # The user cache should NOT have been recreated (pre-cache was used)
-        # Actually, the current flow creates user cache when cachefp doesn't exist
-        # and pre-cache fails. Since pre-cache succeeds, it returns early.
+        # Pre-cache was used directly (early return); user cache was never created.
         assert not os.path.isfile(user_cachefp)
 
     def test_chunked_loader_prefers_user_cache(self, tmp_path, cachedir):
@@ -396,3 +393,244 @@ class TestSeriesPrecache:
         assert os.path.isfile(precache_fp)
         # The new metadata was written to the user cache, not the pre-cache
         assert series2._metadatafile != precache_fp
+
+
+# ===========================================================================
+# Part C: Deploy Utilities
+# ===========================================================================
+
+
+class TestDeployPrecache:
+    """Tests for deploy_precache()."""
+
+    def test_deploys_single_path(self, tmp_path, cachedir):
+        """Deploys a single local cache with ancestor path in staging dir."""
+        from scida.devtools import deploy_precache
+
+        snap_dir = tmp_path / "sim" / "output" / "snapdir_000"
+        _make_chunked_snapshot(snap_dir, nchunks=2)
+
+        # Create a local cache
+        loader = ChunkedHDF5Loader(str(snap_dir))
+        loader.load(fileprefix="snap_000", chunksize="auto")
+
+        basefolder = tmp_path / "shared"
+        result = deploy_precache(
+            str(snap_dir), basefolder=str(basefolder), fileprefix="snap_000"
+        )
+
+        assert len(result) == 1
+        assert os.path.isfile(result[0])
+        hsh = hash_path(os.path.join(str(snap_dir), "snap_000"))
+        # depth=2: snapdir_000 -> output -> sim (ancestor)
+        ancestor = str(tmp_path / "sim").lstrip("/")
+        expected = os.path.join(
+            str(basefolder), ancestor, "postprocessing", "scida", "%s.hdf5" % hsh
+        )
+        assert result[0] == expected
+
+    def test_deploys_multiple_paths(self, tmp_path, cachedir):
+        """Handles a list of paths."""
+        from scida.devtools import deploy_precache
+
+        snap_dirs = []
+        for i in range(3):
+            d = tmp_path / "sim" / "output" / ("snapdir_%d" % i)
+            _make_chunked_snapshot(d, nchunks=2)
+            loader = ChunkedHDF5Loader(str(d))
+            loader.load(fileprefix="snap_000", chunksize="auto")
+            snap_dirs.append(str(d))
+
+        basefolder = tmp_path / "shared"
+        result = deploy_precache(
+            snap_dirs, basefolder=str(basefolder), fileprefix="snap_000"
+        )
+
+        assert len(result) == 3
+        for r in result:
+            assert os.path.isfile(r)
+
+    def test_no_local_cache_raises(self, tmp_path, cachedir):
+        """FileNotFoundError when no local cache exists."""
+        from scida.devtools import deploy_precache
+
+        snap_dir = tmp_path / "sim" / "output" / "snapdir_000"
+        _make_chunked_snapshot(snap_dir, nchunks=2)
+        # Do NOT create a local cache
+
+        basefolder = tmp_path / "shared"
+        with pytest.raises(FileNotFoundError):
+            deploy_precache(
+                str(snap_dir), basefolder=str(basefolder), fileprefix="snap_000"
+            )
+
+    def test_file_exists_raises(self, tmp_path, cachedir):
+        """FileExistsError when output exists and overwrite=False."""
+        from scida.devtools import deploy_precache
+
+        snap_dir = tmp_path / "sim" / "output" / "snapdir_000"
+        _make_chunked_snapshot(snap_dir, nchunks=2)
+        loader = ChunkedHDF5Loader(str(snap_dir))
+        loader.load(fileprefix="snap_000", chunksize="auto")
+
+        basefolder = tmp_path / "shared"
+        deploy_precache(
+            str(snap_dir), basefolder=str(basefolder), fileprefix="snap_000"
+        )
+        with pytest.raises(FileExistsError):
+            deploy_precache(
+                str(snap_dir), basefolder=str(basefolder), fileprefix="snap_000"
+            )
+
+    def test_overwrite_replaces(self, tmp_path, cachedir):
+        """overwrite=True replaces existing file without error."""
+        from scida.devtools import deploy_precache
+
+        snap_dir = tmp_path / "sim" / "output" / "snapdir_000"
+        _make_chunked_snapshot(snap_dir, nchunks=2)
+        loader = ChunkedHDF5Loader(str(snap_dir))
+        loader.load(fileprefix="snap_000", chunksize="auto")
+
+        basefolder = tmp_path / "shared"
+        result1 = deploy_precache(
+            str(snap_dir), basefolder=str(basefolder), fileprefix="snap_000"
+        )
+        mtime1 = os.path.getmtime(result1[0])
+
+        result2 = deploy_precache(
+            str(snap_dir),
+            basefolder=str(basefolder),
+            fileprefix="snap_000",
+            overwrite=True,
+        )
+        mtime2 = os.path.getmtime(result2[0])
+
+        assert result1[0] == result2[0]
+        assert mtime2 >= mtime1
+
+    def test_deployed_file_loadable(self, tmp_path, cachedir):
+        """Deployed file is found by find_precached_file and loads correctly."""
+        from scida.devtools import deploy_precache
+
+        snap_dir = tmp_path / "sim" / "output" / "snapdir_000"
+        _make_chunked_snapshot(snap_dir, nchunks=2)
+
+        # Create local cache
+        loader = ChunkedHDF5Loader(str(snap_dir))
+        loader.load(fileprefix="snap_000", chunksize="auto")
+
+        # Deploy with depth=2: staging mirrors real filesystem
+        # {basefolder}/{sim}/postprocessing/scida/{hash}.hdf5
+        # Copy to real location so find_precached_file finds it
+        basefolder = tmp_path / "staging"
+        result = deploy_precache(
+            str(snap_dir),
+            basefolder=str(basefolder),
+            fileprefix="snap_000",
+        )
+
+        # Remove local cache
+        user_cachefp = return_hdf5cachepath(str(snap_dir), fileprefix="snap_000")
+        os.remove(user_cachefp)
+
+        # The deployed file mirrors the real path, so copying basefolder
+        # contents to / would place it correctly.  For testing, copy to
+        # the real ancestor location.
+        hsh = hash_path(os.path.join(str(snap_dir), "snap_000"))
+        precache_dir = tmp_path / "sim" / "postprocessing" / "scida"
+        precache_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(result[0], str(precache_dir / ("%s.hdf5" % hsh)))
+        found = find_precached_file(hsh, "hdf5", str(snap_dir))
+        assert found is not None
+
+        # Verify the file can be loaded as a cache
+        loader2 = ChunkedHDF5Loader(str(snap_dir))
+        data = loader2.load_cachefile(found, chunksize="auto")
+        assert data is not None
+
+
+class TestDeploySeriesPrecache:
+    """Tests for deploy_series_precache()."""
+
+    def test_deploys_local_cache(self, tmp_path, cachedir):
+        """Copies JSON cache with ancestor path in staging dir."""
+        from scida.devtools import deploy_series_precache
+        from scida.series import DatasetSeries
+
+        snap_dirs = []
+        for i in range(2):
+            d = tmp_path / "sim" / "output" / ("snap_%d" % i)
+            _make_chunked_snapshot(d, nchunks=1)
+            snap_dirs.append(d)
+        paths = [list(d.glob("*.hdf5"))[0] for d in snap_dirs]
+
+        # Create local series cache
+        series = DatasetSeries(paths, datasetclass=Dataset, lazy=True)
+        assert series._metadatafile is not None
+
+        basefolder = tmp_path / "shared"
+        result = deploy_series_precache(paths, basefolder=str(basefolder))
+
+        assert os.path.isfile(result)
+        real_paths = [os.path.realpath(str(p)) for p in paths]
+        hsh = hash_path("".join(real_paths))
+        # depth=3: file.hdf5 -> snap_0 -> output -> sim (ancestor)
+        ancestor = str(tmp_path / "sim").lstrip("/")
+        expected = os.path.join(
+            str(basefolder), ancestor, "postprocessing", "scida", "%s.json" % hsh
+        )
+        assert result == expected
+
+    def test_no_local_cache_raises(self, tmp_path, cachedir):
+        """FileNotFoundError when no local series cache exists."""
+        from scida.devtools import deploy_series_precache
+
+        snap_dirs = []
+        for i in range(2):
+            d = tmp_path / ("snap_%d" % i)
+            _make_chunked_snapshot(d, nchunks=1)
+            snap_dirs.append(d)
+        paths = [list(d.glob("*.hdf5"))[0] for d in snap_dirs]
+
+        # Do NOT create a DatasetSeries (no local cache)
+        basefolder = tmp_path / "shared"
+        with pytest.raises(FileNotFoundError):
+            deploy_series_precache(paths, basefolder=str(basefolder))
+
+    def test_deployed_file_loadable(self, tmp_path, cachedir):
+        """Deployed series JSON is picked up by DatasetSeries."""
+        from scida.devtools import deploy_series_precache
+        from scida.series import DatasetSeries
+
+        snap_dirs = []
+        for i in range(2):
+            d = tmp_path / "sim" / "output" / ("snap_%d" % i)
+            _make_chunked_snapshot(d, nchunks=1)
+            snap_dirs.append(d)
+        paths = [list(d.glob("*.hdf5"))[0] for d in snap_dirs]
+
+        # Create local cache
+        series = DatasetSeries(paths, datasetclass=Dataset, lazy=True)
+        user_fp = series._metadatafile_user
+
+        # Deploy — depth=3 puts it at {basefolder}/{sim}/postprocessing/scida/
+        basefolder = tmp_path / "staging"
+        result = deploy_series_precache(paths, basefolder=str(basefolder))
+        assert os.path.isfile(result)
+
+        # Copy to real location so find_precached_file finds it
+        hsh = hash_path("".join([os.path.realpath(str(p)) for p in paths]))
+        precache_dir = tmp_path / "sim" / "postprocessing" / "scida"
+        precache_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(result, str(precache_dir / ("%s.json" % hsh)))
+
+        # Remove user cache
+        if os.path.exists(user_fp):
+            os.remove(user_fp)
+            user_dir = os.path.dirname(user_fp)
+            if os.path.isdir(user_dir) and not os.listdir(user_dir):
+                os.rmdir(user_dir)
+
+        # Re-create series — should pick up the copied pre-cache
+        series2 = DatasetSeries(paths, datasetclass=Dataset, lazy=True)
+        assert series2.metadata is not None
