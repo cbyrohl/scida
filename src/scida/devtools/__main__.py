@@ -30,6 +30,17 @@ from scida.devtools import (
 app = typer.Typer(help="scida developer tools for building and deploying caches.")
 
 
+def _build_caches(path, overwrite=False):
+    """Load series and force-init every dataset to trigger cache creation."""
+    series = scida.load(path, overwrite=overwrite)
+    typer.echo(f"  Initializing {len(series.datasets)} datasets ...")
+    for i, ds in enumerate(series.datasets):
+        # Accessing .data triggers delay_init -> __init__ -> cache creation
+        _ = ds.data
+        typer.echo(f"  [{i + 1}/{len(series.datasets)}] cached")
+    return series
+
+
 @app.command()
 def build(
     path: str = typer.Argument(..., help="Path to a simulation directory."),
@@ -37,7 +48,7 @@ def build(
 ):
     """Build local caches by loading the dataset series at PATH."""
     typer.echo(f"Building caches for {path} ...")
-    scida.load(path, overwrite=overwrite, lazy=False)
+    _build_caches(path, overwrite=overwrite)
     typer.echo("Done.")
 
 
@@ -79,7 +90,7 @@ def build_deploy(
 ):
     """Build caches and deploy them in one step for PATH."""
     typer.echo(f"Building caches for {path} ...")
-    series = scida.load(path, overwrite=overwrite, lazy=False)
+    series = _build_caches(path, overwrite=overwrite)
 
     typer.echo(f"Deploying dataset caches ({len(series.paths)} paths) ...")
     deploy_precache(
@@ -123,7 +134,7 @@ def build_all(
     """Build caches for all MPCDF_TARGETS that exist on this machine."""
 
     def _build(target, *, overwrite):
-        scida.load(target, overwrite=overwrite, lazy=False)
+        _build_caches(target, overwrite=overwrite)
 
     _run_for_all_targets(_build, overwrite=overwrite)
 
@@ -172,7 +183,7 @@ def build_deploy_all(
     """Build and deploy caches for all MPCDF_TARGETS that exist."""
 
     def _build_deploy(target, *, basefolder, overwrite, depth, series_depth):
-        series = scida.load(target, overwrite=overwrite, lazy=False)
+        series = _build_caches(target, overwrite=overwrite)
         deploy_precache(
             series.paths, basefolder=basefolder, overwrite=overwrite, depth=depth
         )
