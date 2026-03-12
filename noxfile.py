@@ -11,7 +11,7 @@ numpy_versions = ["1.21", "1.26", "2.0"]
 
 
 def tests_base(session: nox.Session) -> None:
-    session.install("coverage[toml]", "pytest", "pytest-mock", "pygments")
+    session.install("coverage[toml]", "pytest", "pytest-mock", "pygments", "ipython")
     session.install(".")
     try:
         session.run(
