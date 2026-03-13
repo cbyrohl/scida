@@ -1109,10 +1109,12 @@ def get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=None):
     )
 
 
-def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
-    hidx = get_hidx_daskwrap(gidx, halocelloffsets)
+def get_haloquantity_daskwrap(
+    gidx, halocelloffsets, valarr, index_unbound=9223372036854775807
+):
+    hidx = get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=index_unbound)
     dmax = np.iinfo(hidx.dtype).max
-    mask = ~((hidx == -1) | (hidx == dmax))
+    mask = ~((hidx == index_unbound) | (hidx == dmax))
     result = -1.0 * np.ones(hidx.shape, dtype=valarr.dtype)
     result[mask] = valarr[hidx[mask]]
     return result
@@ -1134,13 +1136,18 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     units = None
     if hasattr(hvals, "units"):
         units = hvals.units
+        hvals = hvals.magnitude
+    kw = dict()
+    if len(hvals.shape) == 2:
+        kw = dict(drop_axis=0, new_axis=0)
     res = map_blocks(
         get_haloquantity_daskwrap,
         gidx,
         halocelloffsets,
         hvals,
-        meta=np.array((), dtype=hvals.dtype),
+        dtype=hvals.dtype,
         output_units=units,
+        **kw,
     )
     return res
 
