@@ -3,9 +3,9 @@ CLI for building and deploying scida pre-cache files.
 
 Usage::
 
-    uv run python -m scida.devtools build /virgotng/universe/IllustrisTNG/L75n1820TNG
-    uv run python -m scida.devtools deploy /virgotng/universe/IllustrisTNG/L75n1820TNG
-    uv run python -m scida.devtools build-deploy-all
+    uv run python -m scida.devtools cache build /virgotng/universe/IllustrisTNG/L75n1820TNG
+    uv run python -m scida.devtools cache deploy /virgotng/universe/IllustrisTNG/L75n1820TNG
+    uv run python -m scida.devtools cache build-deploy-all
 """
 
 from __future__ import annotations
@@ -27,10 +27,12 @@ from scida.devtools import (
     deploy_series_precache,
 )
 
-app = typer.Typer(help="scida developer tools for building and deploying caches.")
+app = typer.Typer(help="scida developer tools.")
+cache_app = typer.Typer(help="Build and deploy dataset caches.")
+app.add_typer(cache_app, name="cache")
 
 
-@app.command()
+@cache_app.command()
 def build(
     path: str = typer.Argument(..., help="Path to a simulation directory."),
     overwrite: bool = typer.Option(False, help="Overwrite existing caches."),
@@ -41,7 +43,7 @@ def build(
     typer.echo("Done.")
 
 
-@app.command()
+@cache_app.command()
 def deploy(
     path: str = typer.Argument(..., help="Path to a simulation directory."),
     basefolder: str = typer.Option(None, help="Target basefolder for deployment."),
@@ -67,7 +69,7 @@ def deploy(
     typer.echo("Done.")
 
 
-@app.command()
+@cache_app.command()
 def build_deploy(
     path: str = typer.Argument(..., help="Path to a simulation directory."),
     basefolder: str = typer.Option(None, help="Target basefolder for deployment."),
@@ -116,7 +118,7 @@ def _run_for_all_targets(action, **kwargs):
         raise typer.Exit(code=1)
 
 
-@app.command()
+@cache_app.command()
 def build_all(
     overwrite: bool = typer.Option(False, help="Overwrite existing caches."),
 ):
@@ -128,7 +130,7 @@ def build_all(
     _run_for_all_targets(_build, overwrite=overwrite)
 
 
-@app.command()
+@cache_app.command()
 def deploy_all(
     basefolder: str = typer.Option(None, help="Target basefolder for deployment."),
     overwrite: bool = typer.Option(False, help="Overwrite existing deployed files."),
@@ -160,7 +162,7 @@ def deploy_all(
     )
 
 
-@app.command()
+@cache_app.command()
 def build_deploy_all(
     basefolder: str = typer.Option(None, help="Target basefolder for deployment."),
     overwrite: bool = typer.Option(False, help="Overwrite existing caches."),
