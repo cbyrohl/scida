@@ -376,7 +376,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
                 if not (key.startswith("PartType")):
                     continue
                 self.data[key]["SubhaloID"] = -1 * da.ones_like(
-                    da[key]["uid"], dtype=np.int64
+                    self.data[key]["uid"], dtype=np.int64
                 )
             return
 
@@ -446,9 +446,11 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
             # calculate first subhalo of each halo that a particle belongs to
             self.add_groupquantity_to_particles("GroupFirstSub", parttype=key)
-            pdata["SubhaloID"] = pdata["GroupFirstSub"] + pdata["LocalSubhaloID"]
+            local_shid = pdata["LocalSubhaloID"]
             pdata["SubhaloID"] = da.where(
-                pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"]
+                local_shid == index_unbound,
+                index_unbound,
+                pdata["GroupFirstSub"] + local_shid,
             )
 
         # add GroupID and SubhaloID to catalogs/groups themselves
@@ -1141,12 +1143,19 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     units = None
     if hasattr(hvals, "units"):
         units = hvals.units
+        hvals = hvals.magnitude
+    dtype = hvals.dtype
+    # Compute hvals eagerly to avoid chunk mismatch with gidx in map_blocks.
+    # hvals is per-group (small) while gidx is per-particle (large), so their
+    # dask chunk counts differ and map_blocks cannot align them (issue #57).
+    if isinstance(hvals, da.Array):
+        hvals = hvals.compute()
     res = map_blocks(
         get_haloquantity_daskwrap,
         gidx,
         halocelloffsets,
         hvals,
-        meta=np.array((), dtype=hvals.dtype),
+        meta=np.array((), dtype=dtype),
         output_units=units,
     )
     return res
@@ -1182,10 +1191,9 @@ def get_localshidx(
     -------
     np.ndarray
     """
-    dtype = np.int32
     if index_unbound is None:
-        index_unbound = np.iinfo(dtype).max
-    res = index_unbound * np.ones(gidx_count, dtype=dtype)  # fuzz has negative index.
+        index_unbound = np.iinfo(np.int64).max
+    res = index_unbound * np.ones(gidx_count, dtype=np.int64)
 
     # find initial Group we are in
     hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
@@ -1211,7 +1219,9 @@ def get_localshidx(
     cont = True
     while cont and (startid < gidx_count):
         res[startid:endid] = (
-            sidx_start_idx if sidx_start_idx + 1 < shcumsum.shape[0] else -1
+            sidx_start_idx
+            if sidx_start_idx + 1 < shcumsum.shape[0]
+            else index_unbound
         )
         sidx_start_idx += 1
         if sidx_start_idx < shcounts[hidx_start_idx]:
