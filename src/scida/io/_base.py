@@ -526,7 +526,7 @@ class ChunkedHDF5Loader(Loader):
         if verbose is None:
             print_msg = config.get("print_cachefile_creation", True)
         if print_msg:
-            print("Creating cache file, this may take a while...")
+            log.info("Creating cache file, this may take a while...")
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         files = self.get_chunkedfiles(fileprefix, choose_prefix=choose_prefix)
 
@@ -640,9 +640,9 @@ def load_datadict_old(
 
     """
     # TODO: Refactor and rename function
-    inline_array = False  # inline arrays in dask; intended to improve dask scheduling (?). However, doesnt work with h5py (need h5pickle wrapper or zarr).
-    if isinstance(file, h5py.File):
-        inline_array = False
+    # inline_array: inline arrays in dask; intended to improve dask scheduling,
+    # but doesn't work with h5py (needs h5pickle wrapper or zarr).
+    inline_array = False
 
     data: dict[str, Any] = {}
     tree: dict[str, Any] = {}
@@ -745,7 +745,7 @@ def load_datadict_old(
             # TODO: as we do not load any fields any more we do not have a reference for the dask chunking.
             container["uid"] = da.arange(nparts)
         else:
-            print("no uid created for %s" % container.name)
+            log.debug("no uid created for %s" % container.name)
 
     walk_container(data, handler_group=create_uids)
 

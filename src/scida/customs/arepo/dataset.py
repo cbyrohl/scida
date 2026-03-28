@@ -19,16 +19,11 @@ from scida.customs.arepo.selector import ArepoSelector
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
-from scida.helpers_misc import (
-    computedecorator,
-    get_args,
-    get_kwargs,
-    map_blocks,
-    parse_humansize,
-)
+from scida.helpers_misc import computedecorator, get_args, get_kwargs, map_blocks
 from scida.interface import create_datasetclass_with_mixins
 from scida.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin, UnitMixin
 from scida.io import load_metadata
+from scida.misc import parse_size
 
 log = logging.getLogger(__name__)
 
@@ -769,8 +764,6 @@ class ArepoCatalog(ArepoSnapshot):
         kwargs
         """
         kwargs["iscatalog"] = True
-        if "fileprefix" not in kwargs:
-            kwargs["fileprefix"] = "groups"
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -1118,10 +1111,12 @@ def get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=None):
     )
 
 
-def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
-    hidx = get_hidx_daskwrap(gidx, halocelloffsets)
+def get_haloquantity_daskwrap(
+    gidx, halocelloffsets, valarr, index_unbound=9223372036854775807
+):
+    hidx = get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=index_unbound)
     dmax = np.iinfo(hidx.dtype).max
-    mask = ~((hidx == -1) | (hidx == dmax))
+    mask = ~((hidx == index_unbound) | (hidx == dmax))
     result = -1.0 * np.ones(hidx.shape, dtype=valarr.dtype)
     result[mask] = valarr[hidx[mask]]
     return result
@@ -1150,13 +1145,17 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     # dask chunk counts differ and map_blocks cannot align them (issue #57).
     if isinstance(hvals, da.Array):
         hvals = hvals.compute()
+    kw = dict()
+    if len(hvals.shape) == 2:
+        kw = dict(drop_axis=0, new_axis=0)
     res = map_blocks(
         get_haloquantity_daskwrap,
         gidx,
         halocelloffsets,
         hvals,
-        meta=np.array((), dtype=dtype),
+        dtype=dtype,
         output_units=units,
+        **kw,
     )
     return res
 
@@ -1409,7 +1408,7 @@ def map_group_operation_get_chunkedges(
 
     # let's allow a maximal chunksize of 16 times the dask default setting for an individual array [here: multiple]
     if chunksize_bytes is None:
-        chunksize_bytes = 16 * parse_humansize(dask.config.get("array.chunk-size"))
+        chunksize_bytes = 16 * parse_size(dask.config.get("array.chunk-size"))
     cost_memory = entry_nbytes_in * lengths + entry_nbytes_out
 
     if not np.max(cost_memory) < chunksize_bytes:

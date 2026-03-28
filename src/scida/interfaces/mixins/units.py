@@ -98,6 +98,10 @@ def get_unitstr_from_attrs(attrs: dict) -> str | None:
         if attrs["cgsunits"] is not None:  # otherwise, this field has no units
             unitstr = attrs["cgsunits"]
         return unitstr
+    elif "units" in attrs.keys():
+        if attrs["units"] is not None:
+            unitstr = attrs["units"]
+        return unitstr
     elif "description" in attrs.keys():
         # see whether we have units in the description key
         desc = attrs["description"]

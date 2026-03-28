@@ -1,22 +1,44 @@
 site_name: scida
+site_url: https://scida.io
 repo_url: https://github.com/cbyrohl/scida
+repo_name: cbyrohl/scida
+
 theme:
   name: material
+  custom_dir: docs/overrides
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
-    - content.code.annotate
-    - content.code.copy
+    - navigation.tabs
     - navigation.sections
     - navigation.indexes
+    - navigation.expand
+    - navigation.path
+    - search.highlight
+    - search.share
+    - content.code.annotate
+    - content.code.copy
 
 nav:
-  - 'Scida': index.md
-  - 'Getting Started':
+  - Home: index.md
+  - Getting Started:
       - "Installation": install.md
       - 'Tutorial':
           - 'Tutorial': tutorial/index.md
           - 'Simulations': tutorial/simulations.md
           - 'Observations': tutorial/observations.md
-  - 'Features':
+  - Features:
       - 'Supported datasets': supported_data.md
       - 'Visualization': visualization.md
       - 'Units': units.md
@@ -24,15 +46,15 @@ nav:
       - 'Data series': series.md
       - 'Large datasets': largedatasets.md
       - 'Halo/Galaxy Catalogs': halocatalogs.md
-  - 'Further Topics':
+  - Further Topics:
       - 'FAQ': faq.md
       - 'Configuration': configuration.md
       - 'Development': developer.md
       - 'Visual Impressions': impressions.md
-  - 'Cookbooks':
+  - Cookbooks:
       - 'Cookbooks': cookbooks/index.md
       #- 'TNG-Cluster': cookbooks/TNG-Cluster/basic.ipynb
-  - 'API':
+  - API:
       - 'Basic': api/base_api.md
       - 'Index': api/moduleindex.md
 
@@ -53,9 +75,9 @@ markdown_extensions:
   - pymdownx.highlight:
       use_pygments: true
       pygments_lang_class: true
+  - pymdownx.inlinehilite
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
   - toc
   - tables
   - attr_list
@@ -66,7 +88,7 @@ markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
   - md_in_html
-
+  - pymdownx.keys
 
 plugins:
   - glightbox:
@@ -104,19 +126,16 @@ plugins:
           options:
             show_submodules: true
             docstring_style: numpy
+
 watch:
   - src/scida
 
-
 extra_javascript:
   - javascripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 extra_css:
-  - stylesheets/gridview.css
-  - stylesheets/code_select.css
-  - stylesheets/mkdocstrings.css
+  - stylesheets/extra.css
 
 not_in_nav: |
   /cookbooks/*/*.ipynb

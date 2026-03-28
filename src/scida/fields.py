@@ -721,14 +721,13 @@ class FieldContainer(MutableMapping):
                                 try:
                                     field = field.to(units)
                                 except pint.errors.DimensionalityError as e:
-                                    print(e)
                                     raise ValueError(
                                         "Field '%s' units '%s' do not match '%s'"
                                         % (key, field.units, units)
-                                    )
+                                    ) from e
                     else:
                         # this should not happen. TODO: figure out when this happens
-                        logging.warning(
+                        log.warning(
                             "Unit registries of field '%s' do not match. container registry."
                             % key
                         )
