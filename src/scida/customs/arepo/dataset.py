@@ -370,8 +370,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             for key in self.data:
                 if not (key.startswith("PartType")):
                     continue
-                self.data[key]["SubhaloID"] = -1 * da.ones_like(
-                    da[key]["uid"], dtype=np.int64
+                self.data[key]["SubhaloID"] = self.misc["unboundID"] * da.ones_like(
+                    self.data[key]["uid"], dtype=np.int64
                 )
             return
 
@@ -441,9 +441,11 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
             # calculate first subhalo of each halo that a particle belongs to
             self.add_groupquantity_to_particles("GroupFirstSub", parttype=key)
-            pdata["SubhaloID"] = pdata["GroupFirstSub"] + pdata["LocalSubhaloID"]
+            local_shid = pdata["LocalSubhaloID"]
             pdata["SubhaloID"] = da.where(
-                pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"]
+                local_shid == index_unbound,
+                index_unbound,
+                pdata["GroupFirstSub"] + local_shid,
             )
 
         # add GroupID and SubhaloID to catalogs/groups themselves
@@ -1137,6 +1139,13 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     if hasattr(hvals, "units"):
         units = hvals.units
         hvals = hvals.magnitude
+    dtype = hvals.dtype
+    # Ensure hvals has a single chunk to avoid chunk mismatch with gidx in
+    # map_blocks. hvals is per-group (small) while gidx is per-particle
+    # (large), so their dask chunk counts differ and map_blocks cannot align
+    # them unless hvals is a single block (issue #57).
+    if isinstance(hvals, da.Array):
+        hvals = hvals.rechunk({0: -1})
     kw = dict()
     if len(hvals.shape) == 2:
         kw = dict(drop_axis=0, new_axis=0)
@@ -1145,7 +1154,7 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
         gidx,
         halocelloffsets,
         hvals,
-        dtype=hvals.dtype,
+        dtype=dtype,
         output_units=units,
         **kw,
     )
@@ -1182,10 +1191,9 @@ def get_localshidx(
     -------
     np.ndarray
     """
-    dtype = np.int32
     if index_unbound is None:
-        index_unbound = np.iinfo(dtype).max
-    res = index_unbound * np.ones(gidx_count, dtype=dtype)  # fuzz has negative index.
+        index_unbound = np.iinfo(np.int64).max
+    res = index_unbound * np.ones(gidx_count, dtype=np.int64)
 
     # find initial Group we are in
     hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
@@ -1211,7 +1219,9 @@ def get_localshidx(
     cont = True
     while cont and (startid < gidx_count):
         res[startid:endid] = (
-            sidx_start_idx if sidx_start_idx + 1 < shcumsum.shape[0] else -1
+            sidx_start_idx
+            if sidx_start_idx + 1 < shcumsum.shape[0]
+            else index_unbound
         )
         sidx_start_idx += 1
         if sidx_start_idx < shcounts[hidx_start_idx]:

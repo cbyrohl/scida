@@ -2,6 +2,7 @@
 import os
 import pathlib
 
+import dask
 import h5py
 import numpy as np
 import pytest
@@ -121,6 +122,24 @@ def test_noncosmo_simulation(testdatapath, capsys):
     captured = capsys.readouterr()
     assert "=== Cosmological Simulation ===" not in captured.out
     assert "z =" not in captured.out
+
+
+@pytest.mark.external
+@require_testdata_path("interface", only=["TNG50-4_snapshot"])
+def test_issue57(testdatapath):
+    """SubhaloID must be identical regardless of dask chunk size."""
+    ds_default = load(testdatapath, units=True)
+    subhalo_ids_default = ds_default.data["PartType0"]["SubhaloID"].compute()
+    group_ids_default = ds_default.data["PartType0"]["GroupID"].compute()
+
+    with dask.config.set({"array.chunk-size": "8KB"}):
+        ds_small = load(testdatapath, units=True)
+    # This raised "ValueError: Shapes do not align" before the fix
+    subhalo_ids_small = ds_small.data["PartType0"]["SubhaloID"].compute()
+    group_ids_small = ds_small.data["PartType0"]["GroupID"].compute()
+
+    np.testing.assert_array_equal(subhalo_ids_small, subhalo_ids_default)
+    np.testing.assert_array_equal(group_ids_small, group_ids_default)
 
 
 @pytest.mark.external
