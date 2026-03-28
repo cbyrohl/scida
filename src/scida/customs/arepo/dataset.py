@@ -370,7 +370,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             for key in self.data:
                 if not (key.startswith("PartType")):
                     continue
-                self.data[key]["SubhaloID"] = -1 * da.ones_like(
+                self.data[key]["SubhaloID"] = self.misc["unboundID"] * da.ones_like(
                     self.data[key]["uid"], dtype=np.int64
                 )
             return
@@ -1140,11 +1140,12 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
         units = hvals.units
         hvals = hvals.magnitude
     dtype = hvals.dtype
-    # Compute hvals eagerly to avoid chunk mismatch with gidx in map_blocks.
-    # hvals is per-group (small) while gidx is per-particle (large), so their
-    # dask chunk counts differ and map_blocks cannot align them (issue #57).
+    # Ensure hvals has a single chunk to avoid chunk mismatch with gidx in
+    # map_blocks. hvals is per-group (small) while gidx is per-particle
+    # (large), so their dask chunk counts differ and map_blocks cannot align
+    # them unless hvals is a single block (issue #57).
     if isinstance(hvals, da.Array):
-        hvals = hvals.compute()
+        hvals = hvals.rechunk({0: -1})
     kw = dict()
     if len(hvals.shape) == 2:
         kw = dict(drop_axis=0, new_axis=0)
