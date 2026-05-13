@@ -61,6 +61,9 @@ jobs:
           echo "SCIDA_TESTDATA_PATH=$SCIDA_TESTDATA_PATH"
           find "$SCIDA_TESTDATA_PATH" -maxdepth 2 -mindepth 1 | sort | head -100
 
+          # Report which testdata.yaml entries are missing on the runner. Not fatal:
+          # tests using missing entries are skipped via SCIDA_TESTDATA_SILENT_UNAVAILABLE=FALSE
+          # + pytest -rs, so absences surface as visible skips in the report.
           uv run python - <<'PY'
           import os
           from pathlib import Path
@@ -78,9 +81,10 @@ jobs:
                   missing.append(str(path))
 
           if missing:
-              print("Missing regression test data entries:")
+              print(f"Missing {len(missing)}/{len(entries)} regression test data entries (tests will be skipped):")
               print("\n".join(missing))
-              raise SystemExit(1)
+          else:
+              print(f"All {len(entries)} regression test data entries present.")
           PY
 
       - name: Run regression tests
