@@ -87,7 +87,9 @@ jobs:
         run: |
           echo "python version: $PYTHON_VERSION"
           echo "pytest args: $PYTEST_ARGS"
-          nox --session tests --python "$PYTHON_VERSION" -- $PYTEST_ARGS
+          # Tokenize the workflow_dispatch input into an array to avoid shell injection.
+          read -ra ARGS <<< "$PYTEST_ARGS"
+          nox --session tests --python "$PYTHON_VERSION" -- "${ARGS[@]}"
 
       - name: Upload test report
         if: always()
