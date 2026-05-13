@@ -61,9 +61,13 @@ jobs:
           echo "SCIDA_TESTDATA_PATH=$SCIDA_TESTDATA_PATH"
           find "$SCIDA_TESTDATA_PATH" -maxdepth 2 -mindepth 1 | sort | head -100
 
-          # Report which testdata.yaml entries are missing on the runner. Not fatal:
-          # tests using missing entries are skipped via SCIDA_TESTDATA_SILENT_UNAVAILABLE=FALSE
-          # + pytest -rs, so absences surface as visible skips in the report.
+          # Report which testdata.yaml entries are missing on the runner. Individual
+          # gaps are not fatal — tests using missing entries are skipped via
+          # SCIDA_TESTDATA_SILENT_UNAVAILABLE=FALSE + pytest -rs, so absences surface
+          # as visible skips in the report. But fail if a majority of entries are
+          # missing, which usually indicates a broken/unmounted volume rather than
+          # legitimately absent data; pytest returns 0 for all-skipped runs and would
+          # otherwise hide the breakage as a green job.
           uv run python - <<'PY'
           import os
           from pathlib import Path
@@ -83,6 +87,12 @@ jobs:
           if missing:
               print(f"Missing {len(missing)}/{len(entries)} regression test data entries (tests will be skipped):")
               print("\n".join(missing))
+              if 2 * len(missing) > len(entries):
+                  raise SystemExit(
+                      f"More than half of regression test data entries are missing "
+                      f"({len(missing)}/{len(entries)}); aborting to surface what is "
+                      "likely a broken mount."
+                  )
           else:
               print(f"All {len(entries)} regression test data entries present.")
           PY
