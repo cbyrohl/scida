@@ -1,0 +1,107 @@
+name: Regression tests
+
+on:
+  schedule:
+    # Run once a week on the self-hosted runner that has regression data mounted.
+    - cron: "23 3 * * 0"
+  workflow_dispatch:
+    inputs:
+      python_version:
+        description: "Python version to use"
+        required: false
+        default: "3.11"
+      testdata_path:
+        description: "Path to mounted regression test data"
+        required: false
+        default: "/mnt/testdata-scida"
+      pytest_args:
+        description: "Arguments passed through to pytest via nox"
+        required: false
+        default: "tests/external -m external -rs"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regression-tests-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  regression-tests:
+    name: Regression data tests
+    runs-on: [self-hosted, regressiondata]
+    timeout-minutes: 240
+    env:
+      FORCE_COLOR: "1"
+      PRE_COMMIT_COLOR: "always"
+      PYTHON_VERSION: ${{ github.event.inputs.python_version || '3.11' }}
+      SCIDA_TESTDATA_PATH: ${{ github.event.inputs.testdata_path || '/mnt/testdata-scida' }}
+      SCIDA_TESTDATA_SILENT_UNAVAILABLE: "FALSE"
+      PYTEST_ARGS: ${{ github.event.inputs.pytest_args || 'tests/external -m external -rs' }}
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install "$PYTHON_VERSION"
+
+      - name: Install nox
+        run: uv tool install nox --with nox-uv
+
+      - name: Check mounted regression data
+        run: |
+          test -d "$SCIDA_TESTDATA_PATH"
+          echo "SCIDA_TESTDATA_PATH=$SCIDA_TESTDATA_PATH"
+          find "$SCIDA_TESTDATA_PATH" -maxdepth 2 -mindepth 1 | sort | head -100
+
+          uv run python - <<'PY'
+          import os
+          from pathlib import Path
+
+          import yaml
+
+          root = Path(os.environ["SCIDA_TESTDATA_PATH"]).expanduser()
+          with Path("tests/testdata.yaml").open() as handle:
+              entries = yaml.safe_load(handle)["testdata"]
+
+          missing = []
+          for name, config in entries.items():
+              path = root / config.get("fn", name)
+              if not path.exists():
+                  missing.append(str(path))
+
+          if missing:
+              print("Missing regression test data entries:")
+              print("\n".join(missing))
+              raise SystemExit(1)
+          PY
+
+      - name: Run regression tests
+        run: |
+          echo "python version: $PYTHON_VERSION"
+          echo "pytest args: $PYTEST_ARGS"
+          # Tokenize the workflow_dispatch input into an array to avoid shell injection.
+          read -ra ARGS <<< "$PYTEST_ARGS"
+          nox --session tests --python "$PYTHON_VERSION" -- "${ARGS[@]}"
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-junit-report
+          path: report.xml
+
+      - name: Upload coverage data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-coverage-data
+          include-hidden-files: true
+          path: ".coverage*"
