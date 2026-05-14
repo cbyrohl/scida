@@ -7,13 +7,20 @@ from __future__ import annotations
 import pathlib
 
 from scida.customs.gadgetstyle.series import GadgetStyleSimulation
-from scida.discovertypes import CandidateStatus
+from scida.discovertypes import (
+    CandidateStatus,
+    Confidence,
+    DetectionResult,
+    Specificity,
+)
 
 
 class SwiftSimulation(GadgetStyleSimulation):
     """
     A dataseries representing a SWIFT simulation.
     """
+
+    _detection_specificity = Specificity.FAMILY
 
     def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
         """
@@ -52,6 +59,10 @@ class SwiftSimulation(GadgetStyleSimulation):
             return CandidateStatus.NO
         pcode = p / "Code" / "swiftsim"
         if pcode.exists():
-            return CandidateStatus.YES
+            return DetectionResult.match(
+                Confidence.FORMAT_MARKER,
+                specificity=cls._detection_specificity,
+                evidence=("Code/swiftsim",),
+            )
         # TODO: check individual snapshot for swift header
         return CandidateStatus.NO

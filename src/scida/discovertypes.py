@@ -7,7 +7,8 @@ from __future__ import annotations
 import logging
 import os
 from collections import Counter
-from enum import Enum
+from dataclasses import dataclass
+from enum import Enum, IntEnum
 from functools import reduce
 from inspect import getmro
 
@@ -25,15 +26,15 @@ log = logging.getLogger(__name__)
 
 def is_valid_candidate(val):
     """
-    Map mix of old bool and new Candidate Status enum to bool.
+    Map legacy bools to candidate status while passing through rich results.
     Parameters
     ----------
-    val: bool or CandidateStatus
+    val: bool, CandidateStatus, or DetectionResult
         Value to map.
 
     Returns
     -------
-    CandidateStatus
+    CandidateStatus or DetectionResult
     """
     if isinstance(val, bool):
         if val:
@@ -53,6 +54,105 @@ class CandidateStatus(Enum):
     NO = 0  # definitely not a candidate
     MAYBE = 1  # not sure yet
     YES = 2  # yes, this is a candidate
+
+
+class Confidence(IntEnum):
+    """
+    Quality of the evidence for a detection candidate.
+    """
+
+    NO = 0
+    PATH_SHAPE = 10
+    GENERIC_HEADER = 30
+    FORMAT_MARKER = 60
+    UNIQUE_MARKER = 80
+    EXPLICIT = 100
+
+
+class Specificity(IntEnum):
+    """
+    Narrowness of the class being claimed.
+    """
+
+    BASE = 0
+    GENERIC = 10
+    FAMILY = 20
+    SUBFAMILY = 30
+    INSTANCE = 40
+
+
+@dataclass(frozen=True)
+class DetectionResult:
+    """
+    Rich detection result separating evidence quality from class specificity.
+    """
+
+    confidence: Confidence
+    specificity: Specificity | int | None = None
+    evidence: tuple[str, ...] = ()
+
+    @classmethod
+    def no(cls, *evidence: str):
+        return cls(Confidence.NO, evidence=evidence)
+
+    @classmethod
+    def match(
+        cls,
+        confidence: Confidence,
+        *,
+        specificity: Specificity | int | None = None,
+        evidence: tuple[str, ...] | list[str] = (),
+    ):
+        return cls(confidence, specificity=specificity, evidence=tuple(evidence))
+
+    @property
+    def compatible(self) -> bool:
+        return self.confidence != Confidence.NO
+
+
+def _class_specificity(cls) -> int:
+    specificity = getattr(cls, "_detection_specificity", None)
+    if specificity is not None:
+        return (
+            specificity.value if isinstance(specificity, Specificity) else specificity
+        )
+    mro = getmro(cls)
+    return 10 * len(
+        [
+            c
+            for c in mro
+            if c is not object
+            and "Mixin" not in c.__name__
+            and c.__name__ not in {"Dataset", "BaseDataset", "DatasetSeries"}
+        ]
+    )
+
+
+def _candidate_to_detection_result(val, cls) -> DetectionResult:
+    val = is_valid_candidate(val)
+    if isinstance(val, DetectionResult):
+        if val.specificity is None:
+            return DetectionResult(
+                val.confidence,
+                specificity=_class_specificity(cls),
+                evidence=val.evidence,
+            )
+        return val
+    if val == CandidateStatus.NO:
+        return DetectionResult.no()
+    if val == CandidateStatus.MAYBE:
+        return DetectionResult.match(
+            Confidence.GENERIC_HEADER,
+            specificity=_class_specificity(cls),
+            evidence=("legacy_maybe",),
+        )
+    if val == CandidateStatus.YES:
+        return DetectionResult.match(
+            Confidence.FORMAT_MARKER,
+            specificity=_class_specificity(cls),
+            evidence=("legacy_yes",),
+        )
+    raise TypeError("Unknown candidate result '%s'." % val)
 
 
 def _determine_mixins(path=None, metadata_raw=None):
@@ -170,7 +270,8 @@ def _determine_type(
 
     """
     available_dtypes: list[str] = []
-    dtypes_status: list[CandidateStatus] = []
+    dtypes_results: list[DetectionResult] = []
+    result_by_name: dict[str, DetectionResult] = {}
     reg: dict[str, type] = dict()
     if test_datasets:
         reg.update(**dataset_type_registry)
@@ -178,50 +279,59 @@ def _determine_type(
         reg.update(**dataseries_type_registry)
 
     for k, dtype in reg.items():
-        valid = CandidateStatus.NO
+        valid = DetectionResult.no()
 
         if catch_exception:
             try:
-                valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
+                valid = _candidate_to_detection_result(
+                    dtype.validate_path(path, **kwargs), dtype
+                )
             except Exception as e:
                 log.debug(
                     "Exception raised during validate_path of tested type '%s': %s"
                     % (k, e)
                 )
         else:
-            valid = is_valid_candidate(dtype.validate_path(path, **kwargs))
-        if valid != CandidateStatus.NO:
+            valid = _candidate_to_detection_result(
+                dtype.validate_path(path, **kwargs), dtype
+            )
+        if valid.compatible:
             available_dtypes.append(k)
-            dtypes_status.append(valid)  # will be YES or MAYBE
+            dtypes_results.append(valid)
+            result_by_name[k] = valid
 
     if len(available_dtypes) == 0:
         raise ValueError("Unknown data type.")
     if len(available_dtypes) > 1:
-        # TODO: Rethink how tu use MAYBE/YES information.
-        # below lines not suitable for this.
-        good_matches = [
+        max_confidence = max(r.confidence.value for r in dtypes_results)
+        available_dtypes = [
             k
-            for k, v in zip(available_dtypes, dtypes_status)
-            if v == CandidateStatus.YES
+            for k, r in zip(available_dtypes, dtypes_results)
+            if r.confidence.value == max_confidence
         ]
-        if len(good_matches) >= 1:
-            available_dtypes = (
-                good_matches  # discard all MAYBEs as we have better options
-            )
 
         # reduce candidates by looking at most specific ones.
         inheritancecounters = [Counter(getmro(reg[k])) for k in reg.keys()]
-        mros = [getmro(reg[k]) for k in reg.keys()]
-        lens = [len([m for m in mro if "Mixin" not in m.__name__]) for mro in mros]
-        zp = zip(available_dtypes, lens, dtypes_status)
-        lst = sorted(zp, key=lambda x: x[2].value)
-        lst = sorted(lst, key=lambda x: x[1])
         # try to find candidate that shows up only once across all inheritance trees.
         # => this will be the most specific candidate(s).
         count = reduce(lambda x, y: x + y, inheritancecounters)
         countdict = {k: count[reg[k]] for k in available_dtypes}
         mincount = min(countdict.values())
         available_dtypes = [k for k in available_dtypes if count[reg[k]] == mincount]
+        specificities = {k: result_by_name[k].specificity for k in available_dtypes}
+        max_specificity = max(
+            s.value if isinstance(s, Specificity) else s for s in specificities.values()
+        )
+        available_dtypes = [
+            k
+            for k in available_dtypes
+            if (
+                specificities[k].value
+                if isinstance(specificities[k], Specificity)
+                else specificities[k]
+            )
+            == max_specificity
+        ]
         if len(available_dtypes) > 1:
             # after looking for the most specific candidate(s), do we still have multiple?
             if strict:

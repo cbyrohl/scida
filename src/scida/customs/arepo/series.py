@@ -11,12 +11,19 @@ from os.path import join
 import h5py
 
 from scida.customs.gadgetstyle.series import GadgetStyleSimulation
-from scida.discovertypes import CandidateStatus
+from scida.discovertypes import (
+    CandidateStatus,
+    Confidence,
+    DetectionResult,
+    Specificity,
+)
 from scida.misc import group_by_common_prefix
 
 
 class ArepoSimulation(GadgetStyleSimulation):
     """A series representing an Arepo simulation."""
+
+    _detection_specificity = Specificity.FAMILY
 
     def __init__(self, path, lazy=True, async_caching=False, **interface_kwargs):
         """
@@ -97,5 +104,9 @@ class ArepoSimulation(GadgetStyleSimulation):
                     if "Header" in f:
                         if "NumFilesPerSnapshot" in f["Header"].attrs:
                             if f["Header"].attrs["NumFilesPerSnapshot"] == 1:
-                                valid = CandidateStatus.YES
+                                valid = DetectionResult.match(
+                                    Confidence.GENERIC_HEADER,
+                                    specificity=cls._detection_specificity,
+                                    evidence=("NumFilesPerSnapshot=1",),
+                                )
         return valid
