@@ -7,12 +7,19 @@ from __future__ import annotations
 import os
 
 from scida import GadgetStyleSnapshot
-from scida.discovertypes import CandidateStatus
+from scida.discovertypes import (
+    CandidateStatus,
+    Confidence,
+    DetectionResult,
+    Specificity,
+)
 from scida.io import load_metadata
 
 
 class SwiftSnapshot(GadgetStyleSnapshot):
     """SWIFT snapshot dataset."""
+
+    _detection_specificity = Specificity.FAMILY
 
     def __init__(self, path, chunksize="auto", virtualcache=True, **kwargs) -> None:
         """
@@ -51,4 +58,8 @@ class SwiftSnapshot(GadgetStyleSnapshot):
         comparestr = metadata_raw.get("/Code", {}).get("Code", b"").decode()
         if "SWIFT" not in comparestr:
             return CandidateStatus.NO
-        return CandidateStatus.MAYBE
+        return DetectionResult.match(
+            Confidence.FORMAT_MARKER,
+            specificity=cls._detection_specificity,
+            evidence=("Code=SWIFT",),
+        )
