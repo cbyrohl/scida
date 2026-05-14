@@ -697,6 +697,17 @@ def check_unit_mismatch(unit, unit_metadata, override=False, path="", logger=log
             # all good
             return True
         elif without_units and unit != unit_metadata:
+            # 'none' (unit file) is logically equivalent to a dimensionless
+            # metadata quantity with cgs factor 1 -- typical for integer ID
+            # and counter fields whose HDF5 attrs encode to_cgs=1 and zero
+            # scalings. Treat that case as agreement rather than a mismatch.
+            other = unit_metadata if isinstance(unit, str) else unit
+            if (
+                isinstance(other, pint.Quantity)
+                and other.dimensionless
+                and np.isclose(other.to_base_units().magnitude, 1.0, rtol=1e-3)
+            ):
+                return True
             msg = "Unit mismatch for '%s': '%s' (unit file) vs. %s (metadata)" % (
                 path,
                 unit,
