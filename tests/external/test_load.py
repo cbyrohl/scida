@@ -1,7 +1,5 @@
-import math
 import os
 import pathlib
-from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
 import h5py
@@ -113,29 +111,15 @@ def test_load_zarrcutout(testdatapath):
 @require_testdata_path("interface", only=["TNG50-4_snapshot"])
 def test_load_cachefail(cachedir, testdatapath, caplog):
     """Test recovery from failure during cache creation."""
-    import signal
-    import time
-
-    class TimeoutException(Exception):
-        pass
-
-    @contextmanager
-    def time_limit(seconds):
-        def signal_handler(signum, frame):
-            raise TimeoutException("Timed out.")
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(seconds)
-        try:
-            yield
-        finally:
-            signal.alarm(0)
-
     loadkwargs = dict(catalog="none")
-    dt = 0.3
-    dt_int = int(math.ceil(dt))
-    with pytest.raises(Exception):
-        with time_limit(dt_int):
-            time.sleep(dt_int - dt)
+
+    def fail_after_partial_cache(cachefp, *args, **kwargs):
+        with h5py.File(cachefp, "w") as f:
+            f.attrs["partial"] = True
+        raise RuntimeError("cache creation interrupted")
+
+    with patch("scida.io._base.create_mergedhdf5file", fail_after_partial_cache):
+        with pytest.raises(RuntimeError, match="cache creation interrupted"):
             load(testdatapath, **loadkwargs)
 
     nfiles = 0
