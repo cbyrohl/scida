@@ -1,6 +1,6 @@
 # scida
 
-![scida banner](docs/images/banner.png)
+![scida banner](https://raw.githubusercontent.com/cbyrohl/scida/main/docs/images/banner.png)
 
 [![pyversions](https://img.shields.io/pypi/pyversions/scida)](https://pypi.org/project/scida/)
 ![test status](https://github.com/cbyrohl/scida/actions/workflows/tests.yml/badge.svg)
