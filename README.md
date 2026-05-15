@@ -1,5 +1,7 @@
 # scida
 
+![scida banner](docs/images/banner.png)
+
 [![pyversions](https://img.shields.io/pypi/pyversions/scida)](https://pypi.org/project/scida/)
 ![test status](https://github.com/cbyrohl/scida/actions/workflows/tests.yml/badge.svg)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.06064/status.svg)](https://doi.org/10.21105/joss.06064)
