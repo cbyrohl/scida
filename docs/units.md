@@ -31,10 +31,11 @@ You can obtain more information on the cause by setting
 
 ``` pycon
 >>> import logging
->>> logging.getLogger().setLevel(logging.DEBUG)
+>>> logging.getLogger("scida").setLevel(logging.DEBUG)
 ```
 
-before calling `load()`.
+before calling `load()`. See [Logging](configuration.md#logging) for details on
+configuring scida's package-wide or module-specific logging level.
 
 Units for custom datasets can also be manually be specified using unit files, see [here](configuration.md#unit-files).
 

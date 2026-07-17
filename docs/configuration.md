@@ -31,6 +31,34 @@ The following options are available:
 `testdata_path`
 : The base path to the test data sets defined in "tests/testdata.yaml".
 
+## Logging
+
+scida uses Python's standard [`logging`](https://docs.python.org/3/library/logging.html)
+module. Logger names follow the package hierarchy, so configuring the parent
+`scida` logger changes the level for all scida modules without changing the
+level for other libraries:
+
+```python
+import logging
+
+scida_log = logging.getLogger("scida")
+scida_log.setLevel(logging.WARNING)
+```
+
+The level is the minimum severity that will be emitted. Use `logging.DEBUG` for
+detailed diagnostics, `logging.INFO` for normal status messages,
+`logging.WARNING` for warnings and errors, or `logging.CRITICAL` to show only
+critical errors. A more specific logger can be configured independently; for
+example, the following enables detailed unit-loading messages only:
+
+```python
+logging.getLogger("scida.interfaces.mixins.units").setLevel(logging.DEBUG)
+```
+
+If the application has already configured logging handlers or formatting,
+scida uses that configuration. Otherwise, importing scida configures logging to
+write messages at `INFO` level and above to standard output.
+
 ## Simulation configuration
 By default, scida will load supported [simulation configurations from the package](https://github.com/cbyrohl/scida/blob/main/src/scida/configfiles/simulations.yaml).
 User configurations for simulations are loaded from `~/.config/scida/simulations.yaml`. This file is also in YAML format.
