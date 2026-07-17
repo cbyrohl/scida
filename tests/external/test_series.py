@@ -78,26 +78,27 @@ def test_delay_obj(testdatapath):
 
 @pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
-def test_areposimulation_lazy_message(cachedir, testdatapath):
-    tstart = time.process_time()
+def test_areposimulation_lazy_message(cachedir, testdatapath, capsys):
     bs = ArepoSimulation(testdatapath, lazy=True)
-    dt0 = time.process_time() - tstart
+    captured = capsys.readouterr()
     print(bs.datasets[0])
     assert type(bs.datasets[0]).__name__ == "Delay"
-    print(dt0)
-    assert dt0 < 4.0
+    assert "Have not cached this data series. Can take a while." in captured.out
 
 
 @pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
-def test_areposimulation_lazy(cachedir, testdatapath):
-    tstart = time.process_time()
+def test_areposimulation_lazy(cachedir, testdatapath, capsys):
     bs = ArepoSimulation(testdatapath, lazy=True)
-    dt0 = time.process_time() - tstart
     print(bs.datasets[0])
     assert type(bs.datasets[0]).__name__ == "Delay"
-    print(dt0)
-    assert dt0 < 4.0
+    assert os.path.exists(bs._metadatafile)
+
+    capsys.readouterr()
+    bs = ArepoSimulation(testdatapath, lazy=True)
+    captured = capsys.readouterr()
+    assert type(bs.datasets[0]).__name__ == "Delay"
+    assert "Have not cached this data series. Can take a while." not in captured.out
 
 
 @pytest.mark.external
