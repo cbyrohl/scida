@@ -34,30 +34,33 @@ The following options are available:
 ## Logging
 
 scida uses Python's standard [`logging`](https://docs.python.org/3/library/logging.html)
-module. Logger names follow the package hierarchy, so configuring the parent
-`scida` logger changes the level for all scida modules without changing the
-level for other libraries:
+module. To change the logging level for all scida modules without affecting
+other libraries:
 
 ```python
 import logging
 
-scida_log = logging.getLogger("scida")
-scida_log.setLevel(logging.WARNING)
+logging.getLogger("scida").setLevel(logging.WARNING)
 ```
 
-The level is the minimum severity that will be emitted. Use `logging.DEBUG` for
-detailed diagnostics, `logging.INFO` for normal status messages,
-`logging.WARNING` for warnings and errors, or `logging.CRITICAL` to show only
-critical errors. A more specific logger can be configured independently; for
-example, the following enables detailed unit-loading messages only:
+Choose the level based on how much output you want:
+
+- `logging.DEBUG`: detailed diagnostic information
+- `logging.INFO`: normal status messages
+- `logging.WARNING`: warnings and errors
+- `logging.ERROR`: errors only
+- `logging.CRITICAL`: critical errors only
+
+You can also change the level for a specific scida module. For example, to show
+detailed messages about unit loading:
 
 ```python
 logging.getLogger("scida.interfaces.mixins.units").setLevel(logging.DEBUG)
 ```
 
-If the application has already configured logging handlers or formatting,
-scida uses that configuration. Otherwise, importing scida configures logging to
-write messages at `INFO` level and above to standard output.
+scida respects an application's existing logging setup. If logging has not
+already been configured, importing scida displays messages at `INFO` level and
+above on standard output.
 
 ## Simulation configuration
 By default, scida will load supported [simulation configurations from the package](https://github.com/cbyrohl/scida/blob/main/src/scida/configfiles/simulations.yaml).
