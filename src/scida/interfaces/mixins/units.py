@@ -623,7 +623,8 @@ class UnitMixin(Mixin):
                     if v not in success_states:
                         log.info("  - %s (%s)" % (k, v.name))
             log.info(
-                "Re-run with\n\t>>> import logging\n\t>>> logging.getLogger().setLevel(logging.DEBUG)\n"
+                "Re-run with\n\t>>> import logging\n"
+                "\t>>> logging.getLogger('scida').setLevel(logging.DEBUG)\n"
                 "to learn more."
             )
         return count > 0
