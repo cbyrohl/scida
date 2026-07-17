@@ -1,3 +1,5 @@
+import logging
+
 import h5py
 import numpy as np
 import pytest
@@ -57,12 +59,14 @@ def test_missingunits(monkeypatch, gadgetfile_dummy, caplog):
     assert "Cannot determine units" in str(exc_info.value)
     monkeypatch.setenv("SCIDA_MISSING_UNITS", "warn")
     get_config(reload=True)
+    caplog.set_level(logging.DEBUG)
     load(str(p), units=True)
     assert "Cannot determine units" in caplog.text
+    caplog.clear()
     monkeypatch.setenv("SCIDA_MISSING_UNITS", "ignore")
     get_config(reload=True)
     load(str(p), units=True)
-    assert "Cannot determine units" in caplog.text
+    assert "Cannot determine units" not in caplog.text
 
 
 @pytest.mark.integration
