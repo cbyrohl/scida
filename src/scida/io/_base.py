@@ -22,7 +22,13 @@ from scida.config import get_config
 from scida.fields import FieldContainer, walk_container
 from scida.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
 from scida.io.fits import fitsrecords_to_daskarrays
-from scida.misc import get_container_from_path, return_hdf5cachepath
+from scida.helpers_misc import hash_path
+from scida.misc import (
+    CACHE_FORMAT_VERSION,
+    find_precached_file,
+    get_container_from_path,
+    return_hdf5cachepath,
+)
 
 log = logging.getLogger(__name__)
 
@@ -384,6 +390,21 @@ class ChunkedHDF5Loader(Loader):
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
         if cachefp is not None and os.path.isfile(cachefp) and use_cachefile:
             path = cachefp
+        elif use_cachefile:
+            # check for dataset-local pre-cache
+            hsh = hash_path(
+                os.path.join(self.path, fileprefix) if fileprefix else self.path
+            )
+            precache_fp = find_precached_file(hsh, "hdf5", self.path)
+            if precache_fp is not None:
+                path = precache_fp
+            else:
+                paths = self.get_chunkedfiles(
+                    fileprefix, choose_prefix=kwargs.get("choose_prefix", False)
+                )
+                if len(paths) == 0:
+                    raise ValueError("No files for prefix '%s' found." % fileprefix)
+                path = paths[0]
         else:
             # get data from first file in list
             paths = self.get_chunkedfiles(
@@ -439,7 +460,26 @@ class ChunkedHDF5Loader(Loader):
             # 1. no cachepath given
             create = True
         elif not os.path.isfile(cachefp):
-            # 2. no cachefile exists
+            # 2. no cachefile exists — try dataset-local pre-cache first
+            if not overwrite_cache:
+                hsh = hash_path(
+                    os.path.join(self.path, fileprefix) if fileprefix else self.path
+                )
+                precache_fp = find_precached_file(hsh, "hdf5", self.path)
+                if precache_fp is not None:
+                    try:
+                        data, metadata = self.load_cachefile(
+                            precache_fp,
+                            token=token,
+                            chunksize=chunksize,
+                            **kwargs,
+                        )
+                        return data, metadata
+                    except (InvalidCacheError, OSError):
+                        log.warning(
+                            "Pre-cache at %s invalid, creating user cache.",
+                            precache_fp,
+                        )
             create = True
         elif overwrite_cache:
             # 3. cachefile exists, but overwrite=True
@@ -553,6 +593,7 @@ class ChunkedHDF5Loader(Loader):
 
         with h5py.File(cachefp, "r+") as hf:
             hf.attrs["_cachingcomplete"] = True  # mark that caching complete
+            hf.attrs["_cache_format_version"] = CACHE_FORMAT_VERSION
 
     def load_cachefile(self, location, token="", chunksize="auto", **kwargs):
         """
@@ -591,6 +632,12 @@ class ChunkedHDF5Loader(Loader):
         if not cache_valid:
             raise InvalidCacheError(
                 "Cache file '%s' is not valid. Delete file and try again." % location
+            )
+        cache_version = hf.attrs.get("_cache_format_version", None)
+        if cache_version != CACHE_FORMAT_VERSION:
+            raise InvalidCacheError(
+                "Cache format version mismatch (got %s, need %s)"
+                % (cache_version, CACHE_FORMAT_VERSION)
             )
 
         datadict = load_datadict_old(
