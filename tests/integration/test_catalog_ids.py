@@ -1,29 +1,37 @@
 """Integration tests for catalog ID assignment (GroupID, SubhaloID)."""
 
+import os
+
 import dask
 import h5py
 import numpy as np
 import pytest
 
 from scida import load
+from scida.config import get_config
+from scida.customs.arepo.dataset import ArepoCatalog, ArepoSnapshot
+from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
+from scida.discovertypes import CandidateStatus
 
 
-def _create_arepo_snapshot_and_catalog(tmp_path):
+def _create_arepo_snapshot_and_catalog(tmp_path, parttype=0):
     """Create minimal Arepo-style snapshot + catalog files for testing."""
-    npart = 100  # particles in PartType0
+    npart = 100
+    counts = np.zeros(6, dtype=np.int64)
+    counts[parttype] = npart
     ngroups = 3
     nsubs = 4
 
     # Group structure: groups own [40, 30, 20] particles, 10 unbound
     group_lentype = np.zeros((ngroups, 6), dtype=np.int64)
-    group_lentype[:, 0] = [40, 30, 20]
+    group_lentype[:, parttype] = [40, 30, 20]
 
     # Subhalo structure:
     # Group 0: subs 0,1 with 20 particles each
     # Group 1: sub 2 with 30 particles
     # Group 2: sub 3 with 20 particles
     sub_lentype = np.zeros((nsubs, 6), dtype=np.int64)
-    sub_lentype[:, 0] = [20, 20, 30, 20]
+    sub_lentype[:, parttype] = [20, 20, 30, 20]
     sub_grnr = np.array([0, 0, 1, 2], dtype=np.int64)
     group_firstsub = np.array([0, 2, 3], dtype=np.int64)
     group_nsubs = np.array([2, 1, 1], dtype=np.int64)
@@ -32,8 +40,8 @@ def _create_arepo_snapshot_and_catalog(tmp_path):
     snap_path = tmp_path / "snap_000.hdf5"
     with h5py.File(snap_path, "w") as f:
         hdr = f.create_group("Header")
-        hdr.attrs["NumPart_ThisFile"] = [npart, 0, 0, 0, 0, 0]
-        hdr.attrs["NumPart_Total"] = [npart, 0, 0, 0, 0, 0]
+        hdr.attrs["NumPart_ThisFile"] = counts
+        hdr.attrs["NumPart_Total"] = counts
         hdr.attrs["NumPart_Total_HighWord"] = [0, 0, 0, 0, 0, 0]
         hdr.attrs["MassTable"] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         hdr.attrs["Time"] = 1.0
@@ -53,7 +61,7 @@ def _create_arepo_snapshot_and_catalog(tmp_path):
         hdr.attrs["Flag_IC_Info"] = 0
         hdr.attrs["Flag_LptInitCond"] = 0
         hdr.attrs["Git_commit"] = b"dummy"
-        pt0 = f.create_group("PartType0")
+        pt0 = f.create_group(f"PartType{parttype}")
         pt0.create_dataset("Coordinates", data=np.zeros((npart, 3), dtype=np.float64))
         pt0.create_dataset("ParticleIDs", data=np.arange(npart, dtype=np.int64))
         pt0.create_dataset("Velocities", data=np.zeros((npart, 3), dtype=np.float64))
@@ -122,3 +130,71 @@ def test_subhaloid_small_chunksize(tmp_path):
     assert np.all(group_ids[40:70] == 1)
     assert np.all(group_ids[70:90] == 2)
     assert np.all(group_ids[90:] == maxint)  # unbound
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("first_entry", ["snapshot", "hidden", "backup", "directory"])
+def test_catalog_ids_ignore_directory_listing_order(tmp_path, monkeypatch, first_entry):
+    """Temporary entries must not suppress Arepo catalog attachment. [AI-Codex]"""
+    monkeypatch.setitem(get_config(), "nthreads", 1)
+    snap_path, cat_path = _create_arepo_snapshot_and_catalog(tmp_path, parttype=4)
+    snapdir = tmp_path / "snapdir_000"
+    catdir = tmp_path / "groups_000"
+    snapdir.mkdir()
+    catdir.mkdir()
+    names = {
+        "snapshot": "snap_000.0.hdf5",
+        "hidden": ".snap_000.0.hdf5.PARTIAL",
+        "backup": "snap_000.0.hdf5.bak",
+        "directory": "notes",
+    }
+    snap_path.rename(snapdir / names["snapshot"])
+    cat_path.rename(catdir / "fof_subhalo_tab_000.0.hdf5")
+    # Use multipart headers, including an empty trailing chunk, like real outputs.
+    for directory, prefix, count_keys in (
+        (snapdir, "snap_000", ("NumPart_ThisFile",)),
+        (catdir, "fof_subhalo_tab_000", ("Ngroups_ThisFile", "Nsubgroups_ThisFile")),
+    ):
+        with h5py.File(directory / f"{prefix}.0.hdf5", "r+") as first:
+            first["Header"].attrs["NumFilesPerSnapshot"] = 2
+            with h5py.File(directory / f"{prefix}.1.hdf5", "w") as second:
+                header = second.create_group("Header")
+                header.attrs.update(first["Header"].attrs)
+                for key in count_keys:
+                    header.attrs[key] = np.zeros_like(header.attrs[key])
+    (snapdir / names["hidden"]).write_text("incomplete rsync transfer")
+    (snapdir / names["backup"]).write_text("backup")
+    (snapdir / names["directory"]).mkdir()
+    listdir = os.listdir
+
+    def reordered_listdir(path):
+        entries = listdir(path)
+        if os.fspath(path) == str(snapdir):
+            first = names[first_entry]
+            return [first] + [entry for entry in entries if entry != first]
+        return entries
+
+    monkeypatch.setattr(os, "listdir", reordered_listdir)
+    # Match the production catalogue-first loading order.
+    catalog = load(catdir, fileprefix="fof_subhalo_tab_000", units=False)
+    assert isinstance(catalog, ArepoCatalog)
+    snap = load(snapdir, catalog=catdir, fileprefix="snap_000", units=False)
+    assert isinstance(snap, ArepoSnapshot)
+    assert isinstance(snap.catalog, ArepoCatalog)
+    stars = snap.data["PartType4"]
+    np.testing.assert_array_equal(stars["ParticleIDs"].compute(), np.arange(100))
+    expected = np.repeat([0, 1, 2, np.iinfo(np.int64).max], [40, 30, 20, 10])
+    np.testing.assert_array_equal(stars["GroupID"].compute(), expected)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "entry", [None, ".snap_000.0.hdf5", "snap_000.0.hdf5.bak", "directory"]
+)
+def test_directory_without_snapshot_chunks_is_rejected(tmp_path, entry):
+    """Empty or ignored-only directories are not snapshots. [AI-Codex]"""
+    if entry == "directory":
+        (tmp_path / "snap_000.0.hdf5").mkdir()
+    elif entry is not None:
+        (tmp_path / entry).touch()
+    assert GadgetStyleSnapshot.validate_path(tmp_path) == CandidateStatus.NO
