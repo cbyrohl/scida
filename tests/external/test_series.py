@@ -78,12 +78,12 @@ def test_delay_obj(testdatapath):
 
 @pytest.mark.external
 @require_testdata_path("areposimulation", only=["TNGvariation_simulation", "TNG50-4"])
-def test_areposimulation_lazy_message(cachedir, testdatapath, capsys):
+def test_areposimulation_lazy_message(cachedir, testdatapath, caplog):
+    caplog.set_level("INFO", logger="scida.series")
     bs = ArepoSimulation(testdatapath, lazy=True)
-    captured = capsys.readouterr()
     print(bs.datasets[0])
     assert type(bs.datasets[0]).__name__ == "Delay"
-    assert "Have not cached this data series. Can take a while." in captured.out
+    assert "Have not cached this data series. Can take a while." in caplog.text
 
 
 @pytest.mark.external
