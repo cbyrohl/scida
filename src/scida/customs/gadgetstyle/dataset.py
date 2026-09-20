@@ -124,7 +124,7 @@ class GadgetStyleSnapshot(Dataset):
                 )
             except ValueError:
                 return CandidateStatus.NO
-            if not any(f.endswith(".hdf5") for f in files):
+            if len(files) == 0 or not all(f.endswith(".hdf5") for f in files):
                 return CandidateStatus.NO
             possibly_valid = CandidateStatus.MAYBE
         if possibly_valid != CandidateStatus.NO:

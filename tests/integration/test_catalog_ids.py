@@ -198,3 +198,26 @@ def test_directory_without_snapshot_chunks_is_rejected(tmp_path, entry):
     elif entry is not None:
         (tmp_path / entry).touch()
     assert GadgetStyleSnapshot.validate_path(tmp_path) == CandidateStatus.NO
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("artifact_chunk", [0, 1])
+@pytest.mark.parametrize("fileprefix", ["", "snap_000"])
+def test_directory_with_non_hdf5_chunk_is_rejected(
+    tmp_path, artifact_chunk, fileprefix
+):
+    """Reject numbered transfer artifacts before or after valid chunks. [AI-Codex]"""
+    snap_path, _ = _create_arepo_snapshot_and_catalog(tmp_path)
+    snapdir = tmp_path / "snapdir_000"
+    snapdir.mkdir()
+    snap_path.rename(snapdir / f"snap_000.{1 - artifact_chunk}.hdf5")
+    assert (
+        GadgetStyleSnapshot.validate_path(snapdir, fileprefix=fileprefix)
+        == CandidateStatus.MAYBE
+    )
+
+    (snapdir / f"snap_000.{artifact_chunk}.PARTIAL").write_text("incomplete transfer")
+    assert (
+        GadgetStyleSnapshot.validate_path(snapdir, fileprefix=fileprefix)
+        == CandidateStatus.NO
+    )
