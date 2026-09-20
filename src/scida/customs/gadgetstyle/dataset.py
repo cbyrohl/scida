@@ -14,6 +14,7 @@ from scida.discovertypes import CandidateStatus
 from scida.interface import Dataset
 from scida.interfaces.mixins import CosmologyMixin
 from scida.io import load_metadata
+from scida.io._base import _get_chunkedfiles
 from scida.misc import get_scalar
 
 log = logging.getLogger(__name__)
@@ -113,13 +114,19 @@ class GadgetStyleSnapshot(Dataset):
         iszarr = path.rstrip("/").endswith(".zarr")
         if path.endswith(".hdf5") or iszarr:
             possibly_valid = CandidateStatus.MAYBE
-        if os.path.isdir(path):
-            files = os.listdir(path)
-            sufxs = [f.split(".")[-1] for f in files]
-            if not iszarr and len(set(sufxs)) > 1:
-                possibly_valid = CandidateStatus.NO
-            if sufxs[0] == "hdf5":
-                possibly_valid = CandidateStatus.MAYBE
+        if os.path.isdir(path) and not iszarr:
+            # Use the reader's filtering, independent of directory order. [AI-Codex]
+            try:
+                files = _get_chunkedfiles(
+                    path,
+                    fileprefix=kwargs.get("fileprefix", ""),
+                    choose_prefix=kwargs.get("choose_prefix", False),
+                )
+            except ValueError:
+                return CandidateStatus.NO
+            if len(files) == 0 or not all(f.endswith(".hdf5") for f in files):
+                return CandidateStatus.NO
+            possibly_valid = CandidateStatus.MAYBE
         if possibly_valid != CandidateStatus.NO:
             metadata_raw = load_metadata(path, **kwargs)
             # need some silly combination of attributes to be sure
