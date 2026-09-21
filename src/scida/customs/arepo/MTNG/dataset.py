@@ -2,8 +2,9 @@
 Support for MTNG-Arepo datasets, see https://www.mtng-project.org/
 """
 
+from __future__ import annotations
+
 import os
-from typing import Union
 
 from scida.customs.arepo.dataset import ArepoCatalog, ArepoSnapshot
 from scida.discovertypes import CandidateStatus
@@ -74,9 +75,7 @@ class MTNGArepoSnapshot(ArepoSnapshot):
         self.merge_data(self.mostbound, fieldname_suffix="_mostbound")
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for the MTNG-Arepo snapshot class.
 
@@ -146,9 +145,7 @@ class MTNGArepoCatalog(ArepoCatalog):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for the MTNG-Arepo catalog class.
 

@@ -9,6 +9,7 @@ nthreads: 8
 
 datafolders: ["/fastdata/public/testdata-scida", "/vera/ptmp/gc/byrohlc/scida-testdata", "/testdata",
               "/virgotng/universe/IllustrisTNG", "/virgotng/mpia/TNG-Cluster/", "/virgotng/universe/Eagle",
+              "/vera/ptmp/gc/MCST",
               "~/sims.TNG/",
               "~/sims.illustris/",
               "~/sims.other/"]

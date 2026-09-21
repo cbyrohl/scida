@@ -2,11 +2,13 @@
 Base dataset class and its handling.
 """
 
+from __future__ import annotations
+
 import abc
 import hashlib
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any
 
 import dask
 import dask.array as da
@@ -41,14 +43,14 @@ class BaseDataset(metaclass=MixinMeta):
 
     def __init__(
         self,
-        path,
-        chunksize="auto",
-        virtualcache=True,
-        overwrite_cache=False,
-        fileprefix="",
-        hints=None,
-        **kwargs
-    ):
+        path: str,
+        chunksize: str | int = "auto",
+        virtualcache: bool = True,
+        overwrite_cache: bool = False,
+        fileprefix: str = "",
+        hints: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize a dataset object.
 
@@ -82,8 +84,8 @@ class BaseDataset(metaclass=MixinMeta):
         self.withunits = kwargs.get("units", False)
 
         # Let's find the data and metadata for the object at 'path'
-        self.metadata = {}
-        self._metadata_raw = {}
+        self.metadata: dict[str, Any] = {}
+        self._metadata_raw: dict[str, Any] = {}
         self.data = FieldContainer(withunits=self.withunits)
 
         if not os.path.exists(self.path):
@@ -151,7 +153,7 @@ class BaseDataset(metaclass=MixinMeta):
         rep += sprint("============")
         print(rep)
 
-    def _repr_dict(self) -> Dict[str, str]:
+    def _repr_dict(self) -> dict[str, str]:
         """
         Return a dictionary of properties to be printed by __repr__ method.
 
@@ -239,10 +241,9 @@ class BaseDataset(metaclass=MixinMeta):
         -------
         int
         """
-        # determinstic hash; note that hash() on a string is no longer deterministic in python3.
+        # deterministic hash; note that hash() on a string is no longer deterministic in python3.
         hash_value = (
-            int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16)
-            % 10**10
+            int(hashlib.sha256(self.location.encode("utf-8")).hexdigest(), 16) % 10**10
         )
         return hash_value
 
@@ -271,14 +272,14 @@ class BaseDataset(metaclass=MixinMeta):
 
     def save(
         self,
-        fname,
-        fields: Union[
-            str, Dict[str, Union[List[str], Dict[str, da.Array]]], FieldContainer
-        ] = "all",
+        fname: str,
+        fields: (
+            str | dict[str, list[str] | dict[str, da.Array]] | FieldContainer
+        ) = "all",
         overwrite: bool = True,
-        zarr_kwargs: Optional[dict] = None,
+        zarr_kwargs: dict[str, Any] | None = None,
         cast_uints: bool = False,
-        extra_attrs: Optional[dict] = None,
+        extra_attrs: dict[str, Any] | None = None,
     ) -> None:
         """
         Save the dataset to a file using the 'zarr' format.
@@ -307,6 +308,16 @@ class BaseDataset(metaclass=MixinMeta):
         # cast_uints: if true, we cast uints to ints; needed for some compressions (particularly zfp)
         if zarr_kwargs is None:
             zarr_kwargs = {}
+        if overwrite and os.path.exists(fname):
+            if os.path.isdir(fname) and len(os.listdir(fname)) > 0:
+                # check if it is a zarr group/array
+                is_zarr = os.path.exists(os.path.join(fname, ".zgroup"))
+                is_zarr |= os.path.exists(os.path.join(fname, ".zarray"))
+                if not is_zarr:
+                    raise ValueError(
+                        f"Directory '{fname}' exists and is not a zarr group. "
+                        "Refusing to overwrite for safety."
+                    )
         store = zarr.DirectoryStore(fname, **zarr_kwargs)
         root = zarr.group(store, overwrite=overwrite)
 
@@ -324,6 +335,7 @@ class BaseDataset(metaclass=MixinMeta):
                 root.attrs[k] = v
         # Data
         tasks = []
+        units_to_save = {}
         ptypes = self.data.keys()
         if isinstance(fields, dict):
             ptypes = fields.keys()
@@ -347,7 +359,7 @@ class BaseDataset(metaclass=MixinMeta):
                 else:
                     arr = self.data[p][k]
                 if hasattr(arr, "magnitude"):  # if we have units, remove those here
-                    # TODO: save units in metadata!
+                    units_to_save[(p, k)] = str(arr.units)
                     arr = arr.magnitude
                 if np.any(np.isnan(arr.shape)):
                     arr.compute_chunk_sizes()  # very inefficient (have to do it separately for every array)
@@ -362,6 +374,8 @@ class BaseDataset(metaclass=MixinMeta):
                 )
                 tasks.append(task)
         dask.compute(tasks)
+        for (p, k), unit_str in units_to_save.items():
+            root[p][k].attrs["units"] = make_serializable(unit_str)
 
 
 class Dataset(BaseDataset):
@@ -488,7 +502,7 @@ class Selector(object):
         args[0].data = self.data_backup
 
 
-def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
+def create_datasetclass_with_mixins(cls: type, mixins: list | None) -> type:
     """
     Create a new class from a given class and a list of mixins.
 
@@ -506,6 +520,32 @@ def create_datasetclass_with_mixins(cls, mixins: Optional[List]):
     """
     newcls = cls
     if isinstance(mixins, list) and len(mixins) > 0:
+        # check for duplicates within the mixins list itself
+        seen = set()
+        for m in mixins:
+            if m in seen:
+                raise ValueError(
+                    "Mixin '%s' appears multiple times in the mixins list. "
+                    "Please remove duplicates." % getattr(m, "__name__", str(m))
+                )
+            seen.add(m)
+
+        # check whether any mixin already in cls hierarchy recursively
+        def has_mixin_in_hierarchy(cls, m):
+            if m in cls.__bases__:
+                return True
+            for b in cls.__bases__:
+                if has_mixin_in_hierarchy(b, m):
+                    return True
+            return False
+
+        for m in mixins:
+            if has_mixin_in_hierarchy(cls, m):
+                raise ValueError(
+                    "Mixin '%s' is already present in the class hierarchy of '%s'. "
+                    "Please remove it from the mixins list to avoid duplication."
+                    % (getattr(m, "__name__", str(m)), cls.__name__)
+                )
         name = cls.__name__ + "With" + "And".join([m.__name__ for m in mixins])
         # adjust entry point if __init__ available in some mixin
         nms = dict(cls.__dict__)

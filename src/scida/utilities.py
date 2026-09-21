@@ -1,5 +1,7 @@
 """Some utility functions"""
 
+from __future__ import annotations
+
 import zarr
 
 from .interface import Dataset

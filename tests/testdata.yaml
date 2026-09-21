@@ -245,6 +245,18 @@ testdata:
       - areposnapshot
       - areposnapshot_withcatalog|MCST1|1|2
 
+  MCST_ST15_snapshot_z5p5:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|MCST2|0|2
+
+  MCST_ST15_group_z5p5:
+    types:
+      - interface
+      - areposnapshot
+      - areposnapshot_withcatalog|MCST2|1|2
+
   FIRE2_snapshot_z1_minimal:
     types:
       - interface

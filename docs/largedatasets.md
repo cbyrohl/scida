@@ -11,20 +11,44 @@ However, what if we are working with a very large data set
 (like the TNG50-1 cosmological simulation, which has $2160^3$ particles, $512$ times more than TNG50-4)?
 
 ## Preparation
-First, we need to inform scida/dask about the resources it is allowed to use or allocate.
-By default, scida would use all available memory and CPU cores, which is not always desired, particularly on shared systems such as HPC clusters or [TNGLab](https://www.tng-project.org/data/lab/).
-
-scida provides a convenient `init_resources()` function that sets up reasonable local resource defaults.
-**Call `scida.init_resources()` immediately after importing scida** and before any other dask operations.
+Call `scida.init_resources()` before loading data to configure local resources.
+Outside TNGLab, this selects Dask's threaded scheduler and sets the thread count
+from the available CPUs, respecting CPU affinity and container quotas.
+It runs within the current Python process and does not impose a memory limit.
 
 ```python
 import scida
-scida.init_resources()  # Use defaults
-# Or with explicit settings:
-# scida.init_resources(memory_limit="4GB", n_workers=4)
+scida.init_resources()  # Local threads, using the detected CPU count
+# Or choose the local thread count:
+# scida.init_resources(n_workers=4)
 ```
 
-For TNGLab, this mechanism configures a default memory limit of 2GB per worker (4 workers, 8GB total), which you can override by passing `memory_limit` (and optionally `n_workers`) to `scida.init_resources()`. Monitor memory usage via the [dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
+For worker memory limits, explicitly enable a local distributed cluster:
+
+```python
+client = scida.init_resources(use_distributed=True)
+# Or set limits explicitly:
+# client = scida.init_resources(
+#     use_distributed=True, memory_limit="2GB", n_workers=2
+# )
+```
+
+Distributed mode defaults to one worker process per available CPU, with one thread
+per worker. If `threads_per_worker` is set, the default worker count is reduced
+accordingly. Without an explicit `memory_limit`, the full detected system/container
+memory limit is divided equally among the workers. For example, a 16 GiB limit
+and four workers gives 4 GiB per worker; scida does not reserve a fixed fraction.
+An explicit `memory_limit` is **per worker**: two workers with `"2GB"` gives 4 GB
+combined worker limits. Dask manages worker memory on a best-effort basis; this
+is not a hard cap on the entire Python application. Supplying `memory_limit`
+in threaded mode raises an error; set `use_distributed=True` to enable it.
+
+On [TNGLab](https://www.tng-project.org/data/lab/), the default is distributed mode
+with four workers and 2 GB per worker. `scida.load()` initializes that setup
+automatically if no client or explicit scheduler choice has been made.
+Call `scida.init_resources(use_distributed=False)` to choose local threads there;
+later `load()` calls respect that choice. Monitor distributed workers using the
+[Dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
 
 
 ## Starting simple: computing in chunks

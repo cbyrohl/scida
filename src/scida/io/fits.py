@@ -2,6 +2,7 @@
 FITS file reader for scida
 """
 
+from __future__ import annotations
 
 import dask
 import dask.array as da

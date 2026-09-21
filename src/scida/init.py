@@ -6,15 +6,10 @@ import logging
 import os
 from typing import Optional, Union
 
-try:
-    import psutil
+import dask
+from dask.system import cpu_count
 
-    PSUTIL_AVAILABLE = True
-except ImportError:
-    psutil = None  # type: ignore[assignment]
-    PSUTIL_AVAILABLE = False
-
-from scida.helpers_misc import parse_humansize
+from scida.misc import parse_size
 
 log = logging.getLogger(__name__)
 
@@ -26,8 +21,8 @@ def _ensure_distributed_if_needed():
 
     Called automatically at the top of ``scida.load()``.  On TNGLab the
     distributed scheduler is started with default settings (2 GB per
-    worker, 4 workers) so that ``da.histogram2d`` and similar operations
-    don't OOM.  Outside TNGLab a DEBUG-level message nudges users toward
+    worker, 4 workers) to manage memory during ``da.histogram2d`` and
+    similar operations. Outside TNGLab a DEBUG-level message points to
     ``scida.init_resources()`` for large datasets.
 
     The function is guarded by a module-level flag so it only runs once
@@ -57,8 +52,8 @@ def _ensure_distributed_if_needed():
     else:
         log.debug(
             "No dask distributed client found. For large datasets, consider "
-            "calling scida.init_resources(memory_limit=...) to prevent "
-            "out-of-memory errors. See https://scida.io/largedatasets/"
+            "calling scida.init_resources(use_distributed=True) to configure "
+            "worker memory limits. See https://scida.io/largedatasets/"
         )
 
     _auto_init_done = True
@@ -69,65 +64,103 @@ def init_resources(
     n_workers: Optional[int] = None,
     threads_per_worker: Optional[int] = None,
     dashboard_port: Optional[int] = 8787,
+    *,
+    use_distributed: Optional[bool] = None,
     **cluster_kwargs,
 ) -> Optional[object]:
     """
-    Initialize scida with optional distributed computing and memory management.
-    This function sets up dask cluster as requested.
+    Configure local Dask resources, optionally using a distributed cluster.
 
     Parameters
     ----------
     memory_limit : str or int, optional
-        Memory limit per worker. Can be specified as:
+        Memory limit per distributed worker. Requires use_distributed=True
+        outside TNGLab. Can be specified as:
         - String with units: "4GB", "2GiB", "500MB"
         - Integer in bytes: 4000000000
-        If None and n_workers is specified, use half of total system memory.
-        If None and n_workers is None, we use the dask default scheduler, which does not impose limits.
+        If None, divide the full detected system/container memory limit
+        equally among the workers. On TNGLab, default to "2GB" per worker.
     n_workers : int, optional
-        Number of worker processes. If None and memory_limit is not None, set to cpu count.
+        Number of local threads, or worker processes in distributed mode.
+        If None, use the available CPU count; in distributed mode, divide
+        it by threads_per_worker, with a minimum of one worker.
+        CPU detection respects affinity and container quotas. Distributed
+        mode on TNGLab defaults to four workers.
     threads_per_worker : int, optional
-        Number of threads per worker. If None, defaults to 1.
+        Number of threads per distributed worker. Requires distributed
+        mode. If None, defaults to 1 in that mode.
     dashboard_port : int, optional
         Port for the dask dashboard. Set to None to disable dashboard.
-        Default is 8787.
+        Default is 8787. Only used in distributed mode.
+    use_distributed : bool, optional
+        If True, start a local distributed cluster with worker memory limits.
+        If False, configure the threaded scheduler without a memory limit.
+        If None, use distributed mode on TNGLab and threads elsewhere.
     **cluster_kwargs
-        Additional keyword arguments passed to LocalCluster.
+        Additional keyword arguments passed to LocalCluster. Requires
+        distributed mode.
 
     Returns
     -------
     Client or None
-        Returns the dask Client if distributed computing is enabled, None otherwise.
+        The client connected to the local cluster, or None when using the
+        threaded scheduler, distributed is unavailable, or cluster startup fails.
 
 
     Notes
     -----
-    - Once initialized, all subsequent dask operations will use the configured scheduler
-    - Call this function before loading datasets for results
-    - On TNGLab, we default to a memory limit of 2GB and 4 workers (can be overridden).
+    - Calling with no arguments configures the threaded scheduler locally.
+    - Subsequent Dask operations use the configured scheduler.
+    - Call this function before loading datasets.
+    - On TNGLab, we default to distributed mode with 2GB per worker and 4 workers.
+      Pass use_distributed=False to opt out, including during later load() calls.
+    - Memory limits use Dask's best-effort worker memory management.
     - The dashboard can be accessed at http://localhost:{dashboard_port} (if enabled)
     - To reset or change configuration, restart your Python session
     """
 
-    # Handle TNGLab environment first
+    global _auto_init_done
+
+    if use_distributed is not None and not isinstance(use_distributed, bool):
+        raise ValueError("use_distributed must be True, False, or None")
+
+    for name, value in {
+        "n_workers": n_workers,
+        "threads_per_worker": threads_per_worker,
+    }.items():
+        if value is not None and (
+            isinstance(value, bool) or not isinstance(value, int) or value < 1
+        ):
+            raise ValueError(f"{name} must be a positive integer")
+
     is_tnglab = _detect_tnglab_environment()
+    if use_distributed is None:
+        use_distributed = is_tnglab
+
+    if not use_distributed:
+        if memory_limit is not None:
+            raise ValueError("memory_limit requires use_distributed=True")
+        if threads_per_worker is not None or cluster_kwargs:
+            raise ValueError(
+                "threads_per_worker and LocalCluster options require "
+                "use_distributed=True; use n_workers to set the local thread count"
+            )
+        if n_workers is None:
+            n_workers = cpu_count()
+        dask.config.set(scheduler="threads", num_workers=n_workers)
+        _auto_init_done = True  # Respect this scheduler choice during later load().
+        log.info("Using the local threaded scheduler with %s threads", n_workers)
+        return None
+
+    # Keep TNGLab's distributed defaults unless explicitly overridden.
     if is_tnglab:
         log.info(
             "TNGLab environment detected, defaulting to memory_limit=2GB and n_workers=4"
         )
-        memory_limit = memory_limit or "2GB"
-        n_workers = n_workers or 4
-
-    # Use distributed if:
-    # - memory_limit is specified, OR
-    # - n_workers is specified, OR
-    # - we're in TNGLab environment
-    use_distributed = memory_limit is not None or n_workers is not None or is_tnglab
-
-    if not use_distributed:
-        log.info(
-            "Using default dask scheduler (no memory limits or worker constraints)."
-        )
-        return None
+        if memory_limit is None:
+            memory_limit = "2GB"
+        if n_workers is None:
+            n_workers = 4
 
     try:
         from dask.distributed import Client, LocalCluster
@@ -137,23 +170,18 @@ def init_resources(
         )
         return None
 
-    # Set defaults based on what's specified
-    if memory_limit is None and n_workers is not None:
-        # memory_limit=None but n_workers specified -> use half system memory
-        memory_limit = _get_default_memory_limit()
-        log.info(
-            f"No memory limit specified but n_workers={n_workers}, using half system memory: {memory_limit}"
-        )
-
-    if n_workers is None and memory_limit is not None:
-        # n_workers=None but memory_limit specified -> use CPU count
-        n_workers = os.cpu_count() or 1
-        log.info(
-            f"No n_workers specified but memory_limit={memory_limit}, using CPU count: {n_workers}"
-        )
-
     if threads_per_worker is None:
-        threads_per_worker = 1  # Conservative for memory-intensive tasks
+        threads_per_worker = 1
+
+    if n_workers is None:
+        n_workers = max(1, cpu_count() // threads_per_worker)
+        log.info(
+            f"Using {n_workers} local workers based on available CPUs "
+            f"and {threads_per_worker} threads per worker"
+        )
+
+    if memory_limit is None:
+        memory_limit = _get_default_memory_limit(n_workers)
 
     # Prepare cluster arguments
     cluster_args = {
@@ -172,7 +200,7 @@ def init_resources(
     if isinstance(memory_limit, int):
         memory_limit_bytes = memory_limit
     else:
-        memory_limit_bytes = parse_humansize(memory_limit)
+        memory_limit_bytes = parse_size(memory_limit)
 
     try:
         log.info(
@@ -189,7 +217,7 @@ def init_resources(
 
         # Log cluster info
         log.info(
-            f"Total memory available: {n_workers * memory_limit_bytes / 1e9:.1f} GB"
+            f"Combined worker memory limit: {n_workers * memory_limit_bytes / 1e9:.1f} GB"
         )
 
         return client
@@ -211,19 +239,11 @@ def _detect_tnglab_environment() -> bool:
     )
 
 
-def _get_default_memory_limit() -> str:
-    """
-    Get a reasonable default memory limit based on system resources.
-    """
-    if not PSUTIL_AVAILABLE:
-        log.warning("psutil not available for memory detection, using 4GB default")
-        return "4GB"
+def _get_default_memory_limit(n_workers: int) -> int:
+    """Divide the detected system/container memory limit among all workers."""
+    from distributed.system import memory_limit
 
-    try:
-        total_memory = psutil.virtual_memory().total
-        # Use about 50% of system memory
-        memory_per_worker = total_memory * 0.5
-        return f"{int(memory_per_worker)}B"
-    except Exception:
-        log.warning("Could not detect system memory, using 4GB default")
-        return "4GB"
+    per_worker = memory_limit() // n_workers
+    if per_worker < 1:
+        raise ValueError("Detected memory limit is too small for the requested workers")
+    return per_worker

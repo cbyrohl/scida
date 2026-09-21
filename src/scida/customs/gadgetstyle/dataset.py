@@ -2,10 +2,11 @@
 Defines the GadgetStyleSnapshot class, mostly used for deriving subclasses for related codes/simulations.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import re
-from typing import Optional, Union
 
 import numpy as np
 
@@ -13,6 +14,7 @@ from scida.discovertypes import CandidateStatus
 from scida.interface import Dataset
 from scida.interfaces.mixins import CosmologyMixin
 from scida.io import load_metadata
+from scida.io._base import _get_chunkedfiles
 from scida.misc import get_scalar
 
 log = logging.getLogger(__name__)
@@ -55,7 +57,7 @@ class GadgetStyleSnapshot(Dataset):
                         )
 
     @classmethod
-    def _get_fileprefix(cls, path: Union[str, os.PathLike], **kwargs) -> str:
+    def _get_fileprefix(cls, path: str | os.PathLike, **kwargs) -> str:
         """
         Get the fileprefix used to identify files belonging to given dataset.
         Parameters
@@ -92,7 +94,7 @@ class GadgetStyleSnapshot(Dataset):
 
     @classmethod
     def validate_path(
-        cls, path: Union[str, os.PathLike], *args, expect_grp=False, **kwargs
+        cls, path: str | os.PathLike, *args, expect_grp=False, **kwargs
     ) -> CandidateStatus:
         """
         Check if path is valid for this interface.
@@ -112,13 +114,19 @@ class GadgetStyleSnapshot(Dataset):
         iszarr = path.rstrip("/").endswith(".zarr")
         if path.endswith(".hdf5") or iszarr:
             possibly_valid = CandidateStatus.MAYBE
-        if os.path.isdir(path):
-            files = os.listdir(path)
-            sufxs = [f.split(".")[-1] for f in files]
-            if not iszarr and len(set(sufxs)) > 1:
-                possibly_valid = CandidateStatus.NO
-            if sufxs[0] == "hdf5":
-                possibly_valid = CandidateStatus.MAYBE
+        if os.path.isdir(path) and not iszarr:
+            # Use the reader's filtering, independent of directory order. [AI-Codex]
+            try:
+                files = _get_chunkedfiles(
+                    path,
+                    fileprefix=kwargs.get("fileprefix", ""),
+                    choose_prefix=kwargs.get("choose_prefix", False),
+                )
+            except ValueError:
+                return CandidateStatus.NO
+            if len(files) == 0 or not all(f.endswith(".hdf5") for f in files):
+                return CandidateStatus.NO
+            possibly_valid = CandidateStatus.MAYBE
         if possibly_valid != CandidateStatus.NO:
             metadata_raw = load_metadata(path, **kwargs)
             # need some silly combination of attributes to be sure
@@ -149,11 +157,11 @@ class GadgetStyleSnapshot(Dataset):
 
         Parameters
         ----------
-        parttype: Optional[Union[str, List[str]]]
+        parttype: str | list[str] | None
             Particle type name to register with. If None, register for the base field container.
-        name: Optional[str]
+        name: str | None
             Name of the field to register.
-        description: Optional[str]
+        description: str | None
             Description of the field to register.
 
         Returns
@@ -164,9 +172,7 @@ class GadgetStyleSnapshot(Dataset):
         res = self.data.register_field(parttype, name=name, description=description)
         return res
 
-    def merge_data(
-        self, secondobj, fieldname_suffix="", root_group: Optional[str] = None
-    ):
+    def merge_data(self, secondobj, fieldname_suffix="", root_group: str | None = None):
         """
         Merge data from other snapshot into self.data.
 
@@ -174,7 +180,7 @@ class GadgetStyleSnapshot(Dataset):
         ----------
         secondobj: GadgetStyleSnapshot
         fieldname_suffix: str
-        root_group: Optional[str]
+        root_group: str | None
 
         Returns
         -------

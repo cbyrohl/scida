@@ -2,10 +2,12 @@
 Helper functions for hdf5 and zarr file processing.
 """
 
+from __future__ import annotations
+
 import logging
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
-from typing import Optional, List
+from typing import Any
 
 import h5py
 import numpy as np
@@ -135,9 +137,7 @@ def walk_hdf5file(fn, tree, get_attrs=True):
 
 def virtual_concat(field, hf, chunks, shapes, dtypes, files):
     totentries = np.array([k[1] for k in chunks[field]]).sum()
-    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][
-                               1:
-                               ]
+    newshape = (totentries,) + shapes[field][next(iter(shapes[field]))][1:]
 
     # create virtual sources
     vsources = []
@@ -150,24 +150,25 @@ def virtual_concat(field, hf, chunks, shapes, dtypes, files):
                 dtype=dtypes[field],
             )
         )
-    layout = h5py.VirtualLayout(
-        shape=tuple(newshape), dtype=dtypes[field]
-    )
+    layout = h5py.VirtualLayout(shape=tuple(newshape), dtype=dtypes[field])
 
     # fill virtual dataset
     offset = 0
     for vsource in vsources:
         length = vsource.shape[0]
-        layout[offset: offset + length] = vsource
+        layout[offset : offset + length] = vsource
         offset += length
-    assert (
-            newshape[0] == offset
-    )  # make sure we filled the array up fully.
+    assert newshape[0] == offset  # make sure we filled the array up fully.
     hf.create_virtual_dataset(field, layout)
 
+
 def create_mergedhdf5file(
-    fn, files, max_workers=None, virtual=True, groupwise_shape=False,
-    nonvirtual_datasets: Optional[List[str]] = None,
+    fn,
+    files,
+    max_workers=None,
+    virtual=True,
+    groupwise_shape=False,
+    nonvirtual_datasets: list[str] | None = None,
 ):
     """
     Creates a virtual hdf5 file from list of given files. Virtual by default.
@@ -198,34 +199,25 @@ def create_mergedhdf5file(
         config = get_config()
         max_workers = config.get("nthreads", 16)
     # first obtain all datasets and groups
-    trees = [{} for i in range(len(files))]
+    trees: list[dict[str, Any]] = [{} for i in range(len(files))]
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         result = executor.map(walk_hdf5file, files, trees)
     result = list(result)
 
     groups = set([item for r in result for item in r["groups"]])
+    # filter out internal scida metadata groups/datasets from source files
+    groups = {g for g in groups if not g.lstrip("/").startswith("_chunks")}
     datasets = set([item[0] for r in result for item in r["datasets"]])
+    datasets = {d for d in datasets if not d.lstrip("/").startswith("_chunks")}
 
-    def todct(lst):
-        """helper func"""
-        return {item[0]: (item[1], item[2]) for item in lst["datasets"]}
-
-    dcts = [todct(lst) for lst in result]
     shapes = OrderedDict((d, {}) for d in datasets)
-
-    def shps(i, k, s):
-        """helper func"""
-        return shapes[k].update({i: s[0]}) if s is not None else None
-
-    [shps(i, k, dct.get(k)) for k in datasets for i, dct in enumerate(dcts)]
     dtypes = {}
-
-    def dtps(k, s):
-        """helper func"""
-        return dtypes.update({k: s[1]}) if s is not None else None
-
-    [dtps(k, dct.get(k)) for k in datasets for i, dct in enumerate(dcts)]
+    for i, r in enumerate(result):
+        for name, shape, dtype in r["datasets"]:
+            if name in datasets:
+                shapes[name][i] = shape
+                dtypes[name] = dtype
 
     # get shapes of the respective chunks
     chunks = {}
@@ -268,7 +260,6 @@ def create_mergedhdf5file(
             ]
             if len(groupfields) == 0:
                 continue
-
 
             # create virtual datasets as requested
             for field in groupfields:
@@ -322,8 +313,8 @@ def create_mergedhdf5file(
                     "Some attribute paths not present in each partial data file."
                 )
         # check for common key+values across all files
-        attrs_same = {}
-        attrs_differ = {}
+        attrs_same: dict[str, Any] = {}
+        attrs_differ: dict[str, Any] = {}
 
         nfiles = len(files)
 

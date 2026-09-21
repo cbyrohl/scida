@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import copy
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any
 
 import dask
 import numpy as np
@@ -17,16 +19,11 @@ from scida.customs.arepo.selector import ArepoSelector
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus, _determine_mixins
 from scida.fields import FieldContainer
-from scida.helpers_misc import (
-    computedecorator,
-    get_args,
-    get_kwargs,
-    map_blocks,
-    parse_humansize,
-)
+from scida.helpers_misc import computedecorator, get_args, get_kwargs, map_blocks
 from scida.interface import create_datasetclass_with_mixins
 from scida.interfaces.mixins import CosmologyMixin, SpatialCartesian3DMixin, UnitMixin
 from scida.io import load_metadata
+from scida.misc import parse_size
 
 log = logging.getLogger(__name__)
 
@@ -54,18 +51,18 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             Additional keyword arguments.
         """
         self.iscatalog = kwargs.pop("iscatalog", False)
-        self.header = {}
-        self.config = {}
+        self.header: dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
         # check whether we have a cosmology mixin
-        self._defaultunitfiles: List[str] = ["units/gadget_base.yaml"]
+        self._defaultunitfiles: list[str] = ["units/gadget_base.yaml"]
         if hasattr(self, "_mixins") and "cosmology" in self._mixins:
             self._defaultunitfiles += ["units/gadget_cosmological.yaml"]
-        self.parameters = {}
-        self._grouplengths = {}
-        self._subhalolengths = {}
+        self.parameters: dict[str, Any] = {}
+        self._grouplengths: dict[str, Any] = {}
+        self._subhalolengths: dict[str, Any] = {}
         # not needed for group catalogs as entries are back-to-back there, we will provide a property for this
-        self._subhalooffsets = {}
-        self.misc = {}  # for storing misc info
+        self._subhalooffsets: dict[str, Any] = {}
+        self.misc: dict[str, Any] = {}  # for storing misc info
         prfx = kwargs.pop("fileprefix", None)
         if prfx is None:
             prfx = self._get_fileprefix(path)
@@ -169,8 +166,14 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             ureg = self.ureg
 
         # non-virtual catalog fields for better performance
-        nonvirtual_datasets = ["Group/GroupFirstSub", "Group/GroupLenType", "Group/GroupNsubs",
-                               "Subhalo/SubhaloGrNr", "Subhalo/SubhaloGroupNr", "Subhalo/SubhaloLenType"]
+        nonvirtual_datasets = [
+            "Group/GroupFirstSub",
+            "Group/GroupLenType",
+            "Group/GroupNsubs",
+            "Subhalo/SubhaloGrNr",
+            "Subhalo/SubhaloGroupNr",
+            "Subhalo/SubhaloLenType",
+        ]
 
         self.catalog = cls(
             self.catalog,
@@ -205,9 +208,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         self.merge_hints(self.catalog)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path to use for instantiation of this class.
 
@@ -278,7 +279,9 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             self.catalog = candidate
             break
 
-    def register_field(self, parttype: str, name: str = None, construct: bool = False):
+    def register_field(
+        self, parttype: str, name: str | None = None, construct: bool = False
+    ):
         """
         Register a field.
         Parameters
@@ -367,8 +370,8 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
             for key in self.data:
                 if not (key.startswith("PartType")):
                     continue
-                self.data[key]["SubhaloID"] = -1 * da.ones_like(
-                    da[key]["uid"], dtype=np.int64
+                self.data[key]["SubhaloID"] = self.misc["unboundID"] * da.ones_like(
+                    self.data[key]["uid"], dtype=np.int64
                 )
             return
 
@@ -438,9 +441,11 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
             # calculate first subhalo of each halo that a particle belongs to
             self.add_groupquantity_to_particles("GroupFirstSub", parttype=key)
-            pdata["SubhaloID"] = pdata["GroupFirstSub"] + pdata["LocalSubhaloID"]
+            local_shid = pdata["LocalSubhaloID"]
             pdata["SubhaloID"] = da.where(
-                pdata["SubhaloID"] == index_unbound, index_unbound, pdata["SubhaloID"]
+                local_shid == index_unbound,
+                index_unbound,
+                pdata["GroupFirstSub"] + local_shid,
             )
 
         # add GroupID and SubhaloID to catalogs/groups themselves
@@ -465,17 +470,17 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
         ----------
         objtype: str
             Type of object to process. Can be "halo" or "subhalo". Default: "halo"
-        idxlist: Optional[np.ndarray]
+        idxlist: np.ndarray | None
             List of halo indices to process. If not provided, all halos are processed.
         func: function
             Function to apply to each halo. Must take a dictionary of arrays as input.
         cpucost_halo:
             "CPU cost" of processing a single halo. This is a relative value to the processing time per input particle
             used for calculating the dask chunks. Default: 1e4
-        nchunks_min: Optional[int]
+        nchunks_min: int | None
             Minimum number of particles in a halo to process it. Default: None
-        chunksize_bytes: Optional[int]
-        nmax: Optional[int]
+        chunksize_bytes: int | None
+        nmax: int | None
             Only process the first nmax halos.
 
         Returns
@@ -658,7 +663,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
     def grouped(
         self,
-        fields: Union[str, da.Array, List[str], Dict[str, da.Array]] = "",
+        fields: str | list[str] | dict[str, da.Array] = "",
         parttype="PartType0",
         objtype="halo",
     ):
@@ -667,7 +672,7 @@ class ArepoSnapshot(SpatialCartesian3DMixin, GadgetStyleSnapshot):
 
         Parameters
         ----------
-        fields: Union[str, da.Array, List[str], Dict[str, da.Array]]
+        fields: str | list[str] | dict[str, da.Array]
             Fields to pass to the operation. Can be a string, a dask array, a list of strings or a dictionary of dask arrays.
         parttype: str
             Particle type to operate on.
@@ -759,14 +764,10 @@ class ArepoCatalog(ArepoSnapshot):
         kwargs
         """
         kwargs["iscatalog"] = True
-        if "fileprefix" not in kwargs:
-            kwargs["fileprefix"] = "groups"
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path to use for instantiation of this class.
 
@@ -796,7 +797,7 @@ class ChainOps:
 
         Parameters
         ----------
-        funcs: List[function]
+        funcs: list[function]
             Functions to chain together.
         """
         self.funcs = funcs
@@ -843,14 +844,14 @@ class GroupAwareOperation:
         self,
         offsets: NDArray,
         lengths: NDArray,
-        arrs: Dict[str, da.Array],
+        arrs: dict[str, da.Array],
         ops=None,
         inputfields=None,
     ):
         self.offsets = offsets
         self.lengths = lengths
         self.arrs = arrs
-        self.opfuncs_custom = {}
+        self.opfuncs_custom: dict[str, Any] = {}
         self.final = False
         self.inputfields = inputfields
         if ops is None:
@@ -963,9 +964,9 @@ class GroupAwareOperation:
 
         Parameters
         ----------
-        nmax: Optional[int]
+        nmax: int | None
             Maximum number of halos to process.
-        idxlist: Optional[np.ndarray]
+        idxlist: np.ndarray | None
             List of halo indices to process. If not provided, (and nmax not set) all halos are processed.
         compute: bool
             Whether to compute the result immediately or return a dask object to compute later.
@@ -977,7 +978,7 @@ class GroupAwareOperation:
         # TODO: figure out return type
         # final operations: those that can only be at end of chain
         # intermediate operations: those that can only be prior to end of chain
-        funcdict = dict()
+        funcdict: dict[str, Any] = dict()
         funcdict.update(**self.opfuncs)
         funcdict.update(**self.opfuncs_custom)
 
@@ -1110,10 +1111,12 @@ def get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=None):
     )
 
 
-def get_haloquantity_daskwrap(gidx, halocelloffsets, valarr):
-    hidx = get_hidx_daskwrap(gidx, halocelloffsets)
+def get_haloquantity_daskwrap(
+    gidx, halocelloffsets, valarr, index_unbound=9223372036854775807
+):
+    hidx = get_hidx_daskwrap(gidx, halocelloffsets, index_unbound=index_unbound)
     dmax = np.iinfo(hidx.dtype).max
-    mask = ~((hidx == -1) | (hidx == dmax))
+    mask = ~((hidx == index_unbound) | (hidx == dmax))
     result = -1.0 * np.ones(hidx.shape, dtype=valarr.dtype)
     result[mask] = valarr[hidx[mask]]
     return result
@@ -1135,13 +1138,25 @@ def compute_haloquantity(gidx, halocelloffsets, hvals, *args):
     units = None
     if hasattr(hvals, "units"):
         units = hvals.units
+        hvals = hvals.magnitude
+    dtype = hvals.dtype
+    # Ensure hvals has a single chunk to avoid chunk mismatch with gidx in
+    # map_blocks. hvals is per-group (small) while gidx is per-particle
+    # (large), so their dask chunk counts differ and map_blocks cannot align
+    # them unless hvals is a single block (issue #57).
+    if isinstance(hvals, da.Array):
+        hvals = hvals.rechunk({0: -1})
+    kw = dict()
+    if len(hvals.shape) == 2:
+        kw = dict(drop_axis=0, new_axis=0)
     res = map_blocks(
         get_haloquantity_daskwrap,
         gidx,
         halocelloffsets,
         hvals,
-        meta=np.array((), dtype=hvals.dtype),
+        dtype=dtype,
         output_units=units,
+        **kw,
     )
     return res
 
@@ -1176,10 +1191,9 @@ def get_localshidx(
     -------
     np.ndarray
     """
-    dtype = np.int32
     if index_unbound is None:
-        index_unbound = np.iinfo(dtype).max
-    res = index_unbound * np.ones(gidx_count, dtype=dtype)  # fuzz has negative index.
+        index_unbound = np.iinfo(np.int64).max
+    res = index_unbound * np.ones(gidx_count, dtype=np.int64)
 
     # find initial Group we are in
     hidx_start_idx = np.searchsorted(celloffsets, gidx_start, side="right") - 1
@@ -1205,7 +1219,9 @@ def get_localshidx(
     cont = True
     while cont and (startid < gidx_count):
         res[startid:endid] = (
-            sidx_start_idx if sidx_start_idx + 1 < shcumsum.shape[0] else -1
+            sidx_start_idx
+            if sidx_start_idx + 1 < shcumsum.shape[0]
+            else index_unbound
         )
         sidx_start_idx += 1
         if sidx_start_idx < shcounts[hidx_start_idx]:
@@ -1393,7 +1409,7 @@ def map_group_operation_get_chunkedges(
 
     # let's allow a maximal chunksize of 16 times the dask default setting for an individual array [here: multiple]
     if chunksize_bytes is None:
-        chunksize_bytes = 16 * parse_humansize(dask.config.get("array.chunk-size"))
+        chunksize_bytes = 16 * parse_size(dask.config.get("array.chunk-size"))
     cost_memory = entry_nbytes_in * lengths + entry_nbytes_out
 
     if not np.max(cost_memory) < chunksize_bytes:
@@ -1435,20 +1451,20 @@ def map_group_operation(
     lengths,
     arrdict,
     cpucost_halo=1e4,
-    nchunks_min: Optional[int] = None,
-    chunksize_bytes: Optional[int] = None,
-    entry_nbytes_in: Optional[int] = 4,
-    fieldnames: Optional[List[str]] = None,
-    nmax: Optional[int] = None,
-    idxlist: Optional[np.ndarray] = None,
+    nchunks_min: int | None = None,
+    chunksize_bytes: int | None = None,
+    entry_nbytes_in: int | None = 4,
+    fieldnames: list[str] | None = None,
+    nmax: int | None = None,
+    idxlist: np.ndarray | None = None,
 ) -> da.Array:
     """
     Map a function to all halos in a halo catalog.
     Parameters
     ----------
-    idxlist: Optional[np.ndarray]
+    idxlist: np.ndarray | None
         Only process the halos with these indices.
-    nmax: Optional[int]
+    nmax: int | None
         Only process the first nmax halos.
     func
     offsets: np.ndarray
@@ -1457,7 +1473,7 @@ def map_group_operation(
         Number of particles per halo.
     arrdict
     cpucost_halo
-    nchunks_min: Optional[int]
+    nchunks_min: int | None
         Lower bound on the number of halos per chunk.
     chunksize_bytes
     entry_nbytes_in
@@ -1630,9 +1646,9 @@ def map_group_operation(
 
     assert np.all(arrdims == arrdims[0])  # Cannot handle different input dims for now
 
-    drop_axis = []
+    drop_axis: list[int] = []
     if arrdims[0] > 1:
-        drop_axis = np.arange(1, arrdims[0])
+        drop_axis = list(np.arange(1, arrdims[0]))
 
     if dtype is None:
         raise ValueError(

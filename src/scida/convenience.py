@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import hashlib
 import logging
@@ -7,9 +9,14 @@ import shutil
 import sys
 import tarfile
 import time
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import requests
+
+from scida.series import DatasetSeries
+
+if TYPE_CHECKING:
+    from scida.interface import BaseDataset
 
 from scida.config import get_config
 from scida.discovertypes import (
@@ -20,16 +27,99 @@ from scida.discovertypes import (
 from scida.interfaces.mixins import UnitMixin
 from scida.io import load_metadata
 from scida.registries import dataseries_type_registry, dataset_type_registry
-from scida.series import DatasetSeries
 
 log = logging.getLogger(__name__)
+
+
+def _download(
+    url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False
+):
+    """
+    Download a file from a given url.
+
+    Parameters
+    ----------
+    url: str
+        The url to download from.
+    path: pathlib.Path
+        The path to download to.
+    progressbar: bool
+        Whether to show a progress bar.
+    overwrite: bool
+        Whether to overwrite an existing file.
+    """
+    if path.exists() and not overwrite:
+        raise ValueError("Target path '%s' already exists." % path)
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            with requests.get(url, stream=True) as r:
+                r.raise_for_status()
+                totlength = int(r.headers.get("content-length", 0))
+                lread = 0
+                t1 = time.time()
+                with open(path, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=2**22):  # chunks of 4MB
+                        t2 = time.time()
+                        f.write(chunk)
+                        lread += len(chunk)
+                        if progressbar:
+                            rate = (lread / 2**20) / (t2 - t1)
+                            sys.stdout.write(
+                                "\rDownloaded %.2f/%.2f Megabytes"
+                                " (%.2f%%, %.2f MB/s)"
+                                % (
+                                    lread / 2**20,
+                                    totlength / 2**20,
+                                    100.0 * lread / totlength,
+                                    rate,
+                                )
+                            )
+                            sys.stdout.flush()
+                sys.stdout.write("\n")
+                return
+        except requests.exceptions.HTTPError as e:
+            if e.response is not None and e.response.status_code >= 500:
+                if attempt < max_retries - 1:
+                    delay = 2 ** (attempt + 1)
+                    log.warning(
+                        "Download failed (HTTP %s), retrying in %ds "
+                        "(attempt %d/%d)...",
+                        e.response.status_code,
+                        delay,
+                        attempt + 1,
+                        max_retries,
+                    )
+                    # Clean up partial download
+                    if path.exists():
+                        path.unlink()
+                    time.sleep(delay)
+                    continue
+            raise
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            if attempt < max_retries - 1:
+                delay = 2 ** (attempt + 1)
+                log.warning(
+                    "Download failed (%s), retrying in %ds " "(attempt %d/%d)...",
+                    type(e).__name__,
+                    delay,
+                    attempt + 1,
+                    max_retries,
+                )
+                # Clean up partial download
+                if path.exists():
+                    path.unlink()
+                time.sleep(delay)
+                continue
+            raise
 
 
 def download_and_extract(
     url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False
 ):
     """
-    Download and extract a file from a given url.
+    Download and extract a tar.gz archive from a given url.
+
     Parameters
     ----------
     url: str
@@ -43,33 +133,9 @@ def download_and_extract(
     Returns
     -------
     str
-        The path to the downloaded and extracted file(s).
+        The path to the extracted file(s).
     """
-    if path.exists() and not overwrite:
-        raise ValueError("Target path '%s' already exists." % path)
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        totlength = int(r.headers.get("content-length", 0))
-        lread = 0
-        t1 = time.time()
-        with open(path, "wb") as f:
-            for chunk in r.iter_content(chunk_size=2**22):  # chunks of 4MB
-                t2 = time.time()
-                f.write(chunk)
-                lread += len(chunk)
-                if progressbar:
-                    rate = (lread / 2**20) / (t2 - t1)
-                    sys.stdout.write(
-                        "\rDownloaded %.2f/%.2f Megabytes (%.2f%%, %.2f MB/s)"
-                        % (
-                            lread / 2**20,
-                            totlength / 2**20,
-                            100.0 * lread / totlength,
-                            rate,
-                        )
-                    )
-                    sys.stdout.flush()
-        sys.stdout.write("\n")
+    _download(url, path, progressbar=progressbar, overwrite=overwrite)
     tar = tarfile.open(path, "r:gz")
     for t in tar:
         if t.isdir():
@@ -100,7 +166,7 @@ def get_testdata(name: str) -> str:
     str
     """
     config = get_config()
-    tdpath: Optional[str] = config.get("testdata_path", None)
+    tdpath: str | None = config.get("testdata_path", None)
     if tdpath is None:
         raise ValueError("Test data directory not specified in configuration")
     if not os.path.isdir(tdpath):
@@ -139,7 +205,7 @@ def find_path(path, overwrite=False) -> str:
             # dataset on the internet
             savepath = config.get("download_path", None)
             if savepath is None:
-                print(
+                log.info(
                     "Have not specified 'download_path' in config. Using 'cache_path' instead."
                 )
                 savepath = config.get("cache_path")
@@ -150,7 +216,10 @@ def find_path(path, overwrite=False) -> str:
                 int(hashlib.sha256(path.encode("utf-8")).hexdigest(), 16) % 10**8
             )
             savepath = savepath / ("download" + urlhash)
-            filename = "archive.tar.gz"
+            # determine filename and whether this is an archive
+            url_basename = os.path.basename(path.split("?")[0].rstrip("/"))
+            is_archive = url_basename.endswith((".tar.gz", ".tgz"))
+            filename = "archive.tar.gz" if is_archive else (url_basename or "download")
             if not savepath.exists():
                 os.makedirs(savepath, exist_ok=True)
             elif overwrite:
@@ -163,10 +232,14 @@ def find_path(path, overwrite=False) -> str:
                         shutil.rmtree(fp)
             foldercontent = [f for f in savepath.glob("*")]
             if len(foldercontent) == 0:
-                savepath = savepath / filename
-                extractpath = download_and_extract(
-                    path, savepath, progressbar=True, overwrite=overwrite
-                )
+                filepath = savepath / filename
+                if is_archive:
+                    extractpath = download_and_extract(
+                        path, filepath, progressbar=True, overwrite=overwrite
+                    )
+                else:
+                    _download(path, filepath, progressbar=True, overwrite=overwrite)
+                    extractpath = savepath
             else:
                 extractpath = savepath
             extractpath = pathlib.Path(extractpath)
@@ -208,12 +281,12 @@ def find_path(path, overwrite=False) -> str:
 
 def load(
     path: str,
-    units: Union[bool, str] = True,
+    units: bool | str = True,
     unitfile: str = "",
     overwrite: bool = False,
-    force_class: Optional[object] = None,
-    **kwargs
-):
+    force_class: type | None = None,
+    **kwargs: Any,
+) -> BaseDataset | DatasetSeries:
     """
     Load a dataset or dataset series from a given path.
     This function will automatically determine the best-matching
@@ -257,7 +330,7 @@ def load(
             kwargs["catalog"] = find_path(c, overwrite=overwrite)
 
     # determine dataset class
-    reg = dict()
+    reg: dict[str, type] = dict()
     reg.update(**dataset_type_registry)
     reg.update(**dataseries_type_registry)
 
@@ -322,7 +395,7 @@ def load(
     return instance
 
 
-def get_dataset_by_name(name: str) -> Optional[str]:
+def get_dataset_by_name(name: str) -> str | None:
     """
     Get dataset name from alias or name found in the configuration files.
 
@@ -367,7 +440,7 @@ def get_datasets_by_props(**kwargs):
     list[str]:
         List of dataset names.
     """
-    dnames = []
+    dnames: list[str] = []
     c = get_config()
     if "datasets" not in c:
         return dnames
@@ -393,9 +466,9 @@ def get_dataset_candidates(name=None, props=None):
 
     Parameters
     ----------
-    name: Optional[str]
+    name: str | None
         Name or alias of dataset.
-    props: Optional[dict]
+    props: dict | None
         Properties to match.
 
     Returns
@@ -418,9 +491,9 @@ def get_dataset(name=None, props=None):
     Get dataset by name or properties.
     Parameters
     ----------
-    name: Optional[str]
+    name: str | None
         Name or alias of dataset.
-    props: Optional[dict]
+    props: dict | None
         Properties to match.
 
     Returns

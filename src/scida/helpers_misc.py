@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import hashlib
 import inspect
 import io
 import logging
-import re
 import types
 
 import dask.array as da
@@ -142,42 +143,6 @@ def computedecorator(func):
 
     return wrapper
 
-
-# based on https://stackoverflow.com/a/60708339 & https://stackoverflow.com/a/42865957/2002471
-units = {
-    "B": 1,
-    "KIB": 2**10,
-    "MIB": 2**20,
-    "GIB": 2**30,
-    "TIB": 2**40,
-    "KB": 10**3,
-    "MB": 10**6,
-    "GB": 10**9,
-    "TB": 10**12,
-    "PB": 10**15,
-}
-
-
-# needed for processing dask arrays
-def parse_humansize(size):
-    """
-    Parse a human-readable size string to bytes.
-
-    Parameters
-    ----------
-    size: str
-        Human readable size string, e.g. 1.5GiB
-
-    Returns
-    -------
-    int
-        Size in bytes
-    """
-    size = size.upper()
-    if not re.match(r" ", size):
-        size = re.sub(r"([KMGT]?I*B)", r" \1", size)
-    number, unit = [string.strip() for string in size.split()]
-    return int(float(number) * units[unit])
 
 
 def sprint(*args, end="\n", **kwargs):

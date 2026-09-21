@@ -1,6 +1,9 @@
 """
 Defines a series representing a Gizmo simulation.
 """
+
+from __future__ import annotations
+
 import os
 
 from scida.customs.gadgetstyle.series import GadgetStyleSimulation
@@ -28,7 +31,7 @@ class GizmoSimulation(GadgetStyleSimulation):
             arg_dict=arg_dict,
             lazy=lazy,
             async_caching=async_caching,
-            **interface_kwargs
+            **interface_kwargs,
         )
 
     @classmethod

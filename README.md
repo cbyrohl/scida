@@ -1,5 +1,7 @@
 # scida
 
+![scida banner](https://raw.githubusercontent.com/cbyrohl/scida/main/docs/images/banner.png)
+
 [![pyversions](https://img.shields.io/pypi/pyversions/scida)](https://pypi.org/project/scida/)
 ![test status](https://github.com/cbyrohl/scida/actions/workflows/tests.yml/badge.svg)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.06064/status.svg)](https://doi.org/10.21105/joss.06064)
@@ -16,7 +18,7 @@ This tool uses dask, allowing analysis to scale up from your personal computer t
 
 ## Requirements
 
-- Python 3.9, 3.10, 3.11, 3.12
+- Python 3.11, 3.12, 3.13
 
 
 ## Documentation

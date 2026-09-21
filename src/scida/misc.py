@@ -2,13 +2,14 @@
 Miscellaneous helper functions.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import pathlib
 import re
 from collections import defaultdict
 from collections.abc import MutableMapping
-from typing import Optional
 
 import dask.array as da
 import numpy as np
@@ -21,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 def get_container_from_path(
-    element: str, container: FieldContainer = None, create_missing: bool = False
+    element: str, container: FieldContainer | None = None, create_missing: bool = False
 ) -> FieldContainer:
     """
     Get a container from a path.
@@ -50,7 +51,7 @@ def get_container_from_path(
     return rv
 
 
-def return_hdf5cachepath(path, fileprefix: Optional[str] = None) -> str:
+def return_hdf5cachepath(path, fileprefix: str | None = None) -> str:
     """
     Returns the path to the cache file for a given path.
 
@@ -58,7 +59,7 @@ def return_hdf5cachepath(path, fileprefix: Optional[str] = None) -> str:
     ----------
     path: str
         path to the dataset
-    fileprefix: Optional[str]
+    fileprefix: str | None
         Can be used to specify the fileprefix used for the dataset.
 
     Returns
@@ -93,7 +94,7 @@ def path_hdf5cachefile_exists(path, **kwargs) -> bool:
     return False
 
 
-def return_cachefile_path(fname: str) -> Optional[str]:
+def return_cachefile_path(fname: str) -> str | None:
     """
     Return the path to the cache file, return None if path cannot be generated.
 
@@ -230,7 +231,7 @@ def rectangular_cutout_mask(
     return mask
 
 
-def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool = True):
+def check_config_for_dataset(metadata, path: str | None = None, unique: bool = True):
     """
     Check whether the given dataset can be identified to be a certain simulation (type) by its metadata.
 
@@ -251,7 +252,7 @@ def check_config_for_dataset(metadata, path: Optional[str] = None, unique: bool 
     """
     c = get_simulationconfig()
 
-    candidates = []
+    candidates: list[str] = []
     if "data" not in c:
         return candidates
     simdct = c["data"]
@@ -346,34 +347,36 @@ _sizeunits = {
     "MB": 10**6,
     "GB": 10**9,
     "TB": 10**12,
-    "KiB": 1024,
-    "MiB": 1024**2,
-    "GiB": 1024**3,
+    "KIB": 2**10,
+    "MIB": 2**20,
+    "GIB": 2**30,
+    "TIB": 2**40,
 }
 
-_sizeunits = {k.lower(): v for k, v in _sizeunits.items()}
+_RE_UNIT_SIZE = re.compile(r"([KMGT]?I*B)")
 
 
 def parse_size(size):
     """
-    Parse a size string to a number in bytes.
+    Parse a human-readable size string to a number in bytes.
+
+    Supports both SI units (KB, MB, GB, TB) and binary units (KiB, MiB, GiB, TiB).
+
     Parameters
     ----------
-    size: str
+    size : str
+        Human-readable size string, e.g. "128MiB", "1.5 GiB", "500MB".
 
     Returns
     -------
     int
-        size in bytes
+        Size in bytes.
     """
-    idx = 0
-    for c in size:
-        if c.isnumeric():
-            continue
-        idx += 1
-    number = size[:idx]
-    unit = size[idx:]
-    return int(float(number) * _sizeunits[unit.lower().strip()])
+    size = size.upper()
+    if not size.startswith(" "):
+        size = _RE_UNIT_SIZE.sub(r" \1", size)
+    number, unit = [string.strip() for string in size.split()]
+    return int(float(number) * _sizeunits[unit])
 
 
 def is_scalar(value):
@@ -392,11 +395,14 @@ def get_scalar(value):
     return scalar
 
 
+_RE_PREFIX_SPLIT = re.compile(r"[_\.]")
+
+
 def group_by_common_prefix(file_names):
     groups = defaultdict(list)
     for file in file_names:
         # Split by both "_" and "."
-        parts = re.split(r"[_\.]", file)
+        parts = _RE_PREFIX_SPLIT.split(file)
         prefix = parts[0]  # Use the first part as the prefix
         groups[prefix].append(file)
 

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import os
-from typing import Union
 
 import numpy as np
 
@@ -248,9 +249,7 @@ class TNGClusterSnapshot(ArepoSnapshot):
         return super().return_data()
 
     @classmethod
-    def validate_path(
-        cls, path: Union[str, os.PathLike], *args, **kwargs
-    ) -> CandidateStatus:
+    def validate_path(cls, path: str | os.PathLike, *args, **kwargs) -> CandidateStatus:
         """
         Validate a path as a candidate for TNG-Cluster snapshot class.
 

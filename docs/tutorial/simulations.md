@@ -202,7 +202,12 @@ We discuss more advanced and interactive visualization methods [here](../visuali
 !!! tip "Memory Management for Large Datasets"
 
     For large datasets, `histogram2d()` operations can consume significant memory and may cause kernel crashes.
-    Use `scida.init_resources()` at the beginning of your script/notebook with memory limits to prevent crashes for memory intensive applications. See [here](../largedatasets.md) for more information.
+    Call `scida.init_resources(use_distributed=True)` before loading data to start
+    a local distributed cluster with worker memory limits. You can supply
+    `memory_limit="2GB", n_workers=2` to configure two workers with 2 GB each.
+    The threaded scheduler selected by `scida.init_resources()` outside TNGLab
+    controls concurrency but does not enforce memory limits. See
+    [Handling Large Data Sets](../largedatasets.md) for details.
 
 ```pycon
 >>> import dask.array as da

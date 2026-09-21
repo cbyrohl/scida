@@ -37,74 +37,74 @@ runs:
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_FIRE2_snapshot_z1.hdf5
-        url: https://heibox.uni-heidelberg.de/f/856c4ffbcc644530a27d/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_FIRE2_snapshot_z1.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG50-4_snapshot_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/53ac454aa304481bb32e/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-4_snapshot_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG50-1_snapshot_z3.hdf5
-        url: https://heibox.uni-heidelberg.de/f/58b9fbdc6a3043119b5c/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-1_snapshot_z3.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG50-1_snapshot_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/638ae4b2a1514adeb654/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-1_snapshot_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG50-1_group_z3.hdf5
-        url: https://heibox.uni-heidelberg.de/f/8a1c26b2140e4e2bb06c/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-1_group_z3.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG50-1_group_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/1a7eb3e0b7f243038b13/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG50-1_group_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_FIRE2_simulation.tar.gz
-        url: https://heibox.uni-heidelberg.de/f/99a6c5fe31eb430f90e2/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_FIRE2_simulation.tar.gz
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG-Cluster_snapshot_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/fe582fbe745445d7a448/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG-Cluster_snapshot_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_LGal21_z3.hdf5
-        url: https://heibox.uni-heidelberg.de/f/6a24e9db7b8a449d94be/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_LGal21_z3.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG100-3_snapshot_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/6eb403619c534e52bb82/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG100-3_snapshot_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG100-3_group_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/699142c6855341d1bb34/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG100-3_group_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG100-2_snapshot_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/e3c9c3f591574b969557/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG100-2_snapshot_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_TNG100-2_group_z0.hdf5
-        url: https://heibox.uni-heidelberg.de/f/ed8a1b34a9fe40b1b493/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_TNG100-2_group_z0.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_flamingo_snapshot.hdf5
-        url: https://heibox.uni-heidelberg.de/f/8749a46fdfc74577b29a/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_flamingo_snapshot.hdf5
     - uses: ./.github/actions/get-testdata
       with:
         outputfolder: ${{ inputs.outputfolder }}
         filename: minimal_mcst_arepo_mcstmodel.hdf5
-        url: https://heibox.uni-heidelberg.de/f/802d5c8cbee1483a983f/?dl=1
+        url: https://github.com/cbyrohl/scida/releases/download/testdata-v1/minimal_mcst_arepo_mcstmodel.hdf5

@@ -6,7 +6,12 @@ units:
   code_length: ckpc / h
   code_velocity: km / s
   code_mass: 1e10 * Msun / h
-  code_time: 0.978 * Gyr  # TODO: recheck. Needed without h for some consistency with TNG, but AREPO docs say /h?
+  # AREPO derives the code time unit from UnitLength_in_cm / UnitVelocity_in_cm_per_s,
+  # which for the standard kpc + km/s convention is exactly kpc / (km/s) = 3.085678e+16 s
+  # (~0.9778 Julian-Gyr). The previous '0.978 * Gyr' evaluates to 3.11474e+16 s in pint
+  # (pint's Gyr is not the Julian-year * 1e9 one might expect) -- 0.94% high, which
+  # squares to 1.89% on anything quadratic in code_time (energy, pressure, etc.).
+  code_time: kpc / (km / s)
   code_pressure: (code_mass / code_length) / code_time^2
 fields:
   _all:
@@ -89,7 +94,13 @@ fields:
     GFM_StellarFormationTime: # expressed as signed scale factor
     GFM_StellarPhotometrics:  # not supported mag for now
     IMFMass: code_mass
-    IonisingPhotonRate1e49: 1e49 / s
+    # Some MCST AREPO builds write the to_cgs attr as the reciprocal (1e-49
+    # instead of 1e+49) -- a sign inversion in the dimensional-analysis path
+    # for fields whose name already encodes the scale. The unit file is
+    # authoritative; override silences the spurious cgs-factor mismatch.
+    IonisingPhotonRate1e49:
+      units: 1e49 / s
+      override: true
     LowMass: code_mass
     Metallicity: # no units
     StellarArray: none
@@ -108,9 +119,19 @@ fields:
     BH_Mass: code_mass
     BH_Mass_bubbles: code_mass
     BH_Mass_ini: code_mass
-    BH_Mdot: code_mass / (code_time / h)
-    BH_MdotBondi: code_mass / (code_time / h)
-    BH_MdotEddington: code_mass / (code_time / h)
+    # AREPO writes dimensionally inverted scaling attrs for these BH mass-
+    # flow fields (length_scaling=1, mass_scaling=-1, velocity_scaling=1 ->
+    # L^2/(M*T)) while to_cgs is the correct M/T magnitude. The unit file
+    # carries the right dimensions; override the bogus metadata flags.
+    BH_Mdot:
+      units: code_mass / (code_time / h)
+      override: true
+    BH_MdotBondi:
+      units: code_mass / (code_time / h)
+      override: true
+    BH_MdotEddington:
+      units: code_mass / (code_time / h)
+      override: true
     BH_Pressure:  # older AREPO runs have wrong metadata, see AREPO PR420
       units: code_mass * code_velocity^2 / code_length^3
       override: true
@@ -177,8 +198,11 @@ fields:
     SubhaloGasMetallicitySfrWeighted:
     SubhaloGrNr: none
     SubhaloGroupNr: none  # MTNG alias
+    SubhaloH2Mass: code_mass    # MCST: per-subhalo molecular hydrogen mass
+    SubhaloHMass: code_mass     # MCST: per-subhalo atomic hydrogen mass
     SubhaloHalfmassRad: code_length
     SubhaloHalfmassRadType: code_length
+    SubhaloHeMass: code_mass    # MCST: per-subhalo helium mass
     SubhaloIDMostbound: none
     SubhaloLen: none
     SubhaloLenPrevMostBnd: none

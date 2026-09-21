@@ -2,6 +2,8 @@
 scida.io
 """
 
+from __future__ import annotations
+
 from scida.io._base import (
     ChunkedHDF5Loader,
     load,
