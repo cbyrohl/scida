@@ -8,6 +8,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-21
+
+This release adds explicit control of local Dask resources and improves snapshot
+loading, catalog indexing, unit handling, and the safety of dataset exports.
+
+### Compatibility
+
+- Python 3.11 or newer is now required; Python 3.13 is supported. Python 3.9 and
+  3.10 users should stay on scida 0.3.6. (#226)
+- Jupyter and Matplotlib are no longer installed as runtime dependencies. Install
+  them separately when needed for notebooks or plotting. (#232)
+- Corrected the default Gadget/AREPO cosmological `code_time` definition and
+  affected derived units. This can change converted time, energy, and pressure
+  values for datasets using those defaults. (#237)
+
+### Added
+
+- `scida.init_resources()` configures the local threaded scheduler outside TNGLab.
+  Use `use_distributed=True` for a local distributed cluster with per-worker
+  memory limits. Detected memory is divided across the workers; explicit limits
+  remain per worker. Threaded mode rejects memory-limit settings. (#203)
+- TNGLab automatically initializes four distributed workers with a 2 GB limit
+  each on first load. Call `init_resources(use_distributed=False)` before loading
+  to opt out. These are best-effort worker limits, not a hard process-wide cap.
+  (#203)
+- Save unit metadata when exporting datasets to Zarr. (#220)
+- Support two-dimensional halo quantities when mapping catalog values onto
+  particles. (#233)
+- Add a TNGLab tutorial notebook and improve resource and logging documentation.
+  (#225, #203, #243)
+
+### Fixed
+
+- Reject overwriting a nonempty directory that is not a Zarr store, preventing
+  accidental deletion through `Dataset.save(overwrite=True)`. (#216)
+- Fix AREPO catalog loading from `fof_subhalo_tab` directories. (#231)
+- Fix unbound-particle masking, small-chunk SubhaloID calculations, integer
+  overflow, and inconsistent sentinel values. (#233, #234)
+- Improve dataset-type selection and ignore transfer/backup files during
+  snapshot detection while rejecting invalid HDF5 chunks. (#238, #244)
+- Correct MCST/AREPO unit overrides and suppress false dimensionless-unit
+  mismatches. (#237)
+- Retry downloads after transient server failures. (#229)
+
+### Other improvements
+
+- Reduce routine console output and document logging configuration. (#217, #241, #243)
+- Improve HDF5 metadata extraction and helper performance. (#219, #228)
+- Refresh the documentation site and extend regression coverage. (#218, #222,
+  #235, #236, #240, #242, #245)
+
 ## [0.3.5] - 2025-01-16
 
 ### Fixed
