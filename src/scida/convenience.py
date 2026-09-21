@@ -59,9 +59,7 @@ def _download(
                 lread = 0
                 t1 = time.time()
                 with open(path, "wb") as f:
-                    for chunk in r.iter_content(
-                        chunk_size=2**22
-                    ):  # chunks of 4MB
+                    for chunk in r.iter_content(chunk_size=2**22):  # chunks of 4MB
                         t2 = time.time()
                         f.write(chunk)
                         lread += len(chunk)
@@ -102,8 +100,7 @@ def _download(
             if attempt < max_retries - 1:
                 delay = 2 ** (attempt + 1)
                 log.warning(
-                    "Download failed (%s), retrying in %ds "
-                    "(attempt %d/%d)...",
+                    "Download failed (%s), retrying in %ds " "(attempt %d/%d)...",
                     type(e).__name__,
                     delay,
                     attempt + 1,
@@ -241,9 +238,7 @@ def find_path(path, overwrite=False) -> str:
                         path, filepath, progressbar=True, overwrite=overwrite
                     )
                 else:
-                    _download(
-                        path, filepath, progressbar=True, overwrite=overwrite
-                    )
+                    _download(path, filepath, progressbar=True, overwrite=overwrite)
                     extractpath = savepath
             else:
                 extractpath = savepath
@@ -317,6 +312,10 @@ def load(
     Union[Dataset, DatasetSeries]:
         Initialized dataset or dataset series.
     """
+
+    from scida.init import _ensure_distributed_if_needed
+
+    _ensure_distributed_if_needed()
 
     path = find_path(path, overwrite=overwrite)
 

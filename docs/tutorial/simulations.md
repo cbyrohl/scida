@@ -199,6 +199,16 @@ which is analogous to [numpy.histogram2d()](https://numpy.org/doc/stable/referen
 except that it operates on a dask array.
 We discuss more advanced and interactive visualization methods [here](../visualization.md).
 
+!!! tip "Memory Management for Large Datasets"
+
+    For large datasets, `histogram2d()` operations can consume significant memory and may cause kernel crashes.
+    Call `scida.init_resources(use_distributed=True)` before loading data to start
+    a local distributed cluster with worker memory limits. You can supply
+    `memory_limit="2GB", n_workers=2` to configure two workers with 2 GB each.
+    The threaded scheduler selected by `scida.init_resources()` outside TNGLab
+    controls concurrency but does not enforce memory limits. See
+    [Handling Large Data Sets](../largedatasets.md) for details.
+
 ```pycon
 >>> import dask.array as da
 >>> import numpy as np

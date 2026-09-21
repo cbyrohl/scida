@@ -10,6 +10,47 @@ Until now, we have applied our framework to a very small simulation.
 However, what if we are working with a very large data set
 (like the TNG50-1 cosmological simulation, which has $2160^3$ particles, $512$ times more than TNG50-4)?
 
+## Preparation
+Call `scida.init_resources()` before loading data to configure local resources.
+Outside TNGLab, this selects Dask's threaded scheduler and sets the thread count
+from the available CPUs, respecting CPU affinity and container quotas.
+It runs within the current Python process and does not impose a memory limit.
+
+```python
+import scida
+scida.init_resources()  # Local threads, using the detected CPU count
+# Or choose the local thread count:
+# scida.init_resources(n_workers=4)
+```
+
+For worker memory limits, explicitly enable a local distributed cluster:
+
+```python
+client = scida.init_resources(use_distributed=True)
+# Or set limits explicitly:
+# client = scida.init_resources(
+#     use_distributed=True, memory_limit="2GB", n_workers=2
+# )
+```
+
+Distributed mode defaults to one worker process per available CPU, with one thread
+per worker. If `threads_per_worker` is set, the default worker count is reduced
+accordingly. Without an explicit `memory_limit`, the full detected system/container
+memory limit is divided equally among the workers. For example, a 16 GiB limit
+and four workers gives 4 GiB per worker; scida does not reserve a fixed fraction.
+An explicit `memory_limit` is **per worker**: two workers with `"2GB"` gives 4 GB
+combined worker limits. Dask manages worker memory on a best-effort basis; this
+is not a hard cap on the entire Python application. Supplying `memory_limit`
+in threaded mode raises an error; set `use_distributed=True` to enable it.
+
+On [TNGLab](https://www.tng-project.org/data/lab/), the default is distributed mode
+with four workers and 2 GB per worker. `scida.load()` initializes that setup
+automatically if no client or explicit scheduler choice has been made.
+Call `scida.init_resources(use_distributed=False)` to choose local threads there;
+later `load()` calls respect that choice. Monitor distributed workers using the
+[Dask dashboard](https://docs.dask.org/en/latest/dashboard.html).
+
+
 ## Starting simple: computing in chunks
 
 First, we can still run the same calculation as above, and it will "just work" (hopefully).
@@ -52,17 +93,14 @@ Rather than sequentially calculating large tasks, we can also run the computatio
 To do so different advanced dask schedulers are available.
 Here, we use the most straight forward [distributed scheduler](https://docs.dask.org/en/latest/how-to/deploy-dask/single-distributed.html).
 
-### Running a LocalCluster
-Usually, we would start a scheduler and then connect new workers (e.g. running on multiple compute/backend nodes of a HPC cluster).
-After, tasks (either interactively or scripted) can leverage the power of these connected resources.
+### Manual LocalCluster setup
 
-For this example, we will use the same "distributed" scheduler/API, but keep things simple by using just the one (local) node we are currently running on.
-
-While the result is eventually computed, it is a bit slow, primarily because the actual reading of the data off disk is the limiting factor, and we can only use resources available on our local machine.
+If you need fine-grained control beyond what `scida.init_resources()` provides, you can manually configure the Local distributed scheduler:
 
 ```pycon
 >>> from dask.distributed import Client, LocalCluster
 >>> cluster = LocalCluster(n_workers=16, threads_per_worker=1,
+                           memory_limit="4GB",
                            dashboard_address=":8787")
 >>> client = Client(cluster)
 >>> client
