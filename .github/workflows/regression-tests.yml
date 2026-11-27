@@ -98,6 +98,9 @@ jobs:
           PY
 
       - name: Run regression tests
+        env:
+          PYTHONFAULTHANDLER: "1"
+          SCIDA_REGRESSION_DIAGNOSTICS: "1"
         run: |
           echo "python version: $PYTHON_VERSION"
           echo "pytest args: $PYTEST_ARGS"
