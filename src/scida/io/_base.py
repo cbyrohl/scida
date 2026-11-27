@@ -17,6 +17,7 @@ import dask.array as da
 import h5py
 import numpy as np
 import zarr
+from dask.base import tokenize
 
 from scida.config import get_config
 from scida.fields import FieldContainer, walk_container
@@ -682,6 +683,12 @@ def load_datadict_old(
     for group in datagroups:
         get_container_from_path(group, rootcontainer, create_missing=True)
 
+    # For multipart HDF5, location is the cache file for the selected prefix.
+    source_token = tokenize(filetype, os.path.abspath(location), token, chunksize)
+    stored_names = (
+        file["__dask_tokenize__"].attrs if "__dask_tokenize__" in file else {}
+    )
+
     # datasets
     for i, dataset in enumerate(tree["datasets"]):
         # fpath is the path to the group containing given field
@@ -694,13 +701,12 @@ def load_datadict_old(
             continue
 
         container = get_container_from_path(fpath, rootcontainer)
-        # TODO: still change for nesting
-        splt = dataset[0].rstrip("/").split("/")
-        group = splt[1]
-        fieldname = splt[-1]
-        name = "Dataset" + str(token) + dataset[0].replace("/", "_")
-        if "__dask_tokenize__" in file:  # check if the file contains the dask name.
-            name = file["__dask_tokenize__"].attrs.get(dataset[0].strip("/"), name)
+        fieldpath = dataset[0]
+        fieldname = fieldpath.rsplit("/", 1)[-1]
+        # Stored names can repeat, so include them without replacing field identity.
+        name = "Dataset-" + tokenize(
+            source_token, fieldpath, stored_names.get(fieldpath.strip("/"))
+        )
 
         # we do not support HDF5 vlen dtype
         if filetype == "hdf5":
@@ -714,7 +720,6 @@ def load_datadict_old(
                 continue
 
         lz = lazy and i > 0  # need one non-lazy field (?)
-        fieldpath = dataset[0]
         _add_hdf5arr_to_fieldcontainer(
             file,
             container,
