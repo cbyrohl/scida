@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 import numpy as np
+import pint
 
 from scida.interfaces.mixins.base import Mixin
 from scida.misc import rectangular_cutout_mask
@@ -99,8 +100,10 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
 
         Parameters
         ----------
-        center: np.ndarray
-        width: np.ndarray
+        center: array-like or pint.Quantity
+            Cutout center. Numeric values are in the coordinate units.
+        width: array-like or pint.Quantity
+            Cutout widths. Numeric values are in the coordinate units.
         parttype: str
 
         Returns
@@ -108,8 +111,20 @@ class SpatialCartesian3DMixin(Spatial3DMixin):
         da.Array
         """
         coords = self.get_coords(parttype=parttype)
+        boxsize = self.boxsize
+        if (
+            self.pbc
+            and isinstance(coords, pint.Quantity)
+            and not isinstance(boxsize, pint.Quantity)
+        ):
+            # Header BoxSize is in the stored coordinate scale, even when the
+            # coordinate field is presented in CGS. The quantity in self.units
+            # includes the conversion factor from a stored coordinate value.
+            name = self.hints["CoordinatesName"][parttype]
+            stored_unit = getattr(self, "units", {}).get(parttype, {}).get(name)
+            boxsize = boxsize * (coords.units if stored_unit is None else stored_unit)
         return rectangular_cutout_mask(
-            center, width, coords, pbc=self.pbc, boxsize=self.boxsize
+            center, width, coords, pbc=self.pbc, boxsize=boxsize
         )
 
     def rectangular_cutout(self, center, width, parttype="PartType0"):

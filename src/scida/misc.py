@@ -13,6 +13,7 @@ from collections.abc import MutableMapping
 
 import dask.array as da
 import numpy as np
+import pint
 
 from scida.config import get_config, get_simulationconfig
 from scida.fields import FieldContainer
@@ -185,16 +186,16 @@ def rectangular_cutout_mask(
     Create a rectangular mask for a given set of coordinates.
     Parameters
     ----------
-    center: list
-        center of the rectangle
-    width: list
-        widths of the rectangle
-    coords: ndarray
-        coordinates to mask
+    center: array-like or pint.Quantity
+        Center of the rectangle. Numeric values are in the coordinate units.
+    width: array-like or pint.Quantity
+        Widths of the rectangle. Numeric values are in the coordinate units.
+    coords: ndarray, da.Array or pint.Quantity
+        Coordinates to mask.
     pbc: bool
         whether to apply PBC
-    boxsize:
-        boxsize for PBC
+    boxsize: array-like or pint.Quantity, optional
+        Box size for PBC. Numeric values are in the coordinate units.
     backend: str
         backend to use (dask or numpy)
     chunksize: str
@@ -206,8 +207,17 @@ def rectangular_cutout_mask(
         mask
 
     """
-    center = np.array(center)
-    width = np.array(width)
+    coord_units = ""
+    if isinstance(coords, pint.Quantity):
+        coords, coord_units = coords.magnitude, coords.units
+
+    def as_coordinate_values(value):
+        if isinstance(value, pint.Quantity):
+            value = value.m_as(coord_units)
+        return np.asarray(value)
+
+    center = as_coordinate_values(center)
+    width = as_coordinate_values(width)
     if backend == "dask":
         be = da
     else:
@@ -218,6 +228,7 @@ def rectangular_cutout_mask(
     if pbc:
         if boxsize is None:
             raise ValueError("Need to specify for boxsize for PBC.")
+        boxsize = as_coordinate_values(boxsize)
         dists = be.where(dists > 0.5 * boxsize, be.fabs(boxsize - dists), dists)
 
     kwargs = {}
