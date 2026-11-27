@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import nox
@@ -13,6 +14,16 @@ numpy_versions = ["1.26", "2.0"]
 def tests_base(session: nox.Session) -> None:
     session.install("coverage[toml]", "pytest", "pytest-mock", "pygments", "ipython")
     session.install(".")
+    if os.environ.get("SCIDA_REGRESSION_DIAGNOSTICS") == "1":
+        session.run("python", "-VV")
+        session.run(
+            "python",
+            "-c",
+            "from importlib.metadata import distributions\n"
+            "packages = sorted({(d.metadata['Name'], d.version) for d in distributions()})\n"
+            "for name, version in packages:\n"
+            "    print(f'{name}=={version}')",
+        )
     try:
         session.run(
             "coverage",
