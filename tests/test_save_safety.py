@@ -93,21 +93,46 @@ class TestSaveSafetyCheck:
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("nested_source", [False, True])
 @pytest.mark.parametrize("use_symlink", [False, True])
-def test_refuses_to_save_over_source_zarr_store(tmp_path, use_symlink):
-    source = tmp_path / "source.zarr"
-    root = zarr.open_group(str(source), mode="w")
-    root["a/b"] = [1, 2, 3]
-    root["a/c"] = [4, 5, 6]
-    dataset = load(source, units=False)
+def test_refuses_to_save_over_source_zarr_store(tmp_path, use_symlink, nested_source):
+    store = tmp_path / "source.zarr"
+    root = zarr.open_group(str(store), mode="w")
+    source = root.create_group("nested") if nested_source else root
+    source["a/b"] = [1, 2, 3]
+    source["a/c"] = [4, 5, 6]
+    dataset = load(store / source.path, units=False)
 
-    destination = source
+    destination = store
     if use_symlink:
         destination = tmp_path / "link.zarr"
-        destination.symlink_to(source, target_is_directory=True)
+        destination.symlink_to(store, target_is_directory=True)
 
     with pytest.raises(ValueError, match="source Zarr store"):
         dataset.save(destination)
 
-    np.testing.assert_array_equal(root["a/b"][:], [1, 2, 3])
-    np.testing.assert_array_equal(root["a/c"][:], [4, 5, 6])
+    np.testing.assert_array_equal(source["a/b"][:], [1, 2, 3])
+    np.testing.assert_array_equal(source["a/c"][:], [4, 5, 6])
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("source_name", "destination_name", "overwrite"),
+    [("nested", "", False), ("data-extra", "data", True)],
+    ids=["ancestor-without-overwrite", "sibling-with-shared-prefix"],
+)
+def test_save_preserves_source_when_destination_can_be_written(
+    tmp_path, source_name, destination_name, overwrite
+):
+    store = tmp_path / "source.zarr"
+    root = zarr.open_group(str(store), mode="w")
+    source = root.create_group(source_name)
+    source["a/c"] = [4, 5, 6]
+    dataset = load(store / source_name, units=False)
+    destination = store / destination_name
+
+    dataset.save(destination, overwrite=overwrite)
+
+    saved = zarr.open_group(str(destination), mode="r")
+    np.testing.assert_array_equal(saved["a/c"][:], [4, 5, 6])
+    np.testing.assert_array_equal(source["a/c"][:], [4, 5, 6])

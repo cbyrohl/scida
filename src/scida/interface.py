@@ -8,6 +8,7 @@ import abc
 import hashlib
 import logging
 import os
+from pathlib import Path
 from typing import Any
 
 import dask
@@ -309,10 +310,15 @@ class BaseDataset(metaclass=MixinMeta):
         if zarr_kwargs is None:
             zarr_kwargs = {}
         source_store = getattr(getattr(self, "file", None), "store", None)
-        if isinstance(source_store, zarr.DirectoryStore) and os.path.realpath(
-            fname
-        ) == os.path.realpath(source_store.path):
-            raise ValueError("Cannot save a dataset over its source Zarr store.")
+        if isinstance(source_store, zarr.DirectoryStore):
+            source = Path(source_store.path).resolve()
+            destination = Path(fname).resolve()
+            if source == destination:
+                raise ValueError("Cannot save a dataset over its source Zarr store.")
+            if overwrite and source.is_relative_to(destination):
+                raise ValueError(
+                    "Cannot overwrite a directory containing the source Zarr store."
+                )
         if overwrite and os.path.exists(fname):
             if os.path.isdir(fname) and len(os.listdir(fname)) > 0:
                 # check if it is a zarr group/array
