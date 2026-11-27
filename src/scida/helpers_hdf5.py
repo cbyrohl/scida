@@ -5,6 +5,7 @@ Helper functions for hdf5 and zarr file processing.
 from __future__ import annotations
 
 import logging
+import os
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor
 from typing import Any
@@ -16,6 +17,9 @@ import zarr
 from scida.config import get_config
 
 log = logging.getLogger(__name__)
+
+VIRTUAL_SOURCES_PATH = "/_chunks/virtual_sources"
+SOURCE_SHARDS_PATH = "/_chunks/source_shards"
 
 
 def get_dtype(obj):
@@ -74,6 +78,11 @@ def walk_group(obj, tree, get_attrs=False, scalar_to_attr=True):
     """
     if len(tree) == 0:
         tree.update(**dict(attrs={}, groups=[], datasets=[]))
+    if isinstance(obj, h5py.Dataset) and obj.name in (
+        VIRTUAL_SOURCES_PATH,
+        SOURCE_SHARDS_PATH,
+    ):
+        return
     if get_attrs and len(obj.attrs) > 0:
         tree["attrs"][obj.name] = dict(obj.attrs)
     if isinstance(obj, (h5py.Dataset, zarr.Array)):
@@ -246,6 +255,7 @@ def create_mergedhdf5file(
     nonvirtual_datasets_stripped = [v.strip("/") for v in nonvirtual_datasets]
 
     # next fill merger file
+    virtual_source_indices = set()
     with h5py.File(fn, "w", libver="latest") as hf:
         # create groups
         for group in sorted(groups):
@@ -266,6 +276,7 @@ def create_mergedhdf5file(
                 nonvirtual_field = field.strip("/") in nonvirtual_datasets_stripped
                 if virtual and not nonvirtual_field:
                     virtual_concat(field, hf, chunks, shapes, dtypes, files)
+                    virtual_source_indices.update(shapes[field])
 
             # remaining datasets are created non-virtual
             groupfields_nonvirtual = list(groupfields)
@@ -297,6 +308,17 @@ def create_mergedhdf5file(
         grp = hf.create_group("_chunks")
         for k, v in groupchunks.items():
             grp.attrs[k] = v
+        hf.create_dataset(
+            VIRTUAL_SOURCES_PATH,
+            data=[os.fsencode(files[i]) for i in sorted(virtual_source_indices)],
+            dtype=h5py.string_dtype(),
+        )
+        if virtual_source_indices:
+            hf.create_dataset(
+                SOURCE_SHARDS_PATH,
+                data=[os.fsencode(os.path.abspath(path)) for path in files],
+                dtype=h5py.string_dtype(),
+            )
 
         # write the attributes
         # find attributes that change across data sets
