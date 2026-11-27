@@ -1,4 +1,4 @@
-# Claude Development Notes for scida
+# Development Notes for scida
 
 ## Project Overview
 
@@ -10,6 +10,34 @@
 - Physical unit support via pint
 - Extensible architecture with mixins and custom dataset classes
 - Support for HDF5, zarr, and FITS file formats
+
+## AI-assisted contributions
+
+Follow the [contributor policy](CONTRIBUTING.md#ai-assisted-contributions).
+Use the [PR-writing skill](.agents/skills/pr-body/SKILL.md) before drafting,
+opening, or editing a PR title or description. Record the checks you ran and any
+remaining verification so the submitting contributor can review the evidence and
+disclose the assistance. Keep separate PR scopes in separate worktrees and note
+any dependencies.
+
+### AI posting on GitHub
+
+Obtain authorization before pushing, changing a GitHub PR, or releasing
+artifacts. A request to draft or prepare a PR covers local work. Use any Git
+handoff configured for the current worktree.
+
+When an agent posts or edits a PR description, comment, or review through a
+human-authenticated GitHub account, verify the authenticated login through the
+GitHub connector or `gh api user --jq .login`. Start the posted text with this
+line, using the actual agent name and login as literal text.
+
+```text
+🤖 _Posted by <AGENT> on behalf of @<github-login>_
+```
+
+GitHub Actions and posts from identified automation accounts use their platform
+attribution. Use the contributor policy to decide whether the patch itself
+needs an `AI involvement` note and the `agent-authored` label.
 
 ## Project Setup
 

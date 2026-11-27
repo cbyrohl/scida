@@ -52,6 +52,9 @@ Many tests require test data sets. These might not be available to you and lead 
 
 ## Contributing code
 
+Use the [pull request template](https://github.com/cbyrohl/scida/blob/main/.github/pull_request_template.md) to describe the problem, the change, and the validation.
+See the [AI-assisted contribution policy](https://github.com/cbyrohl/scida/blob/main/CONTRIBUTING.md#ai-assisted-contributions) for disclosure, labeling, and verification expectations.
+
 ### Code Formatting
 
 We use the [black](https://github.com/psf/black) code formatter to ensure a consistent code style.
