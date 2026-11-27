@@ -74,8 +74,8 @@ uv run isort src/                                # Import sorting
 
 ```bash
 # Create a new feature branch and worktree
-git branch feature/my-feature main
-git worktree add branches/my-feature feature/my-feature
+git fetch origin main
+git worktree add --no-track -b feature/my-feature branches/my-feature origin/main
 
 # Work in the worktree
 cd branches/my-feature
@@ -86,6 +86,10 @@ cd /home/cbyrohl/repos/scida
 git worktree remove branches/my-feature
 git branch -d feature/my-feature  # after merging
 ```
+
+For a stacked PR, use the parent branch as the explicit start point and keep
+`--no-track`. Set the PR base to that same parent so the review covers the new
+change. For an existing feature branch, add its worktree using the branch name.
 
 **Directory structure:**
 ```
