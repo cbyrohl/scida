@@ -1,5 +1,8 @@
+import numpy as np
 import pytest
+import zarr
 
+from scida import load
 from scida.interface import BaseDataset
 
 
@@ -87,3 +90,24 @@ class TestSaveSafetyCheck:
         # The original file must still exist
         assert (notzarr / "important.txt").exists()
         assert (notzarr / "important.txt").read_text() == "data"
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("use_symlink", [False, True])
+def test_refuses_to_save_over_source_zarr_store(tmp_path, use_symlink):
+    source = tmp_path / "source.zarr"
+    root = zarr.open_group(str(source), mode="w")
+    root["a/b"] = [1, 2, 3]
+    root["a/c"] = [4, 5, 6]
+    dataset = load(source, units=False)
+
+    destination = source
+    if use_symlink:
+        destination = tmp_path / "link.zarr"
+        destination.symlink_to(source, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="source Zarr store"):
+        dataset.save(destination)
+
+    np.testing.assert_array_equal(root["a/b"][:], [1, 2, 3])
+    np.testing.assert_array_equal(root["a/c"][:], [4, 5, 6])

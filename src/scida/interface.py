@@ -308,6 +308,11 @@ class BaseDataset(metaclass=MixinMeta):
         # cast_uints: if true, we cast uints to ints; needed for some compressions (particularly zfp)
         if zarr_kwargs is None:
             zarr_kwargs = {}
+        source_store = getattr(getattr(self, "file", None), "store", None)
+        if isinstance(source_store, zarr.DirectoryStore) and os.path.realpath(
+            fname
+        ) == os.path.realpath(source_store.path):
+            raise ValueError("Cannot save a dataset over its source Zarr store.")
         if overwrite and os.path.exists(fname):
             if os.path.isdir(fname) and len(os.listdir(fname)) > 0:
                 # check if it is a zarr group/array
