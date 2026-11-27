@@ -3,6 +3,7 @@
 import os
 
 import dask
+import dask.array as da
 import h5py
 import numpy as np
 import pytest
@@ -10,8 +11,10 @@ import pytest
 from scida import load
 from scida.config import get_config
 from scida.customs.arepo.dataset import ArepoCatalog, ArepoSnapshot
+from scida.customs.arepo.TNGcluster.dataset import TNGClusterSnapshot
 from scida.customs.gadgetstyle.dataset import GadgetStyleSnapshot
 from scida.discovertypes import CandidateStatus
+from scida.fields import FieldContainer
 
 
 def _create_arepo_snapshot_and_catalog(tmp_path, parttype=0):
@@ -99,6 +102,50 @@ def _create_arepo_snapshot_and_catalog(tmp_path, parttype=0):
         sh.create_dataset("SubhaloMass", data=np.zeros(nsubs, dtype=np.float64))
 
     return snap_path, cat_path
+
+
+@pytest.mark.integration
+def test_unbound_selection_keeps_final_particle(tmp_path):
+    snap_path, cat_path = _create_arepo_snapshot_and_catalog(tmp_path)
+    with h5py.File(cat_path, "r+") as catalog:
+        catalog["Group/GroupLenType"][-1, 0] = 29
+    snap = load(snap_path, catalog=cat_path, units=False)
+
+    particles = snap.return_data(unbound=True)["PartType0"]["ParticleIDs"].compute()
+
+    np.testing.assert_array_equal(particles, [99])
+
+
+@pytest.mark.integration
+def test_local_subhalo_selection_rejects_negative_id(tmp_path):
+    snap_path, cat_path = _create_arepo_snapshot_and_catalog(tmp_path)
+    snap = load(snap_path, catalog=cat_path, units=False)
+
+    with pytest.raises(ValueError, match="localSubhaloID must be nonnegative"):
+        snap.return_data(haloID=1, localSubhaloID=-1)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [
+        ({}, [0, 1]),
+        ({"withfuzz": True}, [0, 1, 4, 5]),
+        ({"onlyfuzz": True}, [4, 5]),
+    ],
+)
+def test_tngcluster_zoom_fuzz_selection(options, expected):
+    snap = object.__new__(TNGClusterSnapshot)
+    snap.data = FieldContainer()
+    snap.data.add_container("PartType0")
+    snap.data["PartType0"]["ParticleIDs"] = da.arange(6, chunks=2)
+    snap.ntargets = 1
+    snap.lengths_zoom = {"particles": np.array([[2, 0, 0, 0, 0, 0]] * 2)}
+    snap.offsets_zoom = {"particles": np.array([[0] * 6, [4, 0, 0, 0, 0, 0]])}
+
+    particles = snap.return_data(zoomID=0, **options)["PartType0"]["ParticleIDs"]
+
+    np.testing.assert_array_equal(particles.compute(), expected)
 
 
 @pytest.mark.integration

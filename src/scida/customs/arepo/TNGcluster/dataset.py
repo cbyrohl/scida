@@ -41,7 +41,7 @@ class TNGClusterSelector(Selector):
         snap: TNGClusterSnapshot = args[0]
         zoom_id = kwargs.get("zoomID", None)
         fuzz = kwargs.get("withfuzz", None)
-        onlyfuzz = kwargs.get("onlylfuzz", None)
+        onlyfuzz = kwargs.get("onlyfuzz", None)
         if zoom_id is None:
             return
         if zoom_id < 0 or zoom_id > (snap.ntargets - 1):
@@ -61,7 +61,7 @@ class TNGClusterSelector(Selector):
             length_fuzz = None
             offset_fuzz = None
 
-            if fuzz and key == "particles":  # fuzz files only for particles
+            if (fuzz or onlyfuzz) and key == "particles":
                 lengths_fuzz = snap.lengths_zoom[key][zoom_id + snap.ntargets]
                 offsets_fuzz = snap.offsets_zoom[key][zoom_id + snap.ntargets]
 
