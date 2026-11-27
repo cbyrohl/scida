@@ -118,7 +118,7 @@ def download_and_extract(
     url: str, path: pathlib.Path, progressbar: bool = True, overwrite: bool = False
 ):
     """
-    Download and extract a tar.gz archive from a given url.
+    Download and extract the regular files and directories in a tar.gz archive.
 
     Parameters
     ----------
@@ -136,21 +136,41 @@ def download_and_extract(
         The path to the extracted file(s).
     """
     _download(url, path, progressbar=progressbar, overwrite=overwrite)
-    tar = tarfile.open(path, "r:gz")
-    for t in tar:
-        if t.isdir():
-            t.mode = int("0755", base=8)
-        else:
-            t.mode = int("0644", base=8)
-    # if python version >= 3.12, need filter argument (required from 3.14 onwards)
-    if sys.version_info >= (3, 12):
-        tar.extractall(path.parents[0], filter="fully_trusted")
-    else:
-        tar.extractall(path.parents[0])
-    foldername = tar.getmembers()[0].name  # parent folder of extracted tar.gz
-    tar.close()
-    os.remove(path)
-    return os.path.join(path.parents[0], foldername)
+    destination = path.parent.resolve()
+    archive_path = path.resolve()
+    try:
+        with tarfile.open(path, "r:gz") as tar:
+            members = tar.getmembers()
+            if not members:
+                raise ValueError("Cannot extract an empty archive.")
+
+            targets = []
+            for member in members:
+                name = pathlib.PurePosixPath(member.name)
+                target = (destination / member.name).resolve()
+                if (
+                    name.is_absolute()
+                    or ".." in name.parts
+                    or not target.is_relative_to(destination)
+                    or target == archive_path
+                ):
+                    raise ValueError(f"Unsafe archive path: {member.name!r}")
+                if not (member.isfile() or member.isdir()):
+                    raise ValueError(f"Unsupported archive entry: {member.name!r}")
+                targets.append(target)
+
+            for member, target in zip(members, targets):
+                if member.isdir():
+                    target.mkdir(mode=0o755, parents=True, exist_ok=True)
+                else:
+                    target.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+                    with tar.extractfile(member) as source, target.open("wb") as output:
+                        shutil.copyfileobj(source, output)
+                    target.chmod(0o644)
+    finally:
+        path.unlink(missing_ok=True)
+
+    return os.path.join(path.parent, members[0].name)
 
 
 def get_testdata(name: str) -> str:
