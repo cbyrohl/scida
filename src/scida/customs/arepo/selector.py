@@ -56,6 +56,8 @@ class ArepoSelector(Selector):
             # compute subhalo_id from subhalo_id_local
             shid_of_first_sh = snap.data["Group"]["GroupFirstSub"]
             nshs = int(snap.data["Group"]["GroupNsubs"][halo_id].compute())
+            if subhalo_id_local < 0:
+                raise ValueError("localSubhaloID must be nonnegative.")
             if subhalo_id_local >= nshs:
                 raise ValueError("localSubhaloID exceeds number of subhalos in halo.")
             subhalo_id = shid_of_first_sh[halo_id] + subhalo_id_local
@@ -94,7 +96,7 @@ class ArepoSelector(Selector):
                 if hasattr(offset, "magnitude"):  # hack for issue 59
                     offset = offset.magnitude
                 for k, v in self.data_backup[p].items():
-                    self.data[p][k] = v[offset:-1]
+                    self.data[p][k] = v[offset:]
         snap.data = self.data
 
     def select_group(self, snap, idx, objtype="Group"):
