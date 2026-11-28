@@ -12,6 +12,7 @@ import tempfile
 from functools import partial
 from os.path import join
 from typing import Any
+from uuid import uuid4
 
 import dask.array as da
 import h5py
@@ -20,7 +21,14 @@ import zarr
 
 from scida.config import get_config
 from scida.fields import FieldContainer, walk_container
-from scida.helpers_hdf5 import create_mergedhdf5file, walk_hdf5file, walk_zarrfile
+from scida.helpers_hdf5 import (
+    SOURCE_SHARDS_PATH,
+    VIRTUAL_SOURCES_PATH,
+    create_mergedhdf5file,
+    walk_group,
+    walk_hdf5file,
+    walk_zarrfile,
+)
 from scida.io.fits import fitsrecords_to_daskarrays
 from scida.misc import get_container_from_path, return_hdf5cachepath
 
@@ -33,6 +41,13 @@ class InvalidCacheError(Exception):
     """
 
     pass
+
+
+class _StaleVirtualCacheError(InvalidCacheError):
+    def __init__(self, files, nonvirtual_datasets):
+        super().__init__("New HDF5 shards found for virtual cache")
+        self.files = files
+        self.nonvirtual_datasets = nonvirtual_datasets
 
 
 class Loader(abc.ABC):
@@ -51,6 +66,7 @@ class Loader(abc.ABC):
         self.path = path
         self.file = None  # open file handle if available
         self.tempfile = None  # reference to tempfile where needed
+        self._directory_files: dict[str, list[str]] = {}
 
     @abc.abstractmethod
     def load(self):
@@ -218,14 +234,20 @@ class HDF5Loader(Loader):
 
         """
         self.location = self.path
-        tree: dict[str, Any] = {}
-        walk_hdf5file(self.location, tree=tree)
-        file = h5py.File(self.location, "r")
         kwargs.pop("nonvirtual_datasets", None)
-        data, metadata = load_datadict_old(
-            self.path, file, token=token, chunksize=chunksize, **kwargs
-        )
-        self.file = file
+        self.file = h5py.File(self.location, "r")
+        try:
+            data, metadata = load_datadict_old(
+                self.path,
+                self.file,
+                token=token,
+                chunksize=chunksize,
+                directory_files=self._directory_files,
+                **kwargs,
+            )
+        except Exception:
+            self.file.close()
+            raise
         return data, metadata
 
     def load_metadata(self, **kwargs):
@@ -459,19 +481,32 @@ class ChunkedHDF5Loader(Loader):
 
         try:
             data, metadata = self.load_cachefile(
-                cachefp, token=token, chunksize=chunksize, **kwargs
+                self.location if create else cachefp,
+                token=token,
+                chunksize=chunksize,
+                watch_source_directory=None if create else self.path,
+                **kwargs,
             )
-        except InvalidCacheError:
+        except InvalidCacheError as exc:
             # if we get an error, we try to create a new cache file (once)
-            log.info("Invalid cache file, attempting to create new one.")
-            os.remove(cachefp)
+            files = None
+            if isinstance(exc, _StaleVirtualCacheError):
+                log.info("New HDF5 shards found, rebuilding the virtual cache.")
+                files = exc.files
+                virtualcache = True
+                if nonvirtual_datasets is None:
+                    nonvirtual_datasets = exc.nonvirtual_datasets
+            else:
+                log.info("Invalid cache file, attempting to create new one.")
             self.create_cachefile(
                 fileprefix=fileprefix,
                 virtualcache=virtualcache,
+                choose_prefix=choose_prefix,
                 nonvirtual_datasets=nonvirtual_datasets,
+                files=files,
             )
             data, metadata = self.load_cachefile(
-                cachefp, token=token, chunksize=chunksize, **kwargs
+                self.location, token=token, chunksize=chunksize, **kwargs
             )
         return data, metadata
 
@@ -491,7 +526,10 @@ class ChunkedHDF5Loader(Loader):
 
         """
         return _get_chunkedfiles(
-            self.path, fileprefix=fileprefix, choose_prefix=choose_prefix
+            self.path,
+            fileprefix=fileprefix,
+            choose_prefix=choose_prefix,
+            filenames=self._directory_files.get(os.path.abspath(self.path)),
         )
 
     def create_cachefile(
@@ -501,6 +539,7 @@ class ChunkedHDF5Loader(Loader):
         verbose=None,
         choose_prefix=False,
         nonvirtual_datasets=None,
+        files=None,
     ):
         """
         Create a cache file from the chunked HDF5 files.
@@ -516,6 +555,8 @@ class ChunkedHDF5Loader(Loader):
             Whether to choose the prefix if multiple are available.
         nonvirtual_datasets: list
             List of datasets to be created as non-virtual in any case.
+        files: list, optional
+            The selected snapshot shards, when already known.
 
         Returns
         -------
@@ -528,31 +569,40 @@ class ChunkedHDF5Loader(Loader):
         if print_msg:
             log.info("Creating cache file, this may take a while...")
         cachefp = return_hdf5cachepath(self.path, fileprefix=fileprefix)
-        files = self.get_chunkedfiles(fileprefix, choose_prefix=choose_prefix)
+        if files is None:
+            files = self.get_chunkedfiles(fileprefix, choose_prefix=choose_prefix)
+        files = [os.path.abspath(path) for path in files]
+        if not files:
+            raise FileNotFoundError(f"No HDF5 shards found in {self.path}.")
+        _check_snapshot_shard_count(files)
 
-        self.location = cachefp
-        if cachefp is None:
-            # no filepath available
-            self.tempfile = tempfile.NamedTemporaryFile("wb", suffix=".hdf5")
-            self.location = self.tempfile.name
-            log.warning(
-                "No caching directory specified. Initial file read will remain slow."
-            )
-
+        # Replace the previous cache only after a new one has been written.
+        staging = tempfile.TemporaryDirectory(
+            prefix=".scida-cache-", dir=os.path.dirname(cachefp) if cachefp else None
+        )
+        staged_path = join(staging.name, "data.hdf5")
         try:
             create_mergedhdf5file(
-                cachefp,
+                staged_path,
                 files,
                 virtual=virtualcache,
                 nonvirtual_datasets=nonvirtual_datasets,
             )
-        except Exception as ex:
-            if os.path.exists(cachefp):
-                os.remove(cachefp)  # remove failed attempt at merging file
-            raise ex
-
-        with h5py.File(cachefp, "r+") as hf:
-            hf.attrs["_cachingcomplete"] = True  # mark that caching complete
+            with h5py.File(staged_path, "r+") as hf:
+                hf.attrs["_cachingcomplete"] = True
+                hf.attrs["_cache_generation"] = uuid4().hex
+            if cachefp is None:
+                self.tempfile = staging
+                self.location = staged_path
+                log.warning(
+                    "No caching directory specified. Initial file read will remain slow."
+                )
+            else:
+                os.replace(staged_path, cachefp)
+                self.location = cachefp
+        finally:
+            if self.tempfile is not staging:
+                staging.cleanup()
 
     def load_cachefile(self, location, token="", chunksize="auto", **kwargs):
         """
@@ -589,13 +639,26 @@ class ChunkedHDF5Loader(Loader):
         if "_cachingcomplete" in hf.attrs:
             cache_valid = hf.attrs["_cachingcomplete"]
         if not cache_valid:
+            self.file.close()
             raise InvalidCacheError(
                 "Cache file '%s' is not valid. Delete file and try again." % location
             )
 
-        datadict = load_datadict_old(
-            location, self.file, token=token, chunksize=chunksize, **kwargs
-        )
+        try:
+            if "_cache_generation" in hf.attrs:
+                # Open readers of the previous cache still use their original file.
+                token = (token, hf.attrs["_cache_generation"])
+            datadict = load_datadict_old(
+                location,
+                self.file,
+                token=token,
+                chunksize=chunksize,
+                directory_files=self._directory_files,
+                **kwargs,
+            )
+        except Exception:
+            self.file.close()
+            raise
         return datadict
 
 
@@ -609,6 +672,8 @@ def load_datadict_old(
     lazy=True,  # if true, call da.from_array delayed
     filetype="hdf5",
     withunits=False,
+    directory_files=None,
+    watch_source_directory=None,
 ):
     """
     Load data from HDF5/Zarr resource into a dictionary of dask arrays.
@@ -632,6 +697,10 @@ def load_datadict_old(
         Filetype of resource.
     withunits: bool
         Whether to load units.
+    directory_files: dict, optional
+        Filenames already found by discovery, keyed by absolute directory path.
+    watch_source_directory: str, optional
+        Snapshot directory to check for newly arrived shards of a cached snapshot.
 
     Returns
     -------
@@ -647,7 +716,14 @@ def load_datadict_old(
     data: dict[str, Any] = {}
     tree: dict[str, Any] = {}
     if filetype == "hdf5":
-        walk_hdf5file(location, tree)
+        walk_group(file, tree, get_attrs=True)
+        _check_virtual_sources(
+            file,
+            tree["datasets"],
+            tree["attrs"].get("/Header", {}),
+            directory_files or {},
+            watch_source_directory,
+        )
     elif filetype == "zarr":
         walk_zarrfile(location, tree)
     else:
@@ -754,6 +830,176 @@ def load_datadict_old(
     return data, metadata
 
 
+def _check_virtual_sources(
+    file, datasets, header, directory_files, watch_source_directory
+):
+    if VIRTUAL_SOURCES_PATH in file:
+        sources = file[VIRTUAL_SOURCES_PATH][:]
+    elif "_chunks" in file:
+        # Legacy scida caches have no manifest. A field can exist in only some shards.
+        sources = set()
+        for fieldpath, _, _ in datasets:
+            dataset = file[fieldpath]
+            if dataset.is_virtual:
+                layout = dataset.id.get_create_plist()
+                sources.update(
+                    layout.get_virtual_filename(i)
+                    for i in range(layout.get_virtual_count())
+                )
+    else:
+        return
+
+    available = {}
+    cache_directory = os.path.dirname(os.path.abspath(file.filename))
+    missing = []
+    source_paths = set()
+    for source in sources:
+        source = os.fsdecode(source)
+        if source == ".":
+            continue  # The virtual dataset references its own file.
+        absolute = os.path.abspath(join(cache_directory, source))
+        directory, filename = os.path.split(absolute)
+        if directory not in available:
+            filenames = directory_files.get(directory)
+            if filenames is None:
+                try:
+                    filenames = _list_directory_files(directory)
+                except (FileNotFoundError, NotADirectoryError):
+                    filenames = []
+            available[directory] = set(filenames)
+        if filename in available[directory]:
+            source_paths.add(absolute)
+        else:
+            # HDF5 also accepts relative paths from the current working directory.
+            if not os.path.isabs(source) and os.path.isfile(source):
+                source_paths.add(os.path.abspath(source))
+            else:
+                missing.append(absolute)
+    if missing:
+        names = ", ".join(sorted(missing)[:5])
+        suffix = f" and {len(missing) - 5} more" if len(missing) > 5 else ""
+        raise FileNotFoundError(
+            f"Missing HDF5 shards referenced by {file.filename}: {names}{suffix}"
+        )
+
+    if not source_paths:
+        return
+
+    refresh = watch_source_directory is not None
+    declared = None
+    if SOURCE_SHARDS_PATH in file:
+        if not refresh:
+            return
+        source_paths = {os.fsdecode(path) for path in file[SOURCE_SHARDS_PATH][:]}
+    elif isinstance(header, dict):
+        # Legacy virtual mappings can omit shards that contributed only copied data.
+        declared = _snapshot_shard_count_attr(header)
+
+    if refresh:
+        directory = os.path.abspath(watch_source_directory)
+    elif declared is not None:
+        directory = os.path.dirname(next(iter(source_paths)))
+    else:
+        return
+
+    filenames = directory_files.get(directory, available.get(directory))
+    if filenames is None:
+        # A relative VDS source may have resolved outside the cache directory.
+        filenames = _list_directory_files(directory)
+    files = _find_added_shards(directory, filenames, source_paths, declared, refresh)
+    if files is not None:
+        copied_fields = [path for path, _, _ in datasets if not file[path].is_virtual]
+        raise _StaleVirtualCacheError(files, copied_fields)
+
+
+def _numbered_shard(filename):
+    parts = os.path.basename(filename).rsplit(".", 2)
+    if len(parts) == 3 and parts[1].isascii() and parts[1].isdigit():
+        stem, index, extension = parts
+        if extension in ("hdf5", "h5"):
+            return (stem, extension), int(index)
+    return None
+
+
+def _find_added_shards(directory, filenames, original_paths, declared, refresh):
+    parsed = [_numbered_shard(path) for path in original_paths]
+    if not all(parsed) or any(
+        os.path.dirname(path) != directory for path in original_paths
+    ):
+        return None
+    families = {family for family, _ in parsed}
+    if len(families) != 1:
+        return None
+    family = families.pop()
+    current = []
+    for name in filenames:
+        shard = _numbered_shard(name)
+        if shard is not None and shard[0] == family:
+            current.append((shard[1], join(directory, name)))
+
+    expected = _parse_snapshot_shard_count(declared)
+    if expected is not None:
+        indices = [index for index, _ in current]
+        if (
+            len(indices) != expected
+            or len({index for index in indices if index < expected}) != expected
+        ):
+            raise _incomplete_snapshot(family, expected, indices)
+    if refresh and original_paths < {path for _, path in current}:
+        return [path for _, path in sorted(current)]
+    return None
+
+
+def _snapshot_shard_count_attr(header):
+    declared = header.get("NumFilesPerSnapshot")
+    if declared is None and "Ngroups_ThisFile" in header:
+        declared = header.get("NumFiles")
+    return declared
+
+
+def _parse_snapshot_shard_count(declared):
+    if declared is None:
+        return None
+    count = np.asarray(declared)
+    if count.size == 0 or not np.issubdtype(count.dtype, np.integer):
+        return None
+    expected = int(count.flat[0])
+    if count.size > 1 and not np.all(count == expected):
+        raise ValueError("Conflicting HDF5 snapshot shard counts in the header.")
+    return expected if expected > 0 else None
+
+
+def _incomplete_snapshot(family, expected, indices):
+    sample = ", ".join(str(index) for index in indices[:10])
+    if len(indices) > 10:
+        sample += ", ..."
+    return FileNotFoundError(
+        f"Incomplete HDF5 snapshot {family[0]!r}: header declares {expected} shards "
+        f"with indices 0 to {expected - 1}, found {len(indices)} shards ({sample})."
+    )
+
+
+def _check_snapshot_shard_count(files):
+    # Unnumbered files and generic HDF5 collections keep their existing behavior.
+    parsed = [_numbered_shard(path) for path in files]
+    if not all(parsed):
+        return
+    with h5py.File(files[0], "r") as first:
+        if "Header" not in first:
+            return
+        expected = _parse_snapshot_shard_count(
+            _snapshot_shard_count_attr(first["Header"].attrs)
+        )
+    if expected is None:
+        return
+
+    family = parsed[0][0]
+    if len(files) != expected or any(
+        shard != (family, index) for index, shard in enumerate(parsed)
+    ):
+        raise _incomplete_snapshot(family, expected, [index for _, index in parsed])
+
+
 def determine_loader(path, **kwargs):
     """
     Determine loader from path.
@@ -773,12 +1019,14 @@ def determine_loader(path, **kwargs):
             # object is a zarr object
             loader = ZarrLoader(path)
             return loader
-        newpath = _cachefile_available_in_path(path, **kwargs)
+        filenames = _list_directory_files(path)
+        newpath = _cachefile_available_in_path(path, filenames=filenames, **kwargs)
         if newpath:  # check whether a virtual merged HDF5 file is present in folder
             loader = HDF5Loader(newpath)
         else:
             # otherwise expect this is a chunked HDF5 file
             loader = ChunkedHDF5Loader(path)
+        loader._directory_files[os.path.abspath(path)] = filenames
     elif not os.path.exists(path):
         raise ValueError("Path '%s' does not exist" % path)
     elif str(path).endswith(".hdf5") or str(path).endswith(".h5"):
@@ -855,7 +1103,7 @@ def load(path, **kwargs):
 
 
 def _cachefile_available_in_path(
-    path: str, fileprefix: str | None = "", **kwargs
+    path: str, fileprefix: str | None = "", filenames=None, **kwargs
 ) -> bool | str:
     """
     Check whether a virtual merged HDF5 file is present in folder.
@@ -873,7 +1121,7 @@ def _cachefile_available_in_path(
 
     """
     try:
-        chnkfiles = _get_chunkedfiles(path, fileprefix=fileprefix)
+        chnkfiles = _get_chunkedfiles(path, fileprefix=fileprefix, filenames=filenames)
     except ValueError:
         return False
     if len(chnkfiles) == 0:
@@ -881,6 +1129,14 @@ def _cachefile_available_in_path(
     fn = chnkfiles[0]
     p = pathlib.Path(fn)
     s = p.name.split(".")
+    if len(s) == 2 and len(chnkfiles) == 1 and p.suffix in (".hdf5", ".h5"):
+        # An adjacent merged cache may be all that is left of this snapshot.
+        try:
+            with h5py.File(p, "r") as hf:
+                if "_chunks" in hf:
+                    return str(p)
+        except OSError:
+            return False
     if len(s) != 3:  # format "PREFIX.NMBR.HDF5"
         return False
     name_new = s[0] + "." + s[2]
@@ -971,7 +1227,14 @@ def _add_hdf5arr_to_fieldcontainer(
     )(fnc)
 
 
-def _get_chunkedfiles(path, fileprefix: str | None = "", choose_prefix=False) -> list:
+def _list_directory_files(path):
+    with os.scandir(path) as entries:
+        return [entry.name for entry in entries if entry.is_file()]
+
+
+def _get_chunkedfiles(
+    path, fileprefix: str | None = "", choose_prefix=False, filenames=None
+) -> list:
     """
     Get all files in directory with given prefix.
     Parameters
@@ -985,20 +1248,15 @@ def _get_chunkedfiles(path, fileprefix: str | None = "", choose_prefix=False) ->
 
     """
 
-    fns = [f for f in os.listdir(path)]
-    files = [join(path, f) for f in fns]
+    if filenames is None:
+        filenames = _list_directory_files(path)
     files = [
-        f
-        for i, f in enumerate(files)
-        if not any(fns[i].startswith(start) for start in [".", "bak"])
-    ]  # ignore hidden files
-    files = [f for f in files if os.path.isfile(f)]  # ignore subdirectories
-    if fileprefix is not None:
-        files = [f for f in files if f.split("/")[-1].startswith(fileprefix)]
-    # ignore backup files
-    files = [f for f in files if not f.endswith("~")]
-    files = [f for f in files if not f.endswith(".bak")]
-    files = [f for f in files if not f.endswith(".swp")]
+        join(path, filename)
+        for filename in filenames
+        if not filename.startswith((".", "bak"))
+        and not filename.endswith(("~", ".bak", ".swp"))
+        and (fileprefix is None or filename.startswith(fileprefix))
+    ]
 
     files = np.array(files)
     prfxs = sorted([f.split(".")[0] for f in files])
