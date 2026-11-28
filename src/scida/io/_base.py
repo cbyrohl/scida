@@ -904,8 +904,7 @@ def _check_virtual_sources(
 
     filenames = directory_files.get(directory, available.get(directory))
     if filenames is None:
-        if not refresh:
-            return
+        # A relative VDS source may have resolved outside the cache directory.
         filenames = _list_directory_files(directory)
     files = _find_added_shards(directory, filenames, source_paths, declared, refresh)
     if files is not None:

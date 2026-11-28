@@ -253,6 +253,24 @@ def test_ioload_rejects_incomplete_legacy_cache(snapshot_shards, cache_type):
 
 
 @pytest.mark.integration
+def test_ioload_checks_legacy_cache_with_working_directory_relative_shard(
+    snapshot_shards, tmp_path, monkeypatch
+):
+    _, first, second = snapshot_shards
+    with h5py.File(first, "a") as shard:
+        shard.create_group("Header").attrs["NumFilesPerSnapshot"] = 2
+    second.unlink()
+    monkeypatch.chdir(tmp_path)
+    cache_dir = tmp_path / "legacy"
+    cache_dir.mkdir()
+    cache_path = cache_dir / "snap_000.hdf5"
+    _write_legacy_cache(cache_path, [str(first.relative_to(tmp_path))])
+
+    with pytest.raises(FileNotFoundError, match="header declares 2 shards.*found 1"):
+        load(cache_path)
+
+
+@pytest.mark.integration
 @pytest.mark.parametrize("unexpected_index", ["00", "2"], ids=["duplicate", "gap"])
 def test_ioload_rejects_invalid_legacy_shard_indices(snapshot_shards, unexpected_index):
     directory, first, second = snapshot_shards
