@@ -94,6 +94,9 @@ def test_ioload_legacy_virtual_cache_checks_all_shards(snapshot_shards, load_dir
 @pytest.mark.integration
 def test_ioload_materialized_cache_does_not_need_original_shards(snapshot_shards):
     directory, first, second = snapshot_shards
+    for path in (first, second):
+        with h5py.File(path, "a") as shard:
+            shard.create_group("Header").attrs["NumFilesPerSnapshot"] = 2
     _, _, cache_file, _ = load(directory, virtualcache=False)
     with cache_file:
         assert not cache_file["Masses"].is_virtual
@@ -103,6 +106,29 @@ def test_ioload_materialized_cache_does_not_need_original_shards(snapshot_shards
     fields, _, cache_file, _ = load(directory, virtualcache=False)
     with cache_file:
         np.testing.assert_array_equal(fields["Masses"].compute(), [1, 2, 3, 11, 12, 13])
+
+
+@pytest.mark.integration
+def test_ioload_virtual_cache_can_use_copied_data_after_shard_removed(snapshot_shards):
+    directory, first, second = snapshot_shards
+    for path in (first, second):
+        with h5py.File(path, "a") as shard:
+            shard.create_group("Header").attrs["NumFilesPerSnapshot"] = 2
+    with h5py.File(second, "a") as shard:
+        del shard["Masses"]
+        shard["ParticleIDs"] = [21, 22, 23]
+    _, _, cache_file, _ = load(
+        directory, virtualcache=True, nonvirtual_datasets=["ParticleIDs"]
+    )
+    with cache_file:
+        assert cache_file["Masses"].is_virtual
+        assert not cache_file["ParticleIDs"].is_virtual
+    second.unlink()
+
+    fields, _, cache_file, _ = load(directory)
+    with cache_file:
+        np.testing.assert_array_equal(fields["Masses"].compute(), [1, 2, 3])
+        np.testing.assert_array_equal(fields["ParticleIDs"].compute(), [21, 22, 23])
 
 
 @pytest.mark.integration
@@ -200,6 +226,88 @@ def test_ioload_rejects_missing_shards_declared_in_header(
         load(directory, virtualcache=True)
 
 
+def _write_legacy_cache(cache_path, files):
+    create_mergedhdf5file(cache_path, files, max_workers=1)
+    with h5py.File(cache_path, "a") as cache:
+        cache.attrs["_cachingcomplete"] = True
+        del cache[SOURCE_SHARDS_PATH]
+        del cache[VIRTUAL_SOURCES_PATH]
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("cache_type", ["managed", "direct", "adjacent"])
+def test_ioload_rejects_incomplete_legacy_cache(snapshot_shards, cache_type):
+    directory, first, second = snapshot_shards
+    with h5py.File(first, "a") as shard:
+        shard.create_group("Header").attrs["NumFilesPerSnapshot"] = [2]
+    second.unlink()
+    if cache_type == "managed":
+        cache_path = return_hdf5cachepath(directory, fileprefix="")
+    else:
+        cache_path = directory / "snap_000.hdf5"
+    _write_legacy_cache(cache_path, [first])
+    input_path = cache_path if cache_type == "direct" else directory
+
+    with pytest.raises(FileNotFoundError, match="header declares 2 shards.*found 1"):
+        load(input_path)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("unexpected_index", ["00", "2"], ids=["duplicate", "gap"])
+def test_ioload_rejects_invalid_legacy_shard_indices(snapshot_shards, unexpected_index):
+    directory, first, second = snapshot_shards
+    with h5py.File(first, "a") as shard:
+        shard.create_group("Header").attrs["NumFilesPerSnapshot"] = 2
+    second.rename(directory / f"snap_000.{unexpected_index}.hdf5")
+    _write_legacy_cache(return_hdf5cachepath(directory, fileprefix=""), [first])
+
+    with pytest.raises(FileNotFoundError, match="header declares 2 shards.*found 2"):
+        load(directory)
+
+
+@pytest.mark.integration
+def test_ioload_rejects_conflicting_legacy_shard_counts(snapshot_shards):
+    directory, first, second = snapshot_shards
+    for path, declared in ((first, 2), (second, 3)):
+        with h5py.File(path, "a") as shard:
+            shard.create_group("Header").attrs["NumFilesPerSnapshot"] = declared
+    _write_legacy_cache(return_hdf5cachepath(directory, fileprefix=""), [first, second])
+
+    with pytest.raises(ValueError, match="Conflicting HDF5 snapshot shard counts"):
+        load(directory)
+
+
+@pytest.mark.integration
+def test_ioload_validates_complete_legacy_cache_without_extra_io(
+    snapshot_shards, monkeypatch
+):
+    directory, first, second = snapshot_shards
+    for path in (first, second):
+        with h5py.File(path, "a") as shard:
+            shard.create_group("Header").attrs["NumFilesPerSnapshot"] = 2
+    cache_path = return_hdf5cachepath(directory, fileprefix="")
+    _write_legacy_cache(cache_path, [first, second])
+
+    scan, open_file = os.scandir, h5py.File
+    scans, opens = [], []
+
+    def track_scan(path):
+        scans.append(pathlib.Path(path))
+        return scan(path)
+
+    def track_open(path, *args, **kwargs):
+        opens.append(pathlib.Path(path))
+        return open_file(path, *args, **kwargs)
+
+    monkeypatch.setattr(os, "scandir", track_scan)
+    monkeypatch.setattr(h5py, "File", track_open)
+    fields, _, cache_file, _ = load(directory)
+    with cache_file:
+        assert fields["Masses"].shape == (6,)
+    assert scans == [directory]
+    assert opens == [pathlib.Path(cache_path)]
+
+
 @pytest.mark.integration
 def test_ioload_refreshes_legacy_cache_after_declared_shards_arrive(snapshot_shards):
     directory, first, second = snapshot_shards
@@ -207,12 +315,7 @@ def test_ioload_refreshes_legacy_cache_after_declared_shards_arrive(snapshot_sha
         shard.create_group("Header").attrs["NumFilesPerSnapshot"] = 2
     with h5py.File(second, "a") as shard:
         shard.create_group("Header").attrs["NumFilesPerSnapshot"] = 2
-    cache_path = return_hdf5cachepath(directory, fileprefix="")
-    create_mergedhdf5file(cache_path, [first], max_workers=1)
-    with h5py.File(cache_path, "a") as cache:
-        cache.attrs["_cachingcomplete"] = True
-        del cache[SOURCE_SHARDS_PATH]
-        del cache[VIRTUAL_SOURCES_PATH]
+    _write_legacy_cache(return_hdf5cachepath(directory, fileprefix=""), [first])
 
     fields, _, cache_file, _ = load(directory)
     with cache_file:

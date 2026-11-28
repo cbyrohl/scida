@@ -718,7 +718,11 @@ def load_datadict_old(
     if filetype == "hdf5":
         walk_group(file, tree, get_attrs=True)
         _check_virtual_sources(
-            file, tree["datasets"], directory_files or {}, watch_source_directory
+            file,
+            tree["datasets"],
+            tree["attrs"].get("/Header", {}),
+            directory_files or {},
+            watch_source_directory,
         )
     elif filetype == "zarr":
         walk_zarrfile(location, tree)
@@ -826,7 +830,9 @@ def load_datadict_old(
     return data, metadata
 
 
-def _check_virtual_sources(file, datasets, directory_files, watch_source_directory):
+def _check_virtual_sources(
+    file, datasets, header, directory_files, watch_source_directory
+):
     if VIRTUAL_SOURCES_PATH in file:
         sources = file[VIRTUAL_SOURCES_PATH][:]
     elif "_chunks" in file:
@@ -876,19 +882,35 @@ def _check_virtual_sources(file, datasets, directory_files, watch_source_directo
             f"Missing HDF5 shards referenced by {file.filename}: {names}{suffix}"
         )
 
-    if watch_source_directory is not None and source_paths:
+    if not source_paths:
+        return
+
+    refresh = watch_source_directory is not None
+    declared = None
+    if SOURCE_SHARDS_PATH in file:
+        if not refresh:
+            return
+        source_paths = {os.fsdecode(path) for path in file[SOURCE_SHARDS_PATH][:]}
+    elif isinstance(header, dict):
+        # Legacy virtual mappings can omit shards that contributed only copied data.
+        declared = _snapshot_shard_count_attr(header)
+
+    if refresh:
         directory = os.path.abspath(watch_source_directory)
-        filenames = directory_files.get(directory, available.get(directory))
-        if filenames is None:
-            filenames = _list_directory_files(directory)
-        if SOURCE_SHARDS_PATH in file:
-            source_paths = {os.fsdecode(path) for path in file[SOURCE_SHARDS_PATH][:]}
-        files = _find_added_shards(directory, filenames, source_paths)
-        if files is not None:
-            copied_fields = [
-                path for path, _, _ in datasets if not file[path].is_virtual
-            ]
-            raise _StaleVirtualCacheError(files, copied_fields)
+    elif declared is not None:
+        directory = os.path.dirname(next(iter(source_paths)))
+    else:
+        return
+
+    filenames = directory_files.get(directory, available.get(directory))
+    if filenames is None:
+        if not refresh:
+            return
+        filenames = _list_directory_files(directory)
+    files = _find_added_shards(directory, filenames, source_paths, declared, refresh)
+    if files is not None:
+        copied_fields = [path for path, _, _ in datasets if not file[path].is_virtual]
+        raise _StaleVirtualCacheError(files, copied_fields)
 
 
 def _numbered_shard(filename):
@@ -900,7 +922,7 @@ def _numbered_shard(filename):
     return None
 
 
-def _find_added_shards(directory, filenames, original_paths):
+def _find_added_shards(directory, filenames, original_paths, declared, refresh):
     parsed = [_numbered_shard(path) for path in original_paths]
     if not all(parsed) or any(
         os.path.dirname(path) != directory for path in original_paths
@@ -915,10 +937,47 @@ def _find_added_shards(directory, filenames, original_paths):
         shard = _numbered_shard(name)
         if shard is not None and shard[0] == family:
             current.append((shard[1], join(directory, name)))
-    current_paths = {path for _, path in current}
-    if original_paths < current_paths:
+
+    expected = _parse_snapshot_shard_count(declared)
+    if expected is not None:
+        indices = [index for index, _ in current]
+        if (
+            len(indices) != expected
+            or len({index for index in indices if index < expected}) != expected
+        ):
+            raise _incomplete_snapshot(family, expected, indices)
+    if refresh and original_paths < {path for _, path in current}:
         return [path for _, path in sorted(current)]
     return None
+
+
+def _snapshot_shard_count_attr(header):
+    declared = header.get("NumFilesPerSnapshot")
+    if declared is None and "Ngroups_ThisFile" in header:
+        declared = header.get("NumFiles")
+    return declared
+
+
+def _parse_snapshot_shard_count(declared):
+    if declared is None:
+        return None
+    count = np.asarray(declared)
+    if count.size == 0 or not np.issubdtype(count.dtype, np.integer):
+        return None
+    expected = int(count.flat[0])
+    if count.size > 1 and not np.all(count == expected):
+        raise ValueError("Conflicting HDF5 snapshot shard counts in the header.")
+    return expected if expected > 0 else None
+
+
+def _incomplete_snapshot(family, expected, indices):
+    sample = ", ".join(str(index) for index in indices[:10])
+    if len(indices) > 10:
+        sample += ", ..."
+    return FileNotFoundError(
+        f"Incomplete HDF5 snapshot {family[0]!r}: header declares {expected} shards "
+        f"with indices 0 to {expected - 1}, found {len(indices)} shards ({sample})."
+    )
 
 
 def _check_snapshot_shard_count(files):
@@ -929,28 +988,17 @@ def _check_snapshot_shard_count(files):
     with h5py.File(files[0], "r") as first:
         if "Header" not in first:
             return
-        attrs = first["Header"].attrs
-        declared = attrs.get("NumFilesPerSnapshot")
-        if declared is None and "Ngroups_ThisFile" in attrs:
-            declared = attrs.get("NumFiles")
-    count = np.asarray(declared)
-    if count.size != 1 or not np.issubdtype(count.dtype, np.integer):
-        return
-    expected = int(count.item())
-    if expected < 1:
+        expected = _parse_snapshot_shard_count(
+            _snapshot_shard_count_attr(first["Header"].attrs)
+        )
+    if expected is None:
         return
 
     family = parsed[0][0]
     if len(files) != expected or any(
         shard != (family, index) for index, shard in enumerate(parsed)
     ):
-        sample = ", ".join(str(index) for _, index in parsed[:10])
-        if len(parsed) > 10:
-            sample += ", ..."
-        raise FileNotFoundError(
-            f"Incomplete HDF5 snapshot {family[0]!r}: header declares {expected} shards "
-            f"with indices 0 to {expected - 1}, found {len(files)} shards ({sample})."
-        )
+        raise _incomplete_snapshot(family, expected, [index for _, index in parsed])
 
 
 def determine_loader(path, **kwargs):
